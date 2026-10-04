@@ -7,8 +7,12 @@ MEON is an instant-noodle dine-in at Canning Bridge, Perth, Western Australia. T
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download
 - Country pages, toppings & sides, MEON Member Card, About, Visit
-- Animated logo, floating mascot crew (eyes follow the cursor, tap to talk), noodle roulette, confetti, typewriter hero, scroll reveals — all respecting “reduce motion”
+- One consistent structure on every page: floating glass header with a **Noodles mega menu**, centred page hero (breadcrumbs, badge, animated headline, floating mascots), content, closing CTA band, footer — plus an always-visible **bottom tab bar** on phones
+- Animated logo, mascot crew (eyes follow the cursor, tap to talk, parallax), split-word headline reveals, card tilt + spotlight, count-ups, page transitions, noodle roulette, confetti, typewriter hero — all respecting “reduce motion”
+- Light mode only, warm MEON palette
 - Dine-in only: no online ordering
+
+Docs: [`docs/design-system.md`](docs/design-system.md) (tokens, page anatomy, navigation, motion catalogue, adding a page) · [`docs/operations.md`](docs/operations.md) (QR codes, Google Drive hub, views log, common edits).
 
 ## Quick start
 
@@ -52,10 +56,11 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # clicks through search, filters, roulette, timer, QR generator
 PLAYWRIGHT_PATH=... node scripts/sweep.mjs                              # every page × phone/desktop: console errors + overflow
 PLAYWRIGHT_PATH=... node scripts/screenshot.mjs <outDir> / /noodles/    # full-page screenshots
+python3 scripts/make_qr_pngs.py [outDir]                                # compact 1-bit QR PNGs for Drive (+ manifest.csv with md5s)
 ```
 
 ## Things to confirm
 
 - Street address, phone, email and opening hours (placeholders on the old Wix site were template text, so they are hidden until set in `data/site.json`).
 - Final domain for QR codes (see above).
-- A few spice ratings in the source doc look off (e.g. *Jin Ramen Spicy* and *Buldak Habanero Lime* are rated 0). Edit `data/source/Meon_Website_format2.md` and re-run the parser.
+- 20 noodles whose names say spicy/hot are rated 0 in the source doc; the site shows “spice rating coming soon” for them (`data/spice_review.json`). Fix the rating in `data/source/Meon_Website_format2.md`, re-run the parser and remove the slug from that list.
