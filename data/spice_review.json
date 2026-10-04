@@ -1,0 +1,25 @@
+{
+ "_readme": "Noodles whose name says spicy/hot but the source doc rates 0. The site shows 'spice rating coming soon' for these until a real rating is set in the source doc (then remove the slug here).",
+ "slugs": [
+  "ottogi-jin-ramen-spicy",
+  "samyang-buldak-hot-chicken-flavor-habanero-lime",
+  "samyang-buldak-spicy-chicken-stew-type",
+  "samyang-buldak-tomato-pasta-hot-chicken-flavor-ramen",
+  "samyang-buldak-yakisoba-hot-chicken-flavor-ramen",
+  "samyang-buldak-carbonara-hot-chicken-ramen",
+  "samyang-buldak-cheese-hot-chicken-flavour-ramen",
+  "samyang-buldak-jjajangmyeon-hot-chicken-ramen",
+  "samyang-samyang-ramen-spicy",
+  "maruchan-fire-spicy-beef-flavour",
+  "myojo-yakisoba-premium-sweet-and-spicy",
+  "maggi-pedas-giler-ayam-bakar",
+  "mie-sedap-sambal-goreng",
+  "master-kong-kangsifu-braised-beef-instant-noodle-spicy-red",
+  "jinmailang-hot-and-sour-instant-noodle",
+  "chongqing-sichuan-baijia-chongqing-noodles-spicy-hot-flavour",
+  "nissin-salted-egg-instant-noodle-spicy",
+  "lucky-me-instant-pancit-canton-sweet-and-spicy",
+  "acecook-hao-hao-spicy-and-sour-shrimp-flavour",
+  "uniben-3-mien-instant-noodle-sour-and-spicy-shrimp-flavour"
+ ]
+}

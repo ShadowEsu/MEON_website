@@ -305,6 +305,7 @@
         if (ok && s !== "all") {
           var sp = parseInt(ds.spice, 10);
           if (s === "mild") ok = sp === 0;
+          else if (sp < 0) ok = false;
           else if (s === "medium") ok = sp >= 1 && sp <= 2;
           else if (s === "hot") ok = sp >= 3;
           else ok = sp === parseInt(s, 10);
@@ -362,7 +363,7 @@
       var img = n.img ? '<img src="' + root + esc(n.img) + '" alt="" width="130" height="130" loading="lazy">' : '<span class="placeholder-art" aria-hidden="true">🍜</span>';
       return '<a class="roulette-item" href="' + root + "noodles/" + esc(n.slug) + '/">' + img +
         '<span><span class="noodle-card-brand">' + esc(n.flag) + " " + esc(n.brand) + "</span><h3>" + esc(n.name) + "</h3>" +
-        '<span class="chip chip--yellow">' + (n.spice ? "🌶️ " + n.spice + "/5" : "No heat") + "</span> " +
+        '<span class="chip chip--yellow">' + (n.spice > 0 ? "🌶️ " + n.spice + "/5" : n.spice < 0 ? "🌶️ Ask the crew" : "No heat") + "</span> " +
         (n.type ? '<span class="chip">' + esc(n.type) + "</span>" : "") + "</span></a>";
     };
     var spinning = false, current = null;
@@ -371,6 +372,7 @@
       var h = heat ? heat.value : "any";
       var pool = all.filter(function (n) {
         if (h === "mild") return n.spice === 0;
+        if (n.spice < 0) return h === "any";
         if (h === "some") return n.spice >= 1 && n.spice <= 2;
         if (h === "fire") return n.spice >= 3;
         return true;

@@ -21,6 +21,7 @@ const noodlesRaw = readJSON("noodles.json");
 const countries = readJSON("countries.json");
 const toppings = readJSON("toppings.json");
 const deals = readJSON("deals.json").filter((d) => d.active !== false);
+const spiceReview = new Set(fs.existsSync(path.join(ROOT, "data", "spice_review.json")) ? readJSON("spice_review.json").slugs : []);
 const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON("images.json") : {};
 const SITE_URL = (process.env.SITE_URL || site.siteUrl).replace(/\/+$/, "");
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
@@ -60,7 +61,8 @@ const noodles = noodlesRaw.map((n) => {
   const m = n.diet.match(/\((\w+)\)/);
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(n.diet)) dietTokens.push("seafood");
-  return { ...n, c, img, thumb, dietTokens, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  const unrated = spiceReview.has(n.slug);
+  return { ...n, c, img, thumb, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
@@ -232,12 +234,12 @@ function noodleMedia(n, r, { size = 400, eager = false, large = false } = {}) {
 
 function noodleCard(n, r, i = 0) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.funNote, n.machine].filter(Boolean).join(" ");
-  return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.06}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spice}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
+  return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.06}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
   <span class="noodle-card-media">${noodleMedia(n, r)}<span class="noodle-card-flag" aria-hidden="true">${n.c.flag}</span>${n.funNote ? `<span class="noodle-card-note">${esc(n.funNote)}</span>` : ""}</span>
   <span class="noodle-card-body">
     <span class="noodle-card-brand">${esc(n.brand)}</span>
     <h3 class="noodle-card-name">${esc(n.name)}</h3>
-    <span class="noodle-card-meta"><span>${esc(n.type || n.country)}${n.machine ? ` · ${esc(n.machine)}` : ""}</span>${spiceMeter(n.spice, r)}</span>
+    <span class="noodle-card-meta"><span>${esc(n.type || n.country)}${n.machine ? ` · ${esc(n.machine)}` : ""}</span>${n.unrated ? `<span title="Spice rating coming soon">🌶️ ?</span>` : spiceMeter(n.spice, r)}</span>
   </span>
 </a>`;
 }
@@ -357,7 +359,7 @@ addPage("", layout({
       </div>
     </div>
   </div>
-  <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, flag: n.c.flag, spice: n.spice, type: n.type, img: n.thumb })))}</script>
+  <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, flag: n.c.flag, spice: n.spiceKey, type: n.type, img: n.thumb })))}</script>
 </section>
 
 <section class="section section--ink">
@@ -381,7 +383,7 @@ addPage("", layout({
       <a class="btn btn--red" href="${r("noodles/?spice=hot")}">Take the spicy challenge ${icon.arrow}</a>
     </div>
     <div class="ladder reveal">
-      ${SPICE_LADDER.map(([lvl, name, desc]) => `<a href="${r(`noodles/?spice=${lvl}`)}">${spiceMeter(lvl, r)}<span><strong>${lvl} · ${name}</strong><small>${desc}</small></span><span class="count">${countFor((n) => n.spice === lvl)}</span></a>`).join("")}
+      ${SPICE_LADDER.map(([lvl, name, desc]) => `<a href="${r(`noodles/?spice=${lvl}`)}">${spiceMeter(lvl, r)}<span><strong>${lvl} · ${name}</strong><small>${desc}</small></span><span class="count">${countFor((n) => n.spiceKey === lvl)}</span></a>`).join("")}
     </div>
   </div>
 </section>
@@ -508,12 +510,13 @@ noodles.forEach((n, idx) => {
     .slice(0, 4)
     .map((x) => x.o);
   const ladder = SPICE_LADDER[n.spice];
+  const spiceSpec = (r) => n.unrated ? `<dd style="font-size:1.05rem">🌶️ Rating coming soon<small>Ask the crew how hot this one is</small></dd>` : `<dd>${spiceMeter(n.spice, r, { large: true })}<small>${n.spice}/5 · ${ladder[1]}</small></dd>`;
   addPage(n.url, layout({
     urlPath: n.url,
     title: `${n.name} – ${n.brand}`,
     active: "noodles/",
     image: n.img || "assets/img/photos/bowl-side.webp",
-    description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)} ${n.type ? n.type + " noodle, " : ""}spice ${n.spice}/5.`,
+    description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)}${n.type ? ` ${n.type} noodle.` : ""}${n.unrated ? "" : ` Spice ${n.spice}/5.`}`,
     jsonld: [
       { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: shortBlurb(n), image: n.img ? `${SITE_URL}/${n.img}` : undefined, url: `${SITE_URL}/${n.url}`, suitableForDiet: n.diet === "Vegetarian/Vegan" ? "https://schema.org/VeganDiet" : undefined },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
@@ -545,7 +548,7 @@ noodles.forEach((n, idx) => {
       ${paras.map((p) => `<p class="lead">${p}</p>`).join("")}
       ${n.machine ? `<div class="machine"><span class="code">${esc(n.machine)}</span><span><small>Cooking machine setting</small><strong>Select program ${esc(n.machine)} for this noodle</strong></span></div>` : ""}
       <dl class="spec-grid">
-        <div class="spec"><dt>Spice level</dt><dd>${spiceMeter(n.spice, r, { large: true })}<small>${n.spice}/5 · ${ladder[1]}</small></dd></div>
+        <div class="spec"><dt>Spice level</dt>${spiceSpec(r)}</div>
         <div class="spec"><dt>Style</dt><dd>${esc(n.type || "Ask the crew")}</dd></div>
         <div class="spec"><dt>Diet</dt><dd style="font-size:1.05rem">${esc(n.diet)}${n.dietNote ? "*" : ""}</dd></div>
         <div class="spec"><dt>Packet size</dt><dd>${n.weightG ? `${n.weightG} g` : "Ask the crew"}</dd></div>
@@ -898,7 +901,7 @@ fs.copyFileSync(require.resolve("qrcode-generator/qrcode.js"), path.join(OUT, "a
 
 // Search index used by the site-wide search overlay.
 const searchIndex = [
-  ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.c.flag} ${n.brand} · ${n.country} · ${n.type || "?"} · 🌶️ ${n.spice}/5`, u: n.url, i: n.thumb, k: [n.flavour, n.diet, n.funNote, n.machine, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
+  ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.c.flag} ${n.brand} · ${n.country} · ${n.type || "?"} · 🌶️ ${n.unrated ? "?" : n.spice + "/5"}`, u: n.url, i: n.thumb, k: [n.flavour, n.diet, n.funNote, n.machine, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
   ...countries.map((c) => ({ g: "Countries", t: c.name, s: `${countFor((n) => n.country === c.name)} noodles · ${c.headline}`, u: `countries/${c.slug}/`, e: c.flag, k: "country" })),
   ...toppings.map((t) => ({ g: "Toppings", t: t.name, s: t.desc, u: `toppings/#${t.id}`, e: t.emoji, k: `topping ${t.group}` })),
   ...[
@@ -919,6 +922,6 @@ write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod></url>`).join("\n")}\n</urlset>\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#fffaf3", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
-write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, funNote: n.funNote, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
+write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, funNote: n.funNote, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
 console.log(`Built ${pages.length + 1} pages → ${path.relative(ROOT, OUT)}/  (${noodles.length} noodles, ${withPhotos.length} with photos, QR base ${SITE_URL})`);
