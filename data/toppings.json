@@ -1,0 +1,173 @@
+[
+ {
+  "id": "egg",
+  "name": "Eggs",
+  "emoji": "🥚",
+  "group": "Proteins & sides",
+  "desc": "Silky, jammy eggs add creamy protein and balance spice with comfort.",
+  "img": "assets/img/toppings/egg.webp"
+ },
+ {
+  "id": "cheese",
+  "name": "Cheese",
+  "emoji": "🧀",
+  "group": "Proteins & sides",
+  "desc": "Melty cheese swirls into broth for a spicy, creamy guilty pleasure."
+ },
+ {
+  "id": "beef",
+  "name": "Beef (microwave ready)",
+  "emoji": "🥩",
+  "group": "Proteins & sides",
+  "desc": "Tender beef slices soak up broth — juicy, savoury and quick.",
+  "img": "assets/img/toppings/beef.webp"
+ },
+ {
+  "id": "pork",
+  "name": "Pork",
+  "emoji": "🐖",
+  "group": "Proteins & sides",
+  "desc": "Juicy pork adds richness, making every spoonful extra satisfying."
+ },
+ {
+  "id": "chicken",
+  "name": "Chicken",
+  "emoji": "🍗",
+  "group": "Proteins & sides",
+  "desc": "Lean chicken stays mild, pairing well with sauces and spice."
+ },
+ {
+  "id": "meatballs",
+  "name": "Meatballs (microwave ready)",
+  "emoji": "🧆",
+  "group": "Proteins & sides",
+  "desc": "Springy, pre-cooked meatballs soak up broth flavour fast.",
+  "img": "assets/img/toppings/meatballs.webp"
+ },
+ {
+  "id": "spam",
+  "name": "Spam",
+  "emoji": "🥫",
+  "group": "Proteins & sides",
+  "img": "assets/img/photos/topping-spam.webp",
+  "desc": "Salty, savoury slices — the classic Korean army-stew upgrade."
+ },
+ {
+  "id": "fishcake",
+  "name": "Fishcake",
+  "emoji": "🍥",
+  "group": "Proteins & sides",
+  "img": "assets/img/photos/topping-fishcake.webp",
+  "desc": "Bouncy fishcake adds savoury chew, cute shapes and instant joy."
+ },
+ {
+  "id": "crab-sticks",
+  "name": "Crab sticks",
+  "emoji": "🦀",
+  "group": "Proteins & sides",
+  "desc": "Soften slightly in the bowl, adding a mild, sweet seafood flavour.",
+  "img": "assets/img/toppings/crab-sticks.webp"
+ },
+ {
+  "id": "shrimp-katsu",
+  "name": "Shrimp katsu",
+  "emoji": "🍤",
+  "group": "Proteins & sides",
+  "desc": "Crispy shrimp katsu crunches loud, with a sweet seafood snap inside.",
+  "img": "assets/img/toppings/shrimp-katsu.webp"
+ },
+ {
+  "id": "tofu",
+  "name": "Tofu",
+  "emoji": "⬜",
+  "group": "Proteins & sides",
+  "desc": "Savoury tofu offers plant-based protein with a hearty texture.",
+  "img": "assets/img/toppings/tofu.webp"
+ },
+ {
+  "id": "spring-onion",
+  "name": "Spring onion",
+  "emoji": "🌱",
+  "group": "Veggies & greens",
+  "desc": "Bright aroma, mild bite and that fresh finishing touch.",
+  "img": "assets/img/toppings/spring-onion.webp"
+ },
+ {
+  "id": "onion",
+  "name": "Onion",
+  "emoji": "🧅",
+  "group": "Veggies & greens",
+  "desc": "Aromatic onion releases sweetness, adding depth to the broth.",
+  "img": "assets/img/toppings/onion.webp"
+ },
+ {
+  "id": "mushrooms",
+  "name": "Mushrooms",
+  "emoji": "🍄",
+  "group": "Veggies & greens",
+  "desc": "Fresh mushrooms bring juicy bites and natural umami.",
+  "img": "assets/img/toppings/mushrooms.webp"
+ },
+ {
+  "id": "shiitake",
+  "name": "Shiitake",
+  "emoji": "🍄",
+  "group": "Veggies & greens",
+  "desc": "Smoky umami, tender caps and bold fragrance."
+ },
+ {
+  "id": "enoki",
+  "name": "Enoki",
+  "emoji": "🍄",
+  "group": "Veggies & greens",
+  "img": "assets/img/photos/topping-enoki.webp",
+  "desc": "Delicate, slurpable mushroom strands that soak up the soup."
+ },
+ {
+  "id": "corn",
+  "name": "Corn",
+  "emoji": "🌽",
+  "group": "Veggies & greens",
+  "desc": "Sweet corn bursts with every bite and adds a pleasant crunch.",
+  "img": "assets/img/toppings/corn.webp"
+ },
+ {
+  "id": "bok-choy",
+  "name": "Bok choy",
+  "emoji": "🥬",
+  "group": "Veggies & greens",
+  "desc": "Tender-crisp greens that freshen up any rich broth.",
+  "img": "assets/img/toppings/bok-choy.webp"
+ },
+ {
+  "id": "lettuce",
+  "name": "Lettuce",
+  "emoji": "🥬",
+  "group": "Veggies & greens",
+  "img": "assets/img/photos/topping-lettuce.webp",
+  "desc": "Crisp lettuce softens fast, adding freshness and light crunch."
+ },
+ {
+  "id": "cabbage",
+  "name": "Cabbage",
+  "emoji": "🥬",
+  "group": "Veggies & greens",
+  "desc": "Stays crunchy, adding volume and gentle sweetness."
+ },
+ {
+  "id": "seaweed",
+  "name": "Seaweed",
+  "emoji": "🌿",
+  "group": "Veggies & greens",
+  "img": "assets/img/photos/topping-seaweed.webp",
+  "desc": "Umami seaweed melts in the heat, boosting ocean flavour and aroma."
+ },
+ {
+  "id": "extra-noodles",
+  "name": "Extra noodles",
+  "emoji": "🍜",
+  "group": "Extras",
+  "desc": "Extra hungry? Add another block of springy noodles.",
+  "img": "assets/img/toppings/extra-noodles.webp"
+ }
+]

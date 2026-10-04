@@ -1,0 +1,19 @@
+{
+  "name": "meon-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MEON — instant noodle dine-in, Canning Bridge, Perth WA. Static site with a page + QR code for every noodle.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "npx --yes serve site -l 4173",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "qrcode-generator": "^1.4.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_readme": "Edit this file to update business details. Empty strings are hidden on the site. After changing siteUrl, run `npm run build` so every QR code points at the new domain.",
+  "name": "MEON",
+  "tagline": "Instant noodles from around the world, cooked your way.",
+  "siteUrl": "https://meon-noodles.vercel.app",
+  "suburb": "Canning Bridge",
+  "city": "Perth",
+  "state": "WA",
+  "country": "Australia",
+  "streetAddress": "",
+  "postcode": "",
+  "mapsUrl": "https://www.google.com/maps/search/?api=1&query=MEON+noodles+Canning+Bridge+Perth",
+  "phone": "",
+  "email": "",
+  "instagram": "https://www.instagram.com/meonnoodles/",
+  "instagramHandle": "@meonnoodles",
+  "tiktok": "",
+  "hours": [],
+  "hoursNote": "Opening hours are posted on our Instagram — check @meonnoodles before you visit.",
+  "orderingNote": "Dine-in only. Walk in, pick a packet, and we'll get you cooking — no online orders.",
+  "analytics": {
+    "vercel": true
+  }
+}
