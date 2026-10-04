@@ -561,6 +561,92 @@
     drawQR();
   }
 
+  /* ---------- Mega menu (Noodles) ---------- */
+  $$(".has-mega").forEach(function (item) {
+    var btn = $(".mega-toggle", item);
+    if (!btn) return;
+    var set = function (open) {
+      item.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      btn.setAttribute("aria-label", open ? "Hide the noodle menu" : "Show the noodle menu");
+    };
+    btn.addEventListener("click", function (e) { e.stopPropagation(); set(!item.classList.contains("is-open")); });
+    document.addEventListener("click", function (e) { if (!item.contains(e.target)) set(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && item.classList.contains("is-open")) { set(false); btn.focus(); } });
+    item.addEventListener("mouseleave", function () { if (window.matchMedia("(min-width: 961px)").matches) set(false); });
+  });
+
+  /* ---------- Split headline words for a staggered rise ---------- */
+  if (!reduceMotion) {
+    $$("[data-split]").forEach(function (el) {
+      var i = 0;
+      var walk = function (node) {
+        Array.prototype.slice.call(node.childNodes).forEach(function (child) {
+          if (child.nodeType === 3) {
+            var parts = child.textContent.split(/(\s+)/);
+            var frag = document.createDocumentFragment();
+            parts.forEach(function (part) {
+              if (!part) return;
+              if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+              var w = document.createElement("span");
+              w.className = "w";
+              var inner = document.createElement("span");
+              inner.style.setProperty("--i", i++);
+              inner.textContent = part;
+              w.appendChild(inner);
+              frag.appendChild(w);
+            });
+            node.replaceChild(frag, child);
+          } else if (child.nodeType === 1) walk(child);
+        });
+      };
+      if (!el.getAttribute("aria-label")) el.setAttribute("aria-label", el.textContent.replace(/\s+/g, " ").trim());
+      walk(el);
+      $$(".w", el).forEach(function (w) { w.setAttribute("aria-hidden", "true"); });
+      el.classList.add("is-split");
+    });
+  }
+
+  /* ---------- Card tilt + spotlight (mouse / pen only) ---------- */
+  var finePointer = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (finePointer && !reduceMotion) {
+    $$(".noodle-card, .country-tile, .step, .topping, .info-card, .roulette-item, .qr-card").forEach(function (card) {
+      card.classList.add("tilt");
+      var raf = 0, ev = null;
+      var paint = function () {
+        raf = 0;
+        if (!ev) return;
+        var b = card.getBoundingClientRect();
+        var px = (ev.clientX - b.left) / b.width, py = (ev.clientY - b.top) / b.height;
+        card.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
+        card.style.setProperty("--my", (py * 100).toFixed(1) + "%");
+        card.style.transform = "perspective(900px) rotateX(" + ((0.5 - py) * 7).toFixed(2) + "deg) rotateY(" + ((px - 0.5) * 9).toFixed(2) + "deg) translateY(-4px)";
+      };
+      card.addEventListener("pointerenter", function () { card.classList.add("is-tilting"); });
+      card.addEventListener("pointermove", function (e) { ev = e; if (!raf) raf = requestAnimationFrame(paint); });
+      card.addEventListener("pointerleave", function () { ev = null; card.classList.remove("is-tilting"); card.style.transform = ""; });
+    });
+
+    /* Crew parallax: the floating mascots drift away from the cursor */
+    var crews = $$(".crew");
+    if (crews.length) {
+      var cx = 0, cy = 0, pend = false;
+      var drift = function () {
+        pend = false;
+        crews.forEach(function (crew) {
+          $$(".meo", crew).forEach(function (m, k) {
+            var depth = 6 + (k % 4) * 5;
+            m.style.translate = (-cx * depth).toFixed(1) + "px " + (-cy * depth).toFixed(1) + "px";
+          });
+        });
+      };
+      window.addEventListener("pointermove", function (e) {
+        cx = e.clientX / window.innerWidth - 0.5; cy = e.clientY / window.innerHeight - 0.5;
+        if (!pend) { pend = true; requestAnimationFrame(drift); }
+      }, { passive: true });
+    }
+  }
+
   /* ---------- Year ---------- */
   $$("[data-year]").forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 })();

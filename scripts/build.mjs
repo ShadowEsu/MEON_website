@@ -8,7 +8,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestToppings } from "./lib/copy.mjs";
-import { icon, spiceMeter, mascot, crew, steamOverlay, stepArt, emptyBowl, logoAnimated, logoMini } from "./lib/art.mjs";
+import { icon, spiceMeter, mascot, crew, crewMini, steamOverlay, stepArt, emptyBowl, logoAnimated, logoMini } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -93,7 +93,10 @@ function layout({ urlPath, title, description, body, active = "", image = "asset
   const r = (p) => root + p;
   const canonical = `${SITE_URL}/${urlPath}`;
   const fullTitle = title ? `${title} · MEON Noodles` : "MEON · Instant Noodle Dine-In · Canning Bridge, Perth";
-  const navLinks = NAV.map(([href, label]) => `<a href="${r(href)}"${active === href ? ' aria-current="page"' : ""}>${label}</a>`).join("");
+  const cur = (href) => (active === href ? ' aria-current="page"' : "");
+  const navLinks = NAV.map(([href, label]) => href === "noodles/"
+    ? `<div class="nav-item has-mega"><a href="${r(href)}"${cur(href)}>${label}</a><button class="mega-toggle" type="button" aria-expanded="false" aria-controls="mega-noodles" aria-label="Show the noodle menu">${icon.chevron}</button>${megaNoodles(r)}</div>`
+    : `<a href="${r(href)}"${cur(href)}>${label}</a>`).join("");
   const analytics = site.analytics?.vercel
     ? `<script>(function(){var h=location.hostname;if(location.protocol.indexOf("http")!==0||/^(localhost|127\\.|0\\.0\\.0\\.0|\\[::1\\])/.test(h))return;window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};var s=document.createElement("script");s.defer=true;s.src="/_vercel/insights/script.js";document.head.appendChild(s);})();</script>`
     : "";
@@ -119,7 +122,8 @@ function layout({ urlPath, title, description, body, active = "", image = "asset
 <title>${esc(fullTitle)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${esc(canonical)}">
-${noindex ? '<meta name="robots" content="noindex">\n' : ""}<meta name="theme-color" content="#ec1b25">
+${noindex ? '<meta name="robots" content="noindex">\n' : ""}<meta name="theme-color" content="#fffaf3">
+<meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MEON Noodles">
 <meta property="og:title" content="${esc(fullTitle)}">
@@ -218,6 +222,13 @@ ${body(r)}
     <div class="search-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open</span><span>Tip: try “vegan”, “tom yum” or “Japan”</span></div>
   </div>
 </div>
+<nav class="tabbar" aria-label="Quick navigation">
+  <a href="${r("")}"${cur("home")}>${icon.home}<span>Home</span></a>
+  <a href="${r("noodles/")}"${cur("noodles/")}>${icon.bowl}<span>Noodles</span></a>
+  <button class="tab-search" type="button" data-search-open aria-label="Search noodles">${icon.search}<span>Search</span></button>
+  <a href="${r("countries/")}"${cur("countries/")}>${icon.globe}<span>Countries</span></a>
+  <a href="${r("visit/")}"${cur("visit/")}>${icon.pin}<span>Visit</span></a>
+</nav>
 <button class="back-top" type="button" aria-label="Back to top">${mascot({ acc: "none", wave: true })}</button>
 ${scripts.map((s) => `<script src="${r(s)}" defer></script>`).join("\n")}
 <script src="${r("assets/js/site.js")}?v=${BUILD_DATE}" defer></script>
@@ -254,13 +265,50 @@ function wallRow(list, r, rev) {
   return `<div class="wall-row${rev ? " wall-row--rev" : ""}" aria-hidden="true"><div class="marquee-track">${group}${group}</div></div>`;
 }
 
-function pageHero({ eyebrow, title, lead, extra = "", acc = "chef", color = "#ff8a4c", style = "" }) {
-  return `<section class="page-hero"${style ? ` style="${style}"` : ""}><div class="wrap">
-  ${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}
-  <h1>${title}</h1>
-  ${lead ? `<p class="lead">${lead}</p>` : ""}
-  ${extra}
-</div>${mascot({ className: "mascot-peek", acc, color })}</section>`;
+function megaNoodles(r) {
+  const quick = [
+    ["noodles/", "🍜", `All ${noodles.length} noodles`], ["noodles/?type=Soup", "🍲", "Soup noodles"], ["noodles/?type=Dry", "🥢", "Dry · mix-and-eat"],
+    ["noodles/?diet=veg", "🥬", "Vegetarian-friendly"], ["noodles/?diet=vegan", "🌱", "Vegan"], ["noodles/?spice=hot", "🔥", "Spicy challenge (3+)"],
+    ["noodles/?spice=mild", "😌", "No heat"], ["noodles/?sort=photo", "📸", "Photos first"],
+  ];
+  return `<div class="mega" id="mega-noodles">
+  <div class="mega-col"><p class="mega-h">Browse</p>${quick.map(([h, e, t]) => `<a href="${r(h)}"><span aria-hidden="true">${e}</span>${t}</a>`).join("")}</div>
+  <div class="mega-col"><p class="mega-h">By country</p><div class="mega-grid">${countries.map((c) => `<a href="${r(`countries/${c.slug}/`)}"><span aria-hidden="true">${c.flag}</span>${esc(c.name)}<small>${countFor((n) => n.country === c.name)}</small></a>`).join("")}</div></div>
+  <a class="mega-feature" href="${r("")}#roulette">${mascot({ acc: "party", color: "#ff8fb0" })}<strong>Can't decide?</strong><span>Spin the Noodle Roulette</span></a>
+</div>`;
+}
+
+// Shared hero for every inner page: grid background, floating mascots, breadcrumbs, badge, word-reveal title.
+function pageHero(r, { crumbs = [], badge = "", tag = "MEON", title, lead = "", actions = "", after = "", seed = 0, tint = "", top = "" }) {
+  return `<section class="page-hero"${tint ? ` style="--tint:${tint}"` : ""}>
+  <div class="grid-bg"></div>
+  ${crewMini(seed)}
+  <div class="wrap">
+    ${crumbs.length ? `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${r("")}">Home</a></li>${crumbs.map(([label, href]) => href ? `<li><a href="${r(href)}">${label}</a></li>` : `<li aria-current="page">${label}</li>`).join("")}</ol></nav>` : ""}
+    ${top}
+    ${badge ? `<span class="badge-pill"><b>${tag}</b>${badge}</span>` : ""}
+    <h1 class="page-title" data-split>${title}</h1>
+    ${lead ? `<p class="lead">${lead}</p>` : ""}
+    ${actions ? `<div class="hero-actions">${actions}</div>` : ""}
+    ${after}
+  </div>
+</section>`;
+}
+
+// Shared closing band for every page.
+function ctaBand(r, { title = `Ready to <span class="serif red">slurp?</span>`, text = site.orderingNote } = {}) {
+  return `<section class="section cta-band"><div class="wrap"><div class="cta-card reveal">
+  <div class="cta-copy">
+    <span class="eyebrow">Come hungry</span>
+    <h2>${title}</h2>
+    <p class="lead">${esc(text)}</p>
+    <div class="hero-actions">
+      <a class="btn btn--red" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a>
+      <a class="btn btn--light" href="${r("visit/")}">${icon.pin} Visit info</a>
+    </div>
+  </div>
+  <div class="cta-mascots" aria-hidden="true">${mascot({ acc: "bowl", color: "#ffc83d" })}${mascot({ acc: "chef", color: "#ff8a4c" })}${mascot({ acc: "chilli", color: "#ff5b5b" })}</div>
+</div></div></section>`;
 }
 
 /* ---------------- pages ---------------- */
@@ -271,6 +319,7 @@ const countFor = (fn) => noodles.filter(fn).length;
 // ---------- Home ----------
 addPage("", layout({
   urlPath: "",
+  active: "home",
   description: `MEON is an instant noodle dine-in at ${site.suburb}, ${site.city}: ${noodles.length} noodles from 12 countries, piles of toppings, and a page for every packet. Walk in, pick, cook, slurp.`,
   body: (r) => `
 <section class="hero">
@@ -339,7 +388,7 @@ addPage("", layout({
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="roulette">
   <div class="wrap roulette" data-roulette data-root="${r("")}">
     <div class="reveal">
       <span class="eyebrow">${sectionNum(3)} Can't decide?</span>
@@ -362,11 +411,11 @@ addPage("", layout({
   <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, flag: n.c.flag, spice: n.spiceKey, type: n.type, img: n.thumb })))}</script>
 </section>
 
-<section class="section section--ink">
+<section class="section section--alt">
   <div class="wrap">
     <div class="section-head reveal">
-      <div><span class="eyebrow">${sectionNum(4)} A passport in a bowl</span><h2>12 countries, <span class="serif" style="color:var(--yellow)">one noodle wall</span></h2><p class="lead">Every country has its own noodle personality. Which one is yours?</p></div>
-      <a class="btn btn--yellow" href="${r("countries/")}">All countries ${icon.arrow}</a>
+      <div><span class="eyebrow">${sectionNum(4)} A passport in a bowl</span><h2>12 countries, <span class="serif red">one noodle wall</span></h2><p class="lead">Every country has its own noodle personality. Which one is yours?</p></div>
+      <a class="btn btn--light" href="${r("countries/")}">All countries ${icon.arrow}</a>
     </div>
     <div class="country-grid">
       ${countries.map((c, i) => `<a class="country-tile reveal" style="--c:${c.color};--rd:${(i % 6) * 0.04}s" href="${r(`countries/${c.slug}/`)}"><span class="country-flag" aria-hidden="true">${c.flag}</span><span><h3>${esc(c.name)}</h3><span class="country-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span></span></a>`).join("")}
@@ -433,20 +482,7 @@ ${marquee(["Egg 🥚", "Cheese 🧀", "Beef 🥩", "Fishcake 🍥", "Corn 🌽",
   </div>
 </section>
 
-<section class="section section--red">
-  <div class="wrap split">
-    <div class="reveal">
-      <span class="eyebrow">${sectionNum(9)} Come hungry</span>
-      <h2>Find us at <span class="serif">${esc(site.suburb)}</span></h2>
-      <p class="lead">${esc(site.orderingNote)}</p>
-      <div class="hero-actions" style="justify-content:flex-start;margin-bottom:0">
-        <a class="btn btn--yellow" href="${r("visit/")}">${icon.pin} Visit info</a>
-        <a class="btn btn--outline-light" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Open Maps ${icon.arrow}</a>
-      </div>
-    </div>
-    <div class="reveal" style="display:grid;place-items:center">${mascot({ label: "Meo, the MEON mascot, waving hello", acc: "bowl", color: "#ffc83d", style: "width:min(320px,70vw);animation:float 4s ease-in-out infinite;overflow:visible" })}</div>
-  </div>
-</section>
+${ctaBand(r, { title: `Find us at <span class="serif red">${esc(site.suburb)}</span>` })}
 `,
 }));
 
@@ -457,13 +493,7 @@ addPage("noodles/", layout({
   active: "noodles/",
   description: `Browse all ${noodles.length} instant noodles at MEON — filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-<section class="library-hero">
-  <div class="wrap">
-    <span class="eyebrow">The noodle wall</span>
-    <h1>Noodle <span class="serif red">library</span></h1>
-    <p class="lead">${noodles.length} instant noodles from 12 countries. Search, filter and find your next favourite — then grab it off the wall.</p>
-  </div>
-</section>
+${pageHero(r, { crumbs: [["Noodles"]], badge: `${noodles.length} noodles · 12 countries`, tag: "WALL", title: `Noodle <span class="serif red">library</span>`, lead: `${noodles.length} instant noodles from 12 countries. Search, filter and find your next favourite — then grab it off the wall.`, seed: 1 })}
 <div data-library>
   <div class="filters">
     <div class="wrap"><div class="filters-inner">
@@ -490,9 +520,10 @@ addPage("noodles/", layout({
     </div>
     <div class="card-grid">${noodles.map((n, i) => noodleCard(n, r, i)).join("")}</div>
     <div class="empty-state">${emptyBowl}<h2>No noodles match… yet</h2><p class="lead" style="margin-inline:auto">Try a different filter, or ask the crew — new packets land all the time.</p><button class="btn btn--red" type="button" data-reset>Clear filters</button></div>
-    <p class="note" style="margin:40px 0 64px">* Vegetarian-friendly means the noodle and seasoning are generally meat-free, but recipes vary by batch and region. Always check the packet if you have dietary requirements or allergies.</p>
+    <p class="note" style="margin:40px 0 0">* Vegetarian-friendly means the noodle and seasoning are generally meat-free, but recipes vary by batch and region. Always check the packet if you have dietary requirements or allergies.</p>
   </div>
 </div>
+${ctaBand(r)}
 `,
 }));
 
@@ -526,7 +557,7 @@ noodles.forEach((n, idx) => {
       ] },
     ],
     body: (r) => `
-<div class="wrap">
+<div class="detail-hero"><div class="grid-bg"></div>${crewMini(idx)}<div class="wrap">
   <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${r("")}">Home</a></li><li><a href="${r("noodles/")}">Noodles</a></li><li><a href="${r(`countries/${n.c.slug}/`)}">${n.c.flag} ${esc(n.country)}</a></li><li aria-current="page">${esc(n.name)}</li></ol></nav>
   <article class="detail">
     <div class="detail-media">
@@ -538,7 +569,7 @@ noodles.forEach((n, idx) => {
     <div>
       <p class="qr-banner" data-qr-banner hidden>👋 You scanned the shelf! Here's everything about this packet — machine setting and cook timer included.</p>
       <span class="detail-brand">${esc(n.brand)}</span>
-      <h1>${esc(n.name)}</h1>
+      <h1 data-split>${esc(n.name)}</h1>
       <div class="detail-chips">
         <a class="chip" href="${r(`countries/${n.c.slug}/`)}">${n.c.flag} ${esc(n.country)}</a>
         ${n.type ? `<a class="chip chip--sky" href="${r(`noodles/?type=${n.type}`)}">${esc(n.type)}</a>` : ""}
@@ -589,13 +620,14 @@ noodles.forEach((n, idx) => {
       </nav>
     </div>
   </article>
-</div>
+</div></div>
 <section class="section section--tight section--alt">
   <div class="wrap">
     <div class="section-head"><div><span class="eyebrow">Keep exploring</span><h2>You might <span class="serif red">also like</span></h2></div><a class="btn btn--light btn--sm" href="${r(`countries/${n.c.slug}/`)}">More from ${esc(n.country)} ${icon.arrow}</a></div>
     <div class="card-grid">${similar.map((o, i) => noodleCard(o, r, i)).join("")}</div>
   </div>
 </section>
+${ctaBand(r, { title: `Hungry for <span class="serif red">more?</span>`, text: "Grab this packet off the wall, or explore another country while your noodles cook." })}
 `,
   }));
 });
@@ -607,12 +639,13 @@ addPage("countries/", layout({
   active: "countries/",
   description: "Explore MEON's instant noodles country by country — South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.",
   body: (r) => `
-${pageHero({ eyebrow: "A passport in a bowl", title: `Noodles by <span class="serif red">country</span>`, lead: "Twelve countries, twelve noodle personalities. Pick a flag and start your trip.", acc: "party", color: "#5cc3f0" })}
+${pageHero(r, { crumbs: [["Countries"]], badge: "A passport in a bowl", tag: "12", title: `Noodles by <span class="serif red">country</span>`, lead: "Twelve countries, twelve noodle personalities. Pick a flag and start your trip.", seed: 2 })}
 <section class="section section--tight" style="padding-top:0"><div class="wrap">
   <div class="country-grid">
     ${countries.map((c, i) => `<a class="country-tile reveal" style="--c:${c.color};--rd:${(i % 4) * 0.05}s" href="${r(`countries/${c.slug}/`)}"><span class="country-flag" aria-hidden="true">${c.flag}</span><span><h3>${esc(c.name)}</h3><span class="country-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span><p style="margin:.5em 0 0;font-size:.92rem;color:var(--muted)">${esc(c.headline)}</p></span></a>`).join("")}
   </div>
 </div></section>
+${ctaBand(r)}
 `,
 }));
 
@@ -626,14 +659,8 @@ for (const c of countries) {
     image: list.find((n) => n.img)?.img,
     description: `${list.length} instant noodles from ${c.name} at MEON ${site.suburb}. ${c.headline}`,
     body: (r) => `
-<section class="page-hero" style="background:linear-gradient(180deg, ${c.color}1a, transparent)"><div class="wrap">
-  <nav class="crumbs" aria-label="Breadcrumb" style="padding:0 0 18px"><ol><li><a href="${r("")}">Home</a></li><li><a href="${r("countries/")}">Countries</a></li><li aria-current="page">${esc(c.name)}</li></ol></nav>
-  <span class="flag-xl" aria-hidden="true">${c.flag}</span><br>
-  <span class="eyebrow">${plural(list.length, "noodle")} from ${esc(c.name)}</span>
-  <h1>${esc(c.name)}</h1>
-  <p class="lead"><strong>${esc(c.headline)}</strong> ${esc(c.intro)}</p>
-  <a class="btn btn--light" href="${r(`noodles/?country=${c.code}`)}">Filter in the library ${icon.arrow}</a>
-</div>${mascot({ className: "mascot-peek", acc: "chopsticks", color: "#ff8a4c" })}</section>
+${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], tint: c.color, top: `<span class="flag-xl" aria-hidden="true">${c.flag}</span>`, badge: `${plural(list.length, "noodle")} from ${esc(c.name)}`, tag: c.code.toUpperCase(), title: esc(c.name), lead: `<strong>${esc(c.headline)}</strong> ${esc(c.intro)}`, actions: `<a class="btn btn--red" href="${r(`noodles/?country=${c.code}`)}">Filter in the library ${icon.arrow}</a><button class="btn btn--light" type="button" data-search-open>${icon.search} Search</button>`, seed: countries.indexOf(c) + 3,
+  after: `<div class="mini-stats reveal"><div><strong data-count="${list.length}">${list.length}</strong><span>noodles</span></div><div><strong data-count="${list.filter((n) => n.type === "Soup").length}">${list.filter((n) => n.type === "Soup").length}</strong><span>soup</span></div><div><strong data-count="${list.filter((n) => n.type === "Dry").length}">${list.filter((n) => n.type === "Dry").length}</strong><span>dry</span></div><div><strong data-count="${list.filter((n) => n.spiceKey >= 3).length}">${list.filter((n) => n.spiceKey >= 3).length}</strong><span>spicy 3+</span></div></div>` })}
 <section class="section section--tight" style="padding-top:0"><div class="wrap">
   <div class="card-grid">${list.map((n, i) => noodleCard(n, r, i)).join("")}</div>
 </div></section>
@@ -641,6 +668,7 @@ for (const c of countries) {
   <h2>Keep <span class="serif red">travelling</span></h2>
   <div class="filter-pills" style="flex-wrap:wrap">${others.map((o) => `<a class="pill" href="${r(`countries/${o.slug}/`)}">${o.flag} ${esc(o.name)}</a>`).join("")}</div>
 </div></section>
+${ctaBand(r)}
 `,
   }));
 }
@@ -653,23 +681,15 @@ addPage("toppings/", layout({
   active: "toppings/",
   description: "Level up your instant noodles at MEON: eggs, cheese, microwave-ready beef and meatballs, fishcake, crab sticks, shrimp katsu, mushrooms, greens and more.",
   body: (r) => `
-<section class="page-hero"><div class="wrap split">
-  <div>
-    <span class="eyebrow">Toppings bar</span>
-    <h1>Toppings <span class="serif red">&amp; sides</span></h1>
-    <p class="lead">The packet is just the start. Stack your bowl with proteins, veg and little extras — the more, the merrier.</p>
-    <div class="filter-pills" style="flex-wrap:wrap">${groups.map((g) => `<a class="pill" href="#${g.toLowerCase().replace(/[^a-z]+/g, "-")}">${esc(g)}</a>`).join("")}</div>
-  </div>
-  <div class="photo-stack">
-    <figure><img src="${r("assets/img/photos/topping-fishcake.webp")}" alt="A cute pig-shaped fishcake on a plate" width="900" height="900"></figure>
-    <figure><img src="${r("assets/img/photos/topping-enoki.webp")}" alt="Fresh enoki mushrooms on a plate" width="900" height="900"></figure>
-  </div>
-</div></section>
+${pageHero(r, { crumbs: [["Toppings"]], badge: `${toppings.length} toppings &amp; sides`, tag: "BAR", title: `Toppings <span class="serif red">&amp; sides</span>`, lead: "The packet is just the start. Stack your bowl with proteins, veg and little extras — the more, the merrier.", seed: 4,
+  actions: groups.map((g) => `<a class="pill" href="#${g.toLowerCase().replace(/[^a-z]+/g, "-")}">${esc(g)}</a>`).join(""),
+  after: `<div class="plate-row" aria-hidden="true">${["topping-fishcake", "topping-enoki", "topping-seaweed", "topping-spam", "topping-lettuce"].map((f, i) => `<img src="${r(`assets/img/photos/${f}.webp`)}" alt="" width="900" height="900" style="--i:${i}">`).join("")}</div>` })}
 ${groups.map((g) => `<section class="section section--tight" style="padding-top:0" id="${g.toLowerCase().replace(/[^a-z]+/g, "-")}"><div class="wrap">
   <h2 class="reveal">${esc(g)}</h2>
   <div class="topping-grid">${toppings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}">${t.img ? `<img src="${r(t.img)}" alt="${esc(t.name)}" width="300" height="300" loading="lazy">` : `<span class="emoji" aria-hidden="true">${t.emoji}</span>`}<strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
 </div></section>`).join("")}
-<section class="section section--tight"><div class="wrap"><p class="note">Topping availability changes day to day — ask the crew what's fresh. Always let us know about allergies.</p></div></section>
+<section class="section section--tight" style="padding-bottom:0"><div class="wrap"><p class="note">Topping availability changes day to day — ask the crew what's fresh. Always let us know about allergies.</p></div></section>
+${ctaBand(r)}
 `,
 }));
 
@@ -681,14 +701,8 @@ addPage("meon-card/", layout({
   image: "assets/img/photos/meon-member-card.webp",
   description: "The MEON Member Card is free: load money in store, pay like cash and get 10% off eligible food items every visit.",
   body: (r) => `
-<section class="page-hero section--sky" style="color:#fff"><div class="wrap split">
-  <div>
-    <span class="eyebrow" style="color:var(--yellow)">Members save more</span>
-    <h1>MEON <span class="serif">Member Card</span></h1>
-    <p class="lead" style="color:rgba(255,255,255,.92)">Loads of fun, anywhere. Get your card free, top it up, use your balance like cash and enjoy exclusive perks — including 10% off eligible food items.</p>
-  </div>
-  <div style="display:grid;place-items:center"><div class="member-card"><img src="${r("assets/img/photos/meon-member-card.webp")}" alt="The MEON Member Card" width="945" height="591"></div></div>
-</div></section>
+${pageHero(r, { crumbs: [["MEON Card"]], badge: "Free card · 10% off", tag: "MEMBERS", title: `MEON <span class="serif red">Member Card</span>`, lead: "Loads of fun, anywhere. Get your card free, top it up, use your balance like cash and enjoy exclusive perks — including 10% off eligible food items.", seed: 5, tint: "#2aa7e1",
+  after: `<div class="hero-card"><div class="member-card"><img src="${r("assets/img/photos/meon-member-card.webp")}" alt="The MEON Member Card" width="945" height="591"></div></div>` })}
 <section class="section"><div class="wrap">
   <div class="section-head reveal"><div><span class="eyebrow">How it works</span><h2>Four taps to <span class="serif red">savings</span></h2></div></div>
   <div class="steps">
@@ -707,6 +721,7 @@ addPage("meon-card/", layout({
   </div>
   <div class="reveal" style="display:grid;place-items:center">${mascot({ label: "Meo, the MEON mascot", acc: "crown", color: "#ff8fb0", style: "width:min(300px,70vw);animation:float 4s ease-in-out infinite;overflow:visible" })}</div>
 </div></section>
+${ctaBand(r)}
 `,
 }));
 
@@ -717,14 +732,8 @@ addPage("about/", layout({
   active: "about/",
   description: `MEON is an instant noodle dine-in at ${site.suburb}, ${site.city} — celebrating flavour, culture and the simple joy of noodles from 12 countries.`,
   body: (r) => `
-<section class="page-hero"><div class="wrap split">
-  <div>
-    <span class="eyebrow">Our story</span>
-    <h1>Get to know <span class="serif red">MEON</span></h1>
-    <p class="lead">We're here to celebrate flavour, culture and the simple joy of noodles. It's fast, fun and full of choices — just the way noodles should be.</p>
-  </div>
-  <div style="display:grid;place-items:center">${logoAnimated()}</div>
-</div></section>
+${pageHero(r, { crumbs: [["About"]], badge: "Our story", tag: "HELLO", title: `Get to know <span class="serif red">MEON</span>`, lead: "We're here to celebrate flavour, culture and the simple joy of noodles. It's fast, fun and full of choices — just the way noodles should be.", seed: 6,
+  after: `<div class="hero-logo">${logoAnimated()}</div>` })}
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2>What sets us <span class="serif red">apart</span></h2>
@@ -738,13 +747,14 @@ addPage("about/", layout({
     <a class="btn btn--red" href="${r("countries/")}">Meet the countries ${icon.arrow}</a>
   </div>
 </div></section>
-<section class="section section--ink"><div class="wrap">
+<section class="section section--alt"><div class="wrap">
   <div class="info-grid">
     <div class="info-card reveal"><h3><span class="ico" aria-hidden="true">🌏</span>Global</h3><p>Noodles from Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></div>
     <div class="info-card reveal" style="--rd:.08s"><h3><span class="ico" aria-hidden="true">🧑‍🍳</span>Your way</h3><p>Pick your packet, pile on toppings and cook it exactly how you like it.</p></div>
     <div class="info-card reveal" style="--rd:.16s"><h3><span class="ico" aria-hidden="true">🪑</span>Dine-in</h3><p>${esc(site.orderingNote)}</p></div>
   </div>
 </div></section>
+${ctaBand(r)}
 `,
 }));
 
@@ -756,7 +766,7 @@ addPage("visit/", layout({
   active: "visit/",
   description: `Find MEON at ${site.suburb}, ${site.city} ${site.state}. Dine-in only — walk in, pick a packet and start cooking.`,
   body: (r) => `
-${pageHero({ eyebrow: "Come hungry", title: `Visit <span class="serif red">MEON</span>`, lead: esc(site.orderingNote), acc: "bowl", color: "#ffc83d" })}
+${pageHero(r, { crumbs: [["Visit"]], badge: `${esc(site.suburb)}, ${esc(site.city)} · dine-in only`, tag: "VISIT", title: `Visit <span class="serif red">MEON</span>`, lead: esc(site.orderingNote), seed: 7, actions: `<a class="btn btn--red" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--light" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}` })}
 <section class="section section--tight" style="padding-top:0"><div class="wrap">
   <div class="info-grid">
     <div class="info-card reveal"><h3><span class="ico" aria-hidden="true">📍</span>Where</h3>
@@ -787,6 +797,7 @@ ${pageHero({ eyebrow: "Come hungry", title: `Visit <span class="serif red">MEON<
     <figure><img src="${r("assets/img/photos/bowl-top-egg.webp")}" alt="Noodles with egg and enoki from above" width="900" height="900" loading="lazy"></figure>
   </div>
 </div></section>
+${ctaBand(r, { title: `See you at <span class="serif red">${esc(site.suburb)}</span>` })}
 `,
 }));
 
@@ -811,10 +822,9 @@ addPage("qr/", layout({
   noindex: true,
   description: "Printable QR codes for every noodle on the MEON wall.",
   body: (r) => `
-<section class="section section--tight"><div class="wrap">
+<div class="no-print">${pageHero(r, { crumbs: [["Shelf QR codes"]], badge: `${noodles.length + 3} printable codes`, tag: "STAFF", title: `Shelf <span class="serif red">QR codes</span>`, seed: 8 })}</div>
+<section class="section section--tight" style="padding-top:0"><div class="wrap">
   <div class="no-print">
-    <span class="eyebrow">Staff only</span>
-    <h1 style="font-size:clamp(2rem,5vw,3.4rem)">Shelf <span class="serif red">QR codes</span></h1>
     <p class="lead">One QR code per noodle. Each opens that noodle's page with <code>?src=qr</code> so in-store scans can be counted separately. Print on A4 (3 per row), or download single files. Need a custom code? Use the <a href="${r("qr-generator/")}">QR generator</a>.</p>
     <p class="note">Codes point to <strong>${esc(SITE_URL)}</strong>. If the domain changes, update <code>siteUrl</code> in <code>data/site.json</code> and rebuild before printing.</p>
   </div>
@@ -841,10 +851,8 @@ addPage("qr-generator/", layout({
   description: "Make branded MEON QR codes for any noodle page, promotion or link — download as PNG or SVG.",
   scripts: ["assets/vendor/qrcode.js"],
   body: (r) => `
-<section class="section section--tight"><div class="wrap">
-  <span class="eyebrow">Staff tool</span>
-  <h1 style="font-size:clamp(2rem,5vw,3.6rem)">QR code <span class="serif red">generator</span></h1>
-  <p class="lead">Make a branded QR code for any noodle, page, deal or link. Everything runs in your browser — download a PNG for print or an SVG for signage.</p>
+<div class="no-print">${pageHero(r, { crumbs: [["QR generator"]], badge: "Runs in your browser", tag: "STAFF", title: `QR code <span class="serif red">generator</span>`, lead: "Make a branded QR code for any noodle, page, deal or link — download a PNG for print or an SVG for signage.", seed: 9 })}</div>
+<section class="section section--tight" style="padding-top:0"><div class="wrap">
   <div class="qrgen" data-qrgen data-site="${esc(SITE_URL)}" data-logo="${r("assets/img/logo-192.png")}">
     <form class="qrgen-form panel" onsubmit="return false">
       <div class="field"><label for="qg-preset">Start from</label>

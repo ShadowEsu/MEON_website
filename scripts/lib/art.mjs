@@ -10,6 +10,10 @@ export const icon = {
   dice: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="16" cy="16" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="16" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="16" r="1.6" fill="currentColor"/></svg>`,
   play: `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>`,
   qr: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h2v2h-2v-2Zm2 2h2v2h-2v-2Zm2-2h2v2h-2v-2Zm2 2h2v2h-2v-2Zm-6 2h2v2h-2v-2Zm4 0h2v2h-2v-2Zm-2 2h2v2h-2v-2Zm4 0h2v2h-2v-2Z"/></svg>`,
+  home: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  bowl: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11h18c0 5-4 9-9 9s-9-4-9-9Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M17 3 11 11M21 5l-8 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+  globe: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+  chevron: `<svg class="chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   download: `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 };
 
@@ -78,6 +82,15 @@ export function crew() {
   return `<div class="crew" aria-hidden="true">${CREW.map(
     (m) => `<div class="meo${m.hideSm ? " hide-sm" : ""}" style="left:${m.x}%;top:${m.y}%;--s:${m.s}px;--d:${m.d}s;--delay:${m.delay}s" data-say="${m.say}"><span class="meo-bubble">${m.say}</span>${mascot({ color: m.color, acc: m.acc, wave: m.acc !== "chopsticks" })}</div>`
   ).join("")}</div>`;
+}
+
+// A smaller crew for inner-page heroes: four mascots at the edges, rotated by `seed` so pages differ.
+const MINI_SPOTS = [{ x: 3, y: 16, s: 62 }, { x: 89, y: 10, s: 58 }, { x: 7, y: 68, s: 50 }, { x: 87, y: 64, s: 56 }];
+export function crewMini(seed = 0) {
+  return `<div class="crew crew--mini" aria-hidden="true">${MINI_SPOTS.map((p, i) => {
+    const m = CREW[(seed + i * 3) % CREW.length];
+    return `<div class="meo${i > 1 ? " hide-sm" : ""}" style="left:${p.x}%;top:${p.y}%;--s:${p.s}px;--d:${m.d}s;--delay:${m.delay}s" data-say="${m.say}"><span class="meo-bubble">${m.say}</span>${mascot({ color: m.color, acc: m.acc, wave: m.acc !== "chopsticks" })}</div>`;
+  }).join("")}</div>`;
 }
 
 export const steamOverlay = `<svg class="steam-overlay" viewBox="0 0 200 90" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M60 90c-12-16 12-24 0-40s12-26 0-46"/><path d="M100 90c-12-16 12-24 0-40s12-26 0-46"/><path d="M140 90c-12-16 12-24 0-40s12-26 0-46"/></svg>`;
