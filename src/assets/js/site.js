@@ -447,6 +447,26 @@
     apply();
   }
 
+  /* ---------- Noodle photo gallery (thumbnails swap the main photo) ---------- */
+  var galleryMain = $("[data-gallery-main]");
+  if (galleryMain) {
+    var mainImg = $("img", galleryMain);
+    $$("[data-gallery-src]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var src = btn.getAttribute("data-gallery-src");
+        if (!mainImg || mainImg.getAttribute("src") === src) return;
+        $$("[data-gallery-src]").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
+        var pre = new Image();
+        pre.onload = function () {
+          galleryMain.classList.add("is-swapping");
+          var first = btn === $("[data-gallery-src]");
+          setTimeout(function () { mainImg.src = src; galleryMain.classList.toggle("is-alt", !first); galleryMain.classList.remove("is-swapping"); }, reduceMotion ? 0 : 200);
+        };
+        pre.src = src;
+      });
+    });
+  }
+
   /* ---------- Noodle roulette ---------- */
   var roulette = $("[data-roulette]");
   var dataEl = $("#noodle-data");

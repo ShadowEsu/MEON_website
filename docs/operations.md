@@ -27,6 +27,22 @@ The QR PNGs come from `scripts/make_qr_pngs.py`. Each file was checked: it decod
 - Make your own codes for posters, Wi-Fi or Instagram at `/qr-generator/` (logo, colours, PNG/SVG download).
 - Print tips: at least 2.5 cm wide, black on white, and leave the white border.
 
+## Noodle photos
+
+The main noodle photos come from the MEON photo shoot. The photographer's shared Drive folder has one folder per noodle, each with a "Web - Sized" copy. For every noodle the site uses:
+- the **bowl-with-packet** shot as the main photo
+- the top-down and close-up shots as extra photos (`data/gallery.json`)
+
+The 41 noodles shot so far use these photos. The rest still use the older photos from the Wix site, or a mascot placeholder. When more noodles are photographed, ask Claude to "add the new noodle photos from the shoot folder".
+
+Some shoot folders are named differently from the packet in the photo. The site follows the packet:
+- "Samyang Ramen Original Mild" is Samyang Bulgogi
+- "Buldak Hot Chicken" is the Buldak Stew Type
+- "Mama Shrimp Tomyum" is Wai Wai Tom Yum Shrimp
+- "Kang Shi Fu Vegetables & Beef" is the Pickled Mustard Beef
+
+"Neoguri Stir Fry" is not on the noodle list yet, so it isn't used.
+
 ## Guest reviews
 
 Guests can leave a 1–5 star rating, their first name and a comment at the bottom of the home page (general reviews) and of every noodle page (reviews for that noodle). Reviews appear on the site straight away.
@@ -71,7 +87,8 @@ Or just ask Claude: "update the MEON views log for last week".
 | --- | --- |
 | Add the address, phone, email or hours | Fill in `data/site.json` (empty fields stay hidden) |
 | Add or change a noodle | Edit the Drive doc *Meon_Website_format2*, export it to `data/source/Meon_Website_format2.md`, run `python3 scripts/parse_library.py`, then `npm run build` |
-| Add a photo | Save an 800×800 `.webp` to `src/assets/img/noodles/<slug>.webp` and a 400×400 copy to `…/noodles/sm/`, then add the slug to `data/images.json` |
+| Add a photo | Save a 900×900 `.webp` to `src/assets/img/noodles/<slug>.webp` and a 400×400 copy to `…/noodles/sm/`, then add the slug to `data/images.json`. Use the bowl-and-packet shot, so guests can match it to the shelf |
+| Add extra photos to a noodle page | Save 900×900 `.webp` files to `src/assets/img/noodles/more/<slug>-1.webp`, `-2.webp` and so on, and list them under the slug in `data/gallery.json`. They appear as tappable thumbnails under the main photo |
 | Set a real spice rating for a noodle marked "coming soon" | Fix the rating in the source doc and remove the slug from `data/spice_review.json` |
 | Run a deal | Edit `data/deals.json` (`"active": false` hides it) |
 
@@ -82,4 +99,4 @@ After any change: `npm run build && npm run check`. Pushing to GitHub redeploys 
 - Street address, phone, email and opening hours
 - The final domain (do this before printing QR codes)
 - 20 noodles have "spice rating coming soon" (listed in `data/spice_review.json`)
-- 62 noodles still need a photo (they show a mascot placeholder)
+- 54 noodles still need a photo (they show a mascot placeholder). Samyang Ramen (original) lost its photo because the old one actually showed the Bulgogi packet

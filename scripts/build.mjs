@@ -23,6 +23,8 @@ const toppings = readJSON("toppings.json");
 const deals = readJSON("deals.json").filter((d) => d.active !== false);
 const spiceReview = new Set(fs.existsSync(path.join(ROOT, "data", "spice_review.json")) ? readJSON("spice_review.json").slugs : []);
 const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON("images.json") : {};
+// Extra photos per noodle (top-down and close-ups from the MEON shoot), shown under the main photo.
+const gallery = fs.existsSync(path.join(ROOT, "data", "gallery.json")) ? readJSON("gallery.json") : {};
 const SITE_URL = (process.env.SITE_URL || site.siteUrl).replace(/\/+$/, "");
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
 const BUILD_ID = Date.now().toString(36);
@@ -54,6 +56,7 @@ const noodles = noodlesRaw.map((n) => {
   if (!c) throw new Error(`Unknown country ${n.country} for ${n.slug}`);
   const img = images[n.slug] && fs.existsSync(path.join(SRC, "assets", images[n.slug])) ? `assets/${images[n.slug]}` : null;
   const thumb = img && fs.existsSync(path.join(SRC, "assets", "img", "noodles", "sm", `${n.slug}.webp`)) ? `assets/img/noodles/sm/${n.slug}.webp` : img;
+  const more = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))).map((p) => `assets/${p}`) : [];
   const dietTokens = [];
   if (/Vegetarian/.test(n.diet)) dietTokens.push("veg");
   if (/Vegan/.test(n.diet)) dietTokens.push("vegan");
@@ -62,7 +65,7 @@ const noodles = noodlesRaw.map((n) => {
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(n.diet)) dietTokens.push("seafood");
   const unrated = spiceReview.has(n.slug);
-  return { ...n, c, img, thumb, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
@@ -625,7 +628,7 @@ noodles.forEach((n, idx) => {
     preload: n.img || "",
     description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)}${n.type ? ` ${n.type} noodle.` : ""}${n.unrated ? "" : ` Spice ${n.spice}/5.`}${n.machine ? ` Machine setting ${n.machine}.` : ""}`,
     jsonld: [
-      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}.`, image: n.img ? `${SITE_URL}/${n.img}` : undefined, url: `${SITE_URL}/${n.url}`, brand: { "@type": "Brand", name: n.brand }, countryOfOrigin: { "@type": "Country", name: n.country }, weight: n.weightG ? { "@type": "QuantitativeValue", value: n.weightG, unitCode: "GRM" } : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined, isPartOf: { "@id": `${SITE_URL}/noodles/#menu` } },
+      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, brand: { "@type": "Brand", name: n.brand }, countryOfOrigin: { "@type": "Country", name: n.country }, weight: n.weightG ? { "@type": "QuantitativeValue", value: n.weightG, unitCode: "GRM" } : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined, isPartOf: { "@id": `${SITE_URL}/noodles/#menu` } },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
         { "@type": "ListItem", position: 2, name: "Noodles", item: `${SITE_URL}/noodles/` },
@@ -639,7 +642,8 @@ noodles.forEach((n, idx) => {
     ${crumbsNav(r, [["Noodles", "noodles/"], [esc(n.country), `countries/${n.c.slug}/`], [esc(n.name)]])}
     <div class="noodle-grid">
       <div class="noodle-media">
-        <figure class="noodle-photo img-reveal">${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
+        <figure class="noodle-photo img-reveal" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
+        ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : p)}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
         ${n.funNote ? `<p class="noodle-note">${esc(n.funNote)}</p>` : ""}
       </div>
       <div class="noodle-body">
@@ -1013,7 +1017,7 @@ const searchIndex = [
 ];
 write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
-const pageImages = new Map([["", ["assets/img/photos/bowl-side.webp", "assets/img/photos/bowl-top-egg.webp"]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img]])]);
+const pageImages = new Map([["", ["assets/img/photos/bowl-side.webp", "assets/img/photos/bowl-top-egg.webp"]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
 write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${noodles.length} instant noodles from 12 countries, a toppings bar and self-cook stations. Dine-in only, no online orders.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/)\n- [MEON Member Card](${SITE_URL}/meon-card/): free card, 10% off eligible food\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
