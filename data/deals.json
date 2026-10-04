@@ -1,4 +1,16 @@
 [
-  {"id": "member-10", "emoji": "💳", "title": "10% off for members", "detail": "MEON Member Card holders get 10% off eligible food items, every visit.", "active": true},
-  {"id": "member-topup", "emoji": "💰", "title": "Load it, use it like cash", "detail": "Top up your card in store and enjoy fast checkout with easy spend tracking.", "active": true}
+  {
+    "id": "member-10",
+    "title": "10% off for members",
+    "detail": "MEON Member Card holders get 10% off eligible food items, every visit.",
+    "active": true,
+    "icon": "card"
+  },
+  {
+    "id": "member-topup",
+    "title": "Load it, use it like cash",
+    "detail": "Top up your card in store and enjoy fast checkout with easy spend tracking.",
+    "active": true,
+    "icon": "coins"
+  }
 ]

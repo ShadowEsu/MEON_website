@@ -1,81 +1,89 @@
-# MEON design system
+# MEON design system (v3)
 
-The site is light-mode only. It is built from a small set of shared pieces, so every page looks and moves the same way. Everything lives in `src/assets/css/site.css` (styles), `src/assets/js/site.js` (behaviour), `scripts/build.mjs` (page templates) and `scripts/lib/art.mjs` (illustrations).
+The site is professional and calm, and lets the food lead. It uses one typeface and one colour (MEON red) on ink and white. Layout comes from spacing and hairlines, not boxes. Files: `src/assets/css/site.css` (styles), `src/assets/js/site.js` (behaviour), `src/assets/js/music.js` (optional music), `scripts/build.mjs` (pages), `scripts/lib/art.mjs` (icons, flags, wordmark, mascots).
 
-## Brand tokens
+## Rules
+- **One font:** Bricolage Grotesque (variable, with automatic optical size). It is used for headings and body text alike, set apart only by weight and size.
+- **One colour:**
+  - ink `#121010` on white, with MEON red as the only accent
+  - `--brand #ec1b25` (the logo red) for big red blocks
+  - `--red #d7141d` for text and buttons, because it meets contrast rules
+  - `--soft #f6f4f1` is the only tint, used for alternating sections
+- **No emojis anywhere.** Icons are a custom line set (`svgIcon()` in `art.mjs`, also published as `assets/img/icons.svg` for JavaScript). Flags are real artwork from flag-icons (MIT), copied to `assets/img/flags/`.
+- **The wordmark is drawn, not typed.** "meon" is built from the logo's own letter shapes (Quicksand outlines turned into SVG paths), so no second font is loaded.
+- **No boxes:**
+  - cards are a photo plus text
+  - sections are separated by hairlines (`--line`) and space
+  - nothing is a card inside a card
+- **Copy is specific and plain.** It uses full stops, few exclamation marks, no "slurp" or "noodle heaven", and no em dash in headings.
 
-| Token | Value | Use |
-| --- | --- | --- |
-| `--red` | `#ec1b25` | MEON red: logo, primary buttons, highlights |
-| `--bg` / `--bg-2` | `#fffaf3` / `#fff2e2` | Warm paper background, alternate sections |
-| `--ink` | `#17110f` | Text, dark pills, footer |
-| `--yellow` | `#ffc83d` | Underline highlights, glows |
-| `--sky`, `--pink`, `--green` | | Mascots, tints, diet badges |
-| `--font-display` | Bricolage Grotesque | Headlines |
-| `--font-serif` | Instrument Serif (italic) | The red accent word in every headline |
-| `--font-body` | DM Sans | Body copy |
-| Quicksand | | The `meon` wordmark inside the logo |
+## Page anatomy
+1. Announcement line: "Every packet on our wall has a QR code…"
+2. Header: white, with a hairline appearing on scroll. It hides as you scroll down and returns as you scroll up. It holds the logo mark, the nav with the Noodles mega menu, **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit**.
+3. Page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
+4. Content sections.
+5. Red closing band (`ctaBand()`) with big type and three mascots.
+6. Ink footer with a giant red wordmark that rises in letter by letter.
+7. Phones: a bottom tab bar (Home, Noodles, Search, Countries, Visit).
 
-Headlines follow one pattern: a bold display phrase plus one italic serif word in red, e.g. `Toppings <span class="serif red">& sides</span>`.
+## Noodle page (QR landing)
+The page is built for someone standing at the shelf with their phone. The order is:
+1. Photo (full width on phones)
+2. "Scanned from the shelf" line, shown only with `?src=qr`
+3. Country and brand, the name, and a one-line flavour summary
+4. **Machine setting (big red code) and the cook timer**, side by side between two rules. A mascot appears while the timer runs and says "Noodles ready" when it ends; the phone also beeps and vibrates.
+5. Facts row: spice, style, diet, packet
+6. About, then how to cook it (numbered), then toppings that go well with it (round photos)
+7. Share, previous and next, and similar noodles
 
-## Page anatomy (every page)
+## Motion (smooth by design)
+All motion uses transform and opacity only, runs from one scroll loop, pauses when off-screen and switches off for reduced motion.
 
-1. **Announcement bar**: a one-line tip in dark ink.
-2. **Floating glass header**: a pill-shaped bar with the moving logo, main nav and the **Noodles mega menu**, a search button (<kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>) and *Visit us*. The bar gets more solid when you scroll.
-3. **Page hero** (`pageHero()` in `build.mjs`), centred:
-   - breadcrumbs, then a badge pill (dark tag plus label)
-   - a split-word headline (`data-split`), a lead paragraph and action buttons
-   - an optional `after` slot (stats, plates, a card or the logo)
-   - a faint grid background, a radial tint (`--tint`, e.g. the country's colour) and four floating **mini mascots** (`crewMini(seed)`)
-4. **Content sections**: white/paper `section`, `section--alt` (warm) and numbered eyebrows (`01`, `02`…) on the home page.
-5. **CTA band** (`ctaBand()`): a closing card with "Browse the noodle wall" and "Visit info" plus three bouncing mascots.
-6. **Footer**, **scroll progress bar** and **back-to-top mascot**.
-7. On phones: the **bottom tab bar** (Home · Noodles · Search · Countries · Visit). It is always visible and its centre button opens search.
-
-Noodle detail pages use `detail-hero` (the same background and mascots) with a two-column layout. The left column is a sticky photo. The right column holds the machine setting, spec grid, cook timer, steps, toppings, and prev/next links.
-
-## Navigation
-
-| Where | What |
+| Effect | Where |
 | --- | --- |
-| Desktop header | Noodles (hover/focus opens the mega menu) · Countries · Toppings · MEON Card · About · Search · Visit us |
-| Mega menu | Quick filters (all, soup, dry, veg, vegan, spicy 3+, no heat, photos first), 12 countries with counts, and the "Can't decide?" roulette card |
-| Mobile | Hamburger drawer (the mega menu becomes an expandable section), plus the always-on bottom tab bar |
-| Everywhere | Breadcrumbs, search overlay (noodles, countries, toppings, pages), and shareable filter URLs like `/noodles/?country=jp&type=Soup` |
-| Between pages | Cross-document view transitions (a soft fade/slide; the header and tab bar stay put) |
+| Lenis smooth scrolling | Whole site (not used with reduced motion) |
+| Intro: red panel, wordmark letters rise, panel lifts away | Home, first visit per session only |
+| Masked word reveal | Every heading with `data-split` |
+| Fade and rise | `.reveal` elements, staggered with `--rd` |
+| Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
+| Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags, member card, plates) |
+| Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, topping names band (`[data-hscroll]`) |
+| Sticky heading with a progress line | How MEON works |
+| Count-up numbers | `.facts` |
+| Magnetic buttons | `[data-magnetic]` (mouse only) |
+| Mascots: blink, wave, eyes follow the cursor, gentle drift, tap to talk | Home hero, page heroes, red band, timer, back-to-top |
+| Moving logo: letters hop, script line cycles (Japanese, Korean, Chinese, Thai) | Header mark, logo tiles |
+| Paper confetti | Roulette win, timer finished |
 
-## Motion catalogue
+Removed on purpose:
+- backdrop blur
+- animated blur and drop-shadow filters
+- card tilt
+- typewriter caret
+- auto-scrolling marquees
 
-All motion is turned off or reduced when the visitor has *prefers-reduced-motion* set.
+These were the main causes of lag, and some are common "AI website" tells.
 
-| Effect | Where | How |
-| --- | --- | --- |
-| Moving logo | Header (`logoMini`), About/home (`logoAnimated`) | Letters hop; the subline cycles through Japanese, Korean, Chinese and Thai scripts |
-| Mascot crew | Home hero, every page hero, CTA band | Floating, blinking, waving; pupils follow the cursor; tap a mascot to make it hop and talk; drifts with the cursor (parallax) |
-| Split-word headline | Every `h1[data-split]` | Words rise in with a stagger (`word-rise`) |
-| Reveal on scroll | `.reveal` (`--rd` sets the delay) | Fade and slide up once the element is in view |
-| Count-up | `[data-count]` (home stats, country mini-stats) | Numbers count up when they come into view |
-| Card tilt + spotlight | Noodle cards, country tiles, steps, toppings, info cards, QR cards | 3D tilt toward the cursor with a soft light (mouse/pen only) |
-| Highlighter underline | Red serif words in section headings | Yellow underline sweeps in |
-| Floating bits | Flag (country), plates (toppings), member card swing, logo (about) | CSS keyframes |
-| Wall marquee, typewriter, confetti, roulette, cook timer | Home and noodle pages | `site.js` |
+## Sound
+`music.js` is an original lo-fi loop generated live with the Web Audio API: electric piano chords (Fmaj9, Em7, Dm9, Cmaj7), bass, brushed drums and vinyl crackle. Nothing is downloaded and there are no licensing issues.
+- It is off by default.
+- The **Sound** button starts it, and the choice is remembered. Browsers block autoplay, so a returning visitor's music resumes on their first tap.
+- While music plays, mascots blip when tapped and the roulette chimes.
 
-## Adding a new page
-
+## Adding a page
 In `scripts/build.mjs`:
 
 ```js
 addPage("new-page/", layout({
   urlPath: "new-page/",
   title: "New page",
-  description: "One-sentence summary for search engines.",
+  seoTitle: "Keyword-rich title for Google · MEON Noodles Perth",
+  description: "One-sentence summary for search results.",
   body: (r) => `
-${pageHero(r, { crumbs: [["New page"]], badge: "…", tag: "NEW", title: `Title <span class="serif red">word</span>`, lead: "…", seed: 4 })}
+${pageHero(r, { crumbs: [["New page"]], eyebrow: "Label", title: "Title.", lead: "…", seed: 4 })}
 <section class="section"><div class="wrap">…</div></section>
 ${ctaBand(r)}`,
 }));
 ```
 
-`r("path/")` makes a link relative to the current page (Home is added to the breadcrumbs automatically). To put it in the main nav, add it to `NAV` and pass `active: "new-page/"`.
-
-Run `npm run build && npm run check`, then the smoke test and sweep (see the README).
+Then run `npm run build && npm run check`, followed by the smoke test and sweep from the README.

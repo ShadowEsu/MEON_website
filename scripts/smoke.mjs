@@ -23,6 +23,8 @@ await Promise.all([page.waitForURL(/\/noodles\//, { timeout: 8000 }).catch(() =>
 ok(/\/noodles\/samyang-buldak/.test(page.url()), `Enter opens first result (${page.url()})`);
 
 await page.goto(BASE + "/", { waitUntil: "networkidle" });
+await page.waitForFunction(() => !document.documentElement.classList.contains("intro-on"), null, { timeout: 6000 }).catch(() => {});
+await page.waitForTimeout(800);
 await page.click(".crew .meo >> nth=0", { force: true });
 await page.waitForTimeout(200);
 ok(await page.$eval(".crew .meo", (m) => m.classList.contains("is-talking")), "mascot talks when tapped");

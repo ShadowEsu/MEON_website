@@ -7,12 +7,14 @@ MEON is an instant-noodle dine-in at Canning Bridge, Perth, Western Australia. T
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download
 - Country pages, toppings & sides, MEON Member Card, About, Visit
-- One consistent structure on every page: floating glass header with a **Noodles mega menu**, centred page hero (breadcrumbs, badge, animated headline, floating mascots), content, closing CTA band, footer — plus an always-visible **bottom tab bar** on phones
-- Animated logo, mascot crew (eyes follow the cursor, tap to talk, parallax), split-word headline reveals, card tilt + spotlight, count-ups, page transitions, noodle roulette, confetti, typewriter hero — all respecting “reduce motion”
-- Light mode only, warm MEON palette
+- Professional, calm design: one typeface (Bricolage Grotesque), ink and white with MEON red as the only colour, hairlines instead of boxes, no emojis (custom line icons and real flag artwork)
+- Noodle pages built for in-store QR scans: photo, machine setting and cook timer first, then facts, cooking steps and toppings
+- Smooth motion: Lenis scrolling, masked headline reveals, image reveals, parallax, scroll-linked noodle wall, sticky "how it works", magnetic buttons, living mascots, moving logo, home intro. Transform/opacity only, paused off-screen, off for "reduce motion"
+- Optional background music: an original lo-fi loop generated in the browser (off by default)
+- SEO: Restaurant, WebSite, Menu (172 items), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
 - Dine-in only: no online ordering
 
-Docs: [`docs/design-system.md`](docs/design-system.md) (tokens, page anatomy, navigation, motion catalogue, adding a page) · [`docs/operations.md`](docs/operations.md) (QR codes, Google Drive hub, views log, common edits).
+Docs: [`docs/design-system.md`](docs/design-system.md) (rules, page anatomy, motion catalogue, sound, adding a page) · [`docs/operations.md`](docs/operations.md) (QR codes, Google Drive hub, views log, common edits) · [`docs/seo.md`](docs/seo.md) (what's done for Google and the owner's step-by-step guide).
 
 ## Quick start
 
