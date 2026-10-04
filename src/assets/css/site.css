@@ -442,14 +442,15 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .roulette-window::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#fff, transparent 22%, transparent 78%, #fff); }
 .roulette-reel { transition: transform 2.6s cubic-bezier(.12, .8, .14, 1); will-change: transform; }
 .roulette-item { display: grid; grid-template-columns: 160px 1fr; gap: 22px; align-items: center; height: 160px; text-decoration: none; color: var(--ink); }
-.roulette-item img, .roulette-item .roulette-ph { width: 160px; height: 160px; object-fit: cover; border-radius: var(--radius-sm); background: var(--soft); }
-.roulette-item .roulette-ph { display: grid; place-items: center; color: var(--muted); }
-.roulette-item h3 { font-size: 1.5rem; margin: 6px 0 10px; }
+.roulette-item > img, .roulette-item > .roulette-ph { width: 160px; height: 160px; object-fit: cover; border-radius: var(--radius-sm); background: var(--soft); }
+.roulette-item > .roulette-ph { display: grid; place-items: center; color: var(--muted); }
+.roulette-item h3 { font-size: 1.5rem; margin: 6px 0 10px; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.roulette-item > span { min-width: 0; }
 .roulette-meo { width: 120px; justify-self: center; overflow: visible; }
 .roulette-item .tags { display: flex; gap: 14px; font-size: .88rem; color: var(--ink-2); }
 .roulette-controls { display: flex; gap: 12px; margin-top: 24px; }
 .roulette-controls .select { flex: 1; }
-@media (max-width: 900px) { .roulette { grid-template-columns: 1fr; } .roulette-item { grid-template-columns: 110px 1fr; } .roulette-item img, .roulette-item .roulette-ph { width: 110px; height: 110px; } .roulette-meo { width: 90px; } .roulette-item h3 { font-size: 1.2rem; } }
+@media (max-width: 900px) { .roulette { grid-template-columns: 1fr; } .roulette-item { grid-template-columns: 110px 1fr; } .roulette-item > img, .roulette-item > .roulette-ph { width: 110px; height: 110px; } .roulette-meo { width: 90px; } .roulette-item h3 { font-size: 1.2rem; } }
 
 /* ---------- Countries ---------- */
 .country-list { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: clamp(28px, 4vw, 64px); }
