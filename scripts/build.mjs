@@ -2,6 +2,7 @@
 // MEON static site generator. Zero framework: reads data/*.json, writes ./site.
 // Usage: node scripts/build.mjs            (uses siteUrl from data/site.json)
 //        SITE_URL=https://meon.au node scripts/build.mjs
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -50,13 +51,15 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 fs.rmSync(OUT, { recursive: true, force: true });
 
+// Photos are cached for 30 days, so add a short content hash: a replaced photo gets a new URL.
+const fingerprint = (p) => `${p}?v=${crypto.createHash("sha1").update(fs.readFileSync(path.join(SRC, p))).digest("hex").slice(0, 8)}`;
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
   if (!c) throw new Error(`Unknown country ${n.country} for ${n.slug}`);
-  const img = images[n.slug] && fs.existsSync(path.join(SRC, "assets", images[n.slug])) ? `assets/${images[n.slug]}` : null;
-  const thumb = img && fs.existsSync(path.join(SRC, "assets", "img", "noodles", "sm", `${n.slug}.webp`)) ? `assets/img/noodles/sm/${n.slug}.webp` : img;
-  const more = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))).map((p) => `assets/${p}`) : [];
+  const img = images[n.slug] && fs.existsSync(path.join(SRC, "assets", images[n.slug])) ? fingerprint(`assets/${images[n.slug]}`) : null;
+  const thumb = img && fs.existsSync(path.join(SRC, "assets", "img", "noodles", "sm", `${n.slug}.webp`)) ? fingerprint(`assets/img/noodles/sm/${n.slug}.webp`) : img;
+  const more = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))).map((p) => fingerprint(`assets/${p}`)) : [];
   const dietTokens = [];
   if (/Vegetarian/.test(n.diet)) dietTokens.push("veg");
   if (/Vegan/.test(n.diet)) dietTokens.push("vegan");
