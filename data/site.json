@@ -29,5 +29,10 @@
     "lat": "",
     "lng": ""
   },
-  "openingHours": []
+  "openingHours": [],
+  "reviews": {
+    "supabaseUrl": "https://wzgfjuxcprignwdlopvl.supabase.co",
+    "publishableKey": "sb_publishable_jPj2mO4RxIjogSe7QJRfpg_bjWR5Bng",
+    "table": "meon_reviews"
+  }
 }

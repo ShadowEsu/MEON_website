@@ -27,6 +27,36 @@ The QR PNGs come from `scripts/make_qr_pngs.py`. Each file was checked: it decod
 - Make your own codes for posters, Wi-Fi or Instagram at `/qr-generator/` (logo, colours, PNG/SVG download).
 - Print tips: at least 2.5 cm wide, black on white, and leave the white border.
 
+## Guest reviews
+
+Guests can leave a 1–5 star rating, their first name and a comment at the bottom of the home page (general reviews) and of every noodle page (reviews for that noodle). Reviews appear on the site straight away.
+
+**Where they are stored:** Supabase, table `meon_reviews` in the project **jaymini-prod** (`wzgfjuxcprignwdlopvl`). The free Supabase plan allows only two projects, and both were already in use, so MEON shares that project. The table is kept separate and locked down, so it cannot read or change anything else in the project. Settings live in `data/site.json` under `reviews`.
+
+| Column | Meaning |
+| --- | --- |
+| `name`, `rating`, `comment` | What the guest typed (name up to 40 characters, comment up to 600) |
+| `noodle_slug` | Which noodle page it came from; empty means a general review from the home page |
+| `source` | `qr` if they arrived by scanning a shelf code, otherwise `web` |
+| `approved` | `true` shows it on the site; set it to `false` to hide it |
+| `created_at` | When it was posted |
+
+**To read or hide reviews:**
+1. Open <https://supabase.com/dashboard>, choose **jaymini-prod**, then **Table Editor**, then `meon_reviews`.
+2. To hide a review, untick `approved` on its row. It disappears from the site on the next page load.
+3. To export them, click **Export**, then **CSV**.
+
+Or ask Claude: "show me this week's MEON reviews" or "hide the review from <name>".
+
+**Spam protection:**
+- The public key can only add reviews and read approved ones. It cannot edit or delete them.
+- A database rule allows at most 20 new reviews a minute across the whole site.
+- The form has a hidden trap field for bots, rejects posts made within 2.5 seconds of the page loading, and remembers on each phone which pages it has already reviewed.
+
+**Moving to MEON's own project later:** create a new Supabase project, apply the same table, then update `supabaseUrl` and `publishableKey` in `data/site.json` and rebuild.
+
+Reviews on the website do not count towards Google rankings. For that, use the Google review QR code in `docs/seo.md`.
+
 ## Updating the Views Log (only when asked)
 
 1. Open Vercel → the project → **Analytics** and choose the date range.

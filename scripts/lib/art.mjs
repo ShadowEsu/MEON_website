@@ -48,6 +48,7 @@ const ICONS = {
   mushroom: `${S("M3 12a9 7 0 0 1 18 0Z")}${S("M9 12v5a3 3 0 0 0 6 0v-5")}`,
   cabbage: `${S("M12 21c-4.6 0-8-3.4-8-8 0-5 4-9 8-9s8 4 8 9c0 4.6-3.4 8-8 8Z")}${S("M12 21V9M12 14l-4-3M12 12l4-3")}`,
   tofu: `${S("M4 8l8-4 8 4v8l-8 4-8-4Z")}${S("M4 8l8 4 8-4M12 12v8")}`,
+  star: `<path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16.6l-5.1 2.7 1-5.7-4.1-4 5.7-.8Z"/>`,
   spark: S("M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"),
 };
 
@@ -140,11 +141,14 @@ export function mascot({ className = "", label = "", color = "#ff8a4c", belly = 
 
 // The crew around the home hero (positions in %, size in px). Speech bubbles appear when tapped.
 export const CREW = [
-  { x: 47, y: 3, s: 64, color: "#ff8a4c", acc: "chef", d: 7, delay: -1, say: "Yes, chef" },
-  { x: 30, y: 1, s: 48, color: "#ff8fb0", acc: "party", d: 6, delay: -3, say: "Party bowl?", hideSm: true },
-  { x: 49, y: 84, s: 58, color: "#5cc3f0", acc: "shades", d: 8, delay: -2, say: "Too cool for mild" },
-  { x: 93, y: 3, s: 62, color: "#ffc83d", acc: "bowl", d: 6.5, delay: -4, say: "Smells so good" },
-  { x: 93, y: 82, s: 58, color: "#ff5b5b", acc: "chilli", d: 5.5, delay: -2.5, say: "Level 5 or bust" },
+  { x: 5, y: 10, s: 84, color: "#ff8a4c", acc: "chef", d: 7, delay: -1, say: "Yes, chef" },
+  { x: 88, y: 7, s: 72, color: "#ff8fb0", acc: "party", d: 6, delay: -3, say: "Party bowl?" },
+  { x: 11, y: 34, s: 64, color: "#5cc3f0", acc: "shades", d: 8, delay: -2, say: "Too cool for mild", hideSm: true },
+  { x: 89, y: 30, s: 80, color: "#ffc83d", acc: "bowl", d: 6.5, delay: -4, say: "Smells so good" },
+  { x: 3, y: 50, s: 58, color: "#6fd08c", acc: "beanie", d: 7.5, delay: -5, say: "Cosy noodle weather", hideSm: true },
+  { x: 86, y: 62, s: 66, color: "#ff5b5b", acc: "chilli", d: 5.5, delay: -2.5, say: "Level 5 or bust", hideSm: true },
+  { x: 24, y: 4, s: 48, color: "#a78bfa", acc: "crown", d: 9, delay: -6, say: "Noodle royalty", hideSm: true },
+  { x: 70, y: 4, s: 50, color: "#ff8a4c", acc: "chopsticks", d: 6, delay: -1.5, say: "Pick me a packet", hideSm: true },
 ];
 
 export function crew(list = CREW, cls = "crew") {

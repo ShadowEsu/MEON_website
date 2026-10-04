@@ -262,7 +262,6 @@ ${body(r)}
   <a href="${r("visit/")}"${cur("visit/")}>${icon.pin}<span>Visit</span></a>
 </nav>
 <button class="back-top" type="button" aria-label="Back to top">${mascot({ acc: "none", wave: true })}</button>
-<script src="${r("assets/vendor/lenis.min.js")}" defer></script>
 ${scripts.map((s) => `<script src="${r(s)}" defer></script>`).join("\n")}
 <script src="${r("assets/js/site.js")}?v=${BUILD_ID}" defer></script>
 </body>
@@ -340,6 +339,33 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
 </section>`;
 }
 
+// Reviews: stored in Supabase (table meon_reviews). Visitors post a star rating and comment; published reviews load live.
+function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = "" } = {}) {
+  const cfg = site.reviews || {};
+  if (!cfg.supabaseUrl || !cfg.publishableKey) return "";
+  const stars = [1, 2, 3, 4, 5].map((v) => `<input type="radio" name="rating" id="rv-${slug || "all"}-${v}" value="${v}" required><label for="rv-${slug || "all"}-${v}" title="${v} star${v > 1 ? "s" : ""}">${svgIcon("star")}<span class="visually-hidden">${v} star${v > 1 ? "s" : ""}</span></label>`).reverse().join("");
+  return `<section class="section reviews" id="reviews" data-reviews data-slug="${esc(slug)}" data-endpoint="${esc(cfg.supabaseUrl)}" data-key="${esc(cfg.publishableKey)}" data-table="${esc(cfg.table || "meon_reviews")}">
+  <div class="wrap reviews-grid">
+    <div class="reviews-head">
+      <p class="eyebrow">Reviews</p>
+      <h2 data-split>${title}</h2>
+      ${lead ? `<p class="lead">${lead}</p>` : ""}
+      <div class="rv-summary" data-rv-summary><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
+      <form class="rv-form" data-rv-form novalidate>
+        <fieldset class="rv-rate"><legend>Your rating</legend><div class="rv-rate-stars">${stars}</div></fieldset>
+        <label class="field"><span>Your name</span><input name="name" type="text" maxlength="40" autocomplete="given-name" required></label>
+        <label class="field"><span>Your review</span><textarea name="comment" rows="4" minlength="3" maxlength="600" required placeholder="${slug ? "How was it? Spice, flavour, toppings you added…" : "Tell us about your visit"}"></textarea></label>
+        <label class="hp" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button>${site.googleBusinessUrl ? `<a class="link-arrow" href="${esc(site.googleBusinessUrl)}" target="_blank" rel="noopener">Also review us on Google ${icon.arrow}</a>` : ""}</div>
+        <p class="rv-status" data-rv-status aria-live="polite"></p>
+        <p class="note">Reviews appear on this site with your first name. Please keep it friendly.</p>
+      </form>
+    </div>
+    <div class="rv-list" data-rv-list aria-live="polite"><p class="rv-empty">${slug ? "No reviews for this noodle yet. Be the first." : "No reviews yet. Be the first."}</p></div>
+  </div>
+</section>`;
+}
+
 const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd><span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span></dd></div>`).join("")}</dl>`;
 
 const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="section-head">
@@ -367,29 +393,35 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 addPage("", layout({
   urlPath: "",
   active: "home",
-  intro: true,
   preload: "assets/img/photos/bowl-side.webp",
   description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}: ${noodles.length} noodles from 12 countries, a toppings bar and your own cooking station. Every packet has its own page.`,
   body: (r) => `
-<section class="hero" data-anim>
+<section class="hero hero--launch" data-anim>
   ${crew()}
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">Instant noodle bar · ${esc(site.suburb)}, ${esc(site.city)}</p>
-      <h1 class="hero-title" data-split>Noodles from twelve countries, cooked your way.</h1>
-      <p class="lead">Choose from ${noodles.length} instant noodles, add toppings from the bar and cook at your own station. Every packet on the wall has a page here: scan its QR code for the machine setting and a cook timer.</p>
-      <div class="actions">
-        <a class="btn btn--red" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
-        <button class="btn btn--line" type="button" data-search-open>${icon.search} Find a noodle</button>
+  <div class="wrap">
+    <a class="hero-tag" href="${r("noodles/")}"><span class="dot" aria-hidden="true"></span>${noodles.length} noodles · 12 countries · dine-in only</a>
+    <h1 class="hero-title" data-split>Slurp the <span class="red">world.</span></h1>
+    <p class="typer" aria-live="off">Tonight I'm craving <span class="typed" data-typer='${esc(JSON.stringify(["Buldak fire noodles", "creamy tom yum", "Mi Goreng", "tonkotsu ramen", "black-bean jjajang", "Penang white curry", "masala noodles", "kimchi ramen"]))}'>Buldak fire noodles</span></p>
+    <p class="lead">Instant noodles from Korea to Australia, a toppings bar and a cooking station that's all yours. Walk in, pick a packet and make it your way.</p>
+    <div class="actions">
+      <a class="btn btn--red" href="${r("noodles/")}" data-magnetic>Explore the noodle wall ${icon.arrow}</a>
+      <button class="btn btn--line" type="button" data-search-open>${icon.search} Find a noodle</button>
+    </div>
+    <ul class="checks"><li>Dine-in only</li><li>QR code on every shelf</li><li>Cook timer on every page</li><li>Members save 10%</li></ul>
+
+    <div class="stage reveal">
+      <div class="stage-float stage-float--a"><span class="ico">${svgIcon("bowl")}</span><span><strong>${noodles.length} noodles</strong><small>on the wall right now</small></span></div>
+      <div class="stage-float stage-float--b"><span class="ico">${svgIcon("clock")}</span><span><strong>Machine setting</strong><small>on every noodle page</small></span></div>
+      <div class="stage-grid">
+        <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-side.webp")}" alt="A MEON bowl of black-bean noodles with sliced beef and a soft egg" width="900" height="900" fetchpriority="high"><span class="stage-label">${svgIcon("chopsticks")} Cooked your way</span></figure>
+        <div class="stage-red">${logoAnimated()}</div>
+        <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-top-egg.webp")}" alt="Noodles topped with enoki, egg and fishcake" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("egg")} Top it up</span></figure>
+        <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-side-seaweed.webp")}" alt="A MEON bowl with seaweed, beef and noodles" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("bowl")} ${noodles.length} to choose from</span></figure>
+        <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-top-dry.webp")}" alt="Dry noodles with beef, fishballs and seaweed" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("flame")} Pick your heat</span></figure>
       </div>
     </div>
-    <div class="hero-visual">
-      <figure class="hv-main img-reveal" data-parallax="-0.05"><img src="${r("assets/img/photos/bowl-side.webp")}" alt="A MEON bowl of black-bean noodles with sliced beef and a soft egg" width="900" height="900" fetchpriority="high"></figure>
-      <div class="hv-logo" data-parallax="0.09">${logoAnimated()}</div>
-      <figure class="hv-small img-reveal" data-parallax="0.14"><img src="${r("assets/img/photos/bowl-top-egg.webp")}" alt="Noodles topped with enoki, egg and fishcake" width="900" height="900"></figure>
-    </div>
+    ${facts([[noodles.length, "Instant noodles"], [12, "Countries"], [toppings.length, "Toppings and sides"], [10, "Off for members", "%"]])}
   </div>
-  <div class="wrap">${facts([[noodles.length, "Instant noodles"], [12, "Countries"], [toppings.length, "Toppings and sides"], [10, "Off for members", "%"]])}</div>
 </section>
 
 <section class="wall-sec" aria-label="On the noodle wall">
@@ -509,6 +541,7 @@ addPage("", layout({
   </div>
 </section>
 
+${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a quick review. It helps other noodle lovers find us." })}
 ${ctaBand(r, { title: `Find us at ${esc(site.suburb)}.` })}
 `,
 }));
@@ -669,6 +702,7 @@ noodles.forEach((n, idx) => {
     </div>
   </div>
 </article>
+${reviewsBlock(r, { slug: n.slug, title: `Rate ${esc(n.name)}.`, lead: "Tried it? Tell everyone how it was." })}
 <section class="section section--soft section--tight">
   <div class="wrap">
     ${sectionHead("Keep exploring", "You might also like", `<a class="link-arrow" href="${r(`countries/${n.c.slug}/`)}">More from ${esc(n.country)} ${icon.arrow}</a>`)}
@@ -954,7 +988,6 @@ write("404.html", layout({
 copyDir(path.join(SRC, "assets"), path.join(OUT, "assets"));
 fs.mkdirSync(path.join(OUT, "assets", "vendor"), { recursive: true });
 fs.copyFileSync(require.resolve("qrcode-generator/qrcode.js"), path.join(OUT, "assets", "vendor", "qrcode.js"));
-fs.copyFileSync(path.join(ROOT, "node_modules", "lenis", "dist", "lenis.min.js"), path.join(OUT, "assets", "vendor", "lenis.min.js"));
 fs.mkdirSync(path.join(OUT, "assets", "img", "flags"), { recursive: true });
 for (const c of countries) fs.copyFileSync(path.join(ROOT, "node_modules", "flag-icons", "flags", "4x3", `${c.code}.svg`), path.join(OUT, "assets", "img", "flags", `${c.code}.svg`));
 write("assets/img/icons.svg", iconSprite());

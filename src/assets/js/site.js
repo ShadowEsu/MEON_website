@@ -18,16 +18,8 @@
   function flagImg(cc, w) { return '<img class="flag" src="' + ROOT + "assets/img/flags/" + esc(cc) + '.svg" alt="" width="' + (w || 20) + '" height="' + Math.round((w || 20) * 0.75) + '">'; }
   function useIcon(name) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><use href="' + ROOT + "assets/img/icons.svg#i-" + esc(name) + '"/></svg>'; }
 
-  /* ---------- Smooth scrolling (Lenis) ---------- */
-  var lenis = null;
-  if (!reduceMotion && window.Lenis) {
-    try {
-      lenis = new window.Lenis({ duration: 1.1, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); }, smoothWheel: true });
-      var lraf = function (t) { lenis.raf(t); requestAnimationFrame(lraf); };
-      requestAnimationFrame(lraf);
-    } catch (e) { lenis = null; }
-  }
-  function scrollToY(y) { if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else window.scrollTo({ top: y, behavior: reduceMotion ? "auto" : "smooth" }); }
+  /* ---------- Native scrolling (instant, no smoothing library) ---------- */
+  function scrollToY(y) { window.scrollTo({ top: y, behavior: reduceMotion ? "auto" : "smooth" }); }
 
   /* ---------- One scroll loop: header, progress, parallax, scroll-linked rows ---------- */
   var header = $("[data-header]");
@@ -42,11 +34,7 @@
   function frame() {
     ticking = false;
     var y = window.scrollY, vh = window.innerHeight;
-    if (header) {
-      header.classList.toggle("is-scrolled", y > 8);
-      if (y > 320 && y > lastY + 4 && !navOpen() && !document.body.classList.contains("is-locked")) header.classList.add("is-hidden");
-      else if (y < lastY - 4 || y < 320) header.classList.remove("is-hidden");
-    }
+    if (header) header.classList.toggle("is-scrolled", y > 8);
     lastY = y;
     if (progress) {
       var max = document.documentElement.scrollHeight - vh;
@@ -74,7 +62,6 @@
     }
   }
   function requestFrame() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
-  if (lenis) lenis.on("scroll", requestFrame);
   window.addEventListener("scroll", requestFrame, { passive: true });
   window.addEventListener("resize", requestFrame, { passive: true });
   frame();
@@ -89,7 +76,6 @@
       toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       nav.classList.toggle("is-open", open);
       document.body.classList.toggle("is-locked", open);
-      if (lenis) open ? lenis.stop() : lenis.start();
     };
     toggle.addEventListener("click", function () { setOpen(toggle.getAttribute("aria-expanded") !== "true"); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && nav.classList.contains("is-open")) setOpen(false); });
@@ -150,22 +136,36 @@
     reveals.forEach(function (el) { io.observe(el); });
   } else reveals.forEach(function (el) { el.classList.add("is-in"); });
 
-  /* ---------- Intro (home, first visit this session) ---------- */
-  function showHero() {
-    if (heroTitle) heroTitle.classList.add("is-in");
-    var crew = $(".crew"); if (crew) crew.classList.add("is-ready");
-  }
-  if (doc.classList.contains("intro-on")) {
-    if (lenis) lenis.stop();
-    requestAnimationFrame(function () { doc.classList.add("intro-play"); });
-    setTimeout(function () { doc.classList.add("intro-out"); }, 1250);
-    setTimeout(showHero, 1650);
+  /* ---------- Hero entrance ---------- */
+  requestAnimationFrame(function () {
     setTimeout(function () {
-      doc.classList.remove("intro-on", "intro-play", "intro-out");
-      try { sessionStorage.setItem("meon-intro", "1"); } catch (e) {}
-      if (lenis) lenis.start();
-    }, 2350);
-  } else requestAnimationFrame(function () { setTimeout(showHero, 60); });
+      if (heroTitle) heroTitle.classList.add("is-in");
+      var crew = $(".crew"); if (crew) crew.classList.add("is-ready");
+    }, 60);
+  });
+
+  /* ---------- Typewriter (home hero) ---------- */
+  var typed = $("[data-typer]");
+  if (typed && !reduceMotion) {
+    var words = [];
+    try { words = JSON.parse(typed.getAttribute("data-typer")); } catch (e) { words = []; }
+    if (words.length > 1) {
+      var wi = 0, ci = words[0].length, deleting = true;
+      var stepType = function () {
+        var w = Array.from(words[wi]);
+        if (deleting) {
+          ci--; typed.textContent = w.slice(0, ci).join("");
+          if (ci <= 0) { deleting = false; wi = (wi + 1) % words.length; }
+          setTimeout(stepType, 34);
+        } else {
+          var nw = Array.from(words[wi]);
+          ci++; typed.textContent = nw.slice(0, ci).join("");
+          if (ci >= nw.length) { deleting = true; setTimeout(stepType, 1800); } else setTimeout(stepType, 65);
+        }
+      };
+      setTimeout(stepType, 2400);
+    }
+  }
 
   /* ---------- Pause decorative loops when off-screen ---------- */
   if ("IntersectionObserver" in window) {
@@ -331,7 +331,6 @@
     lastFocus = document.activeElement;
     overlay.classList.add("is-open");
     document.body.classList.add("is-locked");
-    if (lenis) lenis.stop();
     loadIndex().then(function () { renderResults(sInput.value); });
     setTimeout(function () { sInput.focus(); sInput.select(); }, 40);
   }
@@ -339,7 +338,6 @@
     if (!overlay || !overlay.classList.contains("is-open")) return;
     overlay.classList.remove("is-open");
     document.body.classList.remove("is-locked");
-    if (lenis) lenis.start();
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   if (overlay) {
@@ -656,6 +654,88 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawQR);
     drawQR();
   }
+
+  /* ---------- Reviews (Supabase: meon_reviews) ---------- */
+  $$("[data-reviews]").forEach(function (box) {
+    var base = box.getAttribute("data-endpoint") + "/rest/v1/", key = box.getAttribute("data-key"), table = box.getAttribute("data-table") || "meon_reviews";
+    var slug = box.getAttribute("data-slug") || "";
+    var list = $("[data-rv-list]", box), summary = $("[data-rv-summary]", box), form = $("[data-rv-form]", box), status = $("[data-rv-status]", box);
+    var headers = { apikey: key, "Content-Type": "application/json" };
+    var names = {};
+    try { JSON.parse(($("#noodle-data") || {}).textContent || "[]").forEach(function (n) { names[n.slug] = n.brand + " " + n.name; }); } catch (e) {}
+    var starSvg = function (on) { return '<svg class="i ' + (on ? "on" : "off") + '" viewBox="0 0 24 24" aria-hidden="true"><use href="' + ROOT + 'assets/img/icons.svg#i-star"/></svg>'; };
+    var stars = function (v) { var out = ""; for (var i = 1; i <= 5; i++) out += starSvg(i <= Math.round(v)); return out; };
+    var when = function (iso) { try { return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return ""; } };
+    var itemHTML = function (rv, isNew) {
+      return '<article class="rv-item' + (isNew ? " is-new" : "") + '"><div class="rv-top"><span class="rv-name">' + esc(rv.name) + '</span><span class="rv-date">' + esc(when(rv.created_at)) + "</span></div>" +
+        '<span class="rv-stars" role="img" aria-label="' + rv.rating + ' out of 5 stars">' + stars(rv.rating) + "</span><p>" + esc(rv.comment) + "</p>" +
+        (!slug && rv.noodle_slug && names[rv.noodle_slug] ? '<a class="rv-noodle" href="' + ROOT + "noodles/" + esc(rv.noodle_slug) + '/">About ' + esc(names[rv.noodle_slug]) + "</a>" : "") + "</article>";
+    };
+    var total = 0, sum = 0, offset = 0, PAGE = 8;
+    var drawSummary = function () {
+      if (!summary) return;
+      var avg = total ? sum / total : 0;
+      $(".rv-avg", summary).textContent = total ? avg.toFixed(1) : "–";
+      $(".rv-stars", summary).innerHTML = stars(avg);
+      $(".rv-count", summary).textContent = total ? total + (total === 1 ? " review" : " reviews") : "No reviews yet";
+    };
+    var loadMore = function () {
+      var q = base + table + "?select=id,created_at,name,rating,comment,noodle_slug&order=created_at.desc&limit=" + PAGE + "&offset=" + offset + (slug ? "&noodle_slug=eq." + encodeURIComponent(slug) : "");
+      return fetch(q, { headers: headers }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (rows) {
+        var old = $(".rv-more", list); if (old) old.remove();
+        if (rows.length) { var empty = $(".rv-empty", list); if (empty) empty.remove(); }
+        list.insertAdjacentHTML("beforeend", rows.map(function (x) { return itemHTML(x, false); }).join(""));
+        offset += rows.length;
+        if (rows.length === PAGE) {
+          var more = document.createElement("button");
+          more.className = "btn btn--line btn--sm rv-more"; more.type = "button"; more.textContent = "Show more reviews";
+          more.addEventListener("click", loadMore);
+          list.appendChild(more);
+        }
+      });
+    };
+    var loadStats = function () {
+      return fetch(base + "meon_review_stats?select=slug,reviews,average" + (slug ? "&slug=eq." + encodeURIComponent(slug) : ""), { headers: headers })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (rows) { total = 0; sum = 0; rows.forEach(function (x) { total += x.reviews; sum += x.reviews * Number(x.average); }); drawSummary(); });
+    };
+    var started = false;
+    var start = function () { if (started) return; started = true; Promise.all([loadStats(), loadMore()]).catch(function () { if (status) status.textContent = ""; }); };
+    if ("IntersectionObserver" in window) {
+      var rio = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { rio.disconnect(); start(); } }, { rootMargin: "400px" });
+      rio.observe(box);
+    } else start();
+
+    var doneKey = "meon-reviewed-" + (slug || "home");
+    var t0 = Date.now();
+    var markDone = function (msg) { form.classList.add("is-done"); status.classList.remove("is-error"); status.textContent = msg; };
+    try { if (localStorage.getItem(doneKey)) markDone("Thanks, you've already reviewed this. We appreciate it."); } catch (e) {}
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var rating = parseInt(fd.get("rating"), 10), name = String(fd.get("name") || "").trim(), comment = String(fd.get("comment") || "").trim();
+      status.classList.add("is-error");
+      if (fd.get("website")) return; // bot
+      if (!rating) { status.textContent = "Please choose a star rating."; return; }
+      if (!name) { status.textContent = "Please add your name."; return; }
+      if (comment.length < 3) { status.textContent = "Please write a few words about it."; return; }
+      if (Date.now() - t0 < 2500) { status.textContent = "One moment, then try again."; return; }
+      var btn = $("button[type=submit]", form); btn.disabled = true;
+      status.classList.remove("is-error"); status.textContent = "Posting…";
+      var body = { name: name.slice(0, 40), rating: rating, comment: comment.slice(0, 600), noodle_slug: slug || null, source: /(^|[?&])src=qr(&|$)/.test(location.search) ? "qr" : "web" };
+      fetch(base + table, { method: "POST", headers: Object.assign({ Prefer: "return=minimal" }, headers), body: JSON.stringify(body) })
+        .then(function (r) {
+          if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.message || "Something went wrong."); });
+          var empty = $(".rv-empty", list); if (empty) empty.remove();
+          list.insertAdjacentHTML("afterbegin", itemHTML({ name: body.name, rating: rating, comment: body.comment, created_at: new Date().toISOString(), noodle_slug: body.noodle_slug }, true));
+          total += 1; sum += rating; drawSummary();
+          try { localStorage.setItem(doneKey, "1"); } catch (e2) {}
+          markDone("Thank you. Your review is live.");
+          confetti();
+        })
+        .catch(function (err) { btn.disabled = false; status.classList.add("is-error"); status.textContent = /Too many/.test(err.message) ? err.message : "Sorry, we couldn't post that. Please try again."; });
+    });
+  });
 
   /* ---------- Background music (original, generated in the browser; off by default) ---------- */
   var soundBtn = $("[data-sound]");

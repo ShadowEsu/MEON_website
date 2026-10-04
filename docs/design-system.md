@@ -19,12 +19,14 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 
 ## Page anatomy
 1. Announcement line: "Every packet on our wall has a QR code…"
-2. Header: white, with a hairline appearing on scroll. It hides as you scroll down and returns as you scroll up. It holds the logo mark, the nav with the Noodles mega menu, **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit**.
-3. Page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
+2. Header: white, always visible, with a hairline appearing on scroll. Logo on the left, the nav centred (Noodles mega menu, Countries, Toppings, MEON Card, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
+3. Home: the centred launch hero. It has a pill line, the giant "Slurp the world." headline and a "Tonight I'm craving…" typewriter, then actions and checks, with the mascot crew around the headline (never over the photos). Below that sit a photo stage with the red logo tile and the count-up facts.
+   Other pages: page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
 4. Content sections.
-5. Red closing band (`ctaBand()`) with big type and three mascots.
-6. Ink footer with a giant red wordmark that rises in letter by letter.
-7. Phones: a bottom tab bar (Home, Noodles, Search, Countries, Visit).
+5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
+6. Red closing band (`ctaBand()`) with big type and three mascots.
+7. Ink footer with a giant red wordmark that rises in letter by letter.
+8. Phones: a bottom tab bar (Home, Noodles, Search, Countries, Visit).
 
 ## Noodle page (QR landing)
 The page is built for someone standing at the shelf with their phone. The order is:
@@ -34,15 +36,15 @@ The page is built for someone standing at the shelf with their phone. The order 
 4. **Machine setting (big red code) and the cook timer**, side by side between two rules. A mascot appears while the timer runs and says "Noodles ready" when it ends; the phone also beeps and vibrates.
 5. Facts row: spice, style, diet, packet
 6. About, then how to cook it (numbered), then toppings that go well with it (round photos)
-7. Share, previous and next, and similar noodles
+7. Share, previous and next
+8. Reviews of this noodle, then similar noodles
 
 ## Motion (smooth by design)
 All motion uses transform and opacity only, runs from one scroll loop, pauses when off-screen and switches off for reduced motion.
 
 | Effect | Where |
 | --- | --- |
-| Lenis smooth scrolling | Whole site (not used with reduced motion) |
-| Intro: red panel, wordmark letters rise, panel lifts away | Home, first visit per session only |
+| Typewriter ("Tonight I'm craving…") | Home hero |
 | Masked word reveal | Every heading with `data-split` |
 | Fade and rise | `.reveal` elements, staggered with `--rd` |
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
@@ -56,10 +58,12 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Paper confetti | Roulette win, timer finished |
 
 Removed on purpose:
+- smooth-scroll libraries and scroll hijacking: scrolling is the browser's own, so it never lags behind your finger or wheel
+- the home intro screen
+- the header hiding on scroll
 - backdrop blur
 - animated blur and drop-shadow filters
 - card tilt
-- typewriter caret
 - auto-scrolling marquees
 
 These were the main causes of lag, and some are common "AI website" tells.
