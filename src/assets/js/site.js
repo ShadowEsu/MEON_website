@@ -447,6 +447,24 @@
     apply();
   }
 
+  /* ---------- Videos: big play button, one at a time, background music pauses ---------- */
+  $$("[data-video]").forEach(function (box) {
+    var v = $("video", box), btn = $(".watch-play", box);
+    if (!v || !btn) return;
+    btn.addEventListener("click", function () {
+      v.controls = true;
+      var p = v.play(); if (p && p.catch) p.catch(function () {});
+    });
+    v.addEventListener("play", function () {
+      box.classList.add("is-playing");
+      $$("[data-video] video").forEach(function (o) { if (o !== v && !o.paused) o.pause(); });
+      if (window.MeonMusic && window.MeonMusic.playing) {
+        window.MeonMusic.stop();
+        var sb = $("[data-sound]"); if (sb) { sb.setAttribute("aria-pressed", "false"); sb.setAttribute("aria-label", "Play background music"); }
+      }
+    });
+  });
+
   /* ---------- Noodle photo gallery (thumbnails swap the main photo) ---------- */
   var galleryMain = $("[data-gallery-main]");
   if (galleryMain) {

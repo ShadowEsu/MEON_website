@@ -43,6 +43,21 @@ Some shoot folders are named differently from the packet in the photo. The site 
 
 "Neoguri Stir Fry" is not on the noodle list yet, so it isn't used.
 
+## Videos
+
+The "Watch" section on the home page (below "How MEON works") plays the videos and offers them as downloads. The files are in `src/assets/video/`:
+
+| File | What it is |
+| --- | --- |
+| `meon-promo.mp4` | 47-second promo, 16:9 |
+| `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories |
+| `meon-website-tour.mp4` | 3:53 tour of the website, including the phone QR-scan experience |
+| `poster-*.jpg` | The still image shown before a video plays |
+
+All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
+
+To swap a video, replace the file but keep its name, then run `npm run build` and redeploy. The sizes shown on the download buttons update automatically. To make new versions, for example after adding new noodles or photos, ask Claude to "re-make the MEON promo" or "re-record the website tour".
+
 ## Guest reviews
 
 Guests can leave a 1–5 star rating, their first name and a comment at the bottom of the home page (general reviews) and of every noodle page (reviews for that noodle). Reviews appear on the site straight away.
