@@ -112,13 +112,15 @@ export function shortBlurb(n) {
   return flavourNote(n).replace(/<[^>]+>/g, "");
 }
 
+// Every timer on the site runs for 3 minutes 30 seconds.
+export const COOK_SECONDS = 210;
+
 export function cookSteps(n) {
   if (n.type === "Dry") {
     return {
-      minutes: 5,
       steps: [
         ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
-        ["Boil the noodles", "Cook the noodle block for about 4–5 minutes until just tender."],
+        ["Boil the noodles", "Cook the noodle block for 3 minutes 30 seconds until just tender."],
         ["Drain", "Pour off most of the water, keeping a couple of spoonfuls to loosen the sauce."],
         ["Toss & top", "Add the sauce and flakes, mix until glossy, then pile on your toppings."],
       ],
@@ -126,20 +128,18 @@ export function cookSteps(n) {
   }
   if (n.type === "Porridge") {
     return {
-      minutes: 3,
       steps: [
         ["Grab your packet", "Bring it to the cooking station with a MEON bowl."],
         ["Add hot water", "Add the contents and hot water to the line on the cup or bowl."],
-        ["Stir & rest", "Stir well and let it sit for about 3 minutes until thick and creamy."],
+        ["Stir & rest", "Stir well and let it sit for 3 minutes 30 seconds until thick and creamy."],
         ["Top it", "Finish with an egg, spring onion or a crunchy side."],
       ],
     };
   }
   return {
-    minutes: 4,
     steps: [
       ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
-      ["Add & cook", "Noodles, soup base and any veg in, cook for about 4 minutes."],
+      ["Add & cook", "Noodles, soup base and any veg in, cook for 3 minutes 30 seconds."],
       ["Level up", "Drop in your toppings for the last minute: egg, cheese, meat or greens."],
       ["Stir and eat", "Give it a good stir, grab your chopsticks and enjoy it hot."],
     ],

@@ -8,7 +8,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
-import { describe, shortBlurb, cookSteps, suggestToppings, COUNTRY_ADJ } from "./lib/copy.mjs";
+import { describe, shortBlurb, cookSteps, suggestToppings, COUNTRY_ADJ, COOK_SECONDS } from "./lib/copy.mjs";
 import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, crew, peeker, steamOverlay, stepArt, emptyBowl, logoAnimated, logoMini, wordmark } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
@@ -662,10 +662,10 @@ noodles.forEach((n, idx) => {
             <span class="cook-code">${n.machine ? esc(n.machine) : "Ask"}</span>
             <span class="cook-hint">${n.machine ? `Select program ${esc(n.machine)} on the cooking machine.` : "Ask the crew which program to use."}</span>
           </div>
-          <div class="timer" data-timer data-default="${cook.minutes}">
-            <div class="timer-dial"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54" fill="none" stroke-width="6"/><circle class="prog" cx="60" cy="60" r="54" fill="none" stroke-width="6" stroke-linecap="round"/></svg><span class="timer-readout" role="timer" aria-live="off">${cook.minutes}:00</span></div>
+          <div class="timer" data-timer data-seconds="${COOK_SECONDS}">
+            <div class="timer-dial"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54" fill="none" stroke-width="6"/><circle class="prog" cx="60" cy="60" r="54" fill="none" stroke-width="6" stroke-linecap="round"/></svg><span class="timer-readout" role="timer" aria-live="off">${Math.floor(COOK_SECONDS / 60)}:${String(COOK_SECONDS % 60).padStart(2, "0")}</span></div>
             <div class="timer-side">
-              <div class="timer-presets" role="group" aria-label="Timer length">${[3, 4, 5].map((m) => `<button class="pill" type="button" data-minutes="${m}" aria-pressed="${m === cook.minutes}">${m} min</button>`).join("")}</div>
+              <p class="timer-length">3 min 30 sec</p>
               <div class="timer-controls"><button class="btn btn--red" type="button" data-timer-start>Start timer</button><button class="btn btn--line btn--sm" type="button" data-timer-reset>Reset</button></div>
               <p class="note" data-timer-status aria-live="polite"></p>
             </div>

@@ -583,8 +583,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .timer-dial .track { stroke: var(--line); }
 .timer-dial .prog { stroke: var(--red); transition: stroke-dashoffset .3s linear; }
 .timer-readout { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.7rem; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.timer-presets { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-.timer-presets .pill { min-height: 32px; padding: 0 12px; font-size: .84rem; }
+.timer-length { margin: 0 0 10px; font-size: .84rem; font-weight: 600; letter-spacing: .02em; color: var(--muted); }
 .timer-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .timer .note { margin: 8px 0 0; min-height: 1.2em; }
 .timer-buddy { position: absolute; right: 0; top: -66px; width: 64px; opacity: 0; transform: translateY(12px); transition: opacity .4s, transform .6s var(--ease); pointer-events: none; }

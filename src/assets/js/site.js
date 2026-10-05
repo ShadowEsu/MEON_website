@@ -526,10 +526,10 @@
   $$("[data-timer]").forEach(function (timer) {
     var readout = $(".timer-readout", timer), prog = $(".prog", timer);
     var startBtn = $("[data-timer-start]", timer), resetBtn = $("[data-timer-reset]", timer);
-    var presets = $$("[data-minutes]", timer), status = $("[data-timer-status]", timer);
+    var status = $("[data-timer-status]", timer);
     var buddy = $(".timer-buddy .meo", timer);
     var circ = 2 * Math.PI * 54;
-    var total = parseInt(timer.getAttribute("data-default"), 10) * 60 || 240;
+    var total = parseInt(timer.getAttribute("data-seconds"), 10) || 210;
     var left = total, running = false, endAt = 0, raf = 0, wakeLock = null;
     prog.style.strokeDasharray = circ;
     var fmt = function (s) { var m = Math.floor(s / 60), r = s % 60; return m + ":" + (r < 10 ? "0" : "") + r; };
@@ -561,12 +561,11 @@
       }
       draw(); raf = requestAnimationFrame(tick);
     };
-    var setTotal = function (mins) {
+    var reset = function () {
       cancelAnimationFrame(raf); running = false; releaseWake();
-      total = mins * 60; left = total;
+      left = total;
       timer.classList.remove("is-done", "is-running"); startBtn.textContent = "Start timer";
       if (status) status.textContent = "";
-      presets.forEach(function (b) { b.setAttribute("aria-pressed", String(parseFloat(b.getAttribute("data-minutes")) === mins)); });
       draw();
     };
     startBtn.addEventListener("click", function () {
@@ -578,8 +577,7 @@
       if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {});
       tick();
     });
-    resetBtn.addEventListener("click", function () { setTotal(total / 60); });
-    presets.forEach(function (b) { b.addEventListener("click", function () { setTotal(parseFloat(b.getAttribute("data-minutes"))); }); });
+    resetBtn.addEventListener("click", reset);
     draw();
   });
 

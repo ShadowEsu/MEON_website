@@ -43,11 +43,10 @@ ok((await page.$$eval(".noodle-card:not([hidden])", (e) => e.length)) === 172, "
 
 await page.goto(BASE + "/noodles/nongshim-shin-black-premium/?src=qr", { waitUntil: "networkidle" });
 ok(await page.$eval("[data-qr-banner]", (e) => !e.hidden), "QR scan banner appears with ?src=qr");
-await page.click("[data-minutes='3']");
 await page.click("[data-timer-start]");
 await page.waitForTimeout(1300);
 const t = await page.$eval(".timer-readout", (e) => e.textContent);
-ok(t === "2:59" || t === "2:58", `cook timer counts down (${t})`);
+ok(t === "3:29" || t === "3:28", `cook timer starts at 3:30 and counts down (${t})`);
 
 await page.goto(BASE + "/qr-generator/", { waitUntil: "networkidle" });
 await page.selectOption("#qg-preset", "/noodles/nongshim-shin-black-premium/");
