@@ -1,120 +1,17 @@
-/* MEON play layer: cursor, kinetic hero, throwable mascots, build-your-bowl, heat check,
-   eyebrow scramble, page-transition hooks and the sound prompt.
-   Transform/opacity only; everything respects "reduce motion". */
+/* MEON play layer: throwable mascots, build-your-bowl, heat check and the sound prompt.
+   Kept deliberately light: nothing runs until someone touches it, so scrolling and
+   loading stay fast. Everything respects "reduce motion". */
 (function () {
   "use strict";
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var M = window.MEON || {};
   var sfx = function (kind) { if (window.MeonMusic && window.MeonMusic.playing && window.MeonMusic[kind]) window.MeonMusic[kind](); };
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
-
-  /* ---------- Cursor ring with labels (mouse only) ---------- */
-  if (finePointer && !reduceMotion) {
-    var LABELS = [
-      [".noodle-card, .heat-picks a, .roulette-item", "Open"],
-      ["[data-spin]", "Spin"],
-      [".watch-play", "Play"],
-      [".crew .meo", "Throw me"],
-      [".bb-chip", "Add"],
-      ["[data-heat-input]", "Drag"],
-      [".wall", "Look"],
-    ];
-    var ring = document.createElement("div");
-    ring.className = "cursor-ring is-hidden";
-    ring.setAttribute("aria-hidden", "true");
-    ring.innerHTML = "<span></span>";
-    document.body.appendChild(ring);
-    var label = ring.firstChild;
-    var tx = -100, ty = -100, cx = -100, cy = -100, raf = 0;
-    var loop = function () {
-      cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;
-      ring.style.transform = "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px,0)";
-      if (Math.abs(tx - cx) > 0.2 || Math.abs(ty - cy) > 0.2) raf = requestAnimationFrame(loop); else raf = 0;
-    };
-    window.addEventListener("pointermove", function (e) {
-      if (e.pointerType !== "mouse") return;
-      tx = e.clientX; ty = e.clientY;
-      ring.classList.remove("is-hidden");
-      if (!raf) raf = requestAnimationFrame(loop);
-    }, { passive: true });
-    document.addEventListener("pointerover", function (e) {
-      var t = e.target, txt = "";
-      for (var i = 0; i < LABELS.length; i++) { if (t.closest && t.closest(LABELS[i][0])) { txt = LABELS[i][1]; break; } }
-      var hover = !txt && t.closest && t.closest("a, button, select, input, textarea, label, summary, [role='button']");
-      label.textContent = txt;
-      ring.classList.toggle("is-label", !!txt);
-      ring.classList.toggle("is-hover", !!hover);
-    });
-    document.addEventListener("pointerdown", function () { ring.classList.add("is-down"); });
-    document.addEventListener("pointerup", function () { ring.classList.remove("is-down"); });
-    document.documentElement.addEventListener("pointerleave", function () { ring.classList.add("is-hidden"); });
-  }
-
-  /* ---------- Page transitions: the clicked noodle's photo morphs into the next page ---------- */
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest && e.target.closest("a.noodle-card, .heat-picks a, a.roulette-item");
-    if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-    var current = $(".noodle-photo");
-    if (current) current.style.viewTransitionName = "none";
-    var media = $(".nc-media, .hp-media, .roulette-item > img, .roulette-item > .roulette-ph", a);
-    if (media) media.style.viewTransitionName = "noodle-photo";
-  });
-  window.addEventListener("pageshow", function () {
-    $$(".nc-media, .hp-media, .roulette-item > img").forEach(function (m) { m.style.viewTransitionName = ""; });
-    var p = $(".noodle-photo"); if (p) p.style.viewTransitionName = "";
-  });
-
-  /* ---------- Hero headline: letters lift and thin out near the pointer ---------- */
-  var title = $(".hero--launch .hero-title");
-  if (title && !reduceMotion) {
-    var ci = 0;
-    $$(".w > span", title).forEach(function (word) {
-      var walk = function (node) {
-        Array.prototype.slice.call(node.childNodes).forEach(function (child) {
-          if (child.nodeType === 3) {
-            var frag = document.createDocumentFragment();
-            child.textContent.split("").forEach(function (ch) {
-              var s = document.createElement("span"); s.className = "ch"; s.textContent = ch; s.style.setProperty("--ci", ci++);
-              frag.appendChild(s);
-            });
-            node.replaceChild(frag, child);
-          } else if (child.nodeType === 1) walk(child);
-        });
-      };
-      walk(word);
-    });
-    var chars = $$(".ch", title);
-    var wave = function () { title.classList.remove("is-wave"); void title.offsetWidth; title.classList.add("is-wave"); };
-    setTimeout(wave, 1300);
-    title.addEventListener("click", wave);
-    if (finePointer) {
-      var px = 0, py = 0, queued = false, near = false;
-      var paint = function () {
-        queued = false;
-        chars.forEach(function (c) {
-          var b = c.getBoundingClientRect();
-          var dx = px - (b.left + b.width / 2), dy = py - (b.top + b.height / 2);
-          var k = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 170);
-          k = k * k * (3 - 2 * k);
-          c.style.transform = k ? "translateY(" + (-k * 14).toFixed(1) + "%) rotate(" + (k * (dx > 0 ? 5 : -5)).toFixed(1) + "deg)" : "";
-          c.style.fontVariationSettings = '"wght" ' + Math.round(800 - k * 420);
-        });
-      };
-      window.addEventListener("pointermove", function (e) {
-        var r = title.getBoundingClientRect();
-        var inside = e.clientY > r.top - 140 && e.clientY < r.bottom + 140;
-        if (!inside && !near) return;
-        near = inside; px = e.clientX; py = e.clientY;
-        if (!queued) { queued = true; requestAnimationFrame(paint); }
-      }, { passive: true });
-    }
-  }
 
   /* ---------- Throwable mascots around the hero ---------- */
   var crewBox = $(".hero .crew");
@@ -161,29 +58,6 @@
       m.addEventListener("pointercancel", release);
       m.addEventListener("click", function (e) { if (block) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
     });
-  }
-
-  /* ---------- Eyebrow labels decode as they appear ---------- */
-  if ("IntersectionObserver" in window && !reduceMotion) {
-    var GLYPHS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#*+";
-    var scramble = function (el) {
-      var final = el.textContent, len = final.length, start = performance.now(), dur = 700;
-      el.classList.add("is-scrambling");
-      var step = function (now) {
-        var p = Math.min(1, (now - start) / dur), out = "";
-        for (var i = 0; i < len; i++) {
-          var ch = final[i];
-          out += (ch === " " || i < p * len * 1.05) ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0];
-        }
-        el.textContent = out;
-        if (p < 1) requestAnimationFrame(step); else { el.textContent = final; el.classList.remove("is-scrambling"); }
-      };
-      requestAnimationFrame(step);
-    };
-    var eio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { if (en.isIntersecting) { scramble(en.target); eio.unobserve(en.target); } });
-    }, { threshold: 0.6 });
-    $$(".eyebrow").forEach(function (el) { if (el.children.length === 0 && el.textContent.length < 40) eio.observe(el); });
   }
 
   /* ---------- Build your bowl ---------- */

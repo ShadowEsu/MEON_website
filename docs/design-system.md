@@ -53,20 +53,23 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Sticky heading with a progress line | How MEON works |
 | Count-up numbers | `.facts` |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
-| Mascots: blink, wave, eyes follow the cursor, gentle drift, tap to talk | Home hero, page heroes, red band, timer, back-to-top |
-| Moving logo: letters hop, script line cycles (Japanese, Korean, Chinese, Thai) | Header mark, logo tiles |
+| Mascots: blink, eyes follow the cursor, gentle drift; wave and squish on hover; tap to talk | Home hero, page heroes, red band, timer, back-to-top |
+| Moving logo: script line cycles (Japanese, Korean, Chinese, Thai); letters hop when you hover | Header mark, logo tiles |
 | Paper confetti | Roulette win, timer finished |
-| Headline letters lift and thin out near the pointer (variable font weight); a wave on load and on tap | Home hero ("Slurp the world.") |
 | Throwable mascots: drag, throw, bounce off the edges; tap to talk | Home hero crew |
 | Crossing flavour banners (red and ink) that move with your scroll | Under the home hero (`.ticker`) |
 | Build your bowl: toppings drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
 | Heat check: chilli slider warms the section, the mascot sweats, matching noodles appear | Home (`#spice`) |
-| Eyebrow labels decode from scrambled letters as they appear | Every `.eyebrow` |
-| Cursor ring with labels ("Open", "Spin", "Throw me", "Add", "Play") | Desktop, mouse only (`play.js`) |
-| Page transitions; the tapped noodle's photo morphs into the noodle page | Browsers with view transitions (Chrome, Edge, Safari) |
 | Illustrated packets, coloured by flavour, for noodles without a photo | Cards, noodle pages |
 
+Speed rules (tested with the CPU slowed 4x, like an average phone):
+- Nothing animates forever except cheap things (blinks, floats, the glyph cycle). Waves, squishes and logo hops only play on hover or tap.
+- Nothing reacts to every mouse movement except the mascots' eyes.
+- Sections below the first one use `content-visibility: auto`, so the browser skips drawing them until you scroll near.
+- `play.js` does nothing until someone touches Build your bowl, Heat check or a mascot.
+
 Removed on purpose:
+- the cursor ring, headline letters reacting to the mouse, scrambling labels and page transitions (they made the site laggy)
 - smooth-scroll libraries and scroll hijacking: scrolling is the browser's own, so it never lags behind your finger or wheel
 - the home intro screen
 - the header hiding on scroll
