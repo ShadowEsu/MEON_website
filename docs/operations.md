@@ -65,7 +65,7 @@ The "Watch" section on the home page (below "How MEON works") plays the videos a
 | --- | --- |
 | `meon-promo.mp4` | 47-second promo, 16:9 (100+ noodles, across Asia, spice levels; no card) |
 | `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories |
-| `meon-website-tour.mp4` | Tour of the website, including the phone QR-scan experience |
+| `meon-website-tour.mp4` | 4:04 tour of the website, including the new interactive sections and the phone QR-scan experience |
 | `poster-*.jpg` | The still image shown before a video plays |
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.

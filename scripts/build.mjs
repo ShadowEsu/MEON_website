@@ -410,7 +410,7 @@ const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffi
 // Videos (src/assets/video): the promo, a vertical cut for Reels/TikTok, and the website tour.
 const VIDEOS = [
   { id: "promo", file: "meon-promo.mp4", poster: "poster-promo.jpg", title: "MEON in under a minute", desc: "What MEON is, how it works and why it's worth the trip.", length: "0:47", iso: "PT47S", dl: "MEON-promo.mp4", label: "Promo · 16:9" },
-  { id: "tour", file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "Search, filters, the roulette, every noodle page, the 3:30 timer, reviews and the QR codes.", length: "3:53", iso: "PT3M53S", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9", hidden: true },
+  { id: "tour", file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "Throw the mascots, build a bowl, check the heat, then every noodle page, the 3:30 timer and the QR codes.", length: "4:04", iso: "PT4M4S", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9" },
   { id: "vertical", file: "meon-promo-vertical.mp4", poster: "poster-promo-vertical.jpg", title: "Promo for Reels and TikTok", desc: "", length: "0:47", iso: "PT47S", dl: "MEON-promo-vertical.mp4", label: "Promo · 9:16 for Reels and TikTok" },
 ].filter((v) => !v.hidden).map((v) => ({ ...v, mb: Math.max(1, Math.round(fs.statSync(path.join(SRC, "assets", "video", v.file)).size / 1048576)) }));
 const videoLd = VIDEOS.filter((v) => v.desc).map((v) => ({ "@context": "https://schema.org", "@type": "VideoObject", name: v.title, description: v.desc, thumbnailUrl: `${SITE_URL}/assets/video/${v.poster}`, contentUrl: `${SITE_URL}/assets/video/${v.file}`, uploadDate: "2026-10-05", duration: v.iso, publisher: { "@id": `${SITE_URL}/#restaurant` } }));
@@ -511,7 +511,7 @@ addPage("", layout({
 
 <section class="section section--ink watch" id="watch">
   <div class="wrap">
-    ${sectionHead("Watch", "See MEON before you visit.", "", "A one-minute look at the noodle bar. Download it to share, in widescreen or vertical for Reels and TikTok.")}
+    ${sectionHead("Watch", "See MEON before you visit.", "", "A one-minute look at the noodle bar, and a full tour of this website. Download them to share.")}
     <div class="watch-grid">
       ${videoPlayer(VIDEOS[0], r, { big: true })}
       <div class="watch-side">
