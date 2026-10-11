@@ -130,7 +130,7 @@ export function cookSteps(n) {
     return {
       steps: [
         ["Grab your packet", "Bring it to the cooking station with a MEON bowl."],
-        ["Add hot water", "Add the contents and hot water to the line on the cup or bowl."],
+        ["Add hot water", "Add the noodles and seasoning to a MEON bowl with hot water."],
         ["Stir & rest", "Stir well and let it sit for 3 minutes 30 seconds until thick and creamy."],
         ["Top it", "Finish with an egg, spring onion or a crunchy side."],
       ],

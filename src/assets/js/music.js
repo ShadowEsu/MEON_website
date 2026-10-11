@@ -1,5 +1,5 @@
-/* MEON background music: an original, endlessly varying lo-fi loop generated with the Web Audio API.
-   Soft electric piano chords, a round bass, brushed drums and a little vinyl crackle. Nothing is downloaded.
+/* MEON background music. Plays "MEON FM", the original MEON soundtrack (assets/audio/meon-fm.mp3,
+   a seamless loop). If that can't load, it falls back to a lo-fi loop generated live with the Web Audio API.
    Exposes window.MeonMusic = { start, stop, blip, chime, playing }. */
 (function () {
   "use strict";
@@ -7,6 +7,9 @@
   if (!Ctx) { window.MeonMusic = { start: function () {}, stop: function () {}, blip: function () {}, chime: function () {}, playing: false }; return; }
 
   var ctx = null, master, bus, wet, noise, crackleSrc, timer = null;
+  var me = document.currentScript && document.currentScript.src;
+  var TRACK = me ? me.replace(/js\/music\.js.*$/, "audio/meon-fm.mp3") : null;
+  var track = null, useTrack = !!TRACK;
   var BPM = 76, STEP = 60 / BPM / 4, SWING = 0.14, LOOKAHEAD = 0.14;
   var nextTime = 0, step = 0, bar = 0;
   // Fmaj9 – Em7 – Dm9 – Cmaj7(add9): warm, unresolved, easy to listen to for a long time.
@@ -115,12 +118,22 @@
   var api = {
     playing: false,
     start: function () {
-      if (!ctx) { setup(); crackle(); }
+      if (!ctx) setup();
       if (ctx.state === "suspended") ctx.resume();
       var now = ctx.currentTime;
-      master.gain.cancelScheduledValues(now); master.gain.setValueAtTime(master.gain.value, now); master.gain.linearRampToValueAtTime(0.32, now + 2.4);
-      nextTime = now + 0.06; step = 0;
-      clearInterval(timer); timer = setInterval(schedule, 25); schedule();
+      master.gain.cancelScheduledValues(now); master.gain.setValueAtTime(master.gain.value, now); master.gain.linearRampToValueAtTime(useTrack ? 0.9 : 0.32, now + 1.6);
+      if (useTrack) {
+        if (!track) {
+          track = new Audio(TRACK); track.loop = true; track.preload = "auto";
+          ctx.createMediaElementSource(track).connect(master);
+          track.addEventListener("error", function () { useTrack = false; if (api.playing) { api.playing = false; api.start(); } });
+        }
+        var p = track.play(); if (p && p.catch) p.catch(function () {});
+      } else {
+        if (!crackleSrc) crackle();
+        nextTime = now + 0.06; step = 0;
+        clearInterval(timer); timer = setInterval(schedule, 25); schedule();
+      }
       api.playing = true;
     },
     stop: function () {
@@ -128,7 +141,7 @@
       var now = ctx.currentTime;
       master.gain.cancelScheduledValues(now); master.gain.setValueAtTime(master.gain.value, now); master.gain.linearRampToValueAtTime(0, now + 0.6);
       clearInterval(timer); timer = null;
-      setTimeout(function () { if (!api.playing && ctx) ctx.suspend(); }, 700);
+      setTimeout(function () { if (!api.playing) { if (track) track.pause(); if (ctx) ctx.suspend(); } }, 700);
       api.playing = false;
     },
     blip: function () {

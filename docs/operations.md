@@ -33,7 +33,7 @@ The main noodle photos come from the MEON photo shoot. The photographer's shared
 - the **bowl-with-packet** shot as the main photo
 - the top-down and close-up shots as extra photos (`data/gallery.json`)
 
-The 41 noodles shot so far use these photos. The rest still use the older photos from the Wix site, or a mascot placeholder. When more noodles are photographed, ask Claude to "add the new noodle photos from the shoot folder".
+Only Steven's MEON shoot photos are used (42 noodles so far). The old stock photos from the Wix site were removed: many had harsh black backgrounds or showed cup noodles, which MEON doesn't sell. Noodles without a shoot photo show an illustrated packet in a flavour colour. When more noodles are photographed, ask Claude to "add the new noodle photos from the shoot folder".
 
 Some shoot folders are named differently from the packet in the photo. The site follows the packet:
 - "Samyang Ramen Original Mild" is Samyang Bulgogi
@@ -43,15 +43,29 @@ Some shoot folders are named differently from the packet in the photo. The site 
 
 "Neoguri Stir Fry" is not on the noodle list yet, so it isn't used.
 
+## Wording that changes often
+
+The site says **"100+ noodles"** and **"from across Asia"** rather than exact counts. Both are set once at the top of `scripts/build.mjs` (`COUNT` and `REGION`). Exact counts still appear where they're useful, like the library's filter results.
+
+## Updating the noodle list
+
+When there's a new list of the packets on the wall, send it to Claude ("here's the new noodle list, update the site"). Noodles that are gone are removed, new ones get a page and a shelf QR code, and the QR PNGs in Drive are regenerated. Existing noodle page addresses stay the same, so printed QR codes keep working.
+
+## MEON Card (not launched)
+
+The card is hidden from the website: it's not in the menus, footer, search or sitemap, and Google is told not to index it. The page still exists at `/meon-card/` as a "coming soon" page with the planned offer: top up $20, get a $5 voucher to use on the spot, every time.
+
+To launch it, ask Claude to "launch the MEON Card". That adds it back to the menu, footer and home page and updates the wording.
+
 ## Videos
 
 The "Watch" section on the home page (below "How MEON works") plays the videos and offers them as downloads. The files are in `src/assets/video/`:
 
 | File | What it is |
 | --- | --- |
-| `meon-promo.mp4` | 47-second promo, 16:9 |
+| `meon-promo.mp4` | 47-second promo, 16:9 (100+ noodles, across Asia, spice levels; no card) |
 | `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories |
-| `meon-website-tour.mp4` | 3:53 tour of the website, including the phone QR-scan experience |
+| `meon-website-tour.mp4` | Tour of the website, including the phone QR-scan experience |
 | `poster-*.jpg` | The still image shown before a video plays |
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
@@ -105,7 +119,6 @@ Or just ask Claude: "update the MEON views log for last week".
 | Add a photo | Save a 900×900 `.webp` to `src/assets/img/noodles/<slug>.webp` and a 400×400 copy to `…/noodles/sm/`, then add the slug to `data/images.json`. Use the bowl-and-packet shot, so guests can match it to the shelf |
 | Add extra photos to a noodle page | Save 900×900 `.webp` files to `src/assets/img/noodles/more/<slug>-1.webp`, `-2.webp` and so on, and list them under the slug in `data/gallery.json`. They appear as tappable thumbnails under the main photo |
 | Set a real spice rating for a noodle marked "coming soon" | Fix the rating in the source doc and remove the slug from `data/spice_review.json` |
-| Run a deal | Edit `data/deals.json` (`"active": false` hides it) |
 
 After any change: `npm run build && npm run check`. Pushing to GitHub redeploys on Vercel once it's connected.
 
@@ -114,4 +127,6 @@ After any change: `npm run build && npm run check`. Pushing to GitHub redeploys 
 - Street address, phone, email and opening hours
 - The final domain (do this before printing QR codes)
 - 20 noodles have "spice rating coming soon" (listed in `data/spice_review.json`)
-- 54 noodles still need a photo (they show a mascot placeholder). Samyang Ramen (original) lost its photo because the old one actually showed the Bulgogi packet
+- 130 noodles still need a shoot photo (they show an illustrated packet)
+- The updated noodle list of what is actually on the wall
+- The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)

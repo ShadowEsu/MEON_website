@@ -56,6 +56,15 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Mascots: blink, wave, eyes follow the cursor, gentle drift, tap to talk | Home hero, page heroes, red band, timer, back-to-top |
 | Moving logo: letters hop, script line cycles (Japanese, Korean, Chinese, Thai) | Header mark, logo tiles |
 | Paper confetti | Roulette win, timer finished |
+| Headline letters lift and thin out near the pointer (variable font weight); a wave on load and on tap | Home hero ("Slurp the world.") |
+| Throwable mascots: drag, throw, bounce off the edges; tap to talk | Home hero crew |
+| Crossing flavour banners (red and ink) that move with your scroll | Under the home hero (`.ticker`) |
+| Build your bowl: toppings drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
+| Heat check: chilli slider warms the section, the mascot sweats, matching noodles appear | Home (`#spice`) |
+| Eyebrow labels decode from scrambled letters as they appear | Every `.eyebrow` |
+| Cursor ring with labels ("Open", "Spin", "Throw me", "Add", "Play") | Desktop, mouse only (`play.js`) |
+| Page transitions; the tapped noodle's photo morphs into the noodle page | Browsers with view transitions (Chrome, Edge, Safari) |
+| Illustrated packets, coloured by flavour, for noodles without a photo | Cards, noodle pages |
 
 Removed on purpose:
 - smooth-scroll libraries and scroll hijacking: scrolling is the browser's own, so it never lags behind your finger or wheel
@@ -63,14 +72,14 @@ Removed on purpose:
 - the header hiding on scroll
 - backdrop blur
 - animated blur and drop-shadow filters
-- card tilt
-- auto-scrolling marquees
+- card tilt (cards now wiggle slightly instead)
+- auto-scrolling marquees (the flavour banners only move when you scroll)
 
 These were the main causes of lag, and some are common "AI website" tells.
 
 ## Sound
-`music.js` is an original lo-fi loop generated live with the Web Audio API: electric piano chords (Fmaj9, Em7, Dm9, Cmaj7), bass, brushed drums and vinyl crackle. Nothing is downloaded and there are no licensing issues.
-- It is off by default.
+`music.js` plays **MEON FM** (`assets/audio/meon-fm.mp3`), an original 103-second seamless loop in the same style as the promo videos: electric piano, marimba melody, bass and soft drums. If the file can't load it falls back to a lo-fi loop generated live with the Web Audio API. No licensing issues.
+- On the first visit to the home page a small "Turn the vibes on?" prompt offers it (browsers don't allow sound before a tap). The answer is remembered.
 - The **Sound** button starts it, and the choice is remembered. Browsers block autoplay, so a returning visitor's music resumes on their first tap.
 - While music plays, mascots blip when tapped and the roulette chimes.
 

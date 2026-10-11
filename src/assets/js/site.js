@@ -233,7 +233,7 @@
     };
     window.addEventListener("pointermove", function (e) { mx = e.clientX; my = e.clientY; if (!pending) { pending = true; requestAnimationFrame(look); } }, { passive: true });
   }
-  var LINES = ["Egg on top? Always.", "Try a Buldak if you dare", "Twelve countries, one wall", "Scan a shelf QR code", "Cheese and ramen, trust me", "Spin the roulette", "Members save 10%", "Mind the steam"];
+  var LINES = ["Egg on top? Always.", "Try a Buldak if you dare", "Noodles from across Asia", "Scan a shelf QR code", "Cheese and ramen, trust me", "Spin the roulette", "Mind the steam"];
   function talk(m, text) {
     var bubble = $(".meo-bubble", m);
     if (bubble && text) bubble.textContent = text;
@@ -790,7 +790,7 @@
       if (window.MeonMusic) return Promise.resolve(window.MeonMusic);
       return new Promise(function (res, rej) {
         var s = document.createElement("script");
-        s.src = ROOT + "assets/js/music.js?v=3"; s.onload = function () { res(window.MeonMusic); }; s.onerror = rej;
+        s.src = ROOT + "assets/js/music.js?v=4"; s.onload = function () { res(window.MeonMusic); }; s.onerror = rej;
         document.head.appendChild(s);
       });
     };
@@ -813,6 +813,9 @@
       window.addEventListener("pointerdown", resume, true); window.addEventListener("keydown", resume, true);
     }
   }
+
+  // Shared with play.js
+  window.MEON = { talk: talk, confetti: confetti };
 
   /* ---------- Year ---------- */
   $$("[data-year]").forEach(function (el) { el.textContent = String(new Date().getFullYear()); });

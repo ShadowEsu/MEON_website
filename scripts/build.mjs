@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestToppings, COUNTRY_ADJ, COOK_SECONDS } from "./lib/copy.mjs";
-import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, crew, peeker, steamOverlay, stepArt, emptyBowl, logoAnimated, logoMini, wordmark } from "./lib/art.mjs";
+import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, crew, peeker, steamOverlay, stepArt, emptyBowl, logoAnimated, logoMini, wordmark, TOPPING_ART } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -21,7 +21,7 @@ const site = readJSON("site.json");
 const noodlesRaw = readJSON("noodles.json");
 const countries = readJSON("countries.json");
 const toppings = readJSON("toppings.json");
-const deals = readJSON("deals.json").filter((d) => d.active !== false);
+
 const spiceReview = new Set(fs.existsSync(path.join(ROOT, "data", "spice_review.json")) ? readJSON("spice_review.json").slugs : []);
 const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON("images.json") : {};
 // Extra photos per noodle (top-down and close-ups from the MEON shoot), shown under the main photo.
@@ -89,9 +89,11 @@ const NAV = [
   ["noodles/", "Noodles"],
   ["countries/", "Countries"],
   ["toppings/", "Toppings"],
-  ["meon-card/", "MEON Card"],
   ["about/", "About"],
 ];
+// Public wording: the range changes often, so the site says "100+" and "from across Asia".
+const COUNT = "100+";
+const REGION = "from across Asia";
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap";
 
 function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/photos/bowl-side.webp", preload = "", noindex = false, jsonld = [], scripts = [], intro = false }) {
@@ -113,7 +115,7 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     "@id": `${SITE_URL}/#restaurant`,
     name: "MEON Noodles",
     alternateName: "MEON",
-    description: `Instant noodle bar in ${site.suburb}, ${site.city} with ${noodles.length} instant noodles from 12 countries, a toppings bar and self-cook stations. Dine-in only.`,
+    description: `Instant noodle bar in ${site.suburb}, ${site.city} with ${COUNT} instant noodles ${REGION}, a toppings bar and self-cook stations. Dine-in only.`,
     url: SITE_URL + "/",
     logo: `${SITE_URL}/assets/img/logo-512.png`,
     image: [`${SITE_URL}/assets/img/photos/bowl-side.webp`, `${SITE_URL}/assets/img/photos/bowl-top-egg.webp`, `${SITE_URL}/assets/img/logo-512.png`],
@@ -227,7 +229,6 @@ ${body(r)}
         <ul>
           <li><a href="${r("countries/")}">Countries</a></li>
           <li><a href="${r("toppings/")}">Toppings &amp; sides</a></li>
-          <li><a href="${r("meon-card/")}">MEON Member Card</a></li>
           <li><a href="${r("about/")}">About</a></li>
           <li><a href="${r("visit/")}">Visit</a></li>
         </ul>
@@ -255,13 +256,12 @@ ${body(r)}
 <div class="search-overlay" id="search" role="dialog" aria-modal="true" aria-label="Search MEON">
   <div class="search-backdrop" data-search-close></div>
   <div class="search-panel">
-    <div class="search-field">${icon.search}<input type="search" id="site-search" placeholder="Search ${noodles.length} noodles, countries, toppings" autocomplete="off" spellcheck="false" aria-controls="search-results" enterkeyhint="go"><button class="btn btn--line btn--sm" type="button" data-search-close>Close</button></div>
+    <div class="search-field">${icon.search}<input type="search" id="site-search" placeholder="Search noodles, flavours, countries" autocomplete="off" spellcheck="false" aria-controls="search-results" enterkeyhint="go"><button class="btn btn--line btn--sm" type="button" data-search-close>Close</button></div>
     <div class="search-results" id="search-results" role="listbox"></div>
     <div class="search-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open</span><span>Try “vegan”, “tom yum” or “Japan”</span></div>
   </div>
 </div>
 <nav class="tabbar" aria-label="Quick navigation">
-  <a href="${r("")}"${cur("home")}>${icon.home}<span>Home</span></a>
   <a href="${r("noodles/")}"${cur("noodles/")}>${icon.bowl}<span>Noodles</span></a>
   <button class="tab-search" type="button" data-search-open aria-label="Search noodles">${icon.search}<span>Search</span></button>
   <a href="${r("countries/")}"${cur("countries/")}>${icon.globe}<span>Countries</span></a>
@@ -270,6 +270,7 @@ ${body(r)}
 <button class="back-top" type="button" aria-label="Back to top">${mascot({ acc: "none", wave: true })}</button>
 ${scripts.map((s) => `<script src="${r(s)}" defer></script>`).join("\n")}
 <script src="${r("assets/js/site.js")}?v=${BUILD_ID}" defer></script>
+<script src="${r("assets/js/play.js")}?v=${BUILD_ID}" defer></script>
 </body>
 </html>
 `;
@@ -278,9 +279,38 @@ ${scripts.map((s) => `<script src="${r(s)}" defer></script>`).join("\n")}
 /* ---------------- components ---------------- */
 const crumbsNav = (r, items) => `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${r("")}">Home</a></li>${items.map(([label, href]) => href ? `<li><a href="${r(href)}">${label}</a></li>` : `<li aria-current="page">${label}</li>`).join("")}</ol></nav>`;
 
+// Illustrated packet for noodles without a photo yet, coloured by flavour like real packets.
+const PACKET_COLOURS = [
+  [/buldak|fire|hot|spicy|mala|chilli|chili|kimchi|jjambbong|sambal|tom ?yum|sour|red|pedas|angry|sriracha|geki/i, ["#e3141e", "#fff", "#ffd23f"]],
+  [/black ?bean|jjajang|chapag|dan ?dan|black|pepper/i, ["#2b2523", "#fff", "#ffd23f"]],
+  [/curry|kari|laksa|masala|satay|yippee|twisty/i, ["#f28c28", "#2a1300", "#7a1fa2"]],
+  [/seafood|shrimp|prawn|crab|lobster|fish|tom\b|mien|pho/i, ["#1f6fd1", "#fff", "#ffb703"]],
+  [/veg|veggie|vegetable|mushroom|lime|kalamansi|mansi|soon/i, ["#2f9e57", "#fff", "#ffe066"]],
+  [/chicken|ayam|golden|chick/i, ["#ffc93c", "#2a1a00", "#e3141e"]],
+  [/beef|braised|rib|bulgogi|semur|bo\b|brisket|soyed/i, ["#a8461b", "#fff", "#ffd166"]],
+  [/miso|tonkotsu|shoyu|pork|creamy|carbonara|cheese|white|original|udon|bone/i, ["#f3e6cf", "#2b1d12", "#e3141e"]],
+];
+const PACKET_FALLBACK = [["#7b4fd6", "#fff", "#ffd23f"], ["#ff7aa8", "#2b0a14", "#1f6fd1"], ["#14a3a3", "#fff", "#ffd23f"]];
+const hashOf = (str) => [...str].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
+function packetArt(n, r) {
+  const key = `${n.name} ${n.flavour || ""}`;
+  const hit = PACKET_COLOURS.find(([re]) => re.test(key));
+  const [bg, ink, acc] = hit ? hit[1] : PACKET_FALLBACK[hashOf(n.slug) % PACKET_FALLBACK.length];
+  const tilt = ((hashOf(n.slug) % 7) - 3) * 0.8;
+  const size = n.name.length > 34 ? "s" : n.name.length > 20 ? "m" : "l";
+  return `<span class="pk" style="--pk-bg:${bg};--pk-ink:${ink};--pk-acc:${acc};--pk-tilt:${tilt}deg" role="img" aria-label="${esc(`${n.brand} ${n.name} packet`)}">
+  <span class="pk-body">
+    <span class="pk-brand">${esc(n.brand)}</span>
+    <span class="pk-name pk-name--${size}">${esc(n.name)}</span>
+    <svg class="pk-bowl" viewBox="0 0 120 70" aria-hidden="true"><path d="M8 26h104c0 24-23 40-52 40S8 50 8 26z" fill="#fff"/><path d="M14 26c8-8 16 6 24-2s16 6 24-2 16 6 24-2 16 6 24-2" fill="none" stroke="var(--pk-acc)" stroke-width="5" stroke-linecap="round"/><path d="M20 38h80" stroke="#e3141e" stroke-width="5"/><path d="M42 18c-4-6 4-8 0-14M60 18c-4-6 4-8 0-14M78 18c-4-6 4-8 0-14" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="3.5" stroke-linecap="round"/></svg>
+    <span class="pk-foot">${flag(n.countryCode, r, { w: 18 })}<span>${n.type ? esc(n.type) : "Instant"} noodle</span></span>
+  </span>
+</span>`;
+}
+
 function noodleMedia(n, r, { size = 400, eager = false, large = false } = {}) {
   if (n.img) return `<img src="${r(large ? n.img : n.thumb)}" alt="${esc(`${n.brand} ${n.name}`)}" width="${size}" height="${size}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
-  return `<span class="placeholder-art">${mascot({ className: "placeholder-mascot", color: "#ff8a4c", acc: ["bowl", "chef", "party", "beanie", "crown", "chopsticks"][n.slug.length % 6] })}<span class="ph-label">Photo coming soon</span></span>`;
+  return packetArt(n, r);
 }
 
 const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice rating soon</span>` : spiceMeter(n.spice, r);
@@ -297,7 +327,7 @@ function noodleCard(n, r, i = 0) {
 
 function megaNoodles(r) {
   const quick = [
-    ["noodles/", "bowl", `All ${noodles.length} noodles`], ["noodles/?type=Soup", "soup", "Soup noodles"], ["noodles/?type=Dry", "chopsticks", "Dry noodles"],
+    ["noodles/", "bowl", "All noodles"], ["noodles/?type=Soup", "soup", "Soup noodles"], ["noodles/?type=Dry", "chopsticks", "Dry noodles"],
     ["noodles/?diet=veg", "leaf", "Vegetarian-friendly"], ["noodles/?diet=vegan", "sprout", "Vegan"], ["noodles/?spice=hot", "flame", "Spicy (3+)"],
     ["noodles/?spice=mild", "drop", "No heat"], ["noodles/?sort=photo", "camera", "With photos first"],
   ];
@@ -346,6 +376,8 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
 }
 
 // Reviews: stored in Supabase (table meon_reviews). Visitors post a star rating and comment; published reviews load live.
+// Google reviews: the Business Profile link when it's set in data/site.json, otherwise MEON on Google Maps.
+const GOOGLE_REVIEWS = site.googleBusinessUrl || site.mapsUrl;
 function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = "" } = {}) {
   const cfg = site.reviews || {};
   if (!cfg.supabaseUrl || !cfg.publishableKey) return "";
@@ -357,12 +389,13 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
       <h2 data-split>${title}</h2>
       ${lead ? `<p class="lead">${lead}</p>` : ""}
       <div class="rv-summary" data-rv-summary><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
+      <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a></div>
       <form class="rv-form" data-rv-form novalidate>
         <fieldset class="rv-rate"><legend>Your rating</legend><div class="rv-rate-stars">${stars}</div></fieldset>
         <label class="field"><span>Your name</span><input name="name" type="text" maxlength="40" autocomplete="given-name" required></label>
         <label class="field"><span>Your review</span><textarea name="comment" rows="4" minlength="3" maxlength="600" required placeholder="${slug ? "How was it? Spice, flavour, toppings you added…" : "Tell us about your visit"}"></textarea></label>
         <label class="hp" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
-        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button>${site.googleBusinessUrl ? `<a class="link-arrow" href="${esc(site.googleBusinessUrl)}" target="_blank" rel="noopener">Also review us on Google ${icon.arrow}</a>` : ""}</div>
+        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button></div>
         <p class="rv-status" data-rv-status aria-live="polite"></p>
         <p class="note">Reviews appear on this site with your first name. Please keep it friendly.</p>
       </form>
@@ -377,9 +410,9 @@ const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffi
 // Videos (src/assets/video): the promo, a vertical cut for Reels/TikTok, and the website tour.
 const VIDEOS = [
   { id: "promo", file: "meon-promo.mp4", poster: "poster-promo.jpg", title: "MEON in under a minute", desc: "What MEON is, how it works and why it's worth the trip.", length: "0:47", iso: "PT47S", dl: "MEON-promo.mp4", label: "Promo · 16:9" },
-  { id: "tour", file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "Search, filters, the roulette, every noodle page, the 3:30 timer, reviews and the QR codes.", length: "3:53", iso: "PT3M53S", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9" },
+  { id: "tour", file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "Search, filters, the roulette, every noodle page, the 3:30 timer, reviews and the QR codes.", length: "3:53", iso: "PT3M53S", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9", hidden: true },
   { id: "vertical", file: "meon-promo-vertical.mp4", poster: "poster-promo-vertical.jpg", title: "Promo for Reels and TikTok", desc: "", length: "0:47", iso: "PT47S", dl: "MEON-promo-vertical.mp4", label: "Promo · 9:16 for Reels and TikTok" },
-].map((v) => ({ ...v, mb: Math.max(1, Math.round(fs.statSync(path.join(SRC, "assets", "video", v.file)).size / 1048576)) }));
+].filter((v) => !v.hidden).map((v) => ({ ...v, mb: Math.max(1, Math.round(fs.statSync(path.join(SRC, "assets", "video", v.file)).size / 1048576)) }));
 const videoLd = VIDEOS.filter((v) => v.desc).map((v) => ({ "@context": "https://schema.org", "@type": "VideoObject", name: v.title, description: v.desc, thumbnailUrl: `${SITE_URL}/assets/video/${v.poster}`, contentUrl: `${SITE_URL}/assets/video/${v.file}`, uploadDate: "2026-10-05", duration: v.iso, publisher: { "@id": `${SITE_URL}/#restaurant` } }));
 const videoPlayer = (v, r, { big = false } = {}) => `<figure class="watch-item${big ? " watch-item--big" : ""}">
   <div class="watch-player" data-video>
@@ -389,6 +422,7 @@ const videoPlayer = (v, r, { big = false } = {}) => `<figure class="watch-item${
   <figcaption><h3>${esc(v.title)}</h3><p>${esc(v.desc)}</p></figcaption>
 </figure>`;
 
+const TICKER = ["Buldak", "Tom yum", "Mi goreng", "Tonkotsu", "Jjajang", "Laksa", "Shin Black", "Pancit canton", "Kimchi", "Salted egg", "Hokkaido miso", "Chapagetti"];
 const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="section-head">
   <div>${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}<h2 data-split>${title}</h2>${lead ? `<p class="lead">${lead}</p>` : ""}</div>${extra}
 </div>`;
@@ -396,10 +430,9 @@ const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="sect
 const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Open in Google Maps" on this page for directions.`],
   ["Can I order online or get delivery?", "No. MEON is dine-in only. Walk in, choose a packet from the noodle wall, add toppings and cook it at your own station."],
-  ["How many instant noodles do you have?", `We stock ${noodles.length} instant noodles from 12 countries, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
+  ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
   ["Do you have vegetarian or vegan noodles?", `Yes. ${noodles.filter((n) => n.dietTokens.includes("veg")).length} noodles are vegetarian-friendly and ${noodles.filter((n) => n.dietTokens.includes("vegan")).length} are vegan. Use the diet filter in the noodle library, and always check the packet if you have allergies.`],
   ["What are the QR codes on the shelves for?", "Every packet on the wall has a QR code. Scan it with your phone camera to open that noodle's page with its flavour, spice level, the cooking machine setting and a cook timer."],
-  ["Is there a member discount?", "Yes. The MEON Member Card is free. Load it in store, pay like cash and get 10% off eligible food items every visit."],
   ["How spicy are the noodles?", "Every noodle has a spice rating from 0 (no heat) to 5 (extreme). You can filter the library by spice level or let the roulette pick for you."],
 ];
 
@@ -416,38 +449,43 @@ addPage("", layout({
   active: "home",
   preload: "assets/img/photos/bowl-side.webp",
   jsonld: videoLd,
-  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}: ${noodles.length} noodles from 12 countries, a toppings bar and your own cooking station. Every packet has its own page.`,
+  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}: ${COUNT} noodles ${REGION}, a toppings bar and your own cooking station. Every packet has its own page.`,
   body: (r) => `
 <section class="hero hero--launch" data-anim>
   ${crew()}
   <div class="wrap">
-    <a class="hero-tag" href="${r("noodles/")}"><span class="dot" aria-hidden="true"></span>${noodles.length} noodles · 12 countries · dine-in only</a>
+    <a class="hero-tag" href="${r("noodles/")}"><span class="dot" aria-hidden="true"></span>${COUNT} noodles · across Asia · dine-in only</a>
     <h1 class="hero-title" data-split>Slurp the <span class="red">world.</span></h1>
     <p class="typer" aria-live="off">Tonight I'm craving <span class="typed" data-typer='${esc(JSON.stringify(["Buldak fire noodles", "creamy tom yum", "Mi Goreng", "tonkotsu ramen", "black-bean jjajang", "Penang white curry", "masala noodles", "kimchi ramen"]))}'>Buldak fire noodles</span></p>
-    <p class="lead">Instant noodles from Korea to Australia, a toppings bar and a cooking station that's all yours. Walk in, pick a packet and make it your way.</p>
+    <p class="lead">Instant noodles from Korea to Indonesia, a toppings bar and a cooking station that's all yours. Walk in, pick a packet and make it your way.</p>
     <div class="actions">
       <a class="btn btn--red" href="${r("noodles/")}" data-magnetic>Explore the noodle wall ${icon.arrow}</a>
       <button class="btn btn--line" type="button" data-search-open>${icon.search} Find a noodle</button>
     </div>
-    <ul class="checks"><li>Dine-in only</li><li>QR code on every shelf</li><li>Cook timer on every page</li><li>Members save 10%</li></ul>
+    <ul class="checks"><li>Dine-in only</li><li>QR code on every shelf</li><li>3:30 cook timer on every page</li></ul>
 
     <div class="stage reveal">
-      <div class="stage-float stage-float--a"><span class="ico">${svgIcon("bowl")}</span><span><strong>${noodles.length} noodles</strong><small>on the wall right now</small></span></div>
+      <div class="stage-float stage-float--a"><span class="ico">${svgIcon("bowl")}</span><span><strong>${COUNT} noodles</strong><small>on the wall right now</small></span></div>
       <div class="stage-float stage-float--b"><span class="ico">${svgIcon("clock")}</span><span><strong>Machine setting</strong><small>on every noodle page</small></span></div>
       <div class="stage-grid">
         <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-side.webp")}" alt="A MEON bowl of black-bean noodles with sliced beef and a soft egg" width="900" height="900" fetchpriority="high"><span class="stage-label">${svgIcon("chopsticks")} Cooked your way</span></figure>
         <div class="stage-red">${logoAnimated()}</div>
         <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-top-egg.webp")}" alt="Noodles topped with enoki, egg and fishcake" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("egg")} Top it up</span></figure>
-        <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-side-seaweed.webp")}" alt="A MEON bowl with seaweed, beef and noodles" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("bowl")} ${noodles.length} to choose from</span></figure>
+        <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-side-seaweed.webp")}" alt="A MEON bowl with seaweed, beef and noodles" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("bowl")} ${COUNT} to choose from</span></figure>
         <figure class="img-reveal"><img src="${r("assets/img/photos/bowl-top-dry.webp")}" alt="Dry noodles with beef, fishballs and seaweed" width="900" height="900" loading="lazy"><span class="stage-label">${svgIcon("flame")} Pick your heat</span></figure>
       </div>
     </div>
-    ${facts([[noodles.length, "Instant noodles"], [12, "Countries"], [toppings.length, "Toppings and sides"], [10, "Off for members", "%"]])}
+    ${facts([[100, "Instant noodles", "+"], [toppings.length, "Toppings and sides"], [210, "Seconds to a perfect bowl"], [0, "Online orders. Dine-in only."]])}
   </div>
 </section>
 
+<div class="ticker" data-hscroll aria-hidden="true">
+  <div class="ticker-band ticker-band--red"><div class="wall-row" data-speed="1.4">${TICKER.concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("bowl")}`).join("")}</div></div>
+  <div class="ticker-band ticker-band--ink"><div class="wall-row" data-speed="-1.1">${TICKER.slice().reverse().concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("flame")}`).join("")}</div></div>
+</div>
+
 <section class="wall-sec" aria-label="On the noodle wall">
-  <div class="wrap">${sectionHead("On the wall now", "Pick a packet. Any packet.", `<a class="link-arrow" href="${r("noodles/")}">See all ${noodles.length} ${icon.arrow}</a>`)}</div>
+  <div class="wrap">${sectionHead("On the wall now", "Pick a packet. Any packet.", `<a class="link-arrow" href="${r("noodles/")}">See them all ${icon.arrow}</a>`)}</div>
   <div class="wall" data-hscroll aria-hidden="true">
     <div class="wall-row" data-speed="1">${wallImgs(withPhotos.slice(0, half), r)}</div>
     <div class="wall-row" data-speed="-1">${wallImgs(withPhotos.slice(half), r)}</div>
@@ -463,21 +501,21 @@ addPage("", layout({
       <div class="how-progress" aria-hidden="true"><span></span></div>
     </div></div>
     <ol class="how-steps" data-how>
-      <li class="how-step reveal"><span class="hs-num">01</span>${stepArt.packet}<div><h3>Pick a packet</h3><p>Browse ${noodles.length} noodles from 12 countries. Scan the QR code on the shelf to see what any packet tastes like.</p></div></li>
+      <li class="how-step reveal"><span class="hs-num">01</span>${stepArt.packet}<div><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Scan the QR code on the shelf to see what any packet tastes like.</p></div></li>
       <li class="how-step reveal"><span class="hs-num">02</span>${stepArt.egg}<div><h3>Add toppings</h3><p>Egg, cheese, beef, fishcake, greens and more from the toppings bar.</p></div></li>
       <li class="how-step reveal"><span class="hs-num">03</span>${stepArt.pot}<div><h3>Cook it your way</h3><p>Set the cooking machine to the program on the noodle's page and start its timer.</p></div></li>
-      <li class="how-step reveal"><span class="hs-num">04</span>${stepArt.bowl}<div><h3>Sit down and eat</h3><p>Grab a seat and enjoy it hot. Members save 10% on eligible food every visit.</p></div></li>
+      <li class="how-step reveal"><span class="hs-num">04</span>${stepArt.bowl}<div><h3>Sit down and eat</h3><p>Grab a seat and enjoy it hot. Slurping is encouraged.</p></div></li>
     </ol>
   </div>
 </section>
 
 <section class="section section--ink watch" id="watch">
   <div class="wrap">
-    ${sectionHead("Watch", "See MEON before you visit.", "", "A one-minute look at the noodle bar, and a full tour of this website. Download them to share.")}
+    ${sectionHead("Watch", "See MEON before you visit.", "", "A one-minute look at the noodle bar. Download it to share, in widescreen or vertical for Reels and TikTok.")}
     <div class="watch-grid">
       ${videoPlayer(VIDEOS[0], r, { big: true })}
       <div class="watch-side">
-        ${videoPlayer(VIDEOS[1], r)}
+        ${VIDEOS.find((v) => v.id === "tour") ? videoPlayer(VIDEOS.find((v) => v.id === "tour"), r) : ""}
         <div class="watch-dl">
           <p class="watch-dl-h">${svgIcon("download")} Download</p>
           <ul>${VIDEOS.map((v) => `<li><a href="${r(`assets/video/${v.file}`)}" download="${v.dl}"><span>${esc(v.label)}</span><small>${v.length} · MP4 · ${v.mb} MB</small>${svgIcon("download")}</a></li>`).join("")}</ul>
@@ -518,52 +556,52 @@ addPage("", layout({
 
 <section class="section section--soft">
   <div class="wrap">
-    ${sectionHead("Twelve countries", "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries ${icon.arrow}</a>`)}
+    ${sectionHead("From across Asia", "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries ${icon.arrow}</a>`)}
     <div class="country-list">
       ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}</span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
     </div>
   </div>
 </section>
 
-<section class="section" id="spice">
+<section class="section heat" id="spice" data-heat>
   <div class="wrap split">
     <div class="reveal">
-      <p class="eyebrow">The spice ladder</p>
-      <h2 data-split>Rated from 0 to 5.</h2>
-      <p class="lead">Every noodle has a spice rating using our chilli scale. Start where you're comfortable and work your way up.</p>
-      <a class="btn btn--line" href="${r("noodles/?spice=hot")}">Show the hottest ${icon.arrow}</a>
+      <p class="eyebrow">Heat check</p>
+      <h2 data-split>How brave are you feeling?</h2>
+      <p class="lead">Every noodle has a spice rating from 0 to 5. Drag the chilli to your level and we'll show you what to grab.</p>
+      <label class="heat-slider"><span class="visually-hidden">Spice level</span><input type="range" min="0" max="5" step="1" value="2" data-heat-input aria-valuetext="2, Medium"></label>
+      <div class="heat-scale" aria-hidden="true">${SPICE_LADDER.map(([lvl]) => `<span>${lvl}</span>`).join("")}</div>
     </div>
-    <div class="ladder reveal">
-      ${SPICE_LADDER.map(([lvl, name, desc]) => `<a href="${r(`noodles/?spice=${lvl}`)}">${spiceMeter(lvl, r)}<span><strong>${lvl} · ${name}</strong><small>${desc}</small></span><span class="count">${countFor((n) => n.spiceKey === lvl)}</span></a>`).join("")}
+    <div class="heat-card reveal">
+      <div class="heat-top">
+        <div class="heat-meo" data-heat-meo>${mascot({ acc: "chilli", color: "#ff5b5b" })}<span class="sweat s1"></span><span class="sweat s2"></span><span class="sweat s3"></span></div>
+        <div><p class="heat-level" data-heat-level>2 · Medium</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[2][2])}</p></div>
+      </div>
+      <ul class="heat-picks" data-heat-picks></ul>
+      <a class="btn btn--red" data-heat-link href="${r("noodles/?spice=2")}" data-magnetic>See all level <span data-heat-n>2</span> noodles ${icon.arrow}</a>
+      <script type="application/json" id="heat-copy">${json(SPICE_LADDER)}</script>
     </div>
   </div>
 </section>
 
-<section class="section section--soft toppings-feature">
+<section class="section section--soft bowl-builder" id="build" data-bowl>
   <div class="wrap split split--rev">
-    <div class="duo">
-      <figure class="img-reveal" data-parallax="-0.04"><img src="${r("assets/img/photos/topping-fishcake.webp")}" alt="A pig-shaped fishcake" width="900" height="900" loading="lazy"></figure>
-      <figure class="img-reveal" data-parallax="0.06"><img src="${r("assets/img/photos/topping-enoki.webp")}" alt="Fresh enoki mushrooms" width="900" height="900" loading="lazy"></figure>
+    <div class="bb-stage reveal">
+      <div class="bb-bowl" data-bowl-stage>
+        <svg class="bb-bowl-back" viewBox="0 0 400 260" aria-hidden="true"><ellipse cx="200" cy="70" rx="188" ry="52" fill="#f3d27a" stroke="#17110f" stroke-width="6"/><path d="M40 66c20-14 40 10 60-4s40 10 60-4 40 10 60-4 40 10 60-4 40 10 60-4" fill="none" stroke="#e6b54a" stroke-width="7" stroke-linecap="round"/><path d="M60 86c20-14 40 10 60-4s40 10 60-4 40 10 60-4 40 10 60-4" fill="none" stroke="#e6b54a" stroke-width="7" stroke-linecap="round"/></svg>
+        <div class="bb-toppings" data-bowl-items></div>
+        <svg class="bb-bowl-front" viewBox="0 0 400 260" aria-hidden="true"><path d="M12 70h376c0 104-84 182-188 182S12 174 12 70z" fill="#fff" stroke="#17110f" stroke-width="6" stroke-linejoin="round"/><path d="M40 120h320" stroke="#ec1b25" stroke-width="12"/><rect x="170" y="140" width="60" height="50" rx="4" fill="#ec1b25"/><text x="200" y="172" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#fff">meon</text></svg>
+        <div class="bb-steam" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+      <p class="bb-count" aria-live="polite" data-bowl-count>Your bowl is empty. Add something.</p>
     </div>
     <div class="reveal">
       <p class="eyebrow">Toppings bar</p>
-      <h2 data-split>The packet is only the start.</h2>
-      <p class="lead">Jammy eggs, melted cheese, beef and meatballs ready in the microwave, crab sticks, shrimp katsu, enoki and seaweed. Build a bowl that's yours.</p>
-      <a class="btn btn--line" href="${r("toppings/")}">See every topping ${icon.arrow}</a>
+      <h2 data-split>Build your bowl.</h2>
+      <p class="lead">The packet is only the start. Tap a topping to drop it in, then find it all at the toppings bar.</p>
+      <div class="bb-chips" role="group" aria-label="Add a topping">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
+      <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("toppings/")}">See every topping ${icon.arrow}</a></div>
     </div>
-  </div>
-  <div class="word-band" data-hscroll aria-hidden="true"><div class="wall-row" data-speed="0.6">${[...toppings, ...toppings].map((t) => `<span>${esc(t.name)}</span>`).join("")}</div></div>
-</section>
-
-<section class="section section--red">
-  <div class="wrap split">
-    <div class="reveal">
-      <p class="eyebrow">MEON Member Card</p>
-      <h2 data-split>Free card. 10% off, every visit.</h2>
-      <p class="lead">Pick up a card at the counter, load it up and pay like cash. Members get <strong>10% off eligible food items</strong>.</p>
-      <a class="btn btn--white" href="${r("meon-card/")}" data-magnetic>How the card works ${icon.arrow}</a>
-    </div>
-    <div class="reveal card-stage"><div class="member-card" data-parallax="0.05"><img src="${r("assets/img/photos/meon-member-card.webp")}" alt="The MEON Member Card featuring the MEON mascot and friends" width="945" height="591" loading="lazy"></div></div>
   </div>
 </section>
 
@@ -588,7 +626,7 @@ ${ctaBand(r, { title: `Find us at ${esc(site.suburb)}.` })}
 addPage("noodles/", layout({
   urlPath: "noodles/",
   title: "Noodle library",
-  seoTitle: `All ${noodles.length} Instant Noodles from 12 Countries · MEON Noodles Perth`,
+  seoTitle: `${COUNT} Instant Noodles from Across Asia · MEON Noodles Perth`,
   active: "noodles/",
   jsonld: [{
     "@context": "https://schema.org",
@@ -604,9 +642,9 @@ addPage("noodles/", layout({
       hasMenuItem: noodles.filter((n) => n.country === c.name).map((n) => ({ "@type": "MenuItem", name: `${n.brand} ${n.name}`, url: `${SITE_URL}/${n.url}`, image: n.img ? `${SITE_URL}/${n.img}` : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined })),
     })),
   }],
-  description: `Browse all ${noodles.length} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
+  description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-${pageHero(r, { crumbs: [["Noodles"]], eyebrow: `${noodles.length} noodles · 12 countries`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, seed: 1 })}
+${pageHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, seed: 1 })}
 <div data-library>
   <div class="filters">
     <div class="wrap">
@@ -761,7 +799,7 @@ addPage("countries/", layout({
   active: "countries/",
   description: "Explore MEON's instant noodles country by country: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Countries"]], eyebrow: "Twelve countries", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", seed: 2 })}
+${pageHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", seed: 2 })}
 <section class="section section--tight"><div class="wrap">
   <div class="country-list country-list--full">
     ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
@@ -821,29 +859,21 @@ ${ctaBand(r)}
 `,
 }));
 
-// ---------- MEON Card ----------
+// ---------- MEON Card (not launched yet: unlinked, not indexed, not in the sitemap) ----------
 addPage("meon-card/", layout({
   urlPath: "meon-card/",
-  title: "MEON Member Card",
-  active: "meon-card/",
+  title: "MEON Card · Coming soon",
+  noindex: true,
   image: "assets/img/photos/meon-member-card.webp",
-  description: "The MEON Member Card is free: load money in store, pay like cash and get 10% off eligible food items every visit.",
+  description: "The MEON Card is coming soon: every $20 you top up comes with a $5 voucher to use on the spot.",
   body: (r) => `
-${pageHero(r, { crumbs: [["MEON Card"]], eyebrow: "Free card · 10% off", title: "MEON Member Card.", lead: "Get your card free at the counter, top it up and pay like cash. Members get 10% off eligible food items, every visit.", aside: `<div class="member-card member-card--hero" data-parallax="0.05"><img src="${r("assets/img/photos/meon-member-card.webp")}" alt="The MEON Member Card" width="945" height="591"></div>` })}
+${pageHero(r, { crumbs: [["MEON Card"]], eyebrow: "Coming soon", title: "The MEON Card.", lead: "Top up $20, get a $5 voucher to use on the spot. Every top-up, every time.", aside: `<div class="member-card member-card--hero" data-parallax="0.05"><img src="${r("assets/img/photos/meon-member-card.webp")}" alt="The MEON Card" width="945" height="591"></div>` })}
 <section class="section"><div class="wrap">
-  ${sectionHead("How it works", "Four steps to saving.")}
+  ${sectionHead("How it will work", "Top up. Get a voucher. Eat.")}
   <ol class="icon-steps">
-    ${[["card", "Get your card", "Ask the crew at the counter. The card is free."], ["coins", "Load it up", "Load a minimum amount to activate it, then top up in store whenever you like."], ["bowl", "Pay like cash", "Quick checkout and an easy way to track what you spend."], ["spark", "Save 10%", "Cardholders get 10% off eligible food items: noodles, toppings and sides."]].map(([ic, h, t], i) => `<li class="reveal" style="--rd:${i * 0.06}s"><span class="is-ic">${svgIcon(ic)}</span><span class="hs-num">0${i + 1}</span><h3>${h}</h3><p>${t}</p></li>`).join("")}
+    ${[["card", "Get the card", "Pick one up at the counter once it launches."], ["coins", "Top up $20", "Load your card in store, as often as you like."], ["spark", "Get $5 on the spot", "Every $20 top-up comes with a $5 voucher, ready to use straight away."], ["bowl", "Spend it on noodles", "Use your balance and your voucher on your next bowl."]].map(([ic, h, t], i) => `<li class="reveal" style="--rd:${i * 0.06}s"><span class="is-ic">${svgIcon(ic)}</span><span class="hs-num">0${i + 1}</span><h3>${h}</h3><p>${t}</p></li>`).join("")}
   </ol>
-</div></section>
-<section class="section section--soft"><div class="wrap split">
-  <div class="reveal">
-    <p class="eyebrow">Current perks</p>
-    <h2 data-split>Member perks.</h2>
-    <ul class="perk-list">${deals.map((d) => `<li>${svgIcon(d.icon || "spark")}<span><strong>${esc(d.title)}</strong>${esc(d.detail)}</span></li>`).join("")}</ul>
-    <p class="note">Discounts apply to eligible food items only. Ask in store for full terms.</p>
-  </div>
-  <div class="reveal mascot-stage" data-anim>${mascot({ label: "Meo, the MEON mascot", acc: "crown", color: "#ff8fb0", className: "mascot-lg" })}</div>
+  <p class="note">The card isn't available yet. Details may change before launch, so ask the crew in store.</p>
 </div></section>
 ${ctaBand(r)}
 `,
@@ -854,13 +884,13 @@ addPage("about/", layout({
   urlPath: "about/",
   title: "About MEON",
   active: "about/",
-  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with noodles from 12 countries and a toppings bar.`,
+  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a toppings bar.`,
   body: (r) => `
 ${pageHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", aside: `<div class="about-logo" data-parallax="0.05">${logoAnimated()}</div>` })}
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2 data-split>What we do.</h2>
-    <p class="lead">${noodles.length} instant noodles from 12 countries, in one place. Sweet or spicy, soup or dry: pick a packet, add toppings and cook it at your own station.</p>
+    <p class="lead">${COUNT} instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add toppings and cook it at your own station.</p>
     <p>Every packet on our wall has a page on this site. Scan the QR code on the shelf to see what it tastes like, how hot it is, which machine setting to use and which toppings go well with it.</p>
     <blockquote class="pull">“Meon is a versatile instant noodle celebrating cultural diversity, inviting creativity and fun with every bowl. Enjoy it as is or customise with toppings to make each meal uniquely yours.”</blockquote>
   </div>
@@ -872,7 +902,7 @@ ${pageHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know M
 </div></section>
 <section class="section section--soft"><div class="wrap">
   <ul class="values">
-    <li class="reveal">${svgIcon("globe")}<h3>Twelve countries</h3><p>Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></li>
+    <li class="reveal">${svgIcon("globe")}<h3>From across Asia</h3><p>Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></li>
     <li class="reveal" style="--rd:.06s">${svgIcon("chef")}<h3>Your way</h3><p>Choose the packet, the toppings and how long it cooks.</p></li>
     <li class="reveal" style="--rd:.12s">${svgIcon("chair")}<h3>Dine-in</h3><p>${esc(site.orderingNote)}</p></li>
   </ul>
@@ -905,7 +935,6 @@ ${pageHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.c
     <ul class="perk-list">
       <li>${svgIcon("chair")}<span><strong>Dine-in only.</strong>We don't take online or phone orders. Choosing the packet is half the fun.</span></li>
       <li>${svgIcon("qr")}<span><strong>Scan the shelf.</strong>Every noodle has a QR code that opens its page, with the machine setting and a cook timer.</span></li>
-      <li>${svgIcon("card")}<span><strong>Members save 10%.</strong>Ask about the free <a href="${r("meon-card/")}">MEON Member Card</a> at the counter.</span></li>
       <li>${svgIcon("alert")}<span><strong>Allergies?</strong>Check the packet and tell the crew. We'll help you choose.</span></li>
     </ul>
   </div>
@@ -928,7 +957,6 @@ const qrOpts = { errorCorrectionLevel: "M", margin: 2, color: { dark: "#17110fff
 const extraQR = [
   { slug: "home", name: "MEON home", url: `${SITE_URL}/?src=qr` },
   { slug: "noodle-library", name: "Noodle library", url: `${SITE_URL}/noodles/?src=qr` },
-  { slug: "meon-card", name: "MEON Member Card", url: `${SITE_URL}/meon-card/?src=qr` },
 ];
 for (const item of [...noodles.map((n) => ({ slug: n.slug, url: n.qrUrl })), ...extraQR]) {
   write(`assets/qr/${item.slug}.svg`, await QRCode.toString(item.url, { ...qrOpts, type: "svg" }));
@@ -979,7 +1007,7 @@ addPage("qr-generator/", layout({
       <div class="field"><label for="qg-preset">Start from</label>
         <select id="qg-preset">
           <option value="">Custom link or text</option>
-          <optgroup label="Pages"><option value="/">Home</option><option value="/noodles/">Noodle library</option><option value="/meon-card/">MEON Member Card</option><option value="/toppings/">Toppings</option><option value="/visit/">Visit us</option></optgroup>
+          <optgroup label="Pages"><option value="/">Home</option><option value="/noodles/">Noodle library</option><option value="/toppings/">Toppings</option><option value="/visit/">Visit us</option></optgroup>
           ${countries.map((c) => `<optgroup label="${esc(c.name)}">${noodles.filter((n) => n.country === c.name).map((n) => `<option value="/${n.url}" data-label="${esc(n.name)}">${esc(n.brand)} · ${esc(n.name)}</option>`).join("")}</optgroup>`).join("")}
         </select></div>
       <div class="field"><label for="qg-url">Link or text</label><input id="qg-url" type="text" value="${esc(SITE_URL)}/" spellcheck="false"></div>
@@ -1043,7 +1071,6 @@ const searchIndex = [
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
     ["Dry noodles", "Filter: dry, mix-and-eat", "noodles/?type=Dry", "chopsticks"],
     ["Soup noodles", "Filter: soup", "noodles/?type=Soup", "soup"],
-    ["MEON Member Card", "Free card · 10% off for members", "meon-card/", "card"],
     ["Visit us", `${site.suburb}, ${site.city} · dine-in only`, "visit/", "pin"],
     ["About MEON", "Our story", "about/", "heart"],
     ["Shelf QR codes", "Staff: printable QR codes", "qr/", "qr"],
@@ -1053,8 +1080,8 @@ const searchIndex = [
 write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 const pageImages = new Map([["", ["assets/img/photos/bowl-side.webp", "assets/img/photos/bowl-top-egg.webp"]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
-write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${noodles.length} instant noodles from 12 countries, a toppings bar and self-cook stations. Dine-in only, no online orders.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/)\n- [MEON Member Card](${SITE_URL}/meon-card/): free card, 10% off eligible food\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}`).join("\n")}\n`);
+write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr") && !p.startsWith("meon-card")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
+write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a toppings bar and self-cook stations. Dine-in only, no online orders.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/)\n- [MEON Member Card](${SITE_URL}/meon-card/): free card, 10% off eligible food\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, funNote: n.funNote, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
