@@ -71,7 +71,14 @@
   var toggle = $(".nav-toggle");
   var nav = $("#site-nav");
   if (toggle && nav) {
+    // Start the phone menu right under the header (the announcement bar can push the header down).
+    var placeMenu = function () {
+      var hd = $("[data-header]");
+      if (hd) nav.style.setProperty("--nav-top", Math.max(0, Math.round(hd.getBoundingClientRect().bottom)) + "px");
+    };
+    window.addEventListener("resize", function () { if (nav.classList.contains("is-open")) placeMenu(); }, { passive: true });
     var setOpen = function (open) {
+      if (open) placeMenu();
       toggle.setAttribute("aria-expanded", String(open));
       toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       nav.classList.toggle("is-open", open);
