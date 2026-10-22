@@ -115,6 +115,8 @@ Reviews on the website do not count towards Google rankings. For that, use the G
 
 ## Updating the Views Log (only when asked)
 
+Vercel Web Analytics is off for now: it isn't enabled on the Vercel project, so the site no longer loads its script. To use the Views Log, first enable Web Analytics in Vercel, then set `analytics.vercel` to `true` in `data/site.json` and redeploy.
+
 1. Open Vercel → the project → **Analytics** and choose the date range.
 2. Copy the totals and the top pages (QR scans show as URLs ending `?src=qr`).
 3. Add a row to *MEON — Website Views Log*: date range, visitors, page views, QR scans, top 5 noodles, notes.
