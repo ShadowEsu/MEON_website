@@ -70,6 +70,10 @@
   "master-kong-kangsifu-braised-beef-instant-noodle": {
    "price": 4.2
   },
+  "master-kong-kangsifu-braised-beef-instant-noodle-spicy-red": {
+   "price": 4.2,
+   "weightG": 104
+  },
   "master-kong-kangsifu-mushroom-chicken-noodle-soup": {
    "price": 4.2
   },
