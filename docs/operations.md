@@ -137,8 +137,11 @@ After any change: `npm run build && npm run check`. Pushing to GitHub redeploys 
 
 ## Still to confirm
 
-- Street address, phone, email and opening hours
-- The final domain (do this before printing QR codes)
+- Street address, postcode, phone, email and opening hours, copied exactly from the Google Business Profile into `data/site.json` (Google treats the address as required for a local business)
+- The official suburb: "Canning Bridge" is a precinct, not a postal suburb (it spans Applecross/Mount Pleasant 6153 and Como 6152). Put the suburb from the Business Profile into `suburb` in `data/site.json`
+- Whether MEON already has a Google Maps place (an online directory copy of a Facebook page lists "Meon Noodles Perth Australia" at Shop 7/8, 45 Francis St, Northbridge). If there is one, claim it rather than making a second listing
+- The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy. If that's MEON's company, point it at the Vercel project rather than buying a new domain
+- Nongshim Shin Noodle Soup Original is marked vegetarian-friendly in the Drive doc; check the packet on the wall (many Shin Ramyun versions list beef)
 - 20 noodles have "spice rating coming soon" (listed in `data/spice_review.json`)
 - 130 noodles still need a shoot photo (they show an illustrated packet)
 - The updated noodle list of what is actually on the wall

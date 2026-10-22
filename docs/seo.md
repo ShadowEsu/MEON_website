@@ -5,19 +5,20 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 ## Already done in the website
 
 - **Structured data (schema.org)** that Google reads directly:
-  - `Restaurant`: name, logo, photos, cuisine, price range, map link, address (plus phone, hours and coordinates once you add them)
-  - `WebSite` with a search box
+  - `Restaurant` on the home page: name, logo, photos, cuisine, price range, menu link, map link and suburb. It still needs the street address, postcode, phone, opening hours and map coordinates: Google treats the address as required for a local business, so add them in `data/site.json` once they match the Google Business Profile.
+  - `WebSite`
   - a full `Menu` of all 199 noodles, grouped by country
-  - a `MenuItem` for every noodle (brand, country, weight, diet, and the price where the till lists it)
-  - `BreadcrumbList` on 211 pages
+  - a `MenuItem` for every noodle (description with country and packet size, diet, and the price where the till lists it)
+  - `BreadcrumbList` on every noodle and country page
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
-- **Titles and descriptions**: every page has its own keyword-rich title, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Canning Bridge, Perth".
-- **199 unique noodle pages**, each with real content. These rank for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
+  - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
+- **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Canning Bridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
+- **199 unique noodle pages**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
 - **An FAQ on the Visit page**: questions people actually ask (online orders, vegan options, location, QR codes, member card).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
 - **Robots**: `robots.txt` points to the sitemap, and the staff QR pages are hidden from Google.
-- **AI search**: `llms.txt` gives AI assistants (ChatGPT, Gemini, Perplexity) a clean summary of MEON and every noodle.
+- **AI assistants**: `llms.txt` gives AI assistants a clean summary of MEON and every noodle. Google says it has no effect on Google Search.
 - **Speed (a ranking factor)**:
   - the main photo is preloaded
   - images are sized and lazy-loaded

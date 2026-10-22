@@ -128,6 +128,7 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     servesCuisine: ["Instant noodles", "Ramen", "Korean", "Japanese", "Indonesian", "Asian"],
     priceRange: site.priceRange || "$",
     hasMenu: `${SITE_URL}/noodles/`,
+    menu: `${SITE_URL}/noodles/`,
     acceptsReservations: false,
     hasMap: site.mapsUrl,
     telephone: site.phone || undefined,
@@ -148,7 +149,8 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     potentialAction: { "@type": "SearchAction", target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/noodles/?q={search_term_string}` }, "query-input": "required name=search_term_string" },
   };
   const ld = [
-    ...(urlPath === "" ? [restaurant, website] : [{ "@context": "https://schema.org", "@type": "Restaurant", "@id": `${SITE_URL}/#restaurant`, name: "MEON Noodles", url: SITE_URL + "/" }]),
+    // The full Restaurant node lives on the home page only; a name-and-url stub on other pages reads as an incomplete local business.
+    ...(urlPath === "" ? [restaurant, website] : []),
     ...jsonld,
   ];
   return `<!doctype html>
@@ -186,7 +188,7 @@ ${site.googleSiteVerification ? `<meta name="google-site-verification" content="
 ${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}
 <link rel="stylesheet" href="${r("assets/css/site.css")}?v=${BUILD_ID}">
 <script>(function(d){d.className=d.className.replace("no-js","js");${intro ? `try{if(!sessionStorage.getItem("meon-intro")&&!matchMedia("(prefers-reduced-motion: reduce)").matches)d.className+=" intro-on"}catch(e){}` : ""}})(document.documentElement)</script>
-<script type="application/ld+json">${json(ld.length === 1 ? ld[0] : ld)}</script>
+${ld.length ? `<script type="application/ld+json">${json(ld.length === 1 ? ld[0] : ld)}</script>` : ""}
 ${analytics}
 </head>
 <body data-root="${root}">
@@ -701,13 +703,13 @@ noodles.forEach((n, idx) => {
   addPage(n.url, layout({
     urlPath: n.url,
     title: `${n.name} – ${n.brand}`,
-    seoTitle: `${n.brand} ${n.name} (${n.country}) · Instant Noodles at MEON Perth`,
+    seoTitle: [`${n.brand} ${n.name} (${n.country}) · Instant Noodles at MEON Perth`, `${n.brand} ${n.name} (${n.country}) · MEON Perth`, `${n.brand} ${n.name} · MEON Perth`].find((t) => t.length <= 65) || `${n.brand} ${n.name} · MEON Perth`,
     active: "noodles/",
     image: n.img || "assets/img/photos/bowl-side.webp",
     preload: n.img || "",
     description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)}${n.type ? ` ${n.type} noodle.` : ""}${n.unrated ? "" : ` Spice ${n.spice}/5.`}${n.machine ? ` Machine setting ${n.machine}.` : ""}${n.price ? ` Price ${money(n.price)}.` : ""}`,
     jsonld: [
-      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, brand: { "@type": "Brand", name: n.brand }, countryOfOrigin: { "@type": "Country", name: n.country }, weight: n.weightG ? { "@type": "QuantitativeValue", value: n.weightG, unitCode: "GRM" } : undefined, offers: n.price ? { "@type": "Offer", price: n.price.toFixed(2), priceCurrency: "AUD" } : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined, isPartOf: { "@id": `${SITE_URL}/noodles/#menu` } },
+      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}${n.weightG ? `, ${n.weightG} g packet` : ""}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, offers: n.price ? { "@type": "Offer", price: n.price.toFixed(2), priceCurrency: "AUD" } : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
         { "@type": "ListItem", position: 2, name: "Noodles", item: `${SITE_URL}/noodles/` },
@@ -801,9 +803,9 @@ ${ctaBand(r, { title: "Hungry for another?", text: "Take this packet off the wal
 addPage("countries/", layout({
   urlPath: "countries/",
   title: "Noodles by country",
-  seoTitle: "Instant Noodles by Country: Korea, Japan, Indonesia and more · MEON Perth",
+  seoTitle: "Instant Noodles by Country: Korea, Japan and more · MEON Perth",
   active: "countries/",
-  description: "Explore MEON's instant noodles country by country: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.",
+  description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
 ${pageHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", seed: 2 })}
 <section class="section section--tight"><div class="wrap">
@@ -828,7 +830,7 @@ for (const c of countries) {
       { "@context": "https://schema.org", "@type": "ItemList", name: `${c.name} instant noodles at MEON`, numberOfItems: list.length, itemListElement: list.map((n, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE_URL}/${n.url}`, name: `${n.brand} ${n.name}` })) },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Countries", item: `${SITE_URL}/countries/` }, { "@type": "ListItem", position: 3, name: c.name, item: `${SITE_URL}/countries/${c.slug}/` }] },
     ],
-    description: `${list.length} instant noodles from ${c.name} at MEON ${site.suburb}. ${c.headline}`,
+    description: `${list.length} instant noodles from ${c.name === "Philippines" ? "the Philippines" : c.name} at MEON ${site.suburb}, Perth. ${c.headline} Every packet has its own page with cooking steps and a cook timer.`,
     body: (r) => `
 ${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: plural(list.length, "noodle"), title: esc(c.name), lead: `<strong>${esc(c.headline)}</strong> ${esc(c.intro)}`, actions: `<a class="btn btn--red" href="${r(`noodles/?country=${c.code}`)}" data-magnetic>Filter in the library ${icon.arrow}</a>`, aside: `<div class="flag-hero" data-parallax="0.06">${flag(c.code, r, { cls: "flag flag--hero", w: 360 })}</div>`,
   after: facts([[list.length, "Noodles"], [list.filter((n) => n.type === "Soup").length, "Soup"], [list.filter((n) => n.type === "Dry").length, "Dry"], [list.filter((n) => n.spiceKey >= 3).length, "Spicy (3+)"]]) })}
@@ -850,9 +852,9 @@ const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 addPage("toppings/", layout({
   urlPath: "toppings/",
   title: "Toppings & sides",
-  seoTitle: "Noodle Toppings and Sides: Egg, Cheese, Beef, Fishcake · MEON Perth",
+  seoTitle: "Noodle Toppings, Sides and Drinks · MEON Perth",
   active: "toppings/",
-  description: "Toppings, sides and drinks at MEON: eggs, cheese, beef and meatballs, fishcake, crab sticks, shrimp katsu, mushrooms, greens and more, with prices for sides and drinks.",
+  description: "Toppings, sides and drinks at MEON: eggs, cheese, beef, fishcake, crab sticks, mushrooms, greens and more, plus prices for sides and drinks.",
   body: (r) => `
 ${pageHero(r, { crumbs: [["Toppings"]], eyebrow: `${toppings.length} toppings and sides`, title: "Toppings and sides.", lead: "The packet is where it starts. Add protein, greens and extras until the bowl is exactly how you like it.", actions: groups.map((g) => `<a class="btn btn--line btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--line btn--sm" href="#sides-and-drinks">Sides &amp; drinks</a>`,
   aside: `<div class="plate-stack">${["topping-fishcake", "topping-enoki", "topping-seaweed"].map((f, i) => `<img src="${r(`assets/img/photos/${f}.webp`)}" alt="" width="900" height="900" style="--i:${i}" data-parallax="${(0.04 + i * 0.04).toFixed(2)}">`).join("")}</div>` })}
@@ -931,7 +933,7 @@ addPage("visit/", layout({
   seoTitle: `Visit MEON Noodles · Instant Noodle Bar in ${site.suburb}, Perth`,
   active: "visit/",
   jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }],
-  description: `Find MEON at ${site.suburb}, ${site.city} ${site.state}. Dine-in only: walk in, pick a packet and start cooking.`,
+  description: `Find MEON at ${site.suburb}, ${site.city} ${site.state}. Dine-in only: walk in, pick a packet from the noodle wall, add toppings and cook it at your own station.`,
   body: (r) => `
 ${pageHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), seed: 7, actions: `<a class="btn btn--red" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--line" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}` })}
 <section class="section section--tight"><div class="wrap">
