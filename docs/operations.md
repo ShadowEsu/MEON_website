@@ -54,7 +54,7 @@ When there's a new list of the packets on the wall, send it to Claude ("here's t
 ## Prices, sides and drinks (from the till)
 
 Prices come from the Square catalogue export (`MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx`, 16 October 2026) and live in `data/catalogue.json`. The site shows them in Australian dollars, exactly as in the till:
-- **Noodle pages**: the packet price sits under the packet weight. 52 noodles on the wall matched a till item; the till's packet weight replaced the old one where they differed.
+- **Noodle pages**: the packet price sits under the packet weight. 54 noodles on the wall matched a till item; the till's packet weight replaced the old one where they differed.
 - **New noodles**: 27 noodles were in the till but not on the site. They now have their own page and shelf QR code (on `/qr/`), with an illustrated packet. Their spice rating, diet and machine setting say "rating soon" / "Ask the crew" until the crew confirms them.
 - **Toppings page**: a "Sides" and a "Drinks" list with prices.
 
@@ -143,5 +143,6 @@ After any change: `npm run build && npm run check`. Pushing to GitHub redeploys 
 - The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)
 - Spice rating, diet and machine setting for the 27 noodles added from the till (in `data/catalogue.json`)
 - Shelf QR PNGs in Drive: the 27 new noodles' codes are on `/qr/` but not yet in the Drive folder (run `python3 scripts/make_qr_pngs.py` and upload)
-- Till items not added yet: "Kang Shi Fu Hot & Spicy Beef" (may be the Braised Beef Spicy Red already on the site), "Nissin Black Garlic Demae Ramen" (may be the same packet as the Black Garlic Oil Tonkotsu), and two Wai Wai packets (Chicken, Veg Masala) whose country isn't on the site
+- Till items not added yet: "Kang Shi Fu Hot & Spicy Beef" (may be the Braised Beef Spicy Red already on the site) and "Nissin Black Garlic Demae Ramen" (may be the same packet as the Black Garlic Oil Tonkotsu)
+- Myojo's country: the new Myojo Mee Goreng says Singapore (Myojo is Nissin Foods Singapore's brand), while the Drive doc lists Myojo Mee Poh Dry as Malaysia
 - Whether the toppings bar is priced by weight (the till has "Pairings 4.20 Per 100g"); the site doesn't show it

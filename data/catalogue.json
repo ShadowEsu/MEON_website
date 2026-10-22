@@ -2,6 +2,13 @@
  "_readme": "Prices and items from MEON's Square catalogue export (MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx). Prices are AUD, exactly as in the till. `noodles` adds the packet price (and the catalogue's packet weight where it differs) to noodles in data/noodles.json, by slug. `extraNoodles` are catalogue noodles that the Drive noodle doc doesn't list yet: spice, diet and machine setting stay unknown (the site says 'rating soon' / 'Ask the crew') until the crew confirms them. `sides` and `drinks` appear on the Toppings page. Never add SKUs, stock counts, GTINs or Square tokens here. Left out on purpose: the $0 'Yr12 Drink Promo' and the 'Pairings 4.20 Per 100g' line.",
  "source": "Square catalogue export, 16 October 2026",
  "noodles": {
+  "acecook-hao-hao-satay-and-shallot-flavoured-noodle": {
+   "price": 4.2
+  },
+  "acecook-hao-hao-spicy-and-sour-shrimp-flavour": {
+   "price": 4.2,
+   "weightG": 78
+  },
   "indomie-ayam-bawang": {
    "price": 4.2,
    "weightG": 69
@@ -17,7 +24,8 @@
    "weightG": 80
   },
   "jinmailang-braised-beef-flavour": {
-   "price": 5.5
+   "price": 5.5,
+   "weightG": 110
   },
   "jinmailang-mushroom-chicken-flavour": {
    "price": 5.5,
@@ -36,7 +44,8 @@
    "price": 4.2
   },
   "maggi-2-minute-chicken-flavour": {
-   "price": 4.2
+   "price": 4.2,
+   "weightG": 72
   },
   "maggi-2-minute-noodles-asam-laksa": {
    "price": 4.2,
@@ -83,7 +92,8 @@
    "price": 4.2
   },
   "nissin-demae-iccho-japan-series-black-garlic-oil-tonkotsu": {
-   "price": 4.2
+   "price": 4.2,
+   "weightG": 97
   },
   "nissin-demae-ramen-tonkotsu": {
    "price": 4.2,
@@ -169,38 +179,6 @@
   }
  },
  "extraNoodles": [
-  {
-   "slug": "acecook-hao-hao-chilli-crispy-onion",
-   "name": "Hao Hao Chilli Crispy Onion",
-   "brand": "Acecook",
-   "country": "Vietnam",
-   "countryCode": "vn",
-   "flavour": "chilli onion",
-   "funNote": null,
-   "weightG": 75,
-   "spice": null,
-   "diet": "Ask the crew",
-   "dietNote": false,
-   "type": "Soup",
-   "machine": null,
-   "price": 4.2
-  },
-  {
-   "slug": "acecook-hao-hao-chilli-lime-shrimp",
-   "name": "Hao Hao Chilli Lime Shrimp",
-   "brand": "Acecook",
-   "country": "Vietnam",
-   "countryCode": "vn",
-   "flavour": "chilli lime shrimp",
-   "funNote": null,
-   "weightG": 78,
-   "spice": null,
-   "diet": "Ask the crew",
-   "dietNote": false,
-   "type": "Soup",
-   "machine": null,
-   "price": 4.2
-  },
   {
    "slug": "ibumie-penang-har-mee",
    "name": "Penang Har Mee",
@@ -365,8 +343,8 @@
    "slug": "myojo-mee-goreng-original",
    "name": "Mee Goreng Original",
    "brand": "Myojo",
-   "country": "Malaysia",
-   "countryCode": "my",
+   "country": "Singapore",
+   "countryCode": "sg",
    "flavour": "goreng",
    "funNote": null,
    "weightG": 80,
@@ -598,6 +576,38 @@
    "diet": "Ask the crew",
    "dietNote": false,
    "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "wai-wai-chicken-flavour",
+   "name": "Chicken Flavour",
+   "brand": "Wai Wai",
+   "country": "India",
+   "countryCode": "in",
+   "flavour": "chicken",
+   "funNote": null,
+   "weightG": 75,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": null,
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "wai-wai-veg-masala-flavour",
+   "name": "Veg Masala Flavour",
+   "brand": "Wai Wai",
+   "country": "India",
+   "countryCode": "in",
+   "flavour": "veg masala",
+   "funNote": null,
+   "weightG": 75,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": null,
    "machine": null,
    "price": 4.2
   }

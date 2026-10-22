@@ -29,6 +29,7 @@ const FLAVOUR_NOTES = [
   { re: /tang myun|ahn sung/, note: "A Korean pantry classic with a deep, savoury beef-and-vegetable broth and comforting, mellow spice." },
   { re: /tom ?yum|tomyum|thai tom|lau thai|mi lau/, note: "Lemongrass, kaffir lime, galangal and chilli, the hot, sour, fragrant Thai classic in noodle form." },
   { re: /asam laksa/, note: "Tangy tamarind and fish-based asam laksa, Penang style, sour, spicy and incredibly aromatic." },
+  { re: /vege mee/, note: "A light, savoury vegetable-style noodle soup, Penang hawker style." },
   { re: /white curry/, note: "Penang white curry: creamy, coconutty and peppery, with a slow-building chilli warmth." },
   { re: /laksa/, note: "A rich, coconutty laksa broth loaded with spice, lemongrass and curry depth." },
   { re: /hokkien|prawn/, note: "A deep, sweet-savoury prawn broth inspired by the hawker-stall Hokkien prawn mee." },
@@ -59,6 +60,7 @@ const FLAVOUR_NOTES = [
   { re: /pho/, note: "An aromatic pho-style broth with warming star anise and spice notes." },
   { re: /hot ?pot|chongqing/, note: "Chongqing hot-pot style: deep, oily chilli heat with bold spice." },
   { re: /spaghetti/, note: "Filipino-style sweet spaghetti flavour, tomatoey, a little sweet and nostalgic." },
+  { re: /chilli crab/, note: "Singapore's famous chilli crab in noodle form: a sweet, tangy chilli sauce with a seafood edge." },
   { re: /lobster|crab|shrimp|seafood|fish/, note: "A briny, oceanic seafood flavour with savoury depth." },
   { re: /braised beef|beef|\bbo\b|brisket/, note: "A savoury, slow-braised beef-style broth with gentle spice." },
   { re: /rib|pork|suon/, note: "A rich, rounded pork-and-rib style broth." },
@@ -71,9 +73,11 @@ const FLAVOUR_NOTES = [
   { re: /spicy|hot|chilli|chili/, note: "A chilli-forward seasoning with a satisfying kick." },
 ];
 
+// The "regulars" line needs a track record, so noodles just added from the till (n.newToSite) never get it.
+const REGULARS_OPENER = (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is a bowl our regulars keep coming back for.`;
 const OPENERS = [
   (n) => `${n.name} by ${n.brand} is ${/^[AEIOU]/.test(n.countryAdj) ? "an" : "a"} ${n.countryAdj} favourite you can cook here at MEON.`,
-  (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is a bowl our regulars keep coming back for.`,
+  REGULARS_OPENER,
   (n) => `${n.brand} ${n.name} brings a proper taste of ${n.country} to Canning Bridge.`,
   (n) => `Craving something from ${n.country}? ${n.brand}'s ${n.name} is a great place to start.`,
 ];
@@ -104,8 +108,7 @@ export function flavourNote(n) {
 
 export function describe(n) {
   const ctx = { ...n, countryAdj: COUNTRY_ADJ[n.country] || n.country };
-  // Noodles just added from the till (n.newToSite) have no track record yet, so they skip the "our regulars" opener.
-  const openers = n.newToSite ? OPENERS.filter((_, i) => i !== 1) : OPENERS;
+  const openers = n.newToSite ? OPENERS.filter((o) => o !== REGULARS_OPENER) : OPENERS;
   const opener = openers[hash(n.slug) % openers.length](ctx);
   const paras = [`${opener} ${flavourNote(n)}`];
   if (n.type && TYPE_LINES[n.type]) paras.push(TYPE_LINES[n.type]);
