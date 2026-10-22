@@ -3,7 +3,8 @@
 // Ordered most-specific first. `re` is tested against "name + flavour" (lower-case).
 const FLAVOUR_NOTES = [
   { re: /chapaguri|ram ?don/, note: "It's the famous \"ram-don\" mash-up of black-bean Chapagetti and spicy seafood Neoguri, the bowl the movie <em>Parasite</em> made world-famous." },
-  { re: /habanero|lime/, note: "Fiery Buldak chilli gets a zesty habanero-and-lime twist: fruity, sharp and seriously moreish." },
+  { re: /habanero/, note: "Fiery Buldak chilli gets a zesty habanero-and-lime twist: fruity, sharp and seriously moreish." },
+  { re: /tangle/, note: "Samyang's Tangle range: wide, chewy pasta-style noodles tossed through a rich, Western-style sauce." },
   { re: /buldak.*(carbonara)|carbonara.*buldak/, note: "Buldak's sweet, smoky fire sauce is softened by a creamy carbonara-style finish, rich, cheesy and still packing heat." },
   { re: /buldak.*cheese|cheese.*buldak/, note: "Buldak's smoky fire sauce meets a melty, savoury cheese powder for a rich, spicy, gooey bowl." },
   { re: /buldak.*(jjajang)/, note: "Two Korean icons in one: roasty black-bean jjajang sauce with Buldak's signature chilli kick." },
@@ -18,9 +19,11 @@ const FLAVOUR_NOTES = [
   { re: /bulgogi/, note: "Sweet-savoury Korean BBQ bulgogi flavour with soy, garlic and a hint of caramel." },
   { re: /jjambbong/, note: "A spicy seafood-and-vegetable broth inspired by Korean-Chinese jjambbong, with a smoky chilli-oil depth." },
   { re: /jjajang|black ?bean|chapagetti|chacharoni/, note: "A roasty, sweet-savoury black-bean sauce, Korea's favourite takeaway noodle, ready in minutes." },
+  { re: /neoguri.*mild/, note: "Thick, chewy udon-style noodles in a gentle seafood broth with a little kelp, the mild side of Neoguri." },
   { re: /neoguri/, note: "Thick, chewy udon-style noodles in a spicy seafood broth, finished with a little kelp for real ocean depth." },
   { re: /kim ?chi/, note: "Tangy, fermented kimchi flavour with a garlicky kick and a gently spicy finish." },
   { re: /shin black|black.*premium/, note: "Shin's premium edition adds a rich, bone-broth style soup on top of the classic spicy Shin seasoning." },
+  { re: /shin.*cheese/, note: "Shin's bold, beefy chilli seasoning as a stir-fry, mellowed by a creamy cheese sauce." },
   { re: /shin/, note: "Nongshim's legendary Shin seasoning: a bold, beefy, chilli-forward broth with mushrooms and veg." },
   { re: /tempura/, note: "Thick, slurpy udon-style noodles in a light, savoury broth with crunchy tempura bits." },
   { re: /tang myun|ahn sung/, note: "A Korean pantry classic with a deep, savoury beef-and-vegetable broth and comforting, mellow spice." },
@@ -101,7 +104,9 @@ export function flavourNote(n) {
 
 export function describe(n) {
   const ctx = { ...n, countryAdj: COUNTRY_ADJ[n.country] || n.country };
-  const opener = OPENERS[hash(n.slug) % OPENERS.length](ctx);
+  // Noodles just added from the till (n.newToSite) have no track record yet, so they skip the "our regulars" opener.
+  const openers = n.newToSite ? OPENERS.filter((_, i) => i !== 1) : OPENERS;
+  const opener = openers[hash(n.slug) % openers.length](ctx);
   const paras = [`${opener} ${flavourNote(n)}`];
   if (n.type && TYPE_LINES[n.type]) paras.push(TYPE_LINES[n.type]);
   return paras;
@@ -133,6 +138,16 @@ export function cookSteps(n) {
         ["Add hot water", "Add the noodles and seasoning to a MEON bowl with hot water."],
         ["Stir & rest", "Stir well and let it sit for 3 minutes 30 seconds until thick and creamy."],
         ["Top it", "Finish with an egg, spring onion or a crunchy side."],
+      ],
+    };
+  }
+  if (!n.type) {
+    return {
+      steps: [
+        ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
+        ["Cook the noodles", "Cook the noodle block for 3 minutes 30 seconds until just tender."],
+        ["Soup or sauce", "Check the packet: keep the water for a soup, or drain most of it and toss through the sauce."],
+        ["Top it", "Add your toppings, give it a stir and enjoy it hot."],
       ],
     };
   }

@@ -1,0 +1,700 @@
+{
+ "_readme": "Prices and items from MEON's Square catalogue export (MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx). Prices are AUD, exactly as in the till. `noodles` adds the packet price (and the catalogue's packet weight where it differs) to noodles in data/noodles.json, by slug. `extraNoodles` are catalogue noodles that the Drive noodle doc doesn't list yet: spice, diet and machine setting stay unknown (the site says 'rating soon' / 'Ask the crew') until the crew confirms them. `sides` and `drinks` appear on the Toppings page. Never add SKUs, stock counts, GTINs or Square tokens here. Left out on purpose: the $0 'Yr12 Drink Promo' and the 'Pairings 4.20 Per 100g' line.",
+ "source": "Square catalogue export, 16 October 2026",
+ "noodles": {
+  "indomie-ayam-bawang": {
+   "price": 4.2,
+   "weightG": 69
+  },
+  "indomie-mi-goreng": {
+   "price": 4.2
+  },
+  "indomie-mi-goreng-hot-and-spicy": {
+   "price": 4.2
+  },
+  "indomie-mi-goreng-satay": {
+   "price": 4.2,
+   "weightG": 80
+  },
+  "jinmailang-braised-beef-flavour": {
+   "price": 5.5
+  },
+  "jinmailang-mushroom-chicken-flavour": {
+   "price": 5.5,
+   "weightG": 109
+  },
+  "lucky-me-instant-pancit-canton-kalamansi": {
+   "price": 4.2
+  },
+  "lucky-me-instant-pancit-canton-original": {
+   "price": 4.2
+  },
+  "lucky-me-instant-pancit-canton-sweet-and-spicy": {
+   "price": 4.2
+  },
+  "maggi-2-minute-beef-flavour": {
+   "price": 4.2
+  },
+  "maggi-2-minute-chicken-flavour": {
+   "price": 4.2
+  },
+  "maggi-2-minute-noodles-asam-laksa": {
+   "price": 4.2,
+   "weightG": 78
+  },
+  "maggi-2-minute-noodles-kari": {
+   "price": 4.2
+  },
+  "maggi-2-minute-noodles-tom-yum": {
+   "price": 4.2,
+   "weightG": 80
+  },
+  "maggi-2-minute-oriental-flavour": {
+   "price": 4.2
+  },
+  "mama-tom-yum-shrimp": {
+   "price": 4.2
+  },
+  "mama-tom-yum-shrimp-jumbo": {
+   "price": 5.5
+  },
+  "master-kong-kangsifu-braised-beef-instant-noodle": {
+   "price": 4.2
+  },
+  "master-kong-kangsifu-mushroom-chicken-noodle-soup": {
+   "price": 4.2
+  },
+  "master-kong-kangsifu-pickled-mustard-beef-noodle": {
+   "price": 4.2,
+   "weightG": 117
+  },
+  "master-kong-kangsifu-seafood-flavour": {
+   "price": 4.2
+  },
+  "master-kong-kangsifu-tomato-egg-and-beef-noodle": {
+   "price": 4.2,
+   "weightG": 115
+  },
+  "mie-sedap-soto": {
+   "price": 4.2,
+   "weightG": 76
+  },
+  "myojo-mee-poh-dry": {
+   "price": 4.2
+  },
+  "nissin-demae-iccho-japan-series-black-garlic-oil-tonkotsu": {
+   "price": 4.2
+  },
+  "nissin-demae-ramen-tonkotsu": {
+   "price": 4.2,
+   "weightG": 98
+  },
+  "nissin-nongshim-shin-ramyun-jay-fai-tom-yum-flavour": {
+   "price": 5.2
+  },
+  "nissin-ramen-hokkaido-miso": {
+   "price": 4.2
+  },
+  "nissin-ramen-kyushu-black-garlic": {
+   "price": 4.2
+  },
+  "nissin-ramen-tokyo-shoyu": {
+   "price": 4.2
+  },
+  "nissin-salted-egg-instant-noodle-regular": {
+   "price": 6.5
+  },
+  "nissin-salted-egg-instant-noodle-spicy": {
+   "price": 6.5
+  },
+  "nongshim-chapagetti-original": {
+   "price": 5.5
+  },
+  "nongshim-neoguri-seafood-and-spicy": {
+   "price": 5.5
+  },
+  "nongshim-shin-black-premium": {
+   "price": 6.5
+  },
+  "nongshim-shin-kimchi": {
+   "price": 5.5
+  },
+  "nongshim-shin-noodle-soup-original": {
+   "price": 5.5
+  },
+  "nongshim-tempura-udon": {
+   "price": 6.5
+  },
+  "ottogi-jin-jjajang": {
+   "price": 5.5
+  },
+  "ottogi-jin-jjambbong": {
+   "price": 5.5
+  },
+  "ottogi-jin-ramen-mild": {
+   "price": 5.5
+  },
+  "ottogi-jin-ramen-spicy": {
+   "price": 5.5
+  },
+  "ottogi-kimchi-ramen": {
+   "price": 4.2
+  },
+  "samyang-buldak-2x-spicy-chicken-ramen": {
+   "price": 6.5
+  },
+  "samyang-buldak-carbonara-hot-chicken-ramen": {
+   "price": 5.5
+  },
+  "samyang-buldak-cheese-hot-chicken-flavour-ramen": {
+   "price": 5.5
+  },
+  "samyang-buldak-hot-chicken-ramen": {
+   "price": 5.5
+  },
+  "samyang-buldak-spicy-chicken-stew-type": {
+   "price": 5.5
+  },
+  "samyang-cheese": {
+   "price": 5.5
+  },
+  "samyang-cream-carbonara": {
+   "price": 5.5
+  },
+  "samyang-samyang-ramen": {
+   "price": 5.5
+  },
+  "supermi-mie-goreng": {
+   "price": 4.2
+  }
+ },
+ "extraNoodles": [
+  {
+   "slug": "acecook-hao-hao-chilli-crispy-onion",
+   "name": "Hao Hao Chilli Crispy Onion",
+   "brand": "Acecook",
+   "country": "Vietnam",
+   "countryCode": "vn",
+   "flavour": "chilli onion",
+   "funNote": null,
+   "weightG": 75,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "acecook-hao-hao-chilli-lime-shrimp",
+   "name": "Hao Hao Chilli Lime Shrimp",
+   "brand": "Acecook",
+   "country": "Vietnam",
+   "countryCode": "vn",
+   "flavour": "chilli lime shrimp",
+   "funNote": null,
+   "weightG": 78,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "ibumie-penang-har-mee",
+   "name": "Penang Har Mee",
+   "brand": "Ibumie",
+   "country": "Malaysia",
+   "countryCode": "my",
+   "flavour": "prawn",
+   "funNote": null,
+   "weightG": 85,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "ibumie-penang-vege-mee",
+   "name": "Penang Vege Mee",
+   "brand": "Ibumie",
+   "country": "Malaysia",
+   "countryCode": "my",
+   "flavour": "vegetable",
+   "funNote": null,
+   "weightG": 80,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "ibumie-penang-white-curry-mee",
+   "name": "Penang White Curry Mee",
+   "brand": "Ibumie",
+   "country": "Malaysia",
+   "countryCode": "my",
+   "flavour": "white curry",
+   "funNote": null,
+   "weightG": 105,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "indomie-mi-goreng-cabe-ijo",
+   "name": "Mi Goreng Cabe Ijo",
+   "brand": "Indomie",
+   "country": "Indonesia",
+   "countryCode": "id",
+   "flavour": "green chilli",
+   "funNote": null,
+   "weightG": 85,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "indomie-mi-goreng-rendang-jumbo",
+   "name": "Mi Goreng Rendang Jumbo",
+   "brand": "Indomie",
+   "country": "Indonesia",
+   "countryCode": "id",
+   "flavour": "rendang",
+   "funNote": null,
+   "weightG": 120,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "jinmailang-spicy-beef-flavour",
+   "name": "Spicy Beef Flavour",
+   "brand": "Jinmailang",
+   "country": "China",
+   "countryCode": "cn",
+   "flavour": "spicy beef",
+   "funNote": null,
+   "weightG": 90,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "maggi-sup-ayam-berempah",
+   "name": "Sup Ayam Berempah",
+   "brand": "Maggi",
+   "country": "Malaysia",
+   "countryCode": "my",
+   "flavour": "spiced chicken",
+   "funNote": null,
+   "weightG": 79,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "mama-chicken-flavour-jumbo",
+   "name": "Chicken Flavour Jumbo",
+   "brand": "Mama",
+   "country": "Thailand",
+   "countryCode": "th",
+   "flavour": "chicken",
+   "funNote": null,
+   "weightG": 90,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "mama-pork-flavour-jumbo",
+   "name": "Pork Flavour Jumbo",
+   "brand": "Mama",
+   "country": "Thailand",
+   "countryCode": "th",
+   "flavour": "pork",
+   "funNote": null,
+   "weightG": 90,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "mama-rice-vermicelli-clear-soup",
+   "name": "Rice Vermicelli Clear Soup",
+   "brand": "Mama",
+   "country": "Thailand",
+   "countryCode": "th",
+   "flavour": "clear soup",
+   "funNote": null,
+   "weightG": 55,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "myojo-mee-goreng-original",
+   "name": "Mee Goreng Original",
+   "brand": "Myojo",
+   "country": "Malaysia",
+   "countryCode": "my",
+   "flavour": "goreng",
+   "funNote": null,
+   "weightG": 80,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "nissin-demae-ramen-beef-flavour",
+   "name": "Demae Ramen Beef Flavour",
+   "brand": "Nissin",
+   "country": "Japan",
+   "countryCode": "jp",
+   "flavour": "beef",
+   "funNote": null,
+   "weightG": 91,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "nissin-demae-ramen-chicken-flavour",
+   "name": "Demae Ramen Chicken Flavour",
+   "brand": "Nissin",
+   "country": "Japan",
+   "countryCode": "jp",
+   "flavour": "chicken",
+   "funNote": null,
+   "weightG": 90,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "nissin-jumbo-chilli-crab",
+   "name": "Jumbo Chilli Crab",
+   "brand": "Nissin",
+   "country": "Singapore",
+   "countryCode": "sg",
+   "flavour": "chilli crab",
+   "funNote": null,
+   "weightG": 116,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": null,
+   "machine": null,
+   "price": 6.5
+  },
+  {
+   "slug": "nongshim-neoguri-seafood-and-mild",
+   "name": "Neoguri Seafood & Mild",
+   "brand": "Nongshim",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "seafood",
+   "funNote": null,
+   "weightG": 120,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "nongshim-sarigomtang",
+   "name": "Sarigomtang",
+   "brand": "Nongshim",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "beef bone",
+   "funNote": null,
+   "weightG": 110,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "nongshim-sweet-and-spicy-kimchi-stir-fry",
+   "name": "Sweet & Spicy Kimchi Stir Fry",
+   "brand": "Nongshim",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "kimchi",
+   "funNote": null,
+   "weightG": 137,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "ottogi-odongtong-myon",
+   "name": "Odongtong Myon",
+   "brand": "Ottogi",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "seafood",
+   "funNote": null,
+   "weightG": 120,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "samyang-buldak-swicy",
+   "name": "Buldak Swicy",
+   "brand": "Samyang",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "sweet and spicy",
+   "funNote": null,
+   "weightG": 130,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "samyang-buldak-taco-flavour",
+   "name": "Buldak Taco Flavour",
+   "brand": "Samyang",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "taco",
+   "funNote": null,
+   "weightG": 135,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 5.5
+  },
+  {
+   "slug": "samyang-tangle-creamy-mushroom",
+   "name": "Tangle Creamy Mushroom",
+   "brand": "Samyang",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "creamy mushroom",
+   "funNote": null,
+   "weightG": 100,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 6.5
+  },
+  {
+   "slug": "samyang-tangle-garlic-oil-pasta",
+   "name": "Tangle Garlic Oil Pasta",
+   "brand": "Samyang",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "garlic oil",
+   "funNote": null,
+   "weightG": 100,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 6.5
+  },
+  {
+   "slug": "nongshim-shin-ramyun-cheese",
+   "name": "Shin Ramyun Cheese",
+   "brand": "Nongshim",
+   "country": "South Korea",
+   "countryCode": "kr",
+   "flavour": "cheese",
+   "funNote": null,
+   "weightG": 136,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 6.5
+  },
+  {
+   "slug": "weilih-jah-jan-flavour-noodles",
+   "name": "Jah Jan Flavour Noodles",
+   "brand": "Weilih",
+   "country": "Taiwan",
+   "countryCode": "tw",
+   "flavour": "jah jan",
+   "funNote": null,
+   "weightG": 90,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Dry",
+   "machine": null,
+   "price": 4.2
+  },
+  {
+   "slug": "weilih-onion-flavour-noodles",
+   "name": "Onion Flavour Noodles",
+   "brand": "Weilih",
+   "country": "Taiwan",
+   "countryCode": "tw",
+   "flavour": "onion",
+   "funNote": null,
+   "weightG": 85,
+   "spice": null,
+   "diet": "Ask the crew",
+   "dietNote": false,
+   "type": "Soup",
+   "machine": null,
+   "price": 4.2
+  }
+ ],
+ "sides": [
+  {
+   "name": "Soft-boiled egg",
+   "price": 2
+  },
+  {
+   "name": "Tempura prawn",
+   "price": 1.5
+  },
+  {
+   "name": "Amy's Chicken Wings",
+   "price": 2.5
+  },
+  {
+   "name": "Seasoned seaweed",
+   "size": "4 g",
+   "price": 2.5
+  },
+  {
+   "name": "Seasoned seaweed, green tea",
+   "size": "4 g",
+   "price": 2.5
+  }
+ ],
+ "drinks": [
+  {
+   "name": "100 Plus",
+   "size": "325 ml",
+   "price": 2.5
+  },
+  {
+   "name": "Aiko Matcha",
+   "size": "can",
+   "price": 8
+  },
+  {
+   "name": "Aussie Natural Water",
+   "size": "600 ml",
+   "price": 2.5
+  },
+  {
+   "name": "Australian Natural Spring Water",
+   "size": "600 ml",
+   "price": 2.5
+  },
+  {
+   "name": "Caffe Bene Americano",
+   "size": "190 ml",
+   "price": 3.5
+  },
+  {
+   "name": "Caffe Bene Black Iced Drink",
+   "size": "190 ml",
+   "price": 3.5
+  },
+  {
+   "name": "Caffe Bene Caramel Macchiato",
+   "size": "190 ml",
+   "price": 3.5
+  },
+  {
+   "name": "Caffe Bene Hazelnut",
+   "size": "190 ml",
+   "price": 3.5
+  },
+  {
+   "name": "Caffe Bene Vanilla Americano",
+   "size": "190 ml",
+   "price": 3.5
+  },
+  {
+   "name": "Coca-Cola Classic",
+   "size": "375 ml",
+   "price": 2.5
+  },
+  {
+   "name": "Coca-Cola Zero Sugar",
+   "size": "375 ml",
+   "price": 2.5
+  },
+  {
+   "name": "Sosro Teh Botol",
+   "size": "250 ml",
+   "price": 2
+  },
+  {
+   "name": "Yeo's Chrysanthemum Tea",
+   "size": "300 ml",
+   "price": 2.5
+  },
+  {
+   "name": "Ice in a cup",
+   "price": 1.5
+  }
+ ]
+}

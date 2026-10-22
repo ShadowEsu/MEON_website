@@ -33,13 +33,14 @@ await page.waitForTimeout(3100);
 ok(await page.$$eval(".roulette-reel .roulette-item", (e) => e.length === 1 && /noodles\//.test(e[0].getAttribute("href"))), "roulette lands on a noodle");
 
 await page.goto(BASE + "/noodles/?country=jp&type=Soup", { waitUntil: "networkidle" });
+const total = await page.$$eval(".noodle-card", (e) => e.length);
 const shown = await page.$$eval(".noodle-card:not([hidden])", (e) => e.length);
-ok(shown > 0 && shown < 172, `library URL filters work (${shown} Japanese soups)`);
+ok(shown > 0 && shown < total, `library URL filters work (${shown} Japanese soups of ${total})`);
 await page.fill("#q", "zzzz-not-a-noodle");
 await page.waitForTimeout(300);
 ok(await page.$eval(".empty-state", (e) => e.classList.contains("is-visible")), "empty state shows");
 await page.click(".empty-state [data-reset]");
-ok((await page.$$eval(".noodle-card:not([hidden])", (e) => e.length)) === 172, "reset shows all 172");
+ok((await page.$$eval(".noodle-card:not([hidden])", (e) => e.length)) === total, `reset shows all ${total}`);
 
 await page.goto(BASE + "/noodles/nongshim-shin-black-premium/?src=qr", { waitUntil: "networkidle" });
 ok(await page.$eval("[data-qr-banner]", (e) => !e.hidden), "QR scan banner appears with ?src=qr");
