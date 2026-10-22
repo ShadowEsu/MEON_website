@@ -18,7 +18,13 @@ const OUT = path.join(ROOT, "site");
 const readJSON = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, "data", f), "utf8"));
 
 const site = readJSON("site.json");
-const noodlesRaw = readJSON("noodles.json");
+// Prices, packet weights, extra noodles, sides and drinks from MEON's Square catalogue (see data/catalogue.json).
+const catalogue = readJSON("catalogue.json");
+const noodlesRaw = [...readJSON("noodles.json"), ...catalogue.extraNoodles.map((n) => ({ ...n, newToSite: true }))].map((n) => ({ ...n, ...catalogue.noodles[n.slug] }));
+for (const slug of Object.keys(catalogue.noodles)) if (!noodlesRaw.some((n) => n.slug === slug)) throw new Error(`data/catalogue.json prices unknown noodle ${slug}`);
+const dupSlug = noodlesRaw.find((n, i) => noodlesRaw.findIndex((o) => o.slug === n.slug) !== i);
+if (dupSlug) throw new Error(`Duplicate noodle slug ${dupSlug.slug}`);
+const money = (v) => `$${v.toFixed(2)}`;
 const countries = readJSON("countries.json");
 const toppings = readJSON("toppings.json");
 
@@ -67,7 +73,7 @@ const noodles = noodlesRaw.map((n) => {
   const m = n.diet.match(/\((\w+)\)/);
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(n.diet)) dietTokens.push("seafood");
-  const unrated = spiceReview.has(n.slug);
+  const unrated = spiceReview.has(n.slug) || n.spice == null;
   return { ...n, c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
@@ -687,7 +693,7 @@ noodles.forEach((n, idx) => {
   const next = noodles[(idx + 1) % noodles.length];
   const similar = noodles
     .filter((o) => o.slug !== n.slug)
-    .map((o) => ({ o, s: (o.country === n.country ? 2 : 0) + (o.type === n.type ? 1 : 0) + (Math.abs(o.spice - n.spice) <= 1 ? 1 : 0) + (o.brand === n.brand ? 1 : 0) + (o.img ? 0.5 : 0) }))
+    .map((o) => ({ o, s: (o.country === n.country ? 2 : 0) + (o.type === n.type ? 1 : 0) + (o.spice != null && n.spice != null && Math.abs(o.spice - n.spice) <= 1 ? 1 : 0) + (o.brand === n.brand ? 1 : 0) + (o.img ? 0.5 : 0) }))
     .sort((a, b) => b.s - a.s || a.o.slug.localeCompare(b.o.slug))
     .slice(0, 4)
     .map((x) => x.o);
@@ -699,9 +705,9 @@ noodles.forEach((n, idx) => {
     active: "noodles/",
     image: n.img || "assets/img/photos/bowl-side.webp",
     preload: n.img || "",
-    description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)}${n.type ? ` ${n.type} noodle.` : ""}${n.unrated ? "" : ` Spice ${n.spice}/5.`}${n.machine ? ` Machine setting ${n.machine}.` : ""}`,
+    description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)}${n.type ? ` ${n.type} noodle.` : ""}${n.unrated ? "" : ` Spice ${n.spice}/5.`}${n.machine ? ` Machine setting ${n.machine}.` : ""}${n.price ? ` Price ${money(n.price)}.` : ""}`,
     jsonld: [
-      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, brand: { "@type": "Brand", name: n.brand }, countryOfOrigin: { "@type": "Country", name: n.country }, weight: n.weightG ? { "@type": "QuantitativeValue", value: n.weightG, unitCode: "GRM" } : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined, isPartOf: { "@id": `${SITE_URL}/noodles/#menu` } },
+      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, brand: { "@type": "Brand", name: n.brand }, countryOfOrigin: { "@type": "Country", name: n.country }, weight: n.weightG ? { "@type": "QuantitativeValue", value: n.weightG, unitCode: "GRM" } : undefined, offers: n.price ? { "@type": "Offer", price: n.price.toFixed(2), priceCurrency: "AUD" } : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined, isPartOf: { "@id": `${SITE_URL}/noodles/#menu` } },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
         { "@type": "ListItem", position: 2, name: "Noodles", item: `${SITE_URL}/noodles/` },
@@ -747,7 +753,7 @@ noodles.forEach((n, idx) => {
           <div><dt>Spice</dt><dd>${n.unrated ? `Rating soon<small>Ask the crew how hot it is</small>` : `${spiceMeter(n.spice, r, { large: true })}<small>${n.spice} of 5 · ${ladder[1]}</small>`}</dd></div>
           <div><dt>Style</dt><dd>${esc(n.type || "Ask the crew")}</dd></div>
           <div><dt>Diet</dt><dd>${esc(n.diet)}${n.dietNote ? "*" : ""}</dd></div>
-          <div><dt>Packet</dt><dd>${n.weightG ? `${n.weightG} g` : "Ask the crew"}</dd></div>
+          <div><dt>Packet</dt><dd>${n.weightG ? `${n.weightG} g` : "Ask the crew"}${n.price ? `<small>${money(n.price)}</small>` : ""}</dd></div>
         </dl>
 
         <section class="noodle-sec" aria-labelledby="about-h">
@@ -846,15 +852,21 @@ addPage("toppings/", layout({
   title: "Toppings & sides",
   seoTitle: "Noodle Toppings and Sides: Egg, Cheese, Beef, Fishcake · MEON Perth",
   active: "toppings/",
-  description: "Toppings and sides at MEON: eggs, cheese, beef and meatballs, fishcake, crab sticks, shrimp katsu, mushrooms, greens and more.",
+  description: "Toppings, sides and drinks at MEON: eggs, cheese, beef and meatballs, fishcake, crab sticks, shrimp katsu, mushrooms, greens and more, with prices for sides and drinks.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Toppings"]], eyebrow: `${toppings.length} toppings and sides`, title: "Toppings and sides.", lead: "The packet is where it starts. Add protein, greens and extras until the bowl is exactly how you like it.", actions: groups.map((g) => `<a class="btn btn--line btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join(""),
+${pageHero(r, { crumbs: [["Toppings"]], eyebrow: `${toppings.length} toppings and sides`, title: "Toppings and sides.", lead: "The packet is where it starts. Add protein, greens and extras until the bowl is exactly how you like it.", actions: groups.map((g) => `<a class="btn btn--line btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--line btn--sm" href="#sides-and-drinks">Sides &amp; drinks</a>`,
   aside: `<div class="plate-stack">${["topping-fishcake", "topping-enoki", "topping-seaweed"].map((f, i) => `<img src="${r(`assets/img/photos/${f}.webp`)}" alt="" width="900" height="900" style="--i:${i}" data-parallax="${(0.04 + i * 0.04).toFixed(2)}">`).join("")}</div>` })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <div class="topping-grid">${toppings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}" alt="${esc(t.name)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
 </div></section>`).join("")}
-<section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
+<section class="section section--tight" id="sides-and-drinks"><div class="wrap split split--top">
+${[["Sides", catalogue.sides], ["Drinks", catalogue.drinks]].map(([h, items]) => `  <div class="reveal">
+    <h2 data-split>${h}</h2>
+    <table class="hours"><caption class="visually-hidden">${h} and prices</caption><tbody>${items.map((x) => `<tr><td>${esc(x.name)}${x.size ? ` ${esc(x.size)}` : ""}</td><td style="text-align:right">${money(x.price)}</td></tr>`).join("")}</tbody></table>
+  </div>`).join("\n")}
+</div></section>
+<section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies. Prices are in Australian dollars.</p></div></section>
 ${ctaBand(r)}
 `,
 }));
@@ -1081,8 +1093,8 @@ write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 const pageImages = new Map([["", ["assets/img/photos/bowl-side.webp", "assets/img/photos/bowl-top-egg.webp"]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr") && !p.startsWith("meon-card")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a toppings bar and self-cook stations. Dine-in only, no online orders.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/)\n- [MEON Member Card](${SITE_URL}/meon-card/): free card, 10% off eligible food\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}`).join("\n")}\n`);
+write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a toppings bar and self-cook stations. Dine-in only, no online orders. Prices are in Australian dollars.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/): toppings, plus sides and drinks with prices\n- [MEON Member Card](${SITE_URL}/meon-card/): free card, 10% off eligible food\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}${n.price ? `, ${money(n.price)}` : ""}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
-write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, funNote: n.funNote, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
+write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, price: n.price ?? null, funNote: n.funNote, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
 console.log(`Built ${pages.length + 1} pages → ${path.relative(ROOT, OUT)}/  (${noodles.length} noodles, ${withPhotos.length} with photos, QR base ${SITE_URL})`);

@@ -3,7 +3,8 @@
 // Ordered most-specific first. `re` is tested against "name + flavour" (lower-case).
 const FLAVOUR_NOTES = [
   { re: /chapaguri|ram ?don/, note: "It's the famous \"ram-don\" mash-up of black-bean Chapagetti and spicy seafood Neoguri, the bowl the movie <em>Parasite</em> made world-famous." },
-  { re: /habanero|lime/, note: "Fiery Buldak chilli gets a zesty habanero-and-lime twist: fruity, sharp and seriously moreish." },
+  { re: /habanero/, note: "Fiery Buldak chilli gets a zesty habanero-and-lime twist: fruity, sharp and seriously moreish." },
+  { re: /tangle/, note: "Samyang's Tangle range: wide, chewy pasta-style noodles tossed through a rich, Western-style sauce." },
   { re: /buldak.*(carbonara)|carbonara.*buldak/, note: "Buldak's sweet, smoky fire sauce is softened by a creamy carbonara-style finish, rich, cheesy and still packing heat." },
   { re: /buldak.*cheese|cheese.*buldak/, note: "Buldak's smoky fire sauce meets a melty, savoury cheese powder for a rich, spicy, gooey bowl." },
   { re: /buldak.*(jjajang)/, note: "Two Korean icons in one: roasty black-bean jjajang sauce with Buldak's signature chilli kick." },
@@ -18,14 +19,17 @@ const FLAVOUR_NOTES = [
   { re: /bulgogi/, note: "Sweet-savoury Korean BBQ bulgogi flavour with soy, garlic and a hint of caramel." },
   { re: /jjambbong/, note: "A spicy seafood-and-vegetable broth inspired by Korean-Chinese jjambbong, with a smoky chilli-oil depth." },
   { re: /jjajang|black ?bean|chapagetti|chacharoni/, note: "A roasty, sweet-savoury black-bean sauce, Korea's favourite takeaway noodle, ready in minutes." },
+  { re: /neoguri.*mild/, note: "Thick, chewy udon-style noodles in a gentle seafood broth with a little kelp, the mild side of Neoguri." },
   { re: /neoguri/, note: "Thick, chewy udon-style noodles in a spicy seafood broth, finished with a little kelp for real ocean depth." },
   { re: /kim ?chi/, note: "Tangy, fermented kimchi flavour with a garlicky kick and a gently spicy finish." },
   { re: /shin black|black.*premium/, note: "Shin's premium edition adds a rich, bone-broth style soup on top of the classic spicy Shin seasoning." },
+  { re: /shin.*cheese/, note: "Shin's bold, beefy chilli seasoning as a stir-fry, mellowed by a creamy cheese sauce." },
   { re: /shin/, note: "Nongshim's legendary Shin seasoning: a bold, beefy, chilli-forward broth with mushrooms and veg." },
   { re: /tempura/, note: "Thick, slurpy udon-style noodles in a light, savoury broth with crunchy tempura bits." },
   { re: /tang myun|ahn sung/, note: "A Korean pantry classic with a deep, savoury beef-and-vegetable broth and comforting, mellow spice." },
   { re: /tom ?yum|tomyum|thai tom|lau thai|mi lau/, note: "Lemongrass, kaffir lime, galangal and chilli, the hot, sour, fragrant Thai classic in noodle form." },
   { re: /asam laksa/, note: "Tangy tamarind and fish-based asam laksa, Penang style, sour, spicy and incredibly aromatic." },
+  { re: /vege mee/, note: "A light, savoury vegetable-style noodle soup, Penang hawker style." },
   { re: /white curry/, note: "Penang white curry: creamy, coconutty and peppery, with a slow-building chilli warmth." },
   { re: /laksa/, note: "A rich, coconutty laksa broth loaded with spice, lemongrass and curry depth." },
   { re: /hokkien|prawn/, note: "A deep, sweet-savoury prawn broth inspired by the hawker-stall Hokkien prawn mee." },
@@ -56,6 +60,7 @@ const FLAVOUR_NOTES = [
   { re: /pho/, note: "An aromatic pho-style broth with warming star anise and spice notes." },
   { re: /hot ?pot|chongqing/, note: "Chongqing hot-pot style: deep, oily chilli heat with bold spice." },
   { re: /spaghetti/, note: "Filipino-style sweet spaghetti flavour, tomatoey, a little sweet and nostalgic." },
+  { re: /chilli crab/, note: "Singapore's famous chilli crab in noodle form: a sweet, tangy chilli sauce with a seafood edge." },
   { re: /lobster|crab|shrimp|seafood|fish/, note: "A briny, oceanic seafood flavour with savoury depth." },
   { re: /braised beef|beef|\bbo\b|brisket/, note: "A savoury, slow-braised beef-style broth with gentle spice." },
   { re: /rib|pork|suon/, note: "A rich, rounded pork-and-rib style broth." },
@@ -68,9 +73,11 @@ const FLAVOUR_NOTES = [
   { re: /spicy|hot|chilli|chili/, note: "A chilli-forward seasoning with a satisfying kick." },
 ];
 
+// The "regulars" line needs a track record, so noodles just added from the till (n.newToSite) never get it.
+const REGULARS_OPENER = (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is a bowl our regulars keep coming back for.`;
 const OPENERS = [
   (n) => `${n.name} by ${n.brand} is ${/^[AEIOU]/.test(n.countryAdj) ? "an" : "a"} ${n.countryAdj} favourite you can cook here at MEON.`,
-  (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is a bowl our regulars keep coming back for.`,
+  REGULARS_OPENER,
   (n) => `${n.brand} ${n.name} brings a proper taste of ${n.country} to Canning Bridge.`,
   (n) => `Craving something from ${n.country}? ${n.brand}'s ${n.name} is a great place to start.`,
 ];
@@ -101,7 +108,8 @@ export function flavourNote(n) {
 
 export function describe(n) {
   const ctx = { ...n, countryAdj: COUNTRY_ADJ[n.country] || n.country };
-  const opener = OPENERS[hash(n.slug) % OPENERS.length](ctx);
+  const openers = n.newToSite ? OPENERS.filter((o) => o !== REGULARS_OPENER) : OPENERS;
+  const opener = openers[hash(n.slug) % openers.length](ctx);
   const paras = [`${opener} ${flavourNote(n)}`];
   if (n.type && TYPE_LINES[n.type]) paras.push(TYPE_LINES[n.type]);
   return paras;
@@ -133,6 +141,16 @@ export function cookSteps(n) {
         ["Add hot water", "Add the noodles and seasoning to a MEON bowl with hot water."],
         ["Stir & rest", "Stir well and let it sit for 3 minutes 30 seconds until thick and creamy."],
         ["Top it", "Finish with an egg, spring onion or a crunchy side."],
+      ],
+    };
+  }
+  if (!n.type) {
+    return {
+      steps: [
+        ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
+        ["Cook the noodles", "Cook the noodle block for 3 minutes 30 seconds until just tender."],
+        ["Soup or sauce", "Check the packet: keep the water for a soup, or drain most of it and toss through the sauce."],
+        ["Top it", "Add your toppings, give it a stir and enjoy it hot."],
       ],
     };
   }

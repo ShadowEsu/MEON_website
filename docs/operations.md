@@ -51,6 +51,17 @@ The site says **"100+ noodles"** and **"from across Asia"** rather than exact co
 
 When there's a new list of the packets on the wall, send it to Claude ("here's the new noodle list, update the site"). Noodles that are gone are removed, new ones get a page and a shelf QR code, and the QR PNGs in Drive are regenerated. Existing noodle page addresses stay the same, so printed QR codes keep working.
 
+## Prices, sides and drinks (from the till)
+
+Prices come from the Square catalogue export (`MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx`, 16 October 2026) and live in `data/catalogue.json`. The site shows them in Australian dollars, exactly as in the till:
+- **Noodle pages**: the packet price sits under the packet weight. 54 noodles on the wall matched a till item; the till's packet weight replaced the old one where they differed.
+- **New noodles**: 27 noodles were in the till but not on the site. They now have their own page and shelf QR code (on `/qr/`), with an illustrated packet. Their spice rating, diet and machine setting say "rating soon" / "Ask the crew" until the crew confirms them.
+- **Toppings page**: a "Sides" and a "Drinks" list with prices.
+
+Never copied from the till: SKUs, stock counts, barcodes (GTINs), Square tokens, the $0 "Yr12 Drink Promo" and the "Pairings 4.20 Per 100g" line.
+
+When prices change, send Claude the new catalogue export ("here's the new Square catalogue, update the prices"). Noodles that are on the site but not in the till keep their page and simply show no price.
+
 ## MEON Card (not launched)
 
 The card is hidden from the website: it's not in the menus, footer, search or sitemap, and Google is told not to index it. The page still exists at `/meon-card/` as a "coming soon" page with the planned offer: top up $20, get a $5 voucher to use on the spot, every time.
@@ -130,3 +141,8 @@ After any change: `npm run build && npm run check`. Pushing to GitHub redeploys 
 - 130 noodles still need a shoot photo (they show an illustrated packet)
 - The updated noodle list of what is actually on the wall
 - The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)
+- Spice rating, diet and machine setting for the 27 noodles added from the till (in `data/catalogue.json`)
+- Shelf QR PNGs in Drive: the 27 new noodles' codes are on `/qr/` but not yet in the Drive folder (run `python3 scripts/make_qr_pngs.py` and upload)
+- Till items not added yet: "Kang Shi Fu Hot & Spicy Beef" (may be the Braised Beef Spicy Red already on the site) and "Nissin Black Garlic Demae Ramen" (may be the same packet as the Black Garlic Oil Tonkotsu)
+- Myojo's country: the new Myojo Mee Goreng says Singapore (Myojo is Nissin Foods Singapore's brand), while the Drive doc lists Myojo Mee Poh Dry as Malaysia
+- Whether the toppings bar is priced by weight (the till has "Pairings 4.20 Per 100g"); the site doesn't show it

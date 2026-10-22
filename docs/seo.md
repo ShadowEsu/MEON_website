@@ -7,13 +7,13 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 - **Structured data (schema.org)** that Google reads directly:
   - `Restaurant`: name, logo, photos, cuisine, price range, map link, address (plus phone, hours and coordinates once you add them)
   - `WebSite` with a search box
-  - a full `Menu` of all 172 noodles, grouped by country
-  - a `MenuItem` for every noodle (brand, country, weight, diet)
-  - `BreadcrumbList` on 184 pages
+  - a full `Menu` of all 199 noodles, grouped by country
+  - a `MenuItem` for every noodle (brand, country, weight, diet, and the price where the till lists it)
+  - `BreadcrumbList` on 211 pages
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
-- **Titles and descriptions**: every page has its own keyword-rich title, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (41)" and "Visit MEON Noodles · Instant Noodle Bar in Canning Bridge, Perth".
-- **172 unique noodle pages**, each with real content. These rank for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
+- **Titles and descriptions**: every page has its own keyword-rich title, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Canning Bridge, Perth".
+- **199 unique noodle pages**, each with real content. These rank for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
 - **An FAQ on the Visit page**: questions people actually ask (online orders, vegan options, location, QR codes, member card).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
 - **Robots**: `robots.txt` points to the sitemap, and the staff QR pages are hidden from Google.
@@ -77,7 +77,7 @@ Mismatched details confuse Google and lower your ranking.
   - Perth Now food
   - So Perth
   - WA Today
-- Invite Perth food TikTokers and Instagrammers. "172 noodles from 12 countries" and the Buldak challenge are easy stories.
+- Invite Perth food TikTokers and Instagrammers. "199 noodles from 12 countries" and the Buldak challenge are easy stories.
 - University food clubs (Curtin and UWA are close by) and local community pages.
 - Every article that links to the website helps it rank.
 
