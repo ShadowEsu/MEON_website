@@ -31,7 +31,7 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 
 ## Deploying (Vercel)
 
-`vercel.json` is set up: build command `npm run build`, output directory `site`. Import the repo in Vercel (or `vercel --prod`) and it just works. Vercel Web Analytics is off (`analytics.vercel: false` in `data/site.json`), because it isn't enabled on the Vercel project and the script returned 404. To use it, enable Web Analytics on the project in Vercel first, then set the flag to `true` and redeploy. QR scans arrive as page views with `?src=qr`.
+`vercel.json` is set up: build command `npm run build`, output directory `site`. Production is published with `vercel deploy --prod`. Vercel's Git builds are off for every branch except `main` and `preview/<name>` (`git.deploymentEnabled` in `vercel.json`), so ordinary pushes don't use up the 100-deployments-a-day limit. Vercel Web Analytics is off (`analytics.vercel: false` in `data/site.json`), because it isn't enabled on the Vercel project and the script returned 404. To use it, enable Web Analytics on the project in Vercel first, then set the flag to `true` and redeploy. QR scans arrive as page views with `?src=qr`.
 
 **QR codes encode `siteUrl` from `data/site.json`** (currently `https://meon-noodles.vercel.app`). If you use a different domain, change `siteUrl` and rebuild **before printing** shelf codes.
 

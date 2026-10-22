@@ -131,7 +131,7 @@ Or just ask Claude: "update the MEON views log for last week".
 | Add extra photos to a noodle page | Save 900×900 `.webp` files to `src/assets/img/noodles/more/<slug>-1.webp`, `-2.webp` and so on, and list them under the slug in `data/gallery.json`. They appear as tappable thumbnails under the main photo |
 | Set a real spice rating for a noodle marked "coming soon" | Fix the rating in the source doc and remove the slug from `data/spice_review.json` |
 
-After any change: `npm run build && npm run check`. Pushing to GitHub redeploys on Vercel once it's connected.
+After any change: `npm run build && npm run check`. Pushing to GitHub doesn't deploy: `vercel.json` turns off Vercel's Git builds for every branch except `main` and `preview/<name>` (the free plan allows 100 deployments a day across all the projects). Publish a checked change once with `vercel deploy --prod`, and push to a `preview/<name>` branch only when you need a preview link.
 
 ## Still to confirm
 
