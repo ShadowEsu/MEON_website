@@ -62,11 +62,9 @@ Never copied from the till: SKUs, stock counts, barcodes (GTINs), Square tokens,
 
 When prices change, send Claude the new catalogue export ("here's the new Square catalogue, update the prices"). Noodles that are on the site but not in the till keep their page and simply show no price.
 
-## MEON Card (not launched)
+## MEON Card
 
-The card is hidden from the website: it's not in the menus, footer, search or sitemap, and Google is told not to index it. The page still exists at `/meon-card/` as a "coming soon" page with the planned offer: top up $20, get a $5 voucher to use on the spot, every time.
-
-To launch it, ask Claude to "launch the MEON Card". That adds it back to the menu, footer and home page and updates the wording.
+The MEON Card has been taken off the website completely. `/meon-card/` redirects to the home page (see `vercel.json`).
 
 ## Videos
 

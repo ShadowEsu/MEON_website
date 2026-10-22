@@ -6,7 +6,7 @@ MEON is an instant-noodle dine-in at Canning Bridge, Perth, Western Australia. T
 - Noodle library with search, country / style / spice / diet filters and sorting (filters are shareable URLs, e.g. `/noodles/?country=jp&type=Soup`)
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download
-- Country pages, toppings & sides (with a priced list of sides and drinks), MEON Member Card, About, Visit
+- Country pages, toppings & sides (with a priced list of sides and drinks), About, Visit
 - Professional, calm design: one typeface (Bricolage Grotesque), ink and white with MEON red as the only colour, hairlines instead of boxes, no emojis (custom line icons and real flag artwork)
 - Noodle pages built for in-store QR scans: photo, machine setting and cook timer first, then facts, cooking steps and toppings
 - Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, sticky "how it works", magnetic buttons, living mascots, moving logo, typewriter. Transform/opacity only, paused off-screen, off for "reduce motion"
@@ -45,7 +45,6 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 | Noodle photos | `src/assets/img/noodles/<slug>.webp` (800×800) + `src/assets/img/noodles/sm/<slug>.webp` (400×400), mapped in `data/images.json` |
 | Countries (intro copy, flag, colour) | `data/countries.json` |
 | Toppings & sides | `data/toppings.json` |
-| Deals / member perks | `data/deals.json` (set `"active": false` to hide) |
 | Page copy & layout | `scripts/build.mjs`; flavour descriptions in `scripts/lib/copy.mjs`; illustrations in `scripts/lib/art.mjs` |
 | Styles / behaviour | `src/assets/css/site.css`, `src/assets/js/site.js` |
 

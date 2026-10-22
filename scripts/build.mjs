@@ -8,7 +8,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
-import { describe, shortBlurb, cookSteps, suggestToppings, COUNTRY_ADJ, COOK_SECONDS } from "./lib/copy.mjs";
+import { describe, shortBlurb, cookSteps, suggestToppings, badge, COUNTRY_ADJ, COOK_SECONDS } from "./lib/copy.mjs";
 import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, crew, peeker, steamOverlay, stepArt, emptyBowl, logoAnimated, logoMini, wordmark, TOPPING_ART } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
@@ -74,7 +74,7 @@ const noodles = noodlesRaw.map((n) => {
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(n.diet)) dietTokens.push("seafood");
   const unrated = spiceReview.has(n.slug) || n.spice == null;
-  return { ...n, c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, note: badge(n.funNote), c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
@@ -92,6 +92,7 @@ const SPICE_LADDER = [
 
 /* ---------------- layout ---------------- */
 const NAV = [
+  ["", "Home"],
   ["noodles/", "Noodles"],
   ["countries/", "Countries"],
   ["toppings/", "Toppings"],
@@ -324,9 +325,9 @@ function noodleMedia(n, r, { size = 400, eager = false, large = false } = {}) {
 const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice rating soon</span>` : spiceMeter(n.spice, r);
 
 function noodleCard(n, r, i = 0) {
-  const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.funNote, n.machine].filter(Boolean).join(" ");
+  const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note, n.machine].filter(Boolean).join(" ");
   return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.05}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
-  <span class="nc-media">${noodleMedia(n, r)}${n.funNote ? `<span class="nc-note">${esc(n.funNote)}</span>` : ""}</span>
+  <span class="nc-media">${noodleMedia(n, r)}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}</span>
   <span class="nc-meta">${flag(n.countryCode, r, { w: 16 })}<span>${esc(n.country)}${n.type ? ` · ${esc(n.type)}` : ""}</span></span>
   <h3 class="nc-name">${esc(n.name)}</h3>
   <span class="nc-foot"><span class="nc-brand">${esc(n.brand)}</span>${spiceLine(n, r)}</span>
@@ -396,7 +397,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
       <p class="eyebrow">Reviews</p>
       <h2 data-split>${title}</h2>
       ${lead ? `<p class="lead">${lead}</p>` : ""}
-      <div class="rv-summary" data-rv-summary><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
+      <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
       <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a></div>
       <form class="rv-form" data-rv-form novalidate>
         <fieldset class="rv-rate"><legend>Your rating</legend><div class="rv-rate-stars">${stars}</div></fieldset>
@@ -408,7 +409,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
         <p class="note">Reviews appear on this site with your first name. Please keep it friendly.</p>
       </form>
     </div>
-    <div class="rv-list" data-rv-list aria-live="polite"><p class="rv-empty">${slug ? "No reviews for this noodle yet. Be the first." : "No reviews yet. Be the first."}</p></div>
+    <div class="rv-list" data-rv-list aria-live="polite"><div class="rv-empty">${mascot({ acc: "none", wave: true })}<strong>${slug ? "No reviews for this one yet" : "No reviews yet"}</strong><span>${slug ? "Tried it? Be the first to say how it was." : "Been in? Be the first to tell everyone."}</span></div></div>
   </div>
 </section>`;
 }
@@ -439,7 +440,7 @@ const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Open in Google Maps" on this page for directions.`],
   ["Can I order online or get delivery?", "No. MEON is dine-in only. Walk in, choose a packet from the noodle wall, add toppings and cook it at your own station."],
   ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
-  ["Do you have vegetarian or vegan noodles?", `Yes. ${noodles.filter((n) => n.dietTokens.includes("veg")).length} noodles are vegetarian-friendly and ${noodles.filter((n) => n.dietTokens.includes("vegan")).length} are vegan. Use the diet filter in the noodle library, and always check the packet if you have allergies.`],
+  ["Do you have vegetarian or vegan noodles?", `Yes, plenty of our noodles are vegetarian-friendly and some are vegan. Use the diet filter in the noodle library, and always check the packet if you have allergies.`],
   ["What are the QR codes on the shelves for?", "Every packet on the wall has a QR code. Scan it with your phone camera to open that noodle's page with its flavour, spice level, the cooking machine setting and a cook timer."],
   ["How spicy are the noodles?", "Every noodle has a spice rating from 0 (no heat) to 5 (extreme). You can filter the library by spice level or let the roulette pick for you."],
 ];
@@ -454,7 +455,7 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 // ---------- Home ----------
 addPage("", layout({
   urlPath: "",
-  active: "home",
+  active: "",
   preload: "assets/img/photos/bowl-side.webp",
   jsonld: videoLd,
   description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}: ${COUNT} noodles ${REGION}, a toppings bar and your own cooking station. Every packet has its own page.`,
@@ -586,7 +587,7 @@ addPage("", layout({
         <div><p class="heat-level" data-heat-level>2 · Medium</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[2][2])}</p></div>
       </div>
       <ul class="heat-picks" data-heat-picks></ul>
-      <a class="btn btn--red" data-heat-link href="${r("noodles/?spice=2")}" data-magnetic>See all level <span data-heat-n>2</span> noodles ${icon.arrow}</a>
+      <a class="btn btn--red" data-heat-link href="${r("noodles/?spice=2")}" data-magnetic><span>See all level <span data-heat-n>2</span> noodles</span> ${icon.arrow}</a>
       <script type="application/json" id="heat-copy">${json(SPICE_LADDER)}</script>
     </div>
   </div>
@@ -673,7 +674,7 @@ ${pageHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`,
     </div>
   </div>
   <div class="wrap">
-    <div class="results-bar"><span data-result-count aria-live="polite">${noodles.length} noodles</span>
+    <div class="results-bar"><span data-result-count aria-live="polite">All ${COUNT} noodles</span>
       <span class="results-tools"><label class="visually-hidden" for="f-sort">Sort</label><select class="select" id="f-sort"><option value="featured">By country</option><option value="photo">Photos first</option><option value="az">A to Z</option><option value="hot">Hottest first</option><option value="mild">Mildest first</option></select>
       <button class="btn btn--line btn--sm" type="button" data-reset>Reset</button></span>
     </div>
@@ -725,7 +726,7 @@ noodles.forEach((n, idx) => {
       <div class="noodle-media">
         <figure class="noodle-photo img-reveal" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
         ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : p)}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
-        ${n.funNote ? `<p class="noodle-note">${esc(n.funNote)}</p>` : ""}
+        ${n.note ? `<p class="noodle-note">${esc(n.note)}</p>` : ""}
       </div>
       <div class="noodle-body">
         <p class="qr-banner" data-qr-banner hidden>${icon.qr}<span>Scanned from the shelf. Here's how to cook this one.</span></p>
@@ -869,26 +870,6 @@ ${[["Sides", catalogue.sides], ["Drinks", catalogue.drinks]].map(([h, items]) =>
   </div>`).join("\n")}
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies. Prices are in Australian dollars.</p></div></section>
-${ctaBand(r)}
-`,
-}));
-
-// ---------- MEON Card (not launched yet: unlinked, not indexed, not in the sitemap) ----------
-addPage("meon-card/", layout({
-  urlPath: "meon-card/",
-  title: "MEON Card · Coming soon",
-  noindex: true,
-  image: "assets/img/photos/meon-member-card.webp",
-  description: "The MEON Card is coming soon: every $20 you top up comes with a $5 voucher to use on the spot.",
-  body: (r) => `
-${pageHero(r, { crumbs: [["MEON Card"]], eyebrow: "Coming soon", title: "The MEON Card.", lead: "Top up $20, get a $5 voucher to use on the spot. Every top-up, every time.", aside: `<div class="member-card member-card--hero" data-parallax="0.05"><img src="${r("assets/img/photos/meon-member-card.webp")}" alt="The MEON Card" width="945" height="591"></div>` })}
-<section class="section"><div class="wrap">
-  ${sectionHead("How it will work", "Top up. Get a voucher. Eat.")}
-  <ol class="icon-steps">
-    ${[["card", "Get the card", "Pick one up at the counter once it launches."], ["coins", "Top up $20", "Load your card in store, as often as you like."], ["spark", "Get $5 on the spot", "Every $20 top-up comes with a $5 voucher, ready to use straight away."], ["bowl", "Spend it on noodles", "Use your balance and your voucher on your next bowl."]].map(([ic, h, t], i) => `<li class="reveal" style="--rd:${i * 0.06}s"><span class="is-ic">${svgIcon(ic)}</span><span class="hs-num">0${i + 1}</span><h3>${h}</h3><p>${t}</p></li>`).join("")}
-  </ol>
-  <p class="note">The card isn't available yet. Details may change before launch, so ask the crew in store.</p>
-</div></section>
 ${ctaBand(r)}
 `,
 }));
@@ -1075,7 +1056,7 @@ write("assets/img/icons.svg", iconSprite());
 
 // Search index used by the site-wide search overlay.
 const searchIndex = [
-  ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.thumb, f: n.countryCode, k: [n.flavour, n.diet, n.funNote, n.machine, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
+  ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.thumb, f: n.countryCode, k: [n.flavour, n.diet, n.note, n.machine, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
   ...countries.map((c) => ({ g: "Countries", t: c.name, s: `${countFor((n) => n.country === c.name)} noodles · ${c.headline}`, u: `countries/${c.slug}/`, f: c.code, k: "country" })),
   ...toppings.map((t) => ({ g: "Toppings", t: t.name, s: t.desc, u: `toppings/#${t.id}`, i: t.img || undefined, ic: t.img ? undefined : t.icon, k: `topping ${t.group}` })),
   ...[
@@ -1094,9 +1075,9 @@ const searchIndex = [
 write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 const pageImages = new Map([["", ["assets/img/photos/bowl-side.webp", "assets/img/photos/bowl-top-egg.webp"]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
-write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr") && !p.startsWith("meon-card")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a toppings bar and self-cook stations. Dine-in only, no online orders. Prices are in Australian dollars.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/): toppings, plus sides and drinks with prices\n- [MEON Member Card](${SITE_URL}/meon-card/): free card, 10% off eligible food\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}${n.price ? `, ${money(n.price)}` : ""}`).join("\n")}\n`);
+write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
+write("llms.txt", `# MEON Noodles\n\n> Instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a toppings bar and self-cook stations. Dine-in only, no online orders. Prices are in Australian dollars.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5), diet and cooking machine setting\n- [Countries](${SITE_URL}/countries/)\n- [Toppings and sides](${SITE_URL}/toppings/): toppings, plus sides and drinks with prices\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}${n.machine ? `, machine ${n.machine}` : ""}${n.price ? `, ${money(n.price)}` : ""}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
-write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, price: n.price ?? null, funNote: n.funNote, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
+write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, machine: n.machine, price: n.price ?? null, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
 console.log(`Built ${pages.length + 1} pages → ${path.relative(ROOT, OUT)}/  (${noodles.length} noodles, ${withPhotos.length} with photos, QR base ${SITE_URL})`);

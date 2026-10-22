@@ -57,7 +57,7 @@ ok(/shin-black-premium\/\?src=qr/.test(info), `QR generator encodes chosen noodl
 const nonBlank = await page.$eval("#qg-canvas", (c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let dark = 0; for (let i = 0; i < d.length; i += 4 * 97) if (d[i] < 80) dark++; return dark; });
 ok(nonBlank > 100, "QR canvas is drawn");
 
-for (const p of ["/countries/", "/countries/japan/", "/toppings/", "/meon-card/", "/about/", "/visit/", "/qr/", "/404.html"]) {
+for (const p of ["/countries/", "/countries/japan/", "/toppings/", "/about/", "/visit/", "/qr/", "/404.html"]) {
   await page.goto(BASE + p, { waitUntil: "networkidle" });
 }
 ok(true, "visited all page types");

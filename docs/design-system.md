@@ -19,7 +19,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 
 ## Page anatomy
 1. Announcement line: "Every packet on our wall has a QR code…"
-2. Header: white, always visible, with a hairline appearing on scroll. Logo on the left, the nav centred (Noodles mega menu, Countries, Toppings, MEON Card, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
+2. Header: white, always visible, with a hairline appearing on scroll. Logo on the left, the nav centred (Home, Noodles mega menu, Countries, Toppings, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
 3. Home: the centred launch hero. It has a pill line, the giant "Slurp the world." headline and a "Tonight I'm craving…" typewriter, then actions and checks, with the mascot crew around the headline (never over the photos). Below that sit a photo stage with the red logo tile and the count-up facts.
    Other pages: page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
 4. Content sections.

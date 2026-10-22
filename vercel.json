@@ -44,5 +44,12 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/meon-card/",
+      "destination": "/",
+      "permanent": true
+    }
   ]
 }

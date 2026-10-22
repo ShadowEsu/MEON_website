@@ -183,3 +183,45 @@ export function suggestToppings(n, toppings) {
 }
 
 export { COUNTRY_ADJ };
+
+// Customer-facing badge for the Drive doc's "fun note". Staff notes (market share, rival brands,
+// "rural variant") are hidden; everything else gets tidy wording. Unknown notes show as written.
+const BADGES = {
+  "2nd Most popular": "Crowd favourite",
+  "2nd most popular brands in Vietnam": "A Vietnam favourite",
+  "3 Mien represents North, Central & South": "North, Central & South",
+  "3rd Most popular / Healthier option": "A lighter pick",
+  "Affordable, more rural": null,
+  "Big competitor to Kangsifu": null,
+  "Collab Noodle, Popular online": "Collab noodle",
+  "Collab with Famous Chef / Bangkok Michelin starred restaurant": "Michelin-star collab",
+  "Featured": "Featured",
+  "Hand pulled - Top Seller": "Hand-pulled · Top seller",
+  "High Rating + More Premium": "Premium pick",
+  "Increasing market share": "Rising star",
+  "Known for no MSG flavour": "No added MSG",
+  "Many other flavours.": null,
+  "Most popular flavour": "Most popular flavour",
+  "Most popular in India": "India's favourite",
+  "Most popular in Vietnam": "Vietnam's favourite",
+  "Most popular in the brand": "Brand bestseller",
+  "New range": "New",
+  "New": "New",
+  "Niche flavour": "Something different",
+  "No.1 Ramen in the World": "No.1 ramen in the world",
+  "Popular in US / Canada / Everywhere": "Loved worldwide",
+  "Premium Quality, Restaurant Style": "Restaurant style",
+  "Rural variant": null,
+  "Staple in Philippines home": "A Filipino staple",
+  "Super Premium": "Super premium",
+  "Superior Taste Award; hard to get": "Award winner · Hard to find",
+  "Thailand Top 1 Product 2014": "Thailand's top product 2014",
+  "Third most popular": "Crowd favourite",
+  "Top 10 Noodle 2021": "Top 10 noodle 2021",
+  "Top 10 rated noodle 2021": "Top 10 noodle 2021",
+  "Top Rated in Malaysia": "Top rated in Malaysia",
+  "Top Seller": "Top seller",
+  "Was hyped like Buldak": "Internet famous",
+  "Was viral on tik tok before": "Viral on TikTok",
+};
+export const badge = (note) => (note == null ? null : note in BADGES ? BADGES[note] : note);

@@ -179,7 +179,7 @@
     var po = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { en.target.classList.toggle("is-off", !en.isIntersecting); });
     }, { rootMargin: "120px" });
-    $$(".crew, .peeker, .logo-anim, .cta-mascots, .member-card, .mascot-stage, .flag--hero, .footer-big, .noodle-photo").forEach(function (el) { po.observe(el); });
+    $$(".crew, .peeker, .logo-anim, .cta-mascots, .mascot-stage, .flag--hero, .footer-big, .noodle-photo").forEach(function (el) { po.observe(el); });
   }
 
   /* ---------- Autoplay videos only when visible ---------- */
@@ -425,7 +425,7 @@
       else if (v === "mild") sorted.sort(function (a, b) { return a.dataset.spice - b.dataset.spice; });
       else if (v === "photo") sorted.sort(function (a, b) { return b.dataset.photo - a.dataset.photo; });
       sorted.forEach(function (el) { grid.appendChild(el); });
-      if (countEl) countEl.textContent = shown === 1 ? "1 noodle" : shown + " noodles";
+      if (countEl) countEl.textContent = shown === cards.length ? "All 100+ noodles" : shown === 1 ? "1 noodle" : shown + " noodles";
       if (empty) empty.classList.toggle("is-visible", shown === 0);
       pills.forEach(function (b) { var sel = map[b.getAttribute("data-pill")]; b.setAttribute("aria-pressed", sel && sel.value === b.getAttribute("data-value") ? "true" : "false"); });
       writeParams();
@@ -717,6 +717,7 @@
     var total = 0, sum = 0, offset = 0, PAGE = 8;
     var drawSummary = function () {
       if (!summary) return;
+      summary.hidden = !total;
       var avg = total ? sum / total : 0;
       $(".rv-avg", summary).textContent = total ? avg.toFixed(1) : "–";
       $(".rv-stars", summary).innerHTML = stars(avg);
