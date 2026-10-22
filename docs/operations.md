@@ -54,7 +54,7 @@ When there's a new list of the packets on the wall, send it to Claude ("here's t
 ## Prices, sides and drinks (from the till)
 
 Prices come from the Square catalogue export (`MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx`, 16 October 2026) and live in `data/catalogue.json`. The site shows them in Australian dollars, exactly as in the till:
-- **Noodle pages**: the packet price sits under the packet weight. 54 noodles on the wall matched a till item; the till's packet weight replaced the old one where they differed.
+- **Noodle pages**: the packet price sits under the packet weight. 55 noodles on the wall matched a till item; the till's packet weight replaced the old one where they differed.
 - **New noodles**: 27 noodles were in the till but not on the site. They now have their own page and shelf QR code (on `/qr/`), with an illustrated packet. Their spice rating, diet and machine setting say "rating soon" / "Ask the crew" until the crew confirms them.
 - **Toppings page**: a "Sides" and a "Drinks" list with prices.
 
