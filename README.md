@@ -53,7 +53,7 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 - `data/source/Meon_Website_format2.md` — export of the Drive doc *Meon_Website_format2.docx* (names, countries, spice, diet, fun notes). Source of truth.
 - `data/source/meon_wix_cms_fixed_final.csv` — Wix CMS export (adds machine settings, fills missing soup/dry and weights).
 - `data/catalogue.json` — prices and items from MEON's Square catalogue export (16 Oct 2026). It adds the price (and the till's packet weight) to 55 noodles, 27 noodles that are in the till but not yet in the Drive doc, and the sides and drinks on the Toppings page. SKUs, stock counts and barcodes are never copied in.
-- Photos were taken from the previous Wix Studio site and checked by hand; six mismatched photos were dropped. Noodles without a photo show a mascot placeholder (“Photo coming soon”).
+- Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Topping photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet.
 
 ## Dev helpers
 

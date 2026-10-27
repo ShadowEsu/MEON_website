@@ -26,7 +26,6 @@ const dupSlug = noodlesRaw.find((n, i) => noodlesRaw.findIndex((o) => o.slug ===
 if (dupSlug) throw new Error(`Duplicate noodle slug ${dupSlug.slug}`);
 const money = (v) => `$${v.toFixed(2)}`;
 const countries = readJSON("countries.json");
-const toppings = readJSON("toppings.json");
 
 const spiceReview = new Set(fs.existsSync(path.join(ROOT, "data", "spice_review.json")) ? readJSON("spice_review.json").slugs : []);
 const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON("images.json") : {};
@@ -59,6 +58,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 
 // Photos are cached for 30 days, so add a short content hash: a replaced photo gets a new URL.
 const fingerprint = (p) => `${p}?v=${crypto.createHash("sha1").update(fs.readFileSync(path.join(SRC, p))).digest("hex").slice(0, 8)}`;
+const toppings = readJSON("toppings.json").map((t) => (t.img ? { ...t, img: fingerprint(t.img) } : t));
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -1052,6 +1052,7 @@ fs.mkdirSync(path.join(OUT, "assets", "vendor"), { recursive: true });
 fs.copyFileSync(require.resolve("qrcode-generator/qrcode.js"), path.join(OUT, "assets", "vendor", "qrcode.js"));
 fs.mkdirSync(path.join(OUT, "assets", "img", "flags"), { recursive: true });
 for (const c of countries) fs.copyFileSync(path.join(ROOT, "node_modules", "flag-icons", "flags", "4x3", `${c.code}.svg`), path.join(OUT, "assets", "img", "flags", `${c.code}.svg`));
+fs.copyFileSync(path.join(ROOT, "node_modules", "flag-icons", "LICENSE"), path.join(OUT, "assets", "img", "flags", "LICENSE.txt"));
 write("assets/img/icons.svg", iconSprite());
 
 // Search index used by the site-wide search overlay.

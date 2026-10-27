@@ -68,10 +68,10 @@ export function flag(code, r, { cls = "flag", w = 20 } = {}) {
   return `<img class="${cls}" src="${r(`assets/img/flags/${code}.svg`)}" alt="" width="${w}" height="${Math.round(w * 0.75)}" loading="lazy" decoding="async">`;
 }
 
-// Spice meter using MEON's own chilli artwork. `r` resolves asset paths relative to the page.
+// Spice meter using a chilli drawn in code (assets/img/chilli.svg). `r` resolves asset paths relative to the page.
 export function spiceMeter(level, r, { large = false, max = 5 } = {}) {
   let out = `<span class="spice${large ? " spice--lg" : ""}" role="img" aria-label="Spice level ${level} out of ${max}">`;
-  for (let i = 1; i <= max; i++) out += `<img class="${i <= level ? "on" : "off"}" src="${r("assets/img/chilli-64.webp")}" alt="" width="${large ? 13 : 8}" height="${large ? 46 : 30}">`;
+  for (let i = 1; i <= max; i++) out += `<img class="${i <= level ? "on" : "off"}" src="${r("assets/img/chilli.svg")}" alt="" width="${large ? 13 : 8}" height="${large ? 46 : 30}">`;
   return out + `</span>`;
 }
 
