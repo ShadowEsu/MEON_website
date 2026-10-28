@@ -5,7 +5,7 @@
 -- Order (expand, deploy, then enforce):
 --   STEP 1  before the site deploy. Adds a nullable column, so the live form keeps working.
 --   STEP 2  deploy the site build that sends consent_version (branch audit-top5).
---   STEP 3  after the deploy is live and one test review posts. Rejects any new review without consent.
+--   STEP 3  after the deploy is live and the probe below passes. Rejects any new review without consent.
 -- Older rows keep consent_version = null: they were posted before the checkbox existed.
 
 -- STEP 1 ---------------------------------------------------------------------------------------
@@ -15,6 +15,15 @@ alter table public.meon_reviews add column if not exists consent_version text;
 -- The public key may only insert listed columns if column grants are in use; this is a no-op otherwise.
 grant insert (consent_version) on public.meon_reviews to anon;
 notify pgrst, 'reload schema';
+-- Probe (inserts nothing): POST a review with consent_version and an out-of-range rating. If the column is
+-- missing, PostgREST answers PGRST204 "Could not find the 'consent_version' column"; if it exists, the insert
+-- fails on the rating check instead (confirm meon_reviews has a 1-5 rating check before relying on this).
+--
+-- STEP 1 rollback (additive only, nothing else changes):
+--   revoke insert (consent_version) on public.meon_reviews from anon;
+--   alter table public.meon_reviews drop column if exists consent_version;
+--   notify pgrst, 'reload schema';
+--   Roll the site back first: the new form sends consent_version, which fails once the column is gone.
 
 -- STEP 3 ---------------------------------------------------------------------------------------
 -- set lock_timeout = '5s';
