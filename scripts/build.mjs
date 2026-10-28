@@ -327,7 +327,7 @@ const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice ratin
 function noodleCard(n, r, i = 0) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note, n.machine].filter(Boolean).join(" ");
   return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.05}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
-  <span class="nc-media">${noodleMedia(n, r)}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}</span>
+  <span class="nc-media">${noodleMedia(n, r)}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}${n.price ? `<span class="nc-price">${money(n.price)}</span>` : ""}</span>
   <span class="nc-meta">${flag(n.countryCode, r, { w: 16 })}<span>${esc(n.country)}${n.type ? ` · ${esc(n.type)}` : ""}</span></span>
   <h3 class="nc-name">${esc(n.name)}</h3>
   <span class="nc-foot"><span class="nc-brand">${esc(n.brand)}</span>${spiceLine(n, r)}</span>

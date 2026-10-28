@@ -427,6 +427,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .nc-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
 .noodle-card:hover .nc-media img { transform: scale(1.035); }
 .nc-note { position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); background: rgba(255,255,255,.95); color: var(--ink); font-size: .74rem; font-weight: 500; padding: 4px 9px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nc-price { position: absolute; right: 10px; top: 10px; background: var(--ink); color: #fff; font-size: .8rem; font-weight: 700; letter-spacing: -.01em; font-variant-numeric: tabular-nums; padding: 4px 9px; border-radius: 999px; }
 .nc-meta { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--muted); margin-bottom: 6px; }
 .nc-meta .flag { width: 16px; }
 .nc-name { font-size: 1.08rem; font-weight: 600; letter-spacing: -.015em; line-height: 1.25; margin: 0 0 8px; transition: color .25s; }

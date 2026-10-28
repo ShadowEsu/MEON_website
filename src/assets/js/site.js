@@ -14,6 +14,32 @@
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
   function norm(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  /* Search spelling help: alternate spellings of the same dish always match; one typo per word
+     is forgiven only when nothing matched exactly. */
+  var SPELLINGS = [
+    ["ramen", "ramyun", "ramyeon", "ramyon"], ["jjajang", "jajang", "chajang", "jjajangmyeon", "jajangmyeon", "jjajangmyun"], ["jjambbong", "jjamppong", "jambbong", "champong"],
+    ["chapaguri", "jjapaguri", "ramdon"], ["chapagetti", "chapaghetti", "jjapaghetti", "jjapagetti"], ["yum", "yam"], ["kimchi", "kim chi"]
+  ];
+  var VARIANTS = {};
+  SPELLINGS.forEach(function (g) { g.forEach(function (w) { VARIANTS[w] = g; }); });
+  function queryTerms(q) {
+    q = norm(q.trim()).replace(/\b(?:migoreng|miegoreng|meegoreng|mie goreng|mee goreng)\b/g, "goreng").replace(/\btomy[au]m\b/g, "tom yum");
+    return q ? q.split(/\s+/) : [];
+  }
+  function oneTypo(a, b) {
+    if (Math.abs(a.length - b.length) > 1) return false;
+    var i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1) || (a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2));
+    return a.length > b.length ? a.slice(i + 1) === b.slice(i) : a.slice(i) === b.slice(i + 1);
+  }
+  function hasTerm(hay, t, typo) {
+    var v = VARIANTS[t] || [t];
+    for (var i = 0; i < v.length; i++) if (hay.indexOf(v[i]) !== -1) return true;
+    if (!typo || t.length < 4) return false;
+    return hay.split(/[^a-z0-9]+/).some(function (w) { return oneTypo(t, w); });
+  }
+  function matchesAll(hay, terms, typo) { return terms.every(function (t) { return hasTerm(hay, t, typo); }); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function flagImg(cc, w) { return '<img class="flag" src="' + ROOT + "assets/img/flags/" + esc(cc) + '.svg" alt="" width="' + (w || 20) + '" height="' + Math.round((w || 20) * 0.75) + '">'; }
   function useIcon(name) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><use href="' + ROOT + "assets/img/icons.svg#i-" + esc(name) + '"/></svg>'; }
@@ -311,13 +337,16 @@
         ["Buldak", "Tom yum", "Vegan", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"].map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>";
       html += '<div class="search-group">Jump to</div>' + (index || []).filter(function (x) { return x.g === "Pages"; }).slice(0, 6).map(item).join("");
     } else {
-      var terms = nq.split(/\s+/);
-      var hits = (index || []).filter(function (x) { return terms.every(function (t) { return x._h.indexOf(t) !== -1; }); });
+      var terms = queryTerms(q);
+      var hits = (index || []).filter(function (x) { return matchesAll(x._h, terms, false); });
+      var close = !hits.length;
+      if (close) hits = (index || []).filter(function (x) { return matchesAll(x._h, terms, true); });
       hits.sort(function (a, b) {
         var sa = a._t.indexOf(nq) === 0 ? 0 : a._t.indexOf(nq) > -1 ? 1 : 2, sb = b._t.indexOf(nq) === 0 ? 0 : b._t.indexOf(nq) > -1 ? 1 : 2;
         return sa - sb;
       });
       if (!hits.length) html = '<div class="search-empty">No matches for “' + esc(q) + '”. Try a flavour like “kimchi” or a country like “Japan”.</div>';
+      else if (close) html = '<div class="search-empty">No exact matches for “' + esc(q) + '”. Showing close spellings.</div>';
       var groups = {};
       hits.slice(0, 40).forEach(function (x) { (groups[x.g] = groups[x.g] || []).push(x); });
       ["Noodles", "Countries", "Toppings", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
@@ -398,34 +427,38 @@
       history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
     };
     var apply = function () {
-      var q = norm(search ? search.value.trim() : "");
-      var terms = q ? q.split(/\s+/) : [];
+      var terms = queryTerms(search ? search.value : "");
       var c = selCountry.value, t = selType.value, s = selSpice.value, d = selDiet.value;
-      var shown = 0;
-      cards.forEach(function (card) {
-        var ds = card.dataset, hay = norm(ds.search);
-        var ok = terms.every(function (term) { return hay.indexOf(term) !== -1; });
-        if (ok && c !== "all") ok = ds.country === c;
-        if (ok && t !== "all") ok = ds.type === t;
-        if (ok && s !== "all") {
-          var sp = parseInt(ds.spice, 10);
-          if (s === "mild") ok = sp === 0;
-          else if (sp < 0) ok = false;
-          else if (s === "medium") ok = sp >= 1 && sp <= 2;
-          else if (s === "hot") ok = sp >= 3;
-          else ok = sp === parseInt(s, 10);
-        }
-        if (ok && d !== "all") ok = (" " + ds.diet + " ").indexOf(" " + d + " ") !== -1;
-        card.hidden = !ok;
-        if (ok) { shown++; card.classList.add("is-in"); }
-      });
+      var run = function (typo) {
+        var n = 0;
+        cards.forEach(function (card) {
+          var ds = card.dataset;
+          var ok = matchesAll(norm(ds.search), terms, typo);
+          if (ok && c !== "all") ok = ds.country === c;
+          if (ok && t !== "all") ok = ds.type === t;
+          if (ok && s !== "all") {
+            var sp = parseInt(ds.spice, 10);
+            if (s === "mild") ok = sp === 0;
+            else if (sp < 0) ok = false;
+            else if (s === "medium") ok = sp >= 1 && sp <= 2;
+            else if (s === "hot") ok = sp >= 3;
+            else ok = sp === parseInt(s, 10);
+          }
+          if (ok && d !== "all") ok = (" " + ds.diet + " ").indexOf(" " + d + " ") !== -1;
+          card.hidden = !ok;
+          if (ok) { n++; card.classList.add("is-in"); }
+        });
+        return n;
+      };
+      var shown = run(false), close = !shown && terms.length > 0;
+      if (close) shown = run(true);
       var sorted = original.slice(), v = selSort ? selSort.value : "featured";
       if (v === "az") sorted.sort(function (a, b) { return a.dataset.name.localeCompare(b.dataset.name); });
       else if (v === "hot") sorted.sort(function (a, b) { return b.dataset.spice - a.dataset.spice; });
       else if (v === "mild") sorted.sort(function (a, b) { return a.dataset.spice - b.dataset.spice; });
       else if (v === "photo") sorted.sort(function (a, b) { return b.dataset.photo - a.dataset.photo; });
       sorted.forEach(function (el) { grid.appendChild(el); });
-      if (countEl) countEl.textContent = shown === cards.length ? "All 100+ noodles" : shown === 1 ? "1 noodle" : shown + " noodles";
+      if (countEl) countEl.textContent = (shown === cards.length ? "All 100+ noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
       if (empty) empty.classList.toggle("is-visible", shown === 0);
       pills.forEach(function (b) { var sel = map[b.getAttribute("data-pill")]; b.setAttribute("aria-pressed", sel && sel.value === b.getAttribute("data-value") ? "true" : "false"); });
       writeParams();
@@ -510,7 +543,7 @@
         '<span><span class="nc-meta">' + flagImg(n.cc, 16) + "<span>" + esc(n.country) + " · " + esc(n.brand) + "</span></span><h3>" + esc(n.name) + "</h3>" +
         '<span class="tags"><span>' + spice + "</span>" + (n.type ? "<span>" + esc(n.type) + "</span>" : "") + "</span></span></a>";
     };
-    var spinning = false, current = null;
+    var spinning = false, current = null, recent = [];
     spinBtn.addEventListener("click", function () {
       if (spinning || !all.length) return;
       var h = heat ? heat.value : "any";
@@ -522,9 +555,12 @@
         return true;
       });
       if (!pool.length) pool = all;
+      var fresh = pool.filter(function (n) { return recent.indexOf(n.slug) === -1; });
+      if (!fresh.length) fresh = pool;
       var picks = current ? [current] : [];
-      for (var i = 0; i < 14; i++) picks.push(pool[Math.floor(Math.random() * pool.length)]);
-      var winner = picks[picks.length - 1];
+      for (var i = 0; i < 13; i++) picks.push(pool[Math.floor(Math.random() * pool.length)]);
+      var winner = fresh[Math.floor(Math.random() * fresh.length)];
+      picks.push(winner);
       reel.style.transition = "none";
       reel.style.transform = "translateY(0)";
       reel.innerHTML = picks.map(itemHTML).join("");
@@ -535,6 +571,7 @@
       reel.style.transform = "translateY(-" + (picks.length - 1) * hgt + "px)";
       var done = function () {
         spinning = false; spinBtn.disabled = false; current = winner;
+        recent.push(winner.slug); if (recent.length > 5) recent.shift();
         reel.style.transition = "none";
         reel.innerHTML = itemHTML(winner);
         reel.style.transform = "translateY(0)";
@@ -555,7 +592,12 @@
     var buddy = $(".timer-buddy .meo", timer);
     var circ = 2 * Math.PI * 54;
     var total = parseInt(timer.getAttribute("data-seconds"), 10) || 210;
-    var left = total, running = false, endAt = 0, raf = 0, wakeLock = null;
+    var left = total, running = false, endAt = 0, raf = 0, iv = 0, wakeLock = null;
+    // The countdown also shows in the tab title, and a 1 s interval keeps it (and the alarm) going
+    // when the tab is in the background, where requestAnimationFrame stops.
+    var baseTitle = document.title, shownTitle = baseTitle;
+    var setTitle = function (t) { if (t !== shownTitle) { shownTitle = t; document.title = t; } };
+    var stopLoop = function () { cancelAnimationFrame(raf); clearInterval(iv); };
     prog.style.strokeDasharray = circ;
     var fmt = function (s) { var m = Math.floor(s / 60), r = s % 60; return m + ":" + (r < 10 ? "0" : "") + r; };
     var draw = function () { readout.textContent = fmt(Math.max(0, Math.ceil(left))); prog.style.strokeDashoffset = String(circ * (1 - left / total)); };
@@ -574,32 +616,41 @@
       if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
     };
     var releaseWake = function () { if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; } };
+    var requestWake = function () {
+      if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; l.addEventListener("release", function () { if (wakeLock === l) wakeLock = null; }); }).catch(function () {});
+    };
+    // The browser drops the wake lock whenever the page is hidden; take it back on return.
+    document.addEventListener("visibilitychange", function () { if (running && !document.hidden && !wakeLock) requestWake(); });
     var tick = function () {
       left = (endAt - Date.now()) / 1000;
       if (left <= 0) {
+        stopLoop();
         left = 0; running = false; draw();
         timer.classList.remove("is-running"); timer.classList.add("is-done"); startBtn.textContent = "Start timer";
         if (status) status.textContent = "Ready. Time to eat.";
+        setTitle("Ready · " + baseTitle);
         beep(); releaseWake(); confetti();
         if (buddy) talk(buddy, "Noodles ready");
         return;
       }
-      draw(); raf = requestAnimationFrame(tick);
+      draw(); setTitle(fmt(Math.ceil(left)) + " · " + baseTitle);
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
     };
     var reset = function () {
-      cancelAnimationFrame(raf); running = false; releaseWake();
+      stopLoop(); running = false; releaseWake(); setTitle(baseTitle);
       left = total;
       timer.classList.remove("is-done", "is-running"); startBtn.textContent = "Start timer";
       if (status) status.textContent = "";
       draw();
     };
     startBtn.addEventListener("click", function () {
-      if (running) { cancelAnimationFrame(raf); running = false; timer.classList.remove("is-running"); startBtn.textContent = "Resume"; releaseWake(); if (status) status.textContent = "Paused"; return; }
+      if (running) { stopLoop(); running = false; timer.classList.remove("is-running"); startBtn.textContent = "Resume"; releaseWake(); setTitle("Paused · " + baseTitle); if (status) status.textContent = "Paused"; return; }
       if (left <= 0) { left = total; timer.classList.remove("is-done"); }
       running = true; endAt = Date.now() + left * 1000; startBtn.textContent = "Pause";
       timer.classList.add("is-running");
       if (status) status.textContent = "Cooking. Keep this page open.";
-      if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {});
+      requestWake();
+      clearInterval(iv); iv = setInterval(tick, 1000);
       tick();
     });
     resetBtn.addEventListener("click", reset);

@@ -1,5 +1,5 @@
 {
- "_readme": "Noodles whose name says spicy/hot but the source doc rates 0. The site shows 'spice rating coming soon' for these until a real rating is set in the source doc (then remove the slug here).",
+ "_readme": "Noodles whose name says or implies heat (spicy, hot, red, laksa) but the source doc rates 0. The site shows 'spice rating coming soon' for these until a real rating is set in the source doc (then remove the slug here).",
  "slugs": [
   "ottogi-jin-ramen-spicy",
   "samyang-buldak-hot-chicken-flavor-habanero-lime",
@@ -20,6 +20,9 @@
   "nissin-salted-egg-instant-noodle-spicy",
   "lucky-me-instant-pancit-canton-sweet-and-spicy",
   "acecook-hao-hao-spicy-and-sour-shrimp-flavour",
-  "uniben-3-mien-instant-noodle-sour-and-spicy-shrimp-flavour"
+  "uniben-3-mien-instant-noodle-sour-and-spicy-shrimp-flavour",
+  "nissin-ramen-kyushu-red",
+  "maggi-2-minute-noodles-asam-laksa",
+  "koka-laksa-singapura-signature-noodles"
  ]
 }
