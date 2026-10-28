@@ -558,7 +558,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .cook-label { font-size: .76rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .cook-code { font-size: clamp(3.4rem, 7vw, 5rem); line-height: 1; font-weight: 600; letter-spacing: -.05em; color: var(--red); }
 .cook-hint { font-size: .86rem; color: var(--ink-2); max-width: 18ch; }
-.cook-then { font-size: .55em; color: var(--muted); margin: 0 .14em; vertical-align: .32em; font-weight: 500; }
+.cook-then { font-size: .26em; letter-spacing: .02em; color: var(--muted); margin: 0 .5em; vertical-align: .9em; font-weight: 600; }
 .timer { position: relative; display: grid; grid-template-columns: 112px 1fr; gap: 20px; align-items: center; }
 .timer-dial { position: relative; width: 112px; height: 112px; }
 .timer-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }

@@ -1,7 +1,7 @@
 {
   "_readme": "Edit this file to update business details. Empty strings are hidden on the site. After changing siteUrl, run `npm run build` so every QR code points at the new domain. SEO: paste the Search Console code into googleSiteVerification, your Google Business Profile link into googleBusinessUrl, exact map coordinates into geo, and opening hours into openingHours as {\"days\":[\"Monday\",\"Tuesday\"],\"opens\":\"11:00\",\"closes\":\"21:00\"}. See docs/seo.md.",
   "name": "MEON",
-  "tagline": "Instant noodles from around the world, cooked your way.",
+  "tagline": "Instant noodles from across Asia, cooked your way.",
   "siteUrl": "https://meon-noodles.vercel.app",
   "suburb": "Canning Bridge",
   "city": "Perth",

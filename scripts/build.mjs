@@ -731,7 +731,7 @@ noodles.forEach((n, idx) => {
           <h2 id="cook-h" class="visually-hidden">Cook it</h2>
           <div class="cook-machine">
             <span class="cook-label">On the machine</span>
-            <span class="cook-code">1<span class="cook-then" aria-hidden="true">›</span><span class="visually-hidden">, then </span>2</span>
+            <span class="cook-code">1<span class="cook-then">then</span>2</span>
             <span class="cook-hint">Press 1, then 2 on the cooking machine to start.</span>
           </div>
           <div class="timer" data-timer data-seconds="${COOK_SECONDS}">
