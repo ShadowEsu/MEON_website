@@ -80,13 +80,13 @@ The MEON Card has been taken off the website completely. `/meon-card/` redirects
 
 ## Videos
 
-All three videos are **hidden** for now (`hidden: true` in `VIDEOS` in `scripts/build.mjs`), because they show shelf QR codes, the old per-noodle machine program, the old cook time and the old logo. The "Watch" section on the home page (below "Do it yourself") appears only once a video is unhidden. It plays the videos and offers them as downloads. The files are in `src/assets/video/`:
+The website tour was re-recorded on 28 October 2026 from the live site and is shown in the "Watch" section on the home page (below "Do it yourself"), with a download button. The promo and its 9:16 cut are **hidden** (`hidden: true` in `VIDEOS` in `scripts/build.mjs`) until they are remade, because they show shelf QR codes, the old per-noodle machine program, the old cook time and the old logo. The "Watch" section appears only while at least one video is unhidden, and its lead line changes with what's shown. The files are in `src/assets/video/`:
 
 | File | What it is |
 | --- | --- |
-| `meon-promo.mp4` | 47-second promo, 16:9 (100+ noodles, across Asia, spice levels; no card) |
-| `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories |
-| `meon-website-tour.mp4` | 4:04 tour of the website, including the new interactive sections and the phone QR-scan experience |
+| `meon-promo.mp4` | 47-second promo, 16:9 (hidden: old version) |
+| `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories (hidden: old version) |
+| `meon-website-tour.mp4` | 1:13 tour of the website (28 Oct 2026): home facts and "Do it yourself" steps, the roulette, the spice slider, a search for Shin Ramyun and its noodle page with "1 then 2" and the 3:50 timer, Pairings & sides, and an end card with the MEON logo |
 | `poster-*.jpg` | The still image shown before a video plays |
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.

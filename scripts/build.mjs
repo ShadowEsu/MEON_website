@@ -423,13 +423,14 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
 const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd>${typeof n === "number" ? `<span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span>` : esc(n)}</dd></div>`).join("")}</dl>`;
 
 // Videos (src/assets/video): the promo, a vertical cut for Reels/TikTok, and the website tour.
-// All hidden (Preston, 28 Oct 2026): they show shelf QR codes, the M5 program, a 3:30 timer and the old logo. Unhide a video only once it's remade.
+// Hidden (Preston, 28 Oct 2026) until remade: the old promo and vertical cut show shelf QR codes, the M5 program, a 3:30 timer and the old logo.
+// The tour was re-recorded on 28 Oct 2026 from the live site. Unhide a video only once it's remade; `uploaded` feeds the VideoObject uploadDate.
 const VIDEOS = [
-  { id: "promo", hidden: true, file: "meon-promo.mp4", poster: "poster-promo.jpg", title: "MEON in under a minute", desc: "What MEON is, how it works and why it's worth the trip.", length: "0:47", iso: "PT47S", dl: "MEON-promo.mp4", label: "Promo · 16:9" },
-  { id: "tour", hidden: true, file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "Throw the mascots, build a bowl, check the heat, then every noodle page and its cook timer.", length: "4:04", iso: "PT4M4S", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9" },
-  { id: "vertical", hidden: true, file: "meon-promo-vertical.mp4", poster: "poster-promo-vertical.jpg", title: "Promo for Reels and TikTok", desc: "", length: "0:47", iso: "PT47S", dl: "MEON-promo-vertical.mp4", label: "Promo · 9:16 for Reels and TikTok" },
+  { id: "promo", hidden: true, file: "meon-promo.mp4", poster: "poster-promo.jpg", title: "MEON in under a minute", desc: "What MEON is, how it works and why it's worth the trip.", length: "0:47", iso: "PT47S", uploaded: "2026-10-05", dl: "MEON-promo.mp4", label: "Promo · 16:9" },
+  { id: "tour", hidden: false, file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "The noodle wall, the roulette and the spice slider, then a noodle page with its 3:50 cook timer and the pairings and sides.", length: "1:13", iso: "PT1M13S", uploaded: "2026-10-28", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9" },
+  { id: "vertical", hidden: true, file: "meon-promo-vertical.mp4", poster: "poster-promo-vertical.jpg", title: "Promo for Reels and TikTok", desc: "", length: "0:47", iso: "PT47S", uploaded: "2026-10-05", dl: "MEON-promo-vertical.mp4", label: "Promo · 9:16 for Reels and TikTok" },
 ].filter((v) => !v.hidden).map((v) => ({ ...v, mb: Math.max(1, Math.round(fs.statSync(path.join(SRC, "assets", "video", v.file)).size / 1048576)) }));
-const videoLd = VIDEOS.filter((v) => v.desc).map((v) => ({ "@context": "https://schema.org", "@type": "VideoObject", name: v.title, description: v.desc, thumbnailUrl: `${SITE_URL}/assets/video/${v.poster}`, contentUrl: `${SITE_URL}/assets/video/${v.file}`, uploadDate: "2026-10-05", duration: v.iso, publisher: { "@id": `${SITE_URL}/#restaurant` } }));
+const videoLd = VIDEOS.filter((v) => v.desc).map((v) => ({ "@context": "https://schema.org", "@type": "VideoObject", name: v.title, description: v.desc, thumbnailUrl: `${SITE_URL}/assets/video/${v.poster}`, contentUrl: `${SITE_URL}/assets/video/${v.file}`, uploadDate: v.uploaded, duration: v.iso, publisher: { "@id": `${SITE_URL}/#restaurant` } }));
 const videoPlayer = (v, r, { big = false } = {}) => `<figure class="watch-item${big ? " watch-item--big" : ""}">
   <div class="watch-player" data-video>
     <video preload="none" playsinline poster="${r(`assets/video/${v.poster}`)}" width="1920" height="1080"><source src="${r(`assets/video/${v.file}`)}" type="video/mp4"></video>
@@ -525,11 +526,11 @@ addPage("", layout({
 
 ${VIDEOS.length ? `<section class="section section--ink watch" id="watch">
   <div class="wrap">
-    ${sectionHead("Watch", "See MEON before you visit.", "", "A one-minute look at the noodle bar, and a full tour of this website. Download them to share.")}
+    ${sectionHead("Watch", "See MEON before you visit.", "", VIDEOS.some((v) => v.id === "promo") ? "A one-minute look at the noodle bar, and a full tour of this website. Download them to share." : "A tour of this website, from the noodle wall to the cook timer. Download it to share.")}
     <div class="watch-grid">
       ${videoPlayer(VIDEOS[0], r, { big: true })}
       <div class="watch-side">
-        ${VIDEOS.find((v) => v.id === "tour") ? videoPlayer(VIDEOS.find((v) => v.id === "tour"), r) : ""}
+        ${VIDEOS[0].id !== "tour" && VIDEOS.find((v) => v.id === "tour") ? videoPlayer(VIDEOS.find((v) => v.id === "tour"), r) : ""}
         <div class="watch-dl">
           <p class="watch-dl-h">${svgIcon("download")} Download</p>
           <ul>${VIDEOS.map((v) => `<li><a href="${r(`assets/video/${v.file}`)}" download="${v.dl}"><span>${esc(v.label)}</span><small>${v.length} · MP4 · ${v.mb} MB</small>${svgIcon("download")}</a></li>`).join("")}</ul>
