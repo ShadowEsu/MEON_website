@@ -259,7 +259,7 @@
     };
     window.addEventListener("pointermove", function (e) { mx = e.clientX; my = e.clientY; if (!pending) { pending = true; requestAnimationFrame(look); } }, { passive: true });
   }
-  var LINES = ["Egg on top? Always.", "Try a Buldak if you dare", "Noodles from across Asia", "Scan a shelf QR code", "Cheese and ramen, trust me", "Spin the roulette", "Mind the steam"];
+  var LINES = ["Egg on top? Always.", "Try a Buldak if you dare", "Noodles from across Asia", "Press 1, then 2", "Cheese and ramen, trust me", "Spin the roulette", "Mind the steam"];
   function talk(m, text) {
     var bubble = $(".meo-bubble", m);
     if (bubble && text) bubble.textContent = text;
@@ -349,7 +349,7 @@
       else if (close) note = "No exact matches for “" + q.trim() + "”. Showing close spellings.";
       var groups = {};
       hits.slice(0, 40).forEach(function (x) { (groups[x.g] = groups[x.g] || []).push(x); });
-      ["Noodles", "Countries", "Toppings", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
+      ["Noodles", "Countries", "Pairings and sides", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
     }
     if (sStatus) { sStatus.textContent = note; sStatus.hidden = !note; }
     sResults.innerHTML = html;
@@ -592,7 +592,7 @@
     var status = $("[data-timer-status]", timer);
     var buddy = $(".timer-buddy .meo", timer);
     var circ = 2 * Math.PI * 54;
-    var total = parseInt(timer.getAttribute("data-seconds"), 10) || 210;
+    var total = parseInt(timer.getAttribute("data-seconds"), 10) || 230;
     var left = total, running = false, endAt = 0, raf = 0, iv = 0, wakeLock = null;
     // The countdown also shows in the tab title, and a 1 s interval keeps it (and the alarm) going
     // when the tab is in the background, where requestAnimationFrame stops.

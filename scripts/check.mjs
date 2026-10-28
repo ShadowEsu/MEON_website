@@ -66,6 +66,17 @@ for (const file of htmlFiles) {
     if (!m[1].startsWith(SITE_URL)) problems.push(`${rel}: loads from another host before consent: ${m[1].slice(0, 80)}`);
   }
   if (!/href="[^"]*privacy\/"/.test(html)) problems.push(`${rel}: no link to the privacy page`);
+  // Preston, 28 Oct 2026: no prices on the site (they change), and the logo is always the full mixed logo
+  // ("meon" plus its four glyphs), never the word alone.
+  const text = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, "").replace(/<[^>]+>/g, " ");
+  const price = text.match(/\$\s?\d[\d.,]*/);
+  if (price) problems.push(`${rel}: shows a price (${price[0]}); prices stay off the site`);
+  const mark = html.match(/<a class="logo"[^>]*>([\s\S]*?)<\/a>/);
+  if (!mark || (mark[1].match(/class="lw"/g) || []).length !== 8) problems.push(`${rel}: header logo is not the full mixed logo (meon + 4 glyphs)`);
+}
+for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
+  const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
+  if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
 for (const f of files.filter((f) => f.endsWith(".css"))) {
   for (const m of fs.readFileSync(f, "utf8").matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)/g)) problems.push(`${path.relative(OUT, f)}: loads from another host: ${m[1].slice(0, 80)}`);

@@ -1,7 +1,8 @@
-// Inline SVG art: icons, flags, the MEON wordmark, the "Meo" mascot crew and small illustrations. All original artwork.
+// Inline SVG art: icons, flags, the MEON logo, the "Meo" mascot crew and small illustrations. All original artwork.
 import fs from "node:fs";
 
-const WORD = JSON.parse(fs.readFileSync(new URL("./logo-word.json", import.meta.url), "utf8"));
+// The official logo, traced from the original artwork by scripts/trace_logo.py: "meon" plus the mixed line under it.
+const LOGO = JSON.parse(fs.readFileSync(new URL("./logo-mixed.json", import.meta.url), "utf8"));
 
 /* ---------------- Icons ----------------
    One consistent line set: 24px grid, 1.75 stroke, round caps and joins.
@@ -75,27 +76,23 @@ export function spiceMeter(level, r, { large = false, max = 5 } = {}) {
   return out + `</span>`;
 }
 
-/* ---------------- Wordmark ----------------
-   "meon" drawn from the logo's own letter shapes (no web font needed). Each letter is a .lw group so it can move. */
-export function wordmark(cls = "wordmark", label = "") {
+/* ---------------- Logo ----------------
+   Always the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone.
+   Each letter and glyph is a .lw group (with --i) so CSS can move it. */
+const logoParts = () => [...LOGO.word, ...LOGO.glyphs].map((d, i) => `<g class="lw" style="--i:${i}"><path d="${d}"/></g>`).join("");
+
+// The red square logo with its white frame.
+export function logoMark(cls = "logo-mark", label = "") {
   const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
-  return `<svg class="${cls}" viewBox="${WORD.viewBox}" fill="currentColor" ${a11y} focusable="false">${WORD.paths}</svg>`;
+  const { outer, inner } = LOGO.frame, sw = inner[0] - outer[0], at = (outer[0] + inner[0]) / 2, S = LOGO.size;
+  return `<svg class="${cls}" viewBox="0 0 ${S} ${S}" ${a11y} focusable="false"><rect width="${S}" height="${S}" fill="#ec1b25"/><rect x="${at}" y="${at}" width="${S - 2 * at}" height="${S - 2 * at}" rx="6" fill="none" stroke="#fff" stroke-width="${sw}"/><g fill="#fff" fill-rule="evenodd">${logoParts()}</g></svg>`;
 }
 
-const GLYPHS = [["み", "ㅁ", "咪", "ม"], ["อี", "이", "え", "伊"], ["お", "오", "哦", "โอ"], ["ん", "ㄴ", "恩", "น"]];
-
-// Large animated logo tile: the wordmark plus a subline that cycles through Japanese, Korean, Chinese and Thai.
-export function logoAnimated() {
-  return `<div class="logo-anim" role="img" aria-label="meon logo">
-  ${wordmark("logo-anim-word")}
-  <div class="logo-anim-sub" aria-hidden="true">${GLYPHS.map((s, i) => `<span class="cycle" style="--i:${i}">${s.map((g) => `<b>${g}</b>`).join("")}</span>`).join("")}</div>
-</div>`;
-}
-
-// Header logo: the red square mark with moving letters and a cycling script line.
-export function logoMini() {
-  const lines = [0, 1, 2, 3].map((k) => GLYPHS.map((g) => g[k]).join(" "));
-  return `<span class="logo-mini" aria-hidden="true">${wordmark("logo-mini-word")}<span class="g">${lines.map((l) => `<b>${l}</b>`).join("")}</span></span>`;
+// The lettering without the square, in the current text colour (footer).
+export function logoLockup(cls = "logo-lockup", label = "") {
+  const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
+  const [wx0, wy0, wx1] = LOGO.wordBox, [gx0, , gx1, gy1] = LOGO.glyphBox, x0 = Math.min(wx0, gx0), x1 = Math.max(wx1, gx1);
+  return `<svg class="${cls}" viewBox="${x0} ${wy0} ${x1 - x0} ${gy1 - wy0}" fill="currentColor" fill-rule="evenodd" ${a11y} focusable="false">${logoParts()}</svg>`;
 }
 
 /* ---------------- Meo, the mascot ---------------- */
@@ -182,16 +179,15 @@ export const stepArt = {
 // Sad bowl for empty states / 404
 export const emptyBowl = `<svg class="empty-bowl" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><path d="M20 70h160c0 46-36 78-80 78S20 116 20 70z" fill="#fff" stroke="#17110f" stroke-width="5" stroke-linejoin="round"/><path d="M34 92h132" stroke="#ec1b25" stroke-width="8"/><ellipse class="meo-eye" cx="78" cy="112" rx="6" ry="8" fill="#17110f"/><ellipse class="meo-eye" cx="122" cy="112" rx="6" ry="8" fill="#17110f"/><path d="M88 134c8-8 16-8 24 0" fill="none" stroke="#17110f" stroke-width="5" stroke-linecap="round"/><path d="M70 50c-8-12 8-16 0-30M100 50c-8-12 8-16 0-30M130 50c-8-12 8-16 0-30" fill="none" stroke="rgba(23,17,15,.3)" stroke-width="5" stroke-linecap="round" class="meo-steam"/></svg>`;
 
-/* ---------------- Build-your-bowl toppings (small illustrations) ---------------- */
+/* ---------------- Build-your-bowl pairings (small illustrations); every chip is a real item in data/toppings.json ---------------- */
 export const TOPPING_ART = {
-  egg: { name: "Jammy egg", svg: `<svg viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="24" ry="20" fill="#fffaf0" stroke="#17110f" stroke-width="3"/><circle cx="30" cy="31" r="11" fill="#ff9f1c" stroke="#17110f" stroke-width="3"/><circle cx="26" cy="27" r="3" fill="#ffd27a"/></svg>` },
+  egg: { name: "Egg", svg: `<svg viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="24" ry="20" fill="#fffaf0" stroke="#17110f" stroke-width="3"/><circle cx="30" cy="31" r="11" fill="#ff9f1c" stroke="#17110f" stroke-width="3"/><circle cx="26" cy="27" r="3" fill="#ffd27a"/></svg>` },
   cheese: { name: "Cheese", svg: `<svg viewBox="0 0 60 60"><path d="M8 10h44v30c0 3-3 4-5 2l-4-4-4 10c-1 3-5 3-6 0l-3-8-5 6c-2 2-6 1-6-2V30l-4 3c-3 2-7 0-7-3z" fill="#ffd23f" stroke="#17110f" stroke-width="3" stroke-linejoin="round"/><circle cx="22" cy="20" r="3.5" fill="#f2b705"/><circle cx="38" cy="26" r="2.5" fill="#f2b705"/></svg>` },
-  chilli: { name: "Chilli", svg: `<svg viewBox="0 0 60 60"><path d="M14 46c18-2 30-14 32-30 1-4 6-3 6 1-1 22-20 36-38 34-4 0-4-5 0-5z" fill="#e3141e" stroke="#17110f" stroke-width="3" stroke-linejoin="round"/><path d="M47 15c0-5 3-8 7-8" fill="none" stroke="#2f9e57" stroke-width="4" stroke-linecap="round"/></svg>` },
   seaweed: { name: "Seaweed", svg: `<svg viewBox="0 0 60 60"><rect x="12" y="6" width="36" height="48" rx="4" fill="#1f3a2b" stroke="#17110f" stroke-width="3"/><path d="M18 16h24M18 26h24M18 36h24M18 46h24" stroke="#2f5d43" stroke-width="2.5"/></svg>` },
   fishcake: { name: "Fishcake", svg: `<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#fff" stroke="#17110f" stroke-width="3"/><path d="M30 30c0-4 6-4 6 0 0 7-12 7-12 0 0-10 18-10 18 0 0 13-24 13-24 0" fill="none" stroke="#ff6f91" stroke-width="3.5" stroke-linecap="round"/></svg>` },
   onion: { name: "Spring onion", svg: `<svg viewBox="0 0 60 60"><circle cx="20" cy="22" r="10" fill="#c8f07a" stroke="#17110f" stroke-width="3"/><circle cx="20" cy="22" r="4" fill="#f2ffd9"/><circle cx="40" cy="30" r="9" fill="#9bd64b" stroke="#17110f" stroke-width="3"/><circle cx="40" cy="30" r="3.5" fill="#e7ffc4"/><circle cx="26" cy="42" r="8" fill="#c8f07a" stroke="#17110f" stroke-width="3"/><circle cx="26" cy="42" r="3" fill="#f2ffd9"/></svg>` },
-  beef: { name: "Beef", svg: `<svg viewBox="0 0 60 60"><path d="M8 24c8-12 22-14 32-10s14 14 10 22-18 14-30 10S2 34 8 24z" fill="#a8461b" stroke="#17110f" stroke-width="3"/><path d="M16 26c8-4 16-4 24 2M18 34c6-2 12-2 18 2" fill="none" stroke="#e8a27a" stroke-width="2.5" stroke-linecap="round"/></svg>` },
+  beef: { name: "Beef roll", svg: `<svg viewBox="0 0 60 60"><path d="M8 24c8-12 22-14 32-10s14 14 10 22-18 14-30 10S2 34 8 24z" fill="#a8461b" stroke="#17110f" stroke-width="3"/><path d="M16 26c8-4 16-4 24 2M18 34c6-2 12-2 18 2" fill="none" stroke="#e8a27a" stroke-width="2.5" stroke-linecap="round"/></svg>` },
   enoki: { name: "Enoki", svg: `<svg viewBox="0 0 60 60"><g stroke="#17110f" stroke-width="2.5" stroke-linecap="round" fill="#fff6dc"><path d="M22 52 26 16" fill="none"/><path d="M30 52V12" fill="none"/><path d="M38 52 34 16" fill="none"/><circle cx="26" cy="14" r="4.5"/><circle cx="30" cy="10" r="4.5"/><circle cx="34" cy="14" r="4.5"/></g></svg>` },
-  spam: { name: "Spam", svg: `<svg viewBox="0 0 60 60"><rect x="8" y="16" width="44" height="28" rx="6" fill="#f08a9b" stroke="#17110f" stroke-width="3"/><path d="M14 24h32M14 32h20" stroke="#ffc2cc" stroke-width="3" stroke-linecap="round"/></svg>` },
+  spam: { name: "Fried Spam", svg: `<svg viewBox="0 0 60 60"><rect x="8" y="16" width="44" height="28" rx="6" fill="#f08a9b" stroke="#17110f" stroke-width="3"/><path d="M14 24h32M14 32h20" stroke="#ffc2cc" stroke-width="3" stroke-linecap="round"/></svg>` },
   shrimp: { name: "Shrimp katsu", svg: `<svg viewBox="0 0 60 60"><path d="M12 40c0-18 14-30 32-28 6 1 6 8 0 8-12 0-20 8-20 20 0 6-12 6-12 0z" fill="#f2a03d" stroke="#17110f" stroke-width="3" stroke-linejoin="round"/><path d="M18 34l6 2M22 26l6 3M30 20l4 5" stroke="#c8741e" stroke-width="2.5" stroke-linecap="round"/><path d="M44 12l8-6M45 16l9-2" stroke="#e3141e" stroke-width="3" stroke-linecap="round"/></svg>` },
 };

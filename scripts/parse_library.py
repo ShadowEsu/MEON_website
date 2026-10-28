@@ -2,8 +2,11 @@
 
 Usage: python3 scripts/parse_library.py [library.md] [cms.csv]
 Defaults: data/source/Meon_Website_format2.md (export of Drive doc Meon_Website_format2.docx)
-          data/source/meon_wix_cms_fixed_final.csv (Wix CMS export: adds machine settings + fills missing soup/dry/weight)
-The doc is the source of truth for names, countries, spice and diet.
+          data/source/meon_wix_cms_fixed_final.csv (Wix CMS export: fills missing soup/dry/weight)
+The doc is the source of truth for names, countries and diet. Spice is not: the site's ratings were
+recalibrated against Shin Ramyun = 3 (Preston, 28 Oct 2026), so a re-parse keeps the spice already in
+data/noodles.json and only takes the doc's spice for noodles that are new to the site.
+There is no per-noodle machine program any more: every noodle is "press 1, then 2".
 """
 import csv, json, re, sys, unicodedata
 from pathlib import Path
@@ -64,7 +67,7 @@ def main(src):
             "countryCode": COUNTRY_CODES[country], "flavour": flavour, "funNote": fun_note,
             "weightG": weight, "spice": spice,
             "diet": diet.rstrip("*").strip(), "dietNote": diet.endswith("*"),
-            "type": ntype, "machine": None,
+            "type": ntype,
         })
     return out
 
@@ -80,7 +83,6 @@ def merge_cms(data, csv_path):
         if not x:
             print(f"no CMS row for {n['slug']}", file=sys.stderr)
             continue
-        n["machine"] = x["Machine Setting"].strip() or None
         if not n["type"] and x["Dry or Soup"].strip() not in ("", "—"):
             n["type"] = x["Dry or Soup"].strip()
         w = x["Weight"].strip()
@@ -96,5 +98,9 @@ if __name__ == "__main__":
     if Path(cms).exists():
         data = merge_cms(data, cms)
     dest = base / "data" / "noodles.json"
+    if dest.exists():
+        rated = {n["slug"]: n["spice"] for n in json.loads(dest.read_text(encoding="utf-8"))}
+        for n in data:
+            n["spice"] = rated.get(n["slug"], n["spice"])
     dest.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {len(data)} noodles -> {dest}")

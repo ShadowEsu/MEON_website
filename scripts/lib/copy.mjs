@@ -120,65 +120,65 @@ export function shortBlurb(n) {
   return flavourNote(n).replace(/<[^>]+>/g, "");
 }
 
-// Every timer on the site runs for 3 minutes 30 seconds.
-export const COOK_SECONDS = 210;
+// Every noodle cooks for 3 minutes 50 seconds (Preston, 28 Oct 2026): press 1, then 2 on the machine.
+export const COOK_SECONDS = 230;
+export const COOK_TIME = `${Math.floor(COOK_SECONDS / 60)} minutes ${COOK_SECONDS % 60} seconds`;
+
+// How cooking works at MEON: pairings go in with the noodles at the start; egg and cheese go on top of the
+// noodles (never on the bowl, it burns) in the last 30 seconds; sides are ready to eat and stay out of the machine.
+const PICK = ["Grab your packet", "Pick it off the wall and bring it to the cooking machine with a MEON bowl."];
+const PRESS = ["Press 1, then 2", `Press 1, then 2 on the machine. It cooks for ${COOK_TIME}.`];
+const LAST = ["Egg and cheese last", "In the last 30 seconds, crack the egg and add cheese on top of the noodles, not on the bowl, so it doesn't burn."];
 
 export function cookSteps(n) {
   if (n.type === "Dry") {
     return {
       steps: [
-        ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
-        ["Boil the noodles", "Cook the noodle block for 3 minutes 30 seconds until just tender."],
-        ["Drain", "Pour off most of the water, keeping a couple of spoonfuls to loosen the sauce."],
-        ["Toss & top", "Add the sauce and flakes, mix until glossy, then pile on your toppings."],
-      ],
-    };
-  }
-  if (n.type === "Porridge") {
-    return {
-      steps: [
-        ["Grab your packet", "Bring it to the cooking station with a MEON bowl."],
-        ["Add hot water", "Add the noodles and seasoning to a MEON bowl with hot water."],
-        ["Stir & rest", "Stir well and let it sit for 3 minutes 30 seconds until thick and creamy."],
-        ["Top it", "Finish with an egg, spring onion or a crunchy side."],
+        PICK,
+        ["Pairings in", "Put the noodle block and your pairings in the bowl. Keep the sauce and flakes aside."],
+        PRESS,
+        LAST,
+        ["Drain and toss", "Pour off most of the water, keeping a couple of spoonfuls, then mix in the sauce and flakes until glossy."],
       ],
     };
   }
   if (!n.type) {
     return {
       steps: [
-        ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
-        ["Cook the noodles", "Cook the noodle block for 3 minutes 30 seconds until just tender."],
+        PICK,
+        ["Pairings in", "Put the noodles, the seasoning and your pairings in the bowl."],
+        PRESS,
+        LAST,
         ["Soup or sauce", "Check the packet: keep the water for a soup, or drain most of it and toss through the sauce."],
-        ["Top it", "Add your toppings, give it a stir and enjoy it hot."],
       ],
     };
   }
   return {
     steps: [
-      ["Grab your packet", "Pick it off the wall and bring it to the cooking station with a MEON bowl."],
-      ["Add & cook", "Noodles, soup base and any veg in, cook for 3 minutes 30 seconds."],
-      ["Level up", "Drop in your toppings for the last minute: egg, cheese, meat or greens."],
-      ["Stir and eat", "Give it a good stir, grab your chopsticks and enjoy it hot."],
+      PICK,
+      ["Pairings in", "Put the noodles, the soup base and your pairings in the bowl."],
+      PRESS,
+      LAST,
+      ["Stir and eat", "Give it a good stir, grab your chopsticks and enjoy it hot. Sides go on the side."],
     ],
   };
 }
 
-// Suggest toppings (by id from data/toppings.json) based on flavour & style.
-export function suggestToppings(n, toppings) {
+// Suggest pairings and sides (by id from data/toppings.json) based on flavour and style.
+export function suggestPairings(n, pairings) {
   const hay = `${n.brand} ${n.name} ${n.flavour}`.toLowerCase();
   const ids = new Set(["egg"]);
   if (/buldak|cheese|carbonara|bonara|spicy|fire|kimchi/.test(hay)) ids.add("cheese");
-  if (/tom ?yum|seafood|shrimp|prawn|crab|lobster|fish|neoguri|jjambbong/.test(hay)) { ids.add("crab-sticks"); ids.add("shrimp-katsu"); }
+  if (/tom ?yum|seafood|shrimp|prawn|crab|lobster|fish|neoguri|jjambbong/.test(hay)) { ids.add("crab-sticks"); ids.add("fishcake"); }
   if (/beef|bulgogi|shin|gomtang|brisket|bo\b/.test(hay)) ids.add("beef");
   if (/pork|rib|tonkotsu|spam/.test(hay)) ids.add("spam");
-  if (/chicken|soto|curry|laksa|masala/.test(hay)) ids.add("meatballs");
+  if (/chicken|soto|curry|laksa|masala/.test(hay)) ids.add("chicken");
   if (/veg|vegan|mushroom|miso|shoyu/.test(hay) || n.diet === "Vegetarian/Vegan") { ids.add("tofu"); ids.add("mushrooms"); }
   if (/jjajang|black ?bean|chapa|goreng|carbonara|cheese/.test(hay)) ids.add("corn");
-  if (n.type === "Soup") { ids.add("bok-choy"); ids.add("seaweed"); }
+  if (n.type === "Soup") { ids.add("lettuce"); ids.add("seaweed"); }
   ids.add("spring-onion");
-  if (n.diet === "Vegetarian/Vegan") ["beef", "spam", "meatballs", "crab-sticks", "shrimp-katsu", "egg", "cheese"].forEach((x) => ids.delete(x));
-  const byId = new Map(toppings.map((t) => [t.id, t]));
+  if (n.diet === "Vegetarian/Vegan") ["beef", "spam", "chicken", "crab-sticks", "fishcake", "egg", "cheese"].forEach((x) => ids.delete(x));
+  const byId = new Map(pairings.map((t) => [t.id, t]));
   return [...ids].map((id) => byId.get(id)).filter(Boolean).slice(0, 5);
 }
 
