@@ -108,10 +108,12 @@ Guests can leave a 1–5 star rating, their first name and a comment at the bott
 | `created_at` | When it was posted |
 | `consent_version` | Which version of the review agreement the guest ticked (e.g. `reviews-2026-10-27`); empty on reviews posted before the checkbox existed |
 
-**Consent setup:** `docs/sql/2026-10-27-meon-reviews-consent.sql`.
-1. Run STEP 1 before deploying the site version with the checkbox; without it, new reviews fail.
-2. Deploy.
-3. Run STEP 3 so the database itself rejects reviews without consent.
+**Consent setup:** `docs/sql/2026-10-27-meon-reviews-consent.sql`. All three steps were done on 28 October 2026:
+1. STEP 1 (13:40 PDT) added the `consent_version` column before the site version with the checkbox went live.
+2. The site was deployed (13:43 PDT).
+3. STEP 3 (16:35 PDT) made the database itself reject reviews without consent. Reviews posted before `2026-10-28 20:50:05 UTC` are exempt, so old reviews can still be hidden or shown.
+
+Since STEP 3, anything that inserts reviews, including an admin script using the service role, must send `consent_version`.
 
 If you change the checkbox wording or what the form collects:
 - bump `REVIEW_CONSENT` in `scripts/build.mjs`;

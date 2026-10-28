@@ -7,6 +7,13 @@
 --   STEP 2  deploy the site build that sends consent_version (branch audit-top5).
 --   STEP 3  after the deploy is live and the probe below passes. Rejects any new review without consent.
 -- Older rows keep consent_version = null: they were posted before the checkbox existed.
+--
+-- APPLIED on 28 Oct 2026 (Security GO, BOSS yes):
+--   STEP 1  13:40:58 PDT. Probe returned 23514 meon_reviews_rating_check.
+--   STEP 2  site 6bd36fc live at 13:43 PDT.
+--   STEP 3  16:35:17 PDT, CUTOFF timestamptz '2026-10-28 20:50:05+00'. Probe returned 23514 meon_reviews_consent_required;
+--           the rolled-back moderation update on the 1 pre-checkbox row succeeded.
+-- Since STEP 3, any insert needs consent_version, including service-role imports or admin scripts.
 
 -- STEP 1 ---------------------------------------------------------------------------------------
 set lock_timeout = '5s';
