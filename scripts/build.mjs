@@ -916,6 +916,7 @@ ${ctaBand(r)}
 addPage("privacy/", layout({
   urlPath: "privacy/",
   title: "Privacy",
+  active: "privacy/",
   description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
   body: (r) => `
 ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
