@@ -24,9 +24,8 @@ All files are in `src/assets/img/toppings/`, cropped to 480 × 480. None of thes
 | `corn.webp` | [Wikimedia Commons: Corn on the cob (sweet corn).jpg](https://commons.wikimedia.org/wiki/File:Corn_on_the_cob_(sweet_corn).jpg) | Nutrition, Food Safety & Health (via Flickr, licence review passed) | CC0 |
 | `extra-noodles.webp` | [Wikimedia Commons: Lucky Me instant pancit canton noodles (Philippines) 02.jpg](https://commons.wikimedia.org/wiki/File:Lucky_Me_instant_pancit_canton_noodles_(Philippines)_02.jpg), cropped to the noodle block | Obsidian Soul | CC0 |
 | `egg.webp` | [Pexels photo 162712](https://www.pexels.com/photo/162712/) | Pexels (uploaded as "Pixabay") | [Pexels licence](https://www.pexels.com/license/) |
-| `bok-choy.webp` | Pixabay image 2494763 ([file](https://cdn.pixabay.com/photo/2017/07/11/19/29/bokchoy-2494763_640.png)) | Pixabay contributor | [Pixabay Content License](https://pixabay.com/service/license-summary/) |
 
-`egg.webp` and `bok-choy.webp` came from the old Wix site and were matched to their library pages by reverse image search. The other eight Wix-era topping photos had no licence on record, so they were replaced with the Commons photos above.
+`egg.webp` came from the old Wix site and was matched to its library page by reverse image search. The other eight Wix-era topping photos had no licence on record, so they were replaced with the Commons photos above.
 
 To add a new topping photo, prefer a shot on the MEON lid. If you use a library photo, add a row here with the link, author and licence.
 

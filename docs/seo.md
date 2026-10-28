@@ -8,14 +8,14 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
   - `Restaurant` on the home page: name, logo, photos, cuisine, price range, menu link, map link and suburb. It still needs the street address, postcode, phone, opening hours and map coordinates: Google treats the address as required for a local business, so add them in `data/site.json` once they match the Google Business Profile.
   - `WebSite`
   - a full `Menu` of all 199 noodles, grouped by country
-  - a `MenuItem` for every noodle (description with country and packet size, diet, and the price where the till lists it)
+  - a `MenuItem` for every noodle (description with country and packet size, and diet; no price, because prices stay off the site)
   - `BreadcrumbList` on every noodle and country page
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
   - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
 - **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Canning Bridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
 - **199 unique noodle pages**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
-- **An FAQ on the Visit page**: questions people actually ask (online orders, vegan options, location, QR codes, member card).
+- **An FAQ on the Visit page**: questions people actually ask (location, online orders and delivery, how many noodles, vegetarian and vegan options, how spicy, how long the noodles take).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
 - **Robots**: `robots.txt` points to the sitemap, and the staff QR pages are hidden from Google.
 - **AI assistants**: `llms.txt` gives AI assistants a clean summary of MEON and every noodle. Google says it has no effect on Google Search.
@@ -37,7 +37,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
    - secondary: **Ramen restaurant** and **Asian restaurant**
 3. Enter the exact street address, phone and opening hours. Use exactly the same details everywhere (see step 5).
 4. Website: `https://meon-noodles.vercel.app` (or your own domain later). Menu link: `/noodles/`.
-5. Turn on the attributes "Dine-in", "No delivery" and "No takeaway" (if true).
+5. Turn on the attributes "Dine-in", "Takeaway" and "No delivery".
 6. Upload at least 15 photos: shopfront, the noodle wall, bowls, the cooking stations and the crew. Add new ones every month.
 7. Post a Google update every week, for example "New this week: Buldak Mala".
 8. Copy your profile's share link into `googleBusinessUrl` in `data/site.json`.

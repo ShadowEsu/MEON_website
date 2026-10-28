@@ -1,20 +1,21 @@
 # MEON website
 
-MEON is an instant-noodle dine-in at Canning Bridge, Perth, Western Australia. This repo builds the MEON website: a fast, static site with **a page and a QR code for every noodle on the wall**.
+MEON is an instant-noodle bar at Canning Bridge, Perth, Western Australia. This repo builds the MEON website: a fast, static site with **a page for every noodle on the wall** (and shelf QR codes ready to print).
 
-- 199 noodles from 12 countries, each with its own page (story, spice level, diet, soup/dry, packet size, price, **cooking-machine setting**, cook timer, topping ideas, similar noodles)
+- 199 noodles from 12 countries, each with its own page (story, spice level, diet, soup/dry, packet size, **"press 1, then 2"** on the cooking machine, a 3:50 cook timer, pairing ideas, similar noodles)
 - Noodle library with search, country / style / spice / diet filters and sorting (filters are shareable URLs, e.g. `/noodles/?country=jp&type=Soup`)
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
-- Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download
-- Country pages, toppings & sides (with a priced list of sides and drinks), About, Visit
+- Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download. Both are staff pages hidden from Google; no codes are printed yet, so the public pages don't mention QR codes
+- Country pages, Pairings & sides (`/toppings/`: pairings, egg and cheese, ready-to-eat sides, then a drinks list), About, Visit
+- No prices anywhere: prices change, so they stay off the site
 - Professional, calm design: one typeface (Bricolage Grotesque), ink and white with MEON red as the only colour, hairlines instead of boxes, no emojis (custom line icons and real flag artwork)
-- Noodle pages built for in-store QR scans: photo, machine setting and cook timer first, then facts, cooking steps and toppings
-- Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, sticky "how it works", magnetic buttons, living mascots, moving logo, typewriter. Transform/opacity only, paused off-screen, off for "reduce motion"
+- Noodle pages built for someone at the shelf: photo, "press 1, then 2" and the cook timer first, then facts, cooking steps and pairings
+- Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, sticky "Do it yourself" steps, magnetic buttons, living mascots, logo letters that hop on hover, typewriter. Transform/opacity only, paused off-screen, off for "reduce motion"
 - Guest reviews: star rating, name and comment on the home page and every noodle page, stored in Supabase (see `docs/operations.md`)
 - Optional background music: an original lo-fi loop generated in the browser (off by default)
-- Videos on the home page ("Watch"): a 47-second promo and a 3:53 website tour, both with original music, each with a download button (plus a 9:16 promo for Reels and TikTok)
-- SEO: Restaurant, WebSite, Menu (199 items), MenuItem (with price where known), Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
-- Dine-in only: no online ordering
+- Videos: a 47-second promo, a website tour and a 9:16 promo for Reels and TikTok are in the repo but hidden (`hidden: true` in `VIDEOS` in `scripts/build.mjs`) until they are remade, because they show the old cook time, machine program, QR codes and logo. The home page "Watch" section appears only when a video is unhidden
+- SEO: Restaurant, WebSite, Menu (199 items), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
+- Dine in or take it away: no online ordering
 
 Docs: [`docs/design-system.md`](docs/design-system.md) (rules, page anatomy, motion catalogue, sound, adding a page) · [`docs/operations.md`](docs/operations.md) (QR codes, Google Drive hub, reviews, views log, common edits) · [`docs/seo.md`](docs/seo.md) (what's done for Google and the owner's step-by-step guide).
 
@@ -40,20 +41,24 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 | What | Where |
 | --- | --- |
 | Address, phone, email, hours, Instagram, ordering note, domain | `data/site.json` (empty values are hidden) |
-| Noodles (name, brand, country, spice, diet, type, weight, machine setting) | `data/noodles.json` — regenerate from the Drive sources with `python3 scripts/parse_library.py` |
-| Prices, catalogue weights, catalogue-only noodles, sides and drinks | `data/catalogue.json` (from the Square catalogue export; see `docs/operations.md`) |
+| Noodles (name, brand, country, spice, diet, type, weight) | `data/noodles.json` — regenerate from the Drive sources with `python3 scripts/parse_library.py` |
+| Catalogue weights, catalogue-only noodles, drinks (no prices) | `data/catalogue.json` (from the Square catalogue export; see `docs/operations.md`) |
 | Noodle photos | `src/assets/img/noodles/<slug>.webp` (800×800) + `src/assets/img/noodles/sm/<slug>.webp` (400×400), mapped in `data/images.json` |
 | Countries (intro copy, flag, colour) | `data/countries.json` |
-| Toppings & sides | `data/toppings.json` |
-| Page copy & layout | `scripts/build.mjs`; flavour descriptions in `scripts/lib/copy.mjs`; illustrations in `scripts/lib/art.mjs` |
+| Pairings & sides (groups: Meat and seafood, Vegetables and more, Egg and cheese, Sides) | `data/toppings.json` |
+| Cook time (230 s, shown as 3:50) | `COOK_SECONDS` and `COOK_TIME` in `scripts/lib/copy.mjs` |
+| Spice ladder copy (0 to 5, against Shin Ramyun = 3) | `SPICE_LADDER` in `scripts/build.mjs` |
+| Logo | traced from the official artwork by `python3 scripts/trace_logo.py` into `scripts/lib/logo-mixed.json`; drawn by `logoMark()` and `logoLockup()` in `scripts/lib/art.mjs` |
+| Page copy & layout | `scripts/build.mjs`; flavour descriptions and cook steps in `scripts/lib/copy.mjs`; illustrations in `scripts/lib/art.mjs` |
 | Styles / behaviour | `src/assets/css/site.css`, `src/assets/js/site.js` |
 
 ### Data sources
 
-- `data/source/Meon_Website_format2.md` — export of the Drive doc *Meon_Website_format2.docx* (names, countries, spice, diet, fun notes). Source of truth.
-- `data/source/meon_wix_cms_fixed_final.csv` — Wix CMS export (adds machine settings, fills missing soup/dry and weights).
-- `data/catalogue.json` — prices and items from MEON's Square catalogue export (16 Oct 2026). It adds the price (and the till's packet weight) to 55 noodles, 27 noodles that are in the till but not yet in the Drive doc, and the sides and drinks on the Toppings page. SKUs, stock counts and barcodes are never copied in.
-- Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Topping photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet.
+- `data/source/Meon_Website_format2.md` — export of the Drive doc *Meon_Website_format2.docx* (names, countries, diet, fun notes, and spice for noodles new to the site). Source of truth.
+- `data/source/meon_wix_cms_fixed_final.csv` — Wix CMS export (fills missing soup/dry and weights).
+- Spice: every noodle is rated 0 to 5 against Shin Ramyun = 3 (Indomie Mi Goreng = 1, Mama Creamy Tom Yum = 2), recalibrated on 28 Oct 2026. Re-running `scripts/parse_library.py` keeps the spice already in `data/noodles.json` and takes the doc's spice only for noodles new to the site.
+- `data/catalogue.json` — items from MEON's Square catalogue export (16 Oct 2026), with no prices. It adds the till's packet weight to 14 noodles where it differs, 27 noodles that are in the till but not yet in the Drive doc (`extraNoodles`), and the drinks on the Pairings & sides page. The till's sides live in `data/toppings.json`. SKUs, stock counts and barcodes are never copied in.
+- Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Pairing and side photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet.
 
 ## Dev helpers
 
@@ -68,5 +73,4 @@ python3 scripts/make_qr_pngs.py [outDir]                                # compac
 
 - Street address, phone, email and opening hours (placeholders on the old Wix site were template text, so they are hidden until set in `data/site.json`).
 - Final domain for QR codes (see above).
-- 20 noodles whose names say spicy/hot are rated 0 in the source doc; the site shows “spice rating coming soon” for them (`data/spice_review.json`). Fix the rating in `data/source/Meon_Website_format2.md`, re-run the parser and remove the slug from that list.
-- The 27 noodles added from the till (`extraNoodles` in `data/catalogue.json`) have no spice rating, diet or machine setting yet; their pages say "rating soon" and "Ask the crew". Fill these in `data/catalogue.json` when the crew confirms them.
+- The 27 noodles added from the till (`extraNoodles` in `data/catalogue.json`) have no diet yet; their pages say "Ask the crew". Fill these in `data/catalogue.json` when the crew confirms them.

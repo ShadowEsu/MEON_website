@@ -1,6 +1,6 @@
 # MEON design system (v3)
 
-The site is professional and calm, and lets the food lead. It uses one typeface and one colour (MEON red) on ink and white. Layout comes from spacing and hairlines, not boxes. Files: `src/assets/css/site.css` (styles), `src/assets/js/site.js` (behaviour), `src/assets/js/music.js` (optional music), `scripts/build.mjs` (pages), `scripts/lib/art.mjs` (icons, flags, wordmark, mascots).
+The site is professional and calm, and lets the food lead. It uses one typeface and one colour (MEON red) on ink and white. Layout comes from spacing and hairlines, not boxes. Files: `src/assets/css/site.css` (styles), `src/assets/js/site.js` (behaviour), `src/assets/js/music.js` (optional music), `scripts/build.mjs` (pages), `scripts/lib/art.mjs` (icons, flags, logo, mascots).
 
 ## Rules
 - **One font:** Bricolage Grotesque (variable, with automatic optical size). It is used for headings and body text alike, set apart only by weight and size.
@@ -10,7 +10,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
   - `--red #d7141d` for text and buttons, because it meets contrast rules
   - `--soft #f6f4f1` is the only tint, used for alternating sections
 - **No emojis anywhere.** Icons are a custom line set (`svgIcon()` in `art.mjs`, also published as `assets/img/icons.svg` for JavaScript). Flags are real artwork from flag-icons (MIT), copied to `assets/img/flags/`.
-- **The wordmark is drawn, not typed.** "meon" is built from the logo's own letter shapes (Quicksand outlines turned into SVG paths), so no second font is loaded.
+- **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone. `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. `logoMark()` in `art.mjs` draws the red square (header, home hero tile, About); `logoLockup()` draws the lettering alone in the current colour (footer, red on ink).
 - **No boxes:**
   - cards are a photo plus text
   - sections are separated by hairlines (`--line`) and space
@@ -18,24 +18,24 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 - **Copy is specific and plain.** It uses full stops, few exclamation marks, no "slurp" or "noodle heaven", and no em dash in headings.
 
 ## Page anatomy
-1. Announcement line: "Every packet on our wall has a QR code…"
-2. Header: white, always visible, with a hairline appearing on scroll. Logo on the left, the nav centred (Home, Noodles mega menu, Countries, Toppings, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
-3. Home: the centred launch hero. It has a pill line, the giant "Slurp the world." headline and a "Tonight I'm craving…" typewriter, then actions and checks, with the mascot crew around the headline (never over the photos). Below that sit a photo stage with the red logo tile and the count-up facts.
+1. Announcement line: "Dine in or take it away. 100+ noodles from across Asia, all on one wall."
+2. Header: white, always visible, with a hairline appearing on scroll. Logo on the left, the nav centred (Home, Noodles mega menu, Countries, Pairings & sides, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
+3. Home: the centred launch hero. It has a pill line, the giant "Slurp the world." headline and a "Tonight I'm craving…" typewriter, then actions, with the mascot crew around the headline (never over the photos). Below that sit a photo stage with the red mixed-logo tile and the count-up facts (100+ instant noodles · 20+ pairings and sides · 230 seconds to a perfect bowl, every time · Dine in or take it away).
    Other pages: page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
 4. Content sections.
 5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
 6. Red closing band (`ctaBand()`) with big type and three mascots.
-7. Ink footer with a giant red wordmark that rises in letter by letter.
+7. Ink footer with the giant red logo lockup, its letters and glyphs rising in one by one.
 8. Phones: a bottom tab bar (Home, Noodles, Search, Countries, Visit).
 
-## Noodle page (QR landing)
+## Noodle page (shelf landing)
 The page is built for someone standing at the shelf with their phone. The order is:
 1. Photo (full width on phones)
 2. "Scanned from the shelf" line, shown only with `?src=qr`
 3. Country and brand, the name, and a one-line flavour summary
-4. **Machine setting (big red code) and the cook timer**, side by side between two rules. A mascot appears while the timer runs and says "Noodles ready" when it ends; the phone also beeps and vibrates.
+4. **"Press 1, then 2" and the 3:50 cook timer**, side by side between two rules. A mascot appears while the timer runs and says "Noodles ready" when it ends; the phone also beeps and vibrates.
 5. Facts row: spice, style, diet, packet
-6. About, then how to cook it (numbered), then toppings that go well with it (round photos)
+6. About, then how to cook it (numbered: grab your packet, pairings in, press 1 then 2, egg and cheese in the last 30 seconds, stir and eat; dry noodles drain and toss), then pairings that go well with it (round photos)
 7. Share, previous and next
 8. Reviews of this noodle, then similar noodles
 
@@ -48,22 +48,22 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Masked word reveal | Every heading with `data-split` |
 | Fade and rise | `.reveal` elements, staggered with `--rd` |
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
-| Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags, member card, plates) |
-| Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, topping names band (`[data-hscroll]`) |
-| Sticky heading with a progress line | How MEON works |
+| Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags, About logo, plates) |
+| Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |
+| Sticky heading with a progress line | Do it yourself |
 | Count-up numbers | `.facts` |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
 | Mascots: blink, eyes follow the cursor, gentle drift; wave and squish on hover; tap to talk | Home hero, page heroes, red band, timer, back-to-top |
-| Moving logo: script line cycles (Japanese, Korean, Chinese, Thai); letters hop when you hover | Header mark, logo tiles |
+| Logo: letters and glyphs hop when you hover; nothing cycles | Header mark, home hero tile, About logo, footer |
 | Paper confetti | Roulette win, timer finished |
 | Throwable mascots: drag, throw, bounce off the edges; tap to talk | Home hero crew |
 | Crossing flavour banners (red and ink) that move with your scroll | Under the home hero (`.ticker`) |
-| Build your bowl: toppings drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
+| Build your bowl: pairings and sides drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
 | Heat check: chilli slider warms the section, the mascot sweats, matching noodles appear | Home (`#spice`) |
 | Illustrated packets, coloured by flavour, for noodles without a photo | Cards, noodle pages |
 
 Speed rules (tested with the CPU slowed 4x, like an average phone):
-- Nothing animates forever except cheap things (blinks, floats, the glyph cycle). Waves, squishes and logo hops only play on hover or tap.
+- Nothing animates forever except cheap things (blinks, floats). Waves, squishes and logo hops only play on hover or tap.
 - Nothing reacts to every mouse movement except the mascots' eyes.
 - Sections below the first one use `content-visibility: auto`, so the browser skips drawing them until you scroll near.
 - `play.js` does nothing until someone touches Build your bowl, Heat check or a mascot.

@@ -9,9 +9,9 @@ Folder: https://drive.google.com/drive/folders/1B13fCWhjdPt7kiS31U0OfAv0-pZjTImV
 | File | What it's for |
 | --- | --- |
 | **MEON — Website Guide & Important Info** | The guide (this page, in short), site map, things to confirm |
-| **MEON — Shelf QR Codes (print me)** | All 172 QR codes on one printable doc, with names and machine settings |
+| **MEON — Shelf QR Codes (print me)** | All 172 QR codes on one printable doc, with names |
 | **MEON — QR Codes (one per noodle, PNG)** (folder) | 172 separate QR images, e.g. `045 Nissin Demae Ramen Sesame Oil (JP).png`. Use them for single labels, menus and social posts |
-| **MEON — Noodle Database** | Every noodle: brand, country, spice, diet, soup/dry, weight, machine setting, page URL |
+| **MEON — Noodle Database** | Every noodle: brand, country, spice, diet, soup/dry, weight, page URL |
 | **MEON — Deals & Promotions** | Current deals and member-card perks |
 | **MEON — Website Views Log** | Page-view snapshots. It is updated **only when you ask** (see below) |
 
@@ -19,8 +19,9 @@ The QR PNGs come from `scripts/make_qr_pngs.py`. Each file was checked: it decod
 
 ## QR codes
 
+- No QR codes are printed yet, so the public pages (announcement bar, home, About, Visit, FAQ) don't mention them. The staff pages `/qr/` and `/qr-generator/` stay ready, hidden from Google, for when codes are printed.
 - Every noodle has a code that opens `https://meon-noodles.vercel.app/noodles/<noodle>/?src=qr`.
-- `?src=qr` shows a "You scanned the shelf!" welcome and lets analytics count shelf scans separately.
+- `?src=qr` shows a "Scanned from the shelf" line and lets analytics count shelf scans separately.
 - **Before printing**, confirm the final web address. If you buy a domain (e.g. `meon.au`), change `siteUrl` in `data/site.json`, rebuild, then regenerate the codes:
   - website pages: `npm run build`, then the codes are at `/qr/`
   - Drive PNGs: `python3 scripts/make_qr_pngs.py`, then re-upload
@@ -47,20 +48,31 @@ Some shoot folders are named differently from the packet in the photo. The site 
 
 The site says **"100+ noodles"** and **"from across Asia"** rather than exact counts. Both are set once at the top of `scripts/build.mjs` (`COUNT` and `REGION`). Exact counts still appear where they're useful, like the library's filter results.
 
+Every noodle cooks for **3 minutes 50 seconds** (230 seconds): guests press 1, then 2 on the machine, and the timer on each noodle page shows 3:50. The time is set once as `COOK_SECONDS` in `scripts/lib/copy.mjs`, with the cook steps next to it. Spice is rated 0 to 5 against Shin Ramyun = 3; the ladder copy is `SPICE_LADDER` in `scripts/build.mjs`.
+
 ## Updating the noodle list
 
 When there's a new list of the packets on the wall, send it to Claude ("here's the new noodle list, update the site"). Noodles that are gone are removed, new ones get a page and a shelf QR code, and the QR PNGs in Drive are regenerated. Existing noodle page addresses stay the same, so printed QR codes keep working.
 
-## Prices, sides and drinks (from the till)
+## Sides and drinks (from the till)
 
-Prices come from the Square catalogue export (`MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx`, 16 October 2026) and live in `data/catalogue.json`. The site shows them in Australian dollars, exactly as in the till:
-- **Noodle pages**: the packet price sits under the packet weight. 55 noodles on the wall matched a till item; the till's packet weight replaced the old one where they differed.
-- **New noodles**: 27 noodles were in the till but not on the site. They now have their own page and shelf QR code (on `/qr/`), with an illustrated packet. Their spice rating, diet and machine setting say "rating soon" / "Ask the crew" until the crew confirms them.
-- **Toppings page**: a "Sides" and a "Drinks" list with prices.
+**The site shows no prices** (Preston, 28 Oct 2026: prices change, so they stay off the site). Items come from the Square catalogue export (`MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx`, 16 October 2026):
+- **Noodle pages**: 14 noodles use the till's packet weight where it differed from the old one (`noodles` in `data/catalogue.json`).
+- **New noodles**: 27 noodles were in the till but not on the site (`extraNoodles` in `data/catalogue.json`). They have their own page and shelf QR code (on `/qr/`), with an illustrated packet and a spice rating. Their diet says "Ask the crew" until the crew confirms it.
+- **Pairings & sides page**: the "Sides" group of `data/toppings.json` holds the ready-to-eat sides (chicken wings, fried Spam, shrimp katsu, tempura prawn, soft-boiled egg, seasoned seaweed), including the till's sides that used to be in `data/catalogue.json`. The drinks list at the end of the page comes from `drinks` in `data/catalogue.json`.
 
-Never copied from the till: SKUs, stock counts, barcodes (GTINs), Square tokens, the $0 "Yr12 Drink Promo" and the "Pairings 4.20 Per 100g" line.
+Never copied from the till: prices, SKUs, stock counts, barcodes (GTINs), Square tokens, the $0 "Yr12 Drink Promo" and the "Pairings 4.20 Per 100g" line.
 
-When prices change, send Claude the new catalogue export ("here's the new Square catalogue, update the prices"). Noodles that are on the site but not in the till keep their page and simply show no price.
+When the till changes, send Claude the new catalogue export ("here's the new Square catalogue, update the site"). It updates packet weights, new noodles, sides and drinks, never prices.
+
+## Pairings and sides
+
+The `/toppings/` page is titled "Pairings & sides" (and so is the nav link). The page address stays `/toppings/`. `data/toppings.json` has four groups:
+- **Meat and seafood** and **Vegetables and more**: pairings. They go in the bowl with the noodles at the start, so they cook together.
+- **Egg and cheese**: added on top of the noodles in the last 30 seconds (on the noodles, not the bowl, or the bowl burns).
+- **Sides**: ready to eat, and they don't go in the machine.
+
+Bok choy was removed (28 Oct 2026) because MEON doesn't stock it.
 
 ## MEON Card
 
@@ -68,7 +80,7 @@ The MEON Card has been taken off the website completely. `/meon-card/` redirects
 
 ## Videos
 
-The "Watch" section on the home page (below "How MEON works") plays the videos and offers them as downloads. The files are in `src/assets/video/`:
+All three videos are **hidden** for now (`hidden: true` in `VIDEOS` in `scripts/build.mjs`), because they show shelf QR codes, the old per-noodle machine program, the old cook time and the old logo. The "Watch" section on the home page (below "Do it yourself") appears only once a video is unhidden. It plays the videos and offers them as downloads. The files are in `src/assets/video/`:
 
 | File | What it is |
 | --- | --- |
@@ -79,7 +91,7 @@ The "Watch" section on the home page (below "How MEON works") plays the videos a
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
 
-To swap a video, replace the file but keep its name, then run `npm run build` and redeploy. The sizes shown on the download buttons update automatically. To make new versions, for example after adding new noodles or photos, ask Claude to "re-make the MEON promo" or "re-record the website tour".
+To swap a video, replace the file but keep its name, set `hidden` to `false` for it, then run `npm run build` and redeploy. The sizes shown on the download buttons update automatically. To make new versions (they need "press 1, then 2", the 3:50 timer, the mixed logo and no QR codes), ask Claude to "re-make the MEON promo" or "re-record the website tour".
 
 ## Guest reviews
 
@@ -140,7 +152,7 @@ Or just ask Claude: "update the MEON views log for last week".
 | Add or change a noodle | Edit the Drive doc *Meon_Website_format2*, export it to `data/source/Meon_Website_format2.md`, run `python3 scripts/parse_library.py`, then `npm run build` |
 | Add a photo | Save a 900×900 `.webp` to `src/assets/img/noodles/<slug>.webp` and a 400×400 copy to `…/noodles/sm/`, then add the slug to `data/images.json`. Use the bowl-and-packet shot, so guests can match it to the shelf |
 | Add extra photos to a noodle page | Save 900×900 `.webp` files to `src/assets/img/noodles/more/<slug>-1.webp`, `-2.webp` and so on, and list them under the slug in `data/gallery.json`. They appear as tappable thumbnails under the main photo |
-| Set a real spice rating for a noodle marked "coming soon" | Fix the rating in the source doc and remove the slug from `data/spice_review.json` |
+| Change a noodle's spice rating | Edit `spice` for that noodle in `data/noodles.json` (or in `extraNoodles` in `data/catalogue.json`), rating it against Shin Ramyun = 3. Editing the Drive doc alone won't change it: the parser keeps existing ratings and only takes the doc's spice for new noodles |
 
 After any change: `npm run build && npm run check`. Pushing to GitHub doesn't deploy: `vercel.json` turns off Vercel's Git builds for every branch except `main` and `preview/<name>` (the free plan allows 100 deployments a day across all the projects). Publish a checked change once with `vercel deploy --prod`, and push to a `preview/<name>` branch only when you need a preview link.
 
@@ -151,12 +163,11 @@ After any change: `npm run build && npm run check`. Pushing to GitHub doesn't de
 - Whether MEON already has a Google Maps place (an online directory copy of a Facebook page lists "Meon Noodles Perth Australia" at Shop 7/8, 45 Francis St, Northbridge). If there is one, claim it rather than making a second listing
 - The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy. If that's MEON's company, point it at the Vercel project rather than buying a new domain
 - Nongshim Shin Noodle Soup Original is marked vegetarian-friendly in the Drive doc; check the packet on the wall (many Shin Ramyun versions list beef)
-- 20 noodles have "spice rating coming soon" (listed in `data/spice_review.json`)
+- New videos: all three are hidden until they're remade (see Videos)
 - 130 noodles still need a shoot photo (they show an illustrated packet)
 - The updated noodle list of what is actually on the wall
 - The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)
-- Spice rating, diet and machine setting for the 27 noodles added from the till (in `data/catalogue.json`)
+- Diet for the 27 noodles added from the till (in `data/catalogue.json`)
 - Shelf QR PNGs in Drive: the 27 new noodles' codes are on `/qr/` but not yet in the Drive folder (run `python3 scripts/make_qr_pngs.py` and upload)
 - Till items not added yet: "Kang Shi Fu Hot & Spicy Beef" (may be the Braised Beef Spicy Red already on the site) and "Nissin Black Garlic Demae Ramen" (may be the same packet as the Black Garlic Oil Tonkotsu)
 - Myojo's country: the new Myojo Mee Goreng says Singapore (Myojo is Nissin Foods Singapore's brand), while the Drive doc lists Myojo Mee Poh Dry as Malaysia
-- Whether the toppings bar is priced by weight (the till has "Pairings 4.20 Per 100g"); the site doesn't show it
