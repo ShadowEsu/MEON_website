@@ -12,15 +12,17 @@
 set lock_timeout = '5s';
 set statement_timeout = '30s';
 alter table public.meon_reviews add column if not exists consent_version text;
--- The public key may only insert listed columns if column grants are in use; this is a no-op otherwise.
-grant insert (consent_version) on public.meon_reviews to anon;
+-- anon and authenticated insert through column grants (name, rating, comment, noodle_slug, source; read from
+-- pg_attribute.attacl on 2026-10-27), so the new column needs the same grant or every new review fails with 42501.
+grant insert (consent_version) on public.meon_reviews to anon, authenticated;
 notify pgrst, 'reload schema';
--- Probe (inserts nothing): POST a review with consent_version and an out-of-range rating. If the column is
--- missing, PostgREST answers PGRST204 "Could not find the 'consent_version' column"; if it exists, the insert
--- fails on the rating check instead (confirm meon_reviews has a 1-5 rating check before relying on this).
+-- Probe (inserts nothing): POST a review with consent_version and rating 9 using the publishable key.
+--   PGRST204 "Could not find the 'consent_version' column"  -> column missing
+--   42501 permission denied                                  -> grant missing
+--   23514 meon_reviews_rating_check                          -> column and grant OK (rating check is 1-5)
 --
 -- STEP 1 rollback (additive only, nothing else changes):
---   revoke insert (consent_version) on public.meon_reviews from anon;
+--   revoke insert (consent_version) on public.meon_reviews from anon, authenticated;
 --   alter table public.meon_reviews drop column if exists consent_version;
 --   notify pgrst, 'reload schema';
 --   Roll the site back first: the new form sends consent_version, which fails once the column is gone.
@@ -31,10 +33,11 @@ notify pgrst, 'reload schema';
 --   add constraint meon_reviews_consent_required
 --   check (consent_version ~ '^reviews-[0-9]{4}-[0-9]{2}-[0-9]{2}$') not valid;
 --
--- Check (should fail with a check violation, so nothing is inserted; if it succeeds, the constraint
--- is missing: delete that "Test" row in the Table Editor and re-run STEP 3):
+-- Probe (inserts nothing): POST without consent_version and with rating 9. Postgres checks constraints in
+-- name order, so the error names meon_reviews_consent_required when STEP 3 is in place, and
+-- meon_reviews_rating_check when it isn't:
 --   curl -s -X POST "$SUPABASE_URL/rest/v1/meon_reviews" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
---     -H "Content-Type: application/json" -d '{"name":"Test","rating":5,"comment":"consent check","source":"web"}'
+--     -H "Content-Type: application/json" -d '{"name":"Probe","rating":9,"comment":"consent probe","source":"web"}'
 --
 -- Rollback: alter table public.meon_reviews drop constraint if exists meon_reviews_consent_required;
 --           (the column itself can stay; it is harmless when unused)
