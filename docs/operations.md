@@ -84,14 +84,14 @@ All three videos were remade on 28 October 2026 to Preston's facts ("press 1, th
 
 | File | What it is |
 | --- | --- |
-| `meon-promo.mp4` | 48-second promo, 16:9: 100+ noodles from across Asia, pairings and sides, press 1 then 2, 3 min 50 sec, egg and cheese in the last 30 seconds, spice 0 to 5, dine in or take it away |
-| `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories (text kept inside the Instagram safe area) |
-| `meon-website-tour.mp4` | 1:13 tour of the website: home facts and "Do it yourself" steps, the roulette, the spice slider, a search for Shin Ramyun and its noodle page with "1 then 2" and the 3:50 timer, Pairings & sides |
-| `poster-*.jpg` | The still image shown before a video plays |
+| `meon-promo-20261028.mp4` | 48-second promo, 16:9: 100+ noodles from across Asia, pairings and sides (beef roll, fishcake, meatballs, lettuce, mushrooms), press 1 then 2, 3 min 50 sec, egg and cheese in the last 30 seconds, spice 0 to 5, dine in or take it away |
+| `meon-promo-vertical-20261028.mp4` | The same promo in 9:16, for Reels, TikTok and Stories (text kept inside the Instagram safe area) |
+| `meon-website-tour-20261028.mp4` | 1:13 tour of the website: home facts and "Do it yourself" steps, the roulette, the spice slider, a search for Shin Ramyun and its noodle page with "1 then 2" and the 3:50 timer, Pairings & sides |
+| `poster-*-20261028.jpg` | The still image shown before a video plays |
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
 
-To swap a video, replace the file but keep its name, set `hidden` to `false` for it, then run `npm run build` and redeploy. The sizes shown on the download buttons update automatically. To make new versions (they need "press 1, then 2", the 3:50 timer, the mixed logo and no QR codes), ask Claude to "re-make the MEON promo" or "re-record the website tour".
+To swap a video, add the new file under a **new dated name** (for example `meon-promo-20261215.mp4`, and the same for its poster), point `file` and `poster` for it in `VIDEOS` at the new names, delete the old files, then run `npm run build` and redeploy. Never reuse a file name: `/assets` is cached for 30 days, so returning visitors would keep seeing the old cut. The download names (`dl`) stay the same, and the sizes on the download buttons update automatically. To make new versions (they need "press 1, then 2", the 3:50 timer, the mixed logo and no QR codes), ask Claude to "re-make the MEON promo" or "re-record the website tour".
 
 ## Guest reviews
 
