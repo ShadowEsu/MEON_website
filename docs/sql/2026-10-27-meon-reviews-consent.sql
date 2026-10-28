@@ -29,9 +29,22 @@ notify pgrst, 'reload schema';
 
 -- STEP 3 ---------------------------------------------------------------------------------------
 -- set lock_timeout = '5s';
+-- set statement_timeout = '30s';
 -- alter table public.meon_reviews
 --   add constraint meon_reviews_consent_required
---   check (consent_version ~ '^reviews-[0-9]{4}-[0-9]{2}-[0-9]{2}$') not valid;
+--   check (
+--     (consent_version is not null and consent_version ~ '^reviews-[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+--     or created_at < timestamptz 'CUTOFF'
+--   ) not valid;
+--
+-- * A CHECK passes when its expression is NULL, so "is not null" is what rejects a review sent without
+--   consent_version.
+-- * NOT VALID only skips checking old rows when the constraint is added. Postgres still checks every
+--   UPDATE, so without the created_at clause, unticking `approved` to hide an old review would fail.
+--   Rows created before CUTOFF predate the checkbox; anon can't set created_at (no column grant; default
+--   now()), so a new review can't use that clause.
+-- * CUTOFF = the UTC time read with `select now()` immediately before running STEP 3, written as a literal
+--   (e.g. '2026-10-28 21:05:00+00'). Security sees the final statement before it runs.
 --
 -- Probe (inserts nothing): POST without consent_version and with rating 9. Postgres checks constraints in
 -- name order, so the error names meon_reviews_consent_required when STEP 3 is in place, and
@@ -41,3 +54,7 @@ notify pgrst, 'reload schema';
 --
 -- Rollback: alter table public.meon_reviews drop constraint if exists meon_reviews_consent_required;
 --           (the column itself can stay; it is harmless when unused)
+--
+-- Moderation check after STEP 3 (inside a transaction that is rolled back, so nothing changes):
+--   begin; update public.meon_reviews set approved = approved where consent_version is null; rollback;
+--   It must succeed. If it fails with meon_reviews_consent_required, drop the constraint and fix CUTOFF.
