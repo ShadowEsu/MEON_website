@@ -48,6 +48,7 @@ for (const file of htmlFiles) {
 const csp = JSON.parse(fs.readFileSync(path.join(OUT, "..", "vercel.json"), "utf8")).headers
   .flatMap((h) => h.headers).find((h) => h.key === "Content-Security-Policy")?.value || "";
 if (!csp) problems.push("vercel.json: no Content-Security-Policy header");
+const SITE_URL = (process.env.SITE_URL || JSON.parse(fs.readFileSync(path.join(OUT, "..", "data", "site.json"), "utf8")).siteUrl).replace(/\/+$/, "");
 for (const file of htmlFiles) {
   const rel = path.relative(OUT, file);
   const html = fs.readFileSync(file, "utf8");
@@ -58,6 +59,16 @@ for (const file of htmlFiles) {
     if (!csp.includes(hash)) problems.push(`${rel}: inline script not allowed by the CSP; add ${hash} to script-src in vercel.json`);
   }
   for (const m of html.matchAll(/<[a-z][^>]*\son[a-z]+="/g)) problems.push(`${rel}: inline event handler (blocked by the CSP): ${m[0].slice(0, 80)}`);
+  // Privacy (ledger 299): nothing loads from another host before the visitor does anything, and every
+  // page links the privacy page. Plain links (<a href>) to other sites are fine; so are this site's own
+  // absolute URLs (canonical, alternate).
+  for (const m of html.matchAll(/<(?:link|script|img|source|video|audio|iframe)\b[^>]*\s(?:href|src|srcset|poster)="(https?:\/\/[^"]+)"/g)) {
+    if (!m[1].startsWith(SITE_URL)) problems.push(`${rel}: loads from another host before consent: ${m[1].slice(0, 80)}`);
+  }
+  if (!/href="[^"]*privacy\/"/.test(html)) problems.push(`${rel}: no link to the privacy page`);
+}
+for (const f of files.filter((f) => f.endsWith(".css"))) {
+  for (const m of fs.readFileSync(f, "utf8").matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)/g)) problems.push(`${path.relative(OUT, f)}: loads from another host: ${m[1].slice(0, 80)}`);
 }
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }

@@ -310,7 +310,7 @@
   /* ---------- Site-wide search (Cmd/Ctrl K or "/") ---------- */
   var overlay = $("#search");
   var sInput = $("#site-search");
-  var sResults = $("#search-results");
+  var sResults = $("#search-results"), sStatus = $("#search-status");
   var index = null, loading = null, active = -1, lastFocus = null;
   function loadIndex() {
     if (index) return Promise.resolve(index);
@@ -331,7 +331,7 @@
   }
   function renderResults(q) {
     if (!sResults) return;
-    var nq = norm(q.trim()), html = "";
+    var nq = norm(q.trim()), html = "", note = "";
     if (!nq) {
       html = '<div class="search-group">Popular searches</div><div class="search-suggest">' +
         ["Buldak", "Tom yum", "Vegan", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"].map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>";
@@ -345,12 +345,13 @@
         var sa = a._t.indexOf(nq) === 0 ? 0 : a._t.indexOf(nq) > -1 ? 1 : 2, sb = b._t.indexOf(nq) === 0 ? 0 : b._t.indexOf(nq) > -1 ? 1 : 2;
         return sa - sb;
       });
-      if (!hits.length) html = '<div class="search-empty">No matches for “' + esc(q) + '”. Try a flavour like “kimchi” or a country like “Japan”.</div>';
-      else if (close) html = '<div class="search-empty">No exact matches for “' + esc(q) + '”. Showing close spellings.</div>';
+      if (!hits.length) note = "No matches for “" + q.trim() + "”. Try a flavour like “kimchi” or a country like “Japan”.";
+      else if (close) note = "No exact matches for “" + q.trim() + "”. Showing close spellings.";
       var groups = {};
       hits.slice(0, 40).forEach(function (x) { (groups[x.g] = groups[x.g] || []).push(x); });
       ["Noodles", "Countries", "Toppings", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
     }
+    if (sStatus) { sStatus.textContent = note; sStatus.hidden = !note; }
     sResults.innerHTML = html;
     active = -1;
     if (nq && $(".search-item", sResults)) setActive(0);
@@ -815,10 +816,18 @@
       if (!rating) { status.textContent = "Please choose a star rating."; return; }
       if (!name) { status.textContent = "Please add your name."; return; }
       if (comment.length < 3) { status.textContent = "Please write a few words about it."; return; }
+      var consentBox = $("input[name=consent]", form);
+      if (!consentBox.checked) {
+        consentBox.setAttribute("aria-invalid", "true");
+        status.textContent = "Please tick “Publish my first name and review on this site” to post it.";
+        consentBox.focus();
+        return;
+      }
+      consentBox.removeAttribute("aria-invalid");
       if (Date.now() - t0 < 2500) { status.textContent = "One moment, then try again."; return; }
       var btn = $("button[type=submit]", form); btn.disabled = true;
       status.classList.remove("is-error"); status.textContent = "Posting…";
-      var body = { name: name.slice(0, 40), rating: rating, comment: comment.slice(0, 600), noodle_slug: slug || null, source: /(^|[?&])src=qr(&|$)/.test(location.search) ? "qr" : "web" };
+      var body = { name: name.slice(0, 40), rating: rating, comment: comment.slice(0, 600), noodle_slug: slug || null, source: /(^|[?&])src=qr(&|$)/.test(location.search) ? "qr" : "web", consent_version: form.getAttribute("data-consent") };
       fetch(base + table, { method: "POST", headers: Object.assign({ Prefer: "return=minimal" }, headers), body: JSON.stringify(body) })
         .then(function (r) {
           if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.message || "Something went wrong."); });

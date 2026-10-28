@@ -101,7 +101,6 @@ const NAV = [
 // Public wording: the range changes often, so the site says "100+" and "from across Asia".
 const COUNT = "100+";
 const REGION = "from across Asia";
-const FONT_URL = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap";
 
 function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/photos/bowl-side.webp", preload = "", noindex = false, jsonld = [], scripts = [], intro = false }) {
   const depth = urlPath.split("/").filter(Boolean).length - (urlPath.endsWith(".html") ? 1 : 0);
@@ -183,9 +182,7 @@ ${site.googleSiteVerification ? `<meta name="google-site-verification" content="
 <link rel="icon" type="image/png" sizes="48x48" href="${r("assets/img/favicon-48.png")}">
 <link rel="apple-touch-icon" href="${r("assets/img/apple-touch-icon.png")}">
 <link rel="manifest" href="${r("site.webmanifest")}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="${FONT_URL}">
+<link rel="preload" as="font" type="font/woff2" href="${r("assets/fonts/bricolage-grotesque-latin.woff2")}" crossorigin>
 ${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}
 <link rel="stylesheet" href="${r("assets/css/site.css")}?v=${BUILD_ID}">
 <script>(function(d){d.className=d.className.replace("no-js","js");${intro ? `try{if(!sessionStorage.getItem("meon-intro")&&!matchMedia("(prefers-reduced-motion: reduce)").matches)d.className+=" intro-on"}catch(e){}` : ""}})(document.documentElement)</script>
@@ -240,6 +237,7 @@ ${body(r)}
           <li><a href="${r("toppings/")}">Toppings &amp; sides</a></li>
           <li><a href="${r("about/")}">About</a></li>
           <li><a href="${r("visit/")}">Visit</a></li>
+          <li><a href="${r("privacy/")}">Privacy</a></li>
         </ul>
       </div>
       <div>
@@ -266,6 +264,7 @@ ${body(r)}
   <div class="search-backdrop" data-search-close></div>
   <div class="search-panel">
     <div class="search-field">${icon.search}<input type="search" id="site-search" placeholder="Search noodles, flavours, countries" autocomplete="off" spellcheck="false" aria-controls="search-results" enterkeyhint="go"><button class="btn btn--line btn--sm" type="button" data-search-close>Close</button></div>
+    <div class="search-empty" id="search-status" role="status" aria-live="polite" hidden></div>
     <div class="search-results" id="search-results" role="listbox"></div>
     <div class="search-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open</span><span>Try “vegan”, “tom yum” or “Japan”</span></div>
   </div>
@@ -327,9 +326,9 @@ const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice ratin
 function noodleCard(n, r, i = 0) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note, n.machine].filter(Boolean).join(" ");
   return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.05}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
-  <span class="nc-media">${noodleMedia(n, r)}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}${n.price ? `<span class="nc-price">${money(n.price)}</span>` : ""}</span>
+  <span class="nc-media">${noodleMedia(n, r)}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}${n.price ? `<span class="nc-price" aria-hidden="true">${money(n.price)}</span>` : ""}</span>
   <span class="nc-meta">${flag(n.countryCode, r, { w: 16 })}<span>${esc(n.country)}${n.type ? ` · ${esc(n.type)}` : ""}</span></span>
-  <h3 class="nc-name">${esc(n.name)}</h3>
+  <h3 class="nc-name">${esc(n.name)}</h3>${n.price ? `<span class="visually-hidden">${money(n.price)}</span>` : ""}
   <span class="nc-foot"><span class="nc-brand">${esc(n.brand)}</span>${spiceLine(n, r)}</span>
 </a>`;
 }
@@ -387,6 +386,9 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
 // Reviews: stored in Supabase (table meon_reviews). Visitors post a star rating and comment; published reviews load live.
 // Google reviews: the Business Profile link when it's set in data/site.json, otherwise MEON on Google Maps.
 const GOOGLE_REVIEWS = site.googleBusinessUrl || site.mapsUrl;
+// Consent wording version for guest reviews (ledger 299). Each review row stores it in consent_version;
+// change it whenever the consent text or what the form collects changes, and update privacy/.
+const REVIEW_CONSENT = "reviews-2026-10-27";
 function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = "" } = {}) {
   const cfg = site.reviews || {};
   if (!cfg.supabaseUrl || !cfg.publishableKey) return "";
@@ -399,14 +401,18 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
       ${lead ? `<p class="lead">${lead}</p>` : ""}
       <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
       <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a></div>
-      <form class="rv-form" data-rv-form novalidate>
+      <form class="rv-form" data-rv-form data-consent="${REVIEW_CONSENT}" novalidate>
         <fieldset class="rv-rate"><legend>Your rating</legend><div class="rv-rate-stars">${stars}</div></fieldset>
         <label class="field"><span>Your name</span><input name="name" type="text" maxlength="40" autocomplete="given-name" required></label>
         <label class="field"><span>Your review</span><textarea name="comment" rows="4" minlength="3" maxlength="600" required placeholder="${slug ? "How was it? Spice, flavour, toppings you added…" : "Tell us about your visit"}"></textarea></label>
         <label class="hp" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+        <div class="rv-consent">
+          <label class="toggle"><input type="checkbox" name="consent" id="rv-consent-${slug || "all"}" required aria-required="true" aria-describedby="rv-consent-${slug || "all"}-detail"> Publish my first name and review on this site</label>
+          <p class="note" id="rv-consent-${slug || "all"}-detail">We keep your name, stars and review, the page, whether you scanned a shelf QR code, and the time, with Supabase, our database provider, until you ask us to remove them. <a href="${r("privacy/")}">How we handle reviews</a></p>
+        </div>
         <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button></div>
         <p class="rv-status" data-rv-status aria-live="polite"></p>
-        <p class="note">Reviews appear on this site with your first name. Please keep it friendly.</p>
+        <p class="note">Please keep it friendly.</p>
       </form>
     </div>
     <div class="rv-list" data-rv-list aria-live="polite"><div class="rv-empty">${mascot({ acc: "none", wave: true })}<strong>${slug ? "No reviews for this one yet" : "No reviews yet"}</strong><span>${slug ? "Tried it? Be the first to say how it was." : "Been in? Be the first to tell everyone."}</span></div></div>
@@ -901,6 +907,46 @@ ${pageHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know M
     <li class="reveal" style="--rd:.06s">${svgIcon("chef")}<h3>Your way</h3><p>Choose the packet, the toppings and how long it cooks.</p></li>
     <li class="reveal" style="--rd:.12s">${svgIcon("chair")}<h3>Dine-in</h3><p>${esc(site.orderingNote)}</p></li>
   </ul>
+</div></section>
+${ctaBand(r)}
+`,
+}));
+
+// ---------- Privacy (facts only; the wording goes to the attorney pack, ledger 299) ----------
+addPage("privacy/", layout({
+  urlPath: "privacy/",
+  title: "Privacy",
+  description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
+  body: (r) => `
+${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
+<section class="section section--tight"><div class="wrap split split--top">
+  <div class="reveal">
+    <h2 data-split>Reviews.</h2>
+    <p>Posting a review is optional. We only send it after you tick “Publish my first name and review on this site”.</p>
+    <p>We keep the first name, star rating and words you typed, the page you posted from, whether you arrived by scanning a shelf QR code, the time, and which version of that agreement you ticked. They are stored with Supabase, our database provider, and shown on this site.</p>
+    <p>To have a review removed, message us on Instagram${site.instagram ? ` at <a href="${esc(site.instagram)}" target="_blank" rel="noopener">${esc(site.instagramHandle)}</a>` : ""}${site.email ? ` or email <a href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ""} and we'll take it down.</p>
+  </div>
+  <div class="reveal">
+    <h2 data-split>On your device.</h2>
+    <p>The site keeps a few small notes in your browser. They are not cookies and they never leave your device:</p>
+    <ul>
+      <li>which pages you've already reviewed, so the form doesn't ask twice;</li>
+      <li>whether you turned the background music on;</li>
+      <li>that the intro animation has played during this visit.</li>
+    </ul>
+    <p>Clearing your browser's site data removes them.</p>
+  </div>
+</div></section>
+<section class="section section--tight"><div class="wrap split split--top">
+  <div class="reveal">
+    <h2 data-split>Services we use.</h2>
+    <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
+  </div>
+  <div class="reveal">
+    <h2 data-split>No tracking.</h2>
+    <p>We don't use analytics, advertising or tracking cookies. If that changes, we'll update this page first, and anything that needs your agreement will ask for it.</p>
+    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 27 October 2026.</p>
+  </div>
 </div></section>
 ${ctaBand(r)}
 `,

@@ -33,3 +33,7 @@ To add a new topping photo, prefer a shot on the MEON lid. If you use a library 
 ## Code libraries that ship artwork
 
 - **Country flags** (`assets/img/flags/*.svg`): [flag-icons](https://github.com/lipis/flag-icons), MIT licence. The build copies its licence to `assets/img/flags/LICENSE.txt` next to the flags.
+
+## Font
+
+- **Bricolage Grotesque** (`src/assets/fonts/*.woff2`): © 2022 The Bricolage Grotesque Project Authors (<https://github.com/ateliertriay/bricolage>), SIL Open Font License 1.1. The licence text sits next to the files as `src/assets/fonts/OFL.txt`. The files are the Google Fonts v9 subsets (latin, latin-ext, vietnamese). They are served from this site, so visitors' browsers don't contact Google.

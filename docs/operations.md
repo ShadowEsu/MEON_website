@@ -83,7 +83,7 @@ To swap a video, replace the file but keep its name, then run `npm run build` an
 
 ## Guest reviews
 
-Guests can leave a 1–5 star rating, their first name and a comment at the bottom of the home page (general reviews) and of every noodle page (reviews for that noodle). Reviews appear on the site straight away.
+Guests can leave a 1–5 star rating, their first name and a comment at the bottom of the home page (general reviews) and of every noodle page (reviews for that noodle). Reviews appear on the site straight away. The form only posts after the guest ticks "Publish my first name and review on this site" (unticked by default). `/privacy/` explains what is kept and how to have a review removed.
 
 **Where they are stored:** Supabase, table `meon_reviews` in the project **jaymini-prod** (`wzgfjuxcprignwdlopvl`). The free Supabase plan allows only two projects, and both were already in use, so MEON shares that project. The table is kept separate and locked down, so it cannot read or change anything else in the project. Settings live in `data/site.json` under `reviews`.
 
@@ -94,13 +94,24 @@ Guests can leave a 1–5 star rating, their first name and a comment at the bott
 | `source` | `qr` if they arrived by scanning a shelf code, otherwise `web` |
 | `approved` | `true` shows it on the site; set it to `false` to hide it |
 | `created_at` | When it was posted |
+| `consent_version` | Which version of the review agreement the guest ticked (e.g. `reviews-2026-10-27`); empty on reviews posted before the checkbox existed |
+
+**Consent setup:** `docs/sql/2026-10-27-meon-reviews-consent.sql`.
+1. Run STEP 1 before deploying the site version with the checkbox; without it, new reviews fail.
+2. Deploy.
+3. Run STEP 3 so the database itself rejects reviews without consent.
+
+If you change the checkbox wording or what the form collects:
+- bump `REVIEW_CONSENT` in `scripts/build.mjs`;
+- update `/privacy/`.
 
 **To read or hide reviews:**
 1. Open <https://supabase.com/dashboard>, choose **jaymini-prod**, then **Table Editor**, then `meon_reviews`.
 2. To hide a review, untick `approved` on its row. It disappears from the site on the next page load.
 3. To export them, click **Export**, then **CSV**.
+4. When a guest asks for their review to be removed (the privacy page tells them to message Instagram), delete the row. Hiding it isn't enough, because the privacy page promises removal.
 
-Or ask Claude: "show me this week's MEON reviews" or "hide the review from <name>".
+Read and manage reviews only in the Supabase dashboard. Don't paste them into, or have them read by, an AI assistant: guests haven't agreed to their reviews going to an AI provider (ledger 299). If that's ever wanted, name the provider on `/privacy/`, add it to the checkbox text and bump `REVIEW_CONSENT` first.
 
 **Spam protection:**
 - The public key can only add reviews and read approved ones. It cannot edit or delete them.
