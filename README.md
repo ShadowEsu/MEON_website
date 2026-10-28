@@ -13,7 +13,7 @@ MEON is an instant-noodle bar at Canning Bridge, Perth, Western Australia. This 
 - Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, sticky "Do it yourself" steps, magnetic buttons, living mascots, logo letters that hop on hover, typewriter. Transform/opacity only, paused off-screen, off for "reduce motion"
 - Guest reviews: star rating, name and comment on the home page and every noodle page, stored in Supabase (see `docs/operations.md`)
 - Optional background music: an original lo-fi loop generated in the browser (off by default)
-- Videos: a 1:13 website tour (re-recorded 28 Oct 2026) plays in the home page "Watch" section with a download button. The 47-second promo and its 9:16 cut for Reels and TikTok are in the repo but hidden (`hidden: true` in `VIDEOS` in `scripts/build.mjs`) until they are remade, because they show the old cook time, machine program, QR codes and logo
+- Videos on the home page ("Watch"), remade on 28 Oct 2026 and ending on the mixed logo: a 48-second promo, a 1:13 website tour, and a 9:16 promo for Reels and TikTok, each with a download button
 - SEO: Restaurant, WebSite, Menu (199 items), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
 - Dine in or take it away: no online ordering
 

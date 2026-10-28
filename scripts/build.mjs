@@ -423,12 +423,12 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
 const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd>${typeof n === "number" ? `<span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span>` : esc(n)}</dd></div>`).join("")}</dl>`;
 
 // Videos (src/assets/video): the promo, a vertical cut for Reels/TikTok, and the website tour.
-// Hidden (Preston, 28 Oct 2026) until remade: the old promo and vertical cut show shelf QR codes, the M5 program, a 3:30 timer and the old logo.
-// The tour was re-recorded on 28 Oct 2026 from the live site. Unhide a video only once it's remade; `uploaded` feeds the VideoObject uploadDate.
+// All three were remade on 28 Oct 2026 to Preston's facts (press 1, then 2; 3:50; pairings and sides; no QR, no prices) and end on the mixed logo.
+// Hide a video with `hidden: true` if it goes out of date; `uploaded` feeds the VideoObject uploadDate.
 const VIDEOS = [
-  { id: "promo", hidden: true, file: "meon-promo.mp4", poster: "poster-promo.jpg", title: "MEON in under a minute", desc: "What MEON is, how it works and why it's worth the trip.", length: "0:47", iso: "PT47S", uploaded: "2026-10-05", dl: "MEON-promo.mp4", label: "Promo · 16:9" },
+  { id: "promo", hidden: false, file: "meon-promo.mp4", poster: "poster-promo.jpg", title: "MEON in under a minute", desc: "What MEON is, how it works and why it's worth the trip.", length: "0:48", iso: "PT48S", uploaded: "2026-10-28", dl: "MEON-promo.mp4", label: "Promo · 16:9" },
   { id: "tour", hidden: false, file: "meon-website-tour.mp4", poster: "poster-tour.jpg", title: "Take the website tour", desc: "The noodle wall, the roulette and the spice slider, then a noodle page with its 3:50 cook timer and the pairings and sides.", length: "1:13", iso: "PT1M13S", uploaded: "2026-10-28", dl: "MEON-website-tour.mp4", label: "Website tour · 16:9" },
-  { id: "vertical", hidden: true, file: "meon-promo-vertical.mp4", poster: "poster-promo-vertical.jpg", title: "Promo for Reels and TikTok", desc: "", length: "0:47", iso: "PT47S", uploaded: "2026-10-05", dl: "MEON-promo-vertical.mp4", label: "Promo · 9:16 for Reels and TikTok" },
+  { id: "vertical", hidden: false, file: "meon-promo-vertical.mp4", poster: "poster-promo-vertical.jpg", title: "Promo for Reels and TikTok", desc: "", length: "0:48", iso: "PT48S", uploaded: "2026-10-28", dl: "MEON-promo-vertical.mp4", label: "Promo · 9:16 for Reels and TikTok" },
 ].filter((v) => !v.hidden).map((v) => ({ ...v, mb: Math.max(1, Math.round(fs.statSync(path.join(SRC, "assets", "video", v.file)).size / 1048576)) }));
 const videoLd = VIDEOS.filter((v) => v.desc).map((v) => ({ "@context": "https://schema.org", "@type": "VideoObject", name: v.title, description: v.desc, thumbnailUrl: `${SITE_URL}/assets/video/${v.poster}`, contentUrl: `${SITE_URL}/assets/video/${v.file}`, uploadDate: v.uploaded, duration: v.iso, publisher: { "@id": `${SITE_URL}/#restaurant` } }));
 const videoPlayer = (v, r, { big = false } = {}) => `<figure class="watch-item${big ? " watch-item--big" : ""}">

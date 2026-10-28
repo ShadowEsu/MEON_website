@@ -80,13 +80,13 @@ The MEON Card has been taken off the website completely. `/meon-card/` redirects
 
 ## Videos
 
-The website tour was re-recorded on 28 October 2026 from the live site and is shown in the "Watch" section on the home page (below "Do it yourself"), with a download button. The promo and its 9:16 cut are **hidden** (`hidden: true` in `VIDEOS` in `scripts/build.mjs`) until they are remade, because they show shelf QR codes, the old per-noodle machine program, the old cook time and the old logo. The "Watch" section appears only while at least one video is unhidden, and its lead line changes with what's shown. The files are in `src/assets/video/`:
+All three videos were remade on 28 October 2026 to Preston's facts ("press 1, then 2", the 3:50 cook time, pairings and sides, egg and cheese in the last 30 seconds, spice against Shin Ramyun = 3, no QR codes, no prices) and end on the mixed MEON logo. They play in the "Watch" section on the home page (below "Do it yourself") with download buttons. To take one off the site, set `hidden: true` for it in `VIDEOS` in `scripts/build.mjs`; the "Watch" section appears only while at least one video is shown, and its lead line changes with what's shown. The files are in `src/assets/video/`:
 
 | File | What it is |
 | --- | --- |
-| `meon-promo.mp4` | 47-second promo, 16:9 (hidden: old version) |
-| `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories (hidden: old version) |
-| `meon-website-tour.mp4` | 1:13 tour of the website (28 Oct 2026): home facts and "Do it yourself" steps, the roulette, the spice slider, a search for Shin Ramyun and its noodle page with "1 then 2" and the 3:50 timer, Pairings & sides, and an end card with the MEON logo |
+| `meon-promo.mp4` | 48-second promo, 16:9: 100+ noodles from across Asia, pairings and sides, press 1 then 2, 3 min 50 sec, egg and cheese in the last 30 seconds, spice 0 to 5, dine in or take it away |
+| `meon-promo-vertical.mp4` | The same promo in 9:16, for Reels, TikTok and Stories (text kept inside the Instagram safe area) |
+| `meon-website-tour.mp4` | 1:13 tour of the website: home facts and "Do it yourself" steps, the roulette, the spice slider, a search for Shin Ramyun and its noodle page with "1 then 2" and the 3:50 timer, Pairings & sides |
 | `poster-*.jpg` | The still image shown before a video plays |
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
