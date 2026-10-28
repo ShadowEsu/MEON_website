@@ -3,6 +3,7 @@
 // description, single <h1>, alt text on images, and no duplicate ids. Exit code 1 on any problem.
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "site");
@@ -41,6 +42,22 @@ for (const file of htmlFiles) {
   for (const m of fs.readFileSync(file, "utf8").matchAll(/href="[^"]*toppings\/#([^"]+)"/g)) {
     if (!toppingsHtml.includes(`id="${m[1]}"`)) problems.push(`${path.relative(OUT, file)}: toppings anchor #${m[1]} missing`);
   }
+}
+// Content-Security-Policy (vercel.json): every inline script must be allowed by its sha256 hash,
+// and inline event handlers (onclick="…") are not allowed at all.
+const csp = JSON.parse(fs.readFileSync(path.join(OUT, "..", "vercel.json"), "utf8")).headers
+  .flatMap((h) => h.headers).find((h) => h.key === "Content-Security-Policy")?.value || "";
+if (!csp) problems.push("vercel.json: no Content-Security-Policy header");
+for (const file of htmlFiles) {
+  const rel = path.relative(OUT, file);
+  const html = fs.readFileSync(file, "utf8");
+  for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
+    const attrs = m[1] || "";
+    if (/\ssrc=/.test(attrs) || /\stype="application\/(?:ld\+)?json"/.test(attrs)) continue;
+    const hash = `'sha256-${crypto.createHash("sha256").update(m[2]).digest("base64")}'`;
+    if (!csp.includes(hash)) problems.push(`${rel}: inline script not allowed by the CSP; add ${hash} to script-src in vercel.json`);
+  }
+  for (const m of html.matchAll(/<[a-z][^>]*\son[a-z]+="/g)) problems.push(`${rel}: inline event handler (blocked by the CSP): ${m[0].slice(0, 80)}`);
 }
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }

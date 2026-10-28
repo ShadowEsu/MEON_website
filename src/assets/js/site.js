@@ -684,6 +684,7 @@
 
   /* ---------- QR generator ---------- */
   var gen = $("[data-qrgen]");
+  if (gen) $(".qrgen-form", gen).addEventListener("submit", function (e) { e.preventDefault(); });
   if (gen && window.qrcode) {
     var siteUrl = gen.getAttribute("data-site");
     var logo = new Image(), logoReady = false;

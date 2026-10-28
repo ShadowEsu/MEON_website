@@ -998,7 +998,7 @@ addPage("qr-generator/", layout({
 <div class="no-print">${pageHero(r, { crumbs: [["QR generator"]], eyebrow: "Staff · runs in your browser", title: "QR code generator.", lead: "Make a branded QR code for any noodle, page, deal or link. Download a PNG for print or an SVG for signage.", seed: 9 })}</div>
 <section class="section section--tight"><div class="wrap">
   <div class="qrgen" data-qrgen data-site="${esc(SITE_URL)}" data-logo="${r("assets/img/logo-192.png")}">
-    <form class="qrgen-form panel" onsubmit="return false">
+    <form class="qrgen-form panel">
       <div class="field"><label for="qg-preset">Start from</label>
         <select id="qg-preset">
           <option value="">Custom link or text</option>
