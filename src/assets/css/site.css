@@ -158,11 +158,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .logo-badge { display: block; width: var(--logo-h, 64px); height: var(--logo-h, 64px); border-radius: 3px; transition: transform .5s var(--ease); }
 @media (max-width: 760px) { .logo-badge { --logo-h: 54px; } }
 .logo:hover .logo-badge { transform: rotate(-3deg) scale(1.05); }
-.logo-badge .lw, .about-mark .lw, .vhero-logo .lw { transform-box: fill-box; }
+.logo-badge .lw, .vhero-logo .lw { transform-box: fill-box; }
 .logo-badge .lw { transform-origin: 50% 100%; animation: glyph-in .7s var(--ease) both, logo-wave 6s var(--ease) infinite; animation-delay: calc(.15s + var(--i) * .06s), calc(1.6s + var(--i) * .12s); }
 @keyframes logo-wave { 0%, 16%, 100% { transform: none; } 5% { transform: translateY(-22%) scale(1.12); } 10% { transform: translateY(4%) scale(.96, 1.04); } }
 .videos-paused .logo-badge .lw { animation-play-state: paused; }
-.about-logo:hover .about-mark .lw { animation: lw-hop 1.2s var(--ease); animation-delay: calc(var(--i) * .06s); }
 .nav { display: flex; align-items: center; justify-content: center; gap: 4px; }
 .nav > a, .nav-item > a { position: relative; text-decoration: none; font-weight: 500; font-size: .96rem; padding: 10px 12px; color: var(--ink-2); transition: color .25s; }
 .nav > a::after, .nav-item > a::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 1.5px; background: currentColor; transform: scaleX(0); transform-origin: 100% 50%; transition: transform .45s var(--ease); }
@@ -387,6 +386,35 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 @keyframes cue { 0% { transform: none; opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(14px); opacity: 0; } }
 @media (max-width: 899px) { .vhero-cue { display: none; } .vpause { top: calc(var(--header-h) + 14px); bottom: auto; } .vhero .actions .btn { flex: 1 1 100%; } }
 @media (max-width: 760px) { .vhero-inner { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); } }
+/* Inner pages (Pairings and sides, Noodles, Countries, About, Visit; videoHero() in build.mjs). The reels carry their own
+   burned-in captions, so the words never sit on the footage: desktop splits the hero (words on ink on the left, the
+   three clip columns on the right); phones frame the clip under the header with the words below it. Not pinned:
+   site.js "leave" mode runs --p from 0 to 1 as the hero scrolls away, so the footage shrinks into a rounded card, the
+   desktop columns drift and the words lift away. */
+.js .vhero--page { height: auto; }
+.vhero--page .vhero-stage { display: grid; min-height: 0; align-items: end; }
+.vhero--page .vhero-stage::before { display: none; }
+.vhero--page .vhero-media { position: relative; inset: auto; z-index: 0; }
+.vhero--page .vhero-inner { width: auto; margin: 0; }
+.vhero--page .vhero-title { font-size: clamp(2.6rem, 6.2vw, 6rem); max-width: 12ch; }
+.vhero--page .vhero-sub { max-width: 44ch; }
+.vhero--page .vhero-logo { width: clamp(96px, 8vw, 140px); }
+.vhero--page .eyebrow { color: #ff5a5f; }
+.vhero--page .crumbs { color: rgba(255,255,255,.78); margin-bottom: clamp(18px, 3vh, 32px); }
+.vhero--page .crumbs a:hover { color: #fff; }
+@media (min-width: 900px) {
+  .vhero--page .vhero-stage { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); min-height: max(560px, 86vh); min-height: max(560px, 86svh); }
+  .vhero--page .vhero-media { grid-column: 2; grid-row: 1; align-self: stretch; }
+  /* the transparent header's links sit over the top of the footage */
+  .vhero--page .vhero-media::after { content: ""; position: absolute; inset: 0 0 auto; height: 150px; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(12,9,8,.6), rgba(12,9,8,0)); }
+  .vhero--page .vhero-inner { grid-column: 1; grid-row: 1; padding: calc(var(--header-h) + 32px) clamp(28px, 4vw, 64px) clamp(40px, 7vh, 88px) max(var(--gutter), (100vw - var(--wrap)) / 2); }
+}
+@media (max-width: 899.98px) {
+  .vhero--page .vhero-media { height: 54vh; height: 54svh; margin: calc(var(--header-h) + 8px) 12px 0; border-radius: 22px; }
+  .vhero--page .vhero-inner { padding: 22px var(--gutter) 40px; }
+  .vhero--page .actions .btn--sm { flex: 0 0 auto; }
+  .vhero--page .vpause { top: calc(var(--header-h) + 22px); right: 24px; }
+}
 
 /* Facts row (country pages) */
 .facts { display: grid; grid-template-columns: repeat(4, 1fr); margin: clamp(48px, 6vw, 80px) 0 0; border-top: 1px solid var(--line); }
@@ -606,7 +634,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .page-hero .lead:last-child { margin-bottom: 0; }
 .page-hero .facts { margin-top: clamp(40px, 6vw, 72px); }
 .ph-aside { display: flex; justify-content: flex-end; }
-@media (max-width: 760px) { .ph-grid { grid-template-columns: 1fr; } .ph-aside { justify-content: flex-start; } .peeker { width: 96px; margin: 0; } .plate-stack { margin-inline: auto; } }
+@media (max-width: 760px) { .ph-grid { grid-template-columns: 1fr; } .ph-aside { justify-content: flex-start; } .peeker { width: 96px; margin: 0; } }
 
 /* ---------- Library ---------- */
 .filters { position: sticky; top: var(--header-h); z-index: 20; background: rgba(255,255,255,.97); border-bottom: 1px solid var(--line); padding: 16px 0 12px; transition: top .5s var(--ease); }
@@ -720,12 +748,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .noodle-facts > div:nth-child(n+3) { border-top: 1px solid var(--line); }
 }
 
-/* ---------- Toppings page ---------- */
-.plate-stack { position: relative; width: min(340px, 100%); aspect-ratio: 1; margin-left: auto; }
-.plate-stack img { position: absolute; width: 58%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; border: 5px solid #fff; }
-.plate-stack img:nth-child(1) { left: 0; top: 4%; }
-.plate-stack img:nth-child(2) { right: 0; top: 0; width: 48%; }
-.plate-stack img:nth-child(3) { left: 24%; bottom: 0; width: 52%; }
+/* ---------- Pairings and sides page ---------- */
 .topping-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 32px 22px; margin-top: 28px; }
 .pairing-note { margin: 10px 0 0; }
 .drink-list { list-style: none; margin: 22px 0 0; padding: 0; columns: 3 220px; column-gap: 32px; }
@@ -740,7 +763,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .topping span { font-size: .9rem; color: var(--ink-2); }
 .topping:target strong { color: var(--red); }
 @media (max-width: 1024px) { .topping-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .topping-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .plate-stack { width: 200px; margin: 0 auto; } }
+@media (max-width: 560px) { .topping-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ---------- Card / about / visit ---------- */
 .icon-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line-2); }
@@ -756,8 +779,6 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .perk-list svg.i { width: 24px; height: 24px; color: var(--red); margin-top: 2px; }
 .perk-list strong { display: block; margin-bottom: 2px; }
 .perk-list span { color: var(--ink-2); }
-.about-logo { width: min(280px, 70vw); margin-left: auto; }
-.about-mark { display: block; width: 100%; height: auto; }
 .pull { margin: 32px 0 0; padding: 24px 0 0; border-top: 1px solid var(--ink); font-size: clamp(1.2rem, 2vw, 1.5rem); line-height: 1.4; letter-spacing: -.015em; font-weight: 500; }
 .values { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line-2); }
 .values li { padding: 30px 28px 0 0; }

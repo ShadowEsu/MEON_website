@@ -366,6 +366,31 @@ function pageHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = ""
 </section>`;
 }
 
+// Inner-page video hero (Preston, 29 Oct 2026: the other pages get the home's look). Full-bleed footage: three portrait
+// clips side by side on desktop, one on phones (`phone`, picked without big burned-in captions so nothing runs into the
+// title), with the breadcrumbs, title, lead and actions over it. Not pinned: as the page scrolls on, the footage shrinks
+// into a rounded card and the words lift away (data-scene="leave", site.js). Posters only for reduced motion and
+// Save-Data; the pause button stops every background video. The page's layout() needs `overlay: true`.
+function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "", clips, phone, logo = false }) {
+  return `<section class="vhero vhero--page" aria-labelledby="page-h" data-scene="leave">
+  <div class="vhero-stage">
+    <div class="vhero-media">
+      ${bgVideo(r, phone, { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
+      <div class="vhero-cols">${clips.map((c, i) => `<div class="vcol vcol--${"abc"[i]}">${bgVideo(r, c, { media: "(min-width: 900px)", eager: true })}</div>`).join("")}</div>
+    </div>
+    <div class="wrap vhero-inner">
+      ${crumbs.length ? crumbsNav(r, crumbs) : ""}
+      ${logo ? logoMark("vhero-logo", "MEON") : ""}
+      ${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}
+      <h1 class="vhero-title" id="page-h" data-split>${title}</h1>
+      ${lead ? `<p class="vhero-sub">${lead}</p>` : ""}
+      ${actions ? `<div class="actions">${actions}</div>` : ""}
+    </div>
+    <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
+  </div>
+</section>`;
+}
+
 // Closing band used on every page: one red block, big type, the crew.
 function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}) {
   return `<section class="cta-band" data-anim>
@@ -727,6 +752,7 @@ addPage("noodles/", layout({
   title: "Noodle library",
   seoTitle: `${COUNT} Instant Noodles from Across Asia · MEON Noodles Perth`,
   active: "noodles/",
+  overlay: true,
   jsonld: [{
     "@context": "https://schema.org",
     "@type": "Menu",
@@ -743,7 +769,7 @@ addPage("noodles/", layout({
   }],
   description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-${pageHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, seed: 1 })}
+${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["wall-06", "ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
 <div data-library>
   <div class="filters">
     <div class="wrap">
@@ -896,9 +922,10 @@ addPage("countries/", layout({
   title: "Noodles by country",
   seoTitle: "Instant Noodles by Country: Korea, Japan and more · MEON Perth",
   active: "countries/",
+  overlay: true,
   description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", seed: 2 })}
+${videoHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7", "wall-09"], phone: "wall-10" })}
 <section class="section section--tight"><div class="wrap">
   <div class="country-list country-list--full">
     ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
@@ -953,10 +980,11 @@ addPage("pairings-and-sides/", layout({
   title: "Pairings and sides",
   seoTitle: "Noodle Pairings, Sides and Drinks · MEON Perth",
   active: "pairings-and-sides/",
+  overlay: true,
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms, lettuce and more to cook with your noodles, plus chicken wings and fried Spam on the side.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is exactly how you want it.", actions: groups.map((g) => `<a class="btn btn--line btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--line btn--sm" href="#drinks">Drinks</a>`,
-  aside: `<div class="plate-stack">${["topping-fishcake", "topping-enoki", "topping-seaweed"].map((f, i) => `<img src="${r(`assets/img/photos/${f}.webp`)}" alt="" width="900" height="900" style="--i:${i}" data-parallax="${(0.04 + i * 0.04).toFixed(2)}">`).join("")}</div>` })}
+${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is exactly how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
+  clips: ["step-pairings", "ig-DeOXYn5hSUT", "step-cook"], phone: "step-pairings" })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
@@ -976,9 +1004,10 @@ addPage("about/", layout({
   urlPath: "about/",
   title: "About MEON",
   active: "about/",
+  overlay: true,
   description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
   body: (r) => `
-${pageHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", aside: `<div class="about-logo" data-parallax="0.05">${logoMark("about-mark", "MEON logo")}</div>` })}
+${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "wall-07", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2 data-split>What we do.</h2>
@@ -1050,10 +1079,11 @@ addPage("visit/", layout({
   title: "Visit us",
   seoTitle: `Visit MEON Noodles · Instant Noodle Bar in ${site.suburb}, Perth`,
   active: "visit/",
+  overlay: true,
   jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }],
   description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Dine in or take it away: walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
   body: (r) => `
-${pageHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), seed: 7, actions: `<a class="btn btn--red" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--line" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}` })}
+${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["wall-08", "ig-sign", "wall-12"], phone: "ig-sign" })}
 <section class="section section--tight"><div class="wrap">
   <div class="info-cols">
     <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Directions ${icon.arrow}</a></div>

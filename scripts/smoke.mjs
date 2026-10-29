@@ -31,7 +31,11 @@ ok((await page.$$eval(".stack > li video", (vs) => vs.length)) === 4 && (await p
 ok(await page.$eval(".logo-badge", (s) => { const r = s.getBoundingClientRect(); return s.querySelectorAll(".lw").length === 8 && Math.abs(r.width - r.height) < 1 && r.height >= 50; }), "header logo is the square with meon plus the four glyphs");
 ok(!(await page.$(".facts")) && !(await page.$("#watch")), "no facts row and no Watch section on the home page");
 ok((await page.$$eval(".insta-row .reel", (e) => e.length)) >= 12, "Instagram strip is filled");
-await page.goto(BASE + "/countries/", { waitUntil: "networkidle" });
+for (const p of ["pairings-and-sides/", "noodles/", "countries/", "about/", "visit/"]) {
+  await page.goto(BASE + "/" + p, { waitUntil: "domcontentloaded" });
+  ok(await page.$eval(".vhero--page", (h) => h.querySelectorAll(".vcol video").length === 3 && !!h.querySelector(".vbg--phone video") && !!h.querySelector("h1")), `/${p} has the video hero (3 desktop clips, 1 phone clip, h1)`);
+}
+await page.goto(BASE + "/privacy/", { waitUntil: "networkidle" });
 await page.click(".peeker .meo", { force: true });
 await page.waitForTimeout(200);
 ok(await page.$eval(".peeker .meo", (m) => m.classList.contains("is-talking")), "mascot talks when tapped");

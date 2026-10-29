@@ -94,9 +94,10 @@
   }
 
   /* ---------- Sound prompt: offer the soundtrack on the first visit to the home page ----------
-     It waits until the video hero has scrolled away, so it never covers the hero's buttons. */
+     It waits until the video hero has scrolled away, so it never covers the hero's buttons. Home only: the inner pages'
+     video heroes (.vhero--page) don't trigger it. */
   var soundBtn = $("[data-sound]");
-  var vhero = $(".vhero");
+  var vhero = $(".vhero:not(.vhero--page)");
   if (soundBtn && vhero && store.get("meon-sound") === null) {
     var offerSound = function () {
       var vibe = document.createElement("div");

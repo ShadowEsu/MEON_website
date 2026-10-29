@@ -80,7 +80,7 @@ The MEON Card has been taken off the website completely. `/meon-card/` redirects
 
 ## Videos
 
-The home page is built around every clip Preston sent and MEON's own @meonnoodles reels (29 Oct 2026, Preston: full-screen video hero, videos and photos as you scroll, Instagram-style reels near the bottom, "all the videos I showed you", "great animation"). The promo and the website tour came off the site the same day. The clips have no sound and no prices, offers, dates or hours in frame. Some are slowed down, some sped up.
+The home page is built around every clip Preston sent and MEON's own @meonnoodles reels (29 Oct 2026, Preston: full-screen video hero, videos and photos as you scroll, Instagram-style reels high up, "all the videos I showed you", "great animation"). The same clips also open Pairings and sides, Noodles, Countries, About and Visit (`videoHero()` in `build.mjs`: the words on ink on the left and three clips side by side on the right on desktop; on phones the clip named `phone` in a rounded frame above the words, so the reels' own captions never sit under the text). The promo and the website tour came off the site the same day. The clips have no sound and no prices, offers, dates or hours in frame. Some are slowed down, some sped up.
 
 | File in `src/assets/video/` | Where | What it is |
 | --- | --- | --- |
@@ -89,11 +89,12 @@ The home page is built around every clip Preston sent and MEON's own @meonnoodle
 | `step-pick.mp4`, `step-pairings.mp4`, `step-cook.mp4`, `step-enjoy.mp4` | The four "Do it yourself" cards | Picking a packet, the pairings fridge, the cooking machine, eating |
 | `wall-01.mp4` … `wall-12.mp4` | "Bring your crew." video wall | Short loops from the rest of the footage (store tour, street, entrance, the dancing man, packets, friends); half slowed, half sped up |
 | `street-front.mp4` | Closing "Find us in Northbridge." band | The street and the MEON sign, slowed down |
-| `ig-*.mp4` | Instagram cards near the bottom | 8-second previews of @meonnoodles reels. Each card opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
+| `ig-*.mp4` | Instagram cards straight after the home hero | 8-second previews of @meonnoodles reels. Each card opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
+| Inner-page heroes (reusing the files above) | Pairings and sides; Noodles; Countries; About; Visit | Desktop columns / phone clip: `step-pairings`, `ig-DeOXYn5hSUT`, `step-cook` / `step-pairings`; `wall-06`, `ig-DetKN4Bh0FW`, `ig-DewSjLLBLqQ` / `ig-DetKN4Bh0FW`; `wall-10`, `ig-DefupZzh1I7`, `wall-09` / `wall-10`; `ig-store-tour`, `wall-07`, `ig-DedzCYDhezV` / `ig-store-tour`; `wall-08`, `ig-sign`, `wall-12` / `ig-sign` |
 
 Three @meonnoodles reels are left out because offer or date text is in every frame: the Year 12 posters (DeeCRVIhNv3, DemU3WUhE3S) and Halloween week (De_7IVhhlAg). The site shows no prices or offers.
 
-**Motion.** The hero is pinned while you scroll: the footage shrinks into a rounded card and the words lift away (desktop columns drift at different speeds). The steps are stacked full-screen cards; each one slides up over the last. The video wall's columns drift at different speeds. `site.js` drives it all from one scroll loop that sets `--p`/`--q` on each scene; `site.css` turns those into transforms. With "reduce motion" the hero, cards and wall are plain sections.
+**Motion.** The home hero is pinned while you scroll: the footage shrinks into a rounded card and the words lift away (desktop columns drift at different speeds). The steps are stacked full-screen cards; each one slides up over the last. The video wall's columns drift at different speeds. The inner-page heroes aren't pinned; they shrink the same way as they scroll away. `site.js` drives it all from one scroll loop that sets `--p`/`--q` on each scene; `site.css` turns those into transforms. With "reduce motion" the heroes, cards and wall are plain sections.
 
 Every clip has a `.webp` poster of the same name. Posters are all that visitors with "reduce motion" or Save-Data get, and what everyone sees until a clip starts. A clip loads only when it nears the screen and plays only while on screen (a step card covered by the next one pauses); the hero loads just the cut that fits the screen. The pause button in the hero stops every background video and the reel strip, and the browser remembers the choice.
 

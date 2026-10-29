@@ -54,8 +54,9 @@
   var parallax = reduceMotion ? [] : $$("[data-parallax]");
   var hscroll = reduceMotion ? [] : $$("[data-hscroll]");
   var vhero = $(".vhero");
-  /* Home scenes. [data-scene] gets --p, the scroll progress through it: by default while its sticky first child (the
-     stage) is pinned, i.e. over (scene height - stage height); "through" runs from entering the screen to leaving it.
+  /* Scenes. [data-scene] gets --p, the scroll progress through it: by default while its sticky first child (the
+     stage) is pinned, i.e. over (scene height - stage height); "through" runs from entering the screen to leaving it;
+     "leave" (inner-page video heroes, which start on screen) runs from the top of the page until it has scrolled away.
      .is-moving once it has started (rounded corners), .is-late past .58 (the faded hero words stop taking clicks).
      [data-stack] cards get --q (how far the card has slid in) and --p (how far the next card covers it), .is-sinking
      once covered at all; a fully covered card pauses its videos. All scene and card reads happen before any write. */
@@ -73,7 +74,9 @@
     for (var k = 0; k < scenes.length; k++) {
       var sc = scenes[k], sr = sc.getBoundingClientRect();
       if (sr.bottom < -100 || sr.top > vh + 100) { sceneP[k] = null; continue; }
-      if (sc.getAttribute("data-scene") === "through") sceneP[k] = (vh - sr.top) / (vh + sr.height);
+      var mode = sc.getAttribute("data-scene");
+      if (mode === "through") sceneP[k] = (vh - sr.top) / (vh + sr.height);
+      else if (mode === "leave") sceneP[k] = -sr.top / Math.max(1, sr.height);
       else { var pin = sr.height - sc.firstElementChild.offsetHeight; sceneP[k] = pin > 1 ? -sr.top / pin : 0; }
     }
     var stackOn = false;
