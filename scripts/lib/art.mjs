@@ -82,20 +82,12 @@ export function spiceMeter(level, r, { large = false, max = 5 } = {}) {
    Each letter and glyph is a .lw group (with --i) so CSS can move it. */
 const logoParts = () => [...LOGO.word, ...LOGO.glyphs].map((d, i) => `<g class="lw" style="--i:${i}"><path d="${d}"/></g>`).join("");
 
-// The red square logo with its white frame (home hero, About). Small sizes use logoBadge so the glyphs stay readable.
+// The red square logo with its white frame: the header on every page (Preston, 29 Oct 2026: square, not the wide
+// crop, always animated), the home hero and About.
 export function logoMark(cls, label = "") {
   const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
   const { outer, inner } = LOGO.frame, sw = inner[0] - outer[0], at = (outer[0] + inner[0]) / 2, S = LOGO.size;
   return `<svg class="${cls}" viewBox="0 0 ${S} ${S}" ${a11y} focusable="false"><rect width="${S}" height="${S}" fill="#ec1b25"/><rect x="${at}" y="${at}" width="${S - 2 * at}" height="${S - 2 * at}" rx="6" fill="none" stroke="#fff" stroke-width="${sw}"/><g fill="#fff" fill-rule="evenodd">${logoParts()}</g></svg>`;
-}
-
-// The same red logo cropped wide around the lettering, for the header: in the square the four glyphs are under
-// 6% of its height, so at header size they would read as blank. Here they are about 18% of the height.
-export function logoBadge(cls = "logo-badge", label = "") {
-  const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
-  const [wx0, wy0, wx1] = LOGO.wordBox, [gx0, , gx1, gy1] = LOGO.glyphBox, pad = 58, fr = 22, sw = 14;
-  const x = Math.min(wx0, gx0) - pad, y = wy0 - pad, w = Math.max(wx1, gx1) - Math.min(wx0, gx0) + 2 * pad, h = gy1 - wy0 + 2 * pad;
-  return `<svg class="${cls}" viewBox="${x} ${y} ${w} ${h}" ${a11y} focusable="false"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ec1b25"/><rect x="${x + fr}" y="${y + fr}" width="${w - 2 * fr}" height="${h - 2 * fr}" rx="6" fill="none" stroke="#fff" stroke-width="${sw}"/><g fill="#fff" fill-rule="evenodd">${logoParts()}</g></svg>`;
 }
 
 // The lettering without the square, in the current text colour (footer).

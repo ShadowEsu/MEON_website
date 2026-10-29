@@ -152,13 +152,16 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 /* Keep the buttons in the right-hand column even when the nav becomes the phone menu overlay */
 .bar > .header-actions { grid-column: 3; }
 .logo { display: inline-flex; align-items: center; text-decoration: none; flex: none; }
-/* The traced mixed logo (scripts/lib/art.mjs): the wide badge in the header (logoBadge, so the glyphs read), the square
-   logoMark in the home hero and on About. Letters and glyphs hop on hover. */
-.logo-badge { display: block; height: var(--logo-h, 50px); width: calc(var(--logo-h, 50px) * 2.5426); border-radius: 3px; transition: transform .5s var(--ease); }
-@media (max-width: 760px) { .logo-badge { --logo-h: 44px; } }
-.logo:hover .logo-badge { transform: rotate(-2deg) scale(1.03); }
+/* The traced mixed logo (scripts/lib/art.mjs): the red square logoMark in the header on every page (Preston, 29 Oct:
+   square, always animated), in the home hero and on About. In the header its letters and glyphs rise in on every page
+   load, then wave one after another every 6 s (transform and opacity only); still for reduced motion. */
+.logo-badge { display: block; width: var(--logo-h, 64px); height: var(--logo-h, 64px); border-radius: 3px; transition: transform .5s var(--ease); }
+@media (max-width: 760px) { .logo-badge { --logo-h: 54px; } }
+.logo:hover .logo-badge { transform: rotate(-3deg) scale(1.05); }
 .logo-badge .lw, .about-mark .lw, .vhero-logo .lw { transform-box: fill-box; }
-.logo:hover .logo-badge .lw { animation: lw-hop 1.2s var(--ease); animation-delay: calc(var(--i) * .05s); }
+.logo-badge .lw { transform-origin: 50% 100%; animation: glyph-in .7s var(--ease) both, logo-wave 6s var(--ease) infinite; animation-delay: calc(.15s + var(--i) * .06s), calc(1.6s + var(--i) * .12s); }
+@keyframes logo-wave { 0%, 16%, 100% { transform: none; } 5% { transform: translateY(-22%) scale(1.12); } 10% { transform: translateY(4%) scale(.96, 1.04); } }
+.videos-paused .logo-badge .lw { animation-play-state: paused; }
 .about-logo:hover .about-mark .lw { animation: lw-hop 1.2s var(--ease); animation-delay: calc(var(--i) * .06s); }
 .nav { display: flex; align-items: center; justify-content: center; gap: 4px; }
 .nav > a, .nav-item > a { position: relative; text-decoration: none; font-weight: 500; font-size: .96rem; padding: 10px 12px; color: var(--ink-2); transition: color .25s; }
@@ -849,7 +852,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; transition-delay: 0s !important; }
   .js .reveal, [data-split] .w > span, .js .img-reveal img, .js .footer-big .lw { opacity: 1; transform: none; }
   .js .img-reveal::after { transform: scaleY(0); }
-  .vhero-logo .lw { animation: none !important; opacity: 1; transform: none; }
+  .vhero-logo .lw, .logo-badge .lw { animation: none !important; opacity: 1; transform: none; }
   /* The home scenes become plain sections: no pinned hero, no stacked cards, no drifting columns */
   .js .vhero { height: auto; }
   .js .scard { position: relative; }

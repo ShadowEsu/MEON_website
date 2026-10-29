@@ -28,7 +28,7 @@ await page.waitForTimeout(2500);
 ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 3 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the three desktop hero columns load and play");
 ok(await page.$eval(".vhero .vbg--phone video", (v) => !v.getAttribute("src")), "phone hero video is not fetched on desktop");
 ok((await page.$$eval(".stack > li video", (vs) => vs.length)) === 4 && (await page.$$eval(".vwall video", (vs) => vs.length)) === 12, "four step-card videos and a twelve-clip video wall");
-ok(await page.$eval(".logo-badge", (s) => s.querySelectorAll(".lw").length === 8 && s.getBoundingClientRect().height >= 44), "header logo has meon plus the four glyphs, at a readable size");
+ok(await page.$eval(".logo-badge", (s) => { const r = s.getBoundingClientRect(); return s.querySelectorAll(".lw").length === 8 && Math.abs(r.width - r.height) < 1 && r.height >= 50; }), "header logo is the square with meon plus the four glyphs");
 ok(!(await page.$(".facts")) && !(await page.$("#watch")), "no facts row and no Watch section on the home page");
 ok((await page.$$eval(".insta-row .reel", (e) => e.length)) >= 12, "Instagram strip is filled");
 await page.goto(BASE + "/countries/", { waitUntil: "networkidle" });

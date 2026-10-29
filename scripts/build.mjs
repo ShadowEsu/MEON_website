@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestPairings, badge, COUNTRY_ADJ, COOK_SECONDS, COOK_TIME } from "./lib/copy.mjs";
-import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoBadge, logoLockup, TOPPING_ART } from "./lib/art.mjs";
+import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoLockup, TOPPING_ART } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -196,7 +196,7 @@ ${analytics}
 ${overlay ? "" : `<div class="announce"><span>Cook-it-yourself instant noodles at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</span> <a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></div>`}
 <header class="site-header${overlay ? " site-header--over" : ""}" data-header>
   <div class="wrap bar">
-    <a class="logo" href="${r("")}" aria-label="MEON home">${logoBadge("logo-badge")}</a>
+    <a class="logo" href="${r("")}" aria-label="MEON home">${logoMark("logo-badge")}</a>
     <nav class="nav" id="site-nav" aria-label="Main">
       ${navLinks}
       <a class="nav-mobile-only" href="${r("visit/")}"${cur("visit/")}>Visit us</a>
@@ -528,7 +528,31 @@ addPage("", layout({
       </div>
     </div>
     <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
-    <a class="vhero-cue" href="#how"><span class="visually-hidden">See how it works</span><i aria-hidden="true"></i></a>
+    <a class="vhero-cue" href="#instagram"><span class="visually-hidden">See our Instagram videos</span><i aria-hidden="true"></i></a>
+  </div>
+</section>
+
+<section class="insta" id="instagram" aria-labelledby="insta-h">
+  <div class="wrap insta-head">
+    <div class="reveal">
+      <p class="eyebrow">${esc(site.instagramHandle)}</p>
+      <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
+      <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
+    </div>
+    <div class="actions">
+      <a class="btn btn--red" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} Follow ${esc(site.instagramHandle)}</a>
+      ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
+    </div>
+  </div>
+  <div class="insta-track">
+    <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
+      const copy = i >= REELS.length;
+      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
+        <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
+        <div class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></div>
+        <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
+      </a></li>`;
+    }).join("")}</ul>
   </div>
 </section>
 
@@ -569,29 +593,6 @@ addPage("", layout({
 </section>
 
 
-<section class="insta" id="instagram" aria-labelledby="insta-h">
-  <div class="wrap insta-head">
-    <div class="reveal">
-      <p class="eyebrow">${esc(site.instagramHandle)}</p>
-      <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
-      <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
-    </div>
-    <div class="actions">
-      <a class="btn btn--red" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} Follow ${esc(site.instagramHandle)}</a>
-      ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
-    </div>
-  </div>
-  <div class="insta-track">
-    <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
-      const copy = i >= REELS.length;
-      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
-        <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
-        <div class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></div>
-        <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
-      </a></li>`;
-    }).join("")}</ul>
-  </div>
-</section>
 <div class="ticker" data-hscroll aria-hidden="true">
   <div class="ticker-band ticker-band--red"><div class="wall-row" data-speed="1.4">${TICKER.concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("bowl")}`).join("")}</div></div>
   <div class="ticker-band ticker-band--ink"><div class="wall-row" data-speed="-1.1">${TICKER.slice().reverse().concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("flame")}`).join("")}</div></div>

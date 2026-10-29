@@ -10,7 +10,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
   - `--red #d7141d` for text and buttons, because it meets contrast rules
   - `--soft #f6f4f1` is the only tint, used for alternating sections
 - **No emojis anywhere.** Icons are a custom line set (`svgIcon()` in `art.mjs`, also published as `assets/img/icons.svg` for JavaScript). Flags are real artwork from flag-icons (MIT), copied to `assets/img/flags/`.
-- **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone, and the four glyphs must be readable wherever it appears (Preston, 29 Oct 2026). `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. In the square the glyphs are under 6% of its height, so small sizes use the wide badge: `logoBadge()` in `art.mjs` (header), `logoMark()` the red square (home hero, About), `logoLockup()` the lettering alone in the current colour (footer, red on ink).
+- **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone (Preston, 29 Oct 2026). `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. `logoMark()` in `art.mjs` is the red square, used everywhere it appears as a badge: the header on every page (Preston, 29 Oct 2026: "square please", never the wide crop, and always animated), the home hero and About. In the square the glyphs are about 6% of its height, so in the header they read as small marks; the big hero square is where they read clearly. `logoLockup()` is the lettering alone in the current colour (footer, red on ink).
 - **No boxes:**
   - cards are a photo plus text
   - sections are separated by hairlines (`--line`) and space
@@ -19,8 +19,8 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 
 ## Page anatomy
 1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.
-2. Header: white, always visible, with a hairline appearing on scroll. On the home page it floats see-through over the video hero, with white controls, until the hero scrolls away. Logo badge on the left, the nav centred (Home, Noodles mega menu, Countries, Pairings and sides, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
-3. Home (video-first, 29 Oct 2026, same brand; Preston: videos and the scroll story at the start): a full-screen video hero, pinned while you scroll (one portrait clip on phones, three portrait clips side by side on desktop), with the big square logo, "Your bowl, your rules.", the address and two actions (Browse the noodle wall, Get directions), plus a pause button for every background video. Straight after it, the four "Do it yourself" steps as stacked full-screen video cards (phones: the clip fills a rounded frame at the top and the words sit below it, so the reels' own captions never run into the headline; tablets: a centred 9:16 frame; desktop: a 9:16 frame beside the words), the "Bring your crew." video wall and the Instagram-style @meonnoodles reel cards. Then the flavour banners, the five booth-shoot bowls ("Straight out of the machine."), the noodle wall, Most picked, roulette, countries, heat check, Build your bowl, reviews and a closing "Find us in Northbridge." band over the street video. No count-up facts and no stats on the home page.
+2. Header: white, always visible, with a hairline appearing on scroll. On the home page it floats see-through over the video hero, with white controls, until the hero scrolls away. The square logo on the left (its letters and glyphs rise in on every page load, then wave in turn), the nav centred (Home, Noodles mega menu, Countries, Pairings and sides, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
+3. Home (video-first, 29 Oct 2026, same brand; Preston: videos and the scroll story at the start, the Instagram reels high up): a full-screen video hero, pinned while you scroll (one portrait clip on phones, three portrait clips side by side on desktop), with the big square logo, "Your bowl, your rules.", the address and two actions (Browse the noodle wall, Get directions), plus a pause button for every background video. Straight after it, the Instagram-style @meonnoodles reel cards, then the four "Do it yourself" steps as stacked full-screen video cards (phones: the clip fills a rounded frame at the top and the words sit below it, so the reels' own captions never run into the headline; tablets: a centred 9:16 frame; desktop: a 9:16 frame beside the words) and the "Bring your crew." video wall. Then the flavour banners, the five booth-shoot bowls ("Straight out of the machine."), the noodle wall, Most picked, roulette, countries, heat check, Build your bowl, reviews and a closing "Find us in Northbridge." band over the street video. No count-up facts and no stats on the home page.
    Other pages: page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
 4. Content sections.
 5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
@@ -58,7 +58,8 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Count-up numbers | `.facts` (country pages) |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
 | Mascots: blink, eyes follow the cursor; wave and squish on hover; tap to talk | Page heroes, red band, timer, back-to-top |
-| Logo: letters and glyphs hop when you hover | Header badge, About logo, footer |
+| Header logo: letters and glyphs rise in on every page load, then wave one after another every few seconds (pauses with the video pause button; still for reduce motion) | Header, every page |
+| Logo: letters and glyphs hop when you hover | About logo, footer |
 | Paper confetti | Roulette win, timer finished |
 | Crossing flavour banners (red and ink) that move with your scroll | Home, after the reel cards (`.ticker`) |
 | Build your bowl: pairings and sides drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
@@ -66,8 +67,7 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Illustrated packets, coloured by flavour, for noodles without a photo | Cards, noodle pages |
 
 Speed rules (tested with the CPU slowed 4x, like an average phone):
-- Nothing animates forever except cheap things (blinks, floats). Waves, squishes and logo hops only play on hover or tap.
-- Nothing reacts to every mouse movement except the mascots' eyes.
+- Nothing animates forever except cheap things (blinks, floats, the header logo's transform-only wave). Waves, squishes and the other logo hops only play on hover or tap.
 - Sections below the first one use `content-visibility: auto`, so the browser skips drawing them until you scroll near.
 - `play.js` does nothing until someone touches Build your bowl, Heat check or a mascot.
 
