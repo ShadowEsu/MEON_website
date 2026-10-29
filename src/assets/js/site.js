@@ -47,13 +47,18 @@
   /* ---------- Native scrolling (instant, no smoothing library) ---------- */
   function scrollToY(y) { window.scrollTo({ top: y, behavior: reduceMotion ? "auto" : "smooth" }); }
 
-  /* ---------- One scroll loop: header, progress, parallax, scroll-linked rows ---------- */
+  /* ---------- One scroll loop: header, progress, parallax, scroll-linked rows, home scenes ---------- */
   var header = $("[data-header]");
   var progress = $(".scroll-progress span");
   var backTop = $(".back-top");
   var parallax = reduceMotion ? [] : $$("[data-parallax]");
   var hscroll = reduceMotion ? [] : $$("[data-hscroll]");
   var vhero = $(".vhero");
+  /* Home scenes: [data-scene] gets --p, the scroll progress through it (default: while its sticky stage is pinned;
+     "through": from entering the screen to leaving it). [data-stack] cards get --q (how far the card has slid in)
+     and --p (how far the next card covers it); a fully covered card pauses its videos. */
+  var scenes = reduceMotion ? [] : $$("[data-scene]");
+  var stackCards = reduceMotion ? [] : $$("[data-stack] > li");
   var lastY = window.scrollY, ticking = false;
   var navOpen = function () { var n = $("#site-nav"); return n && n.classList.contains("is-open"); };
   function frame() {
@@ -80,6 +85,25 @@
         var span = Math.min(row.scrollWidth - box.clientWidth, box.clientWidth * 0.9);
         row.style.transform = "translate3d(" + (-p * span * parseFloat(row.getAttribute("data-speed") || 1)).toFixed(1) + "px,0,0)";
       });
+    }
+    for (var k = 0; k < scenes.length; k++) {
+      var sc = scenes[k], sr = sc.getBoundingClientRect();
+      if (sr.bottom < -100 || sr.top > vh + 100) continue;
+      var sp = sc.getAttribute("data-scene") === "through" ? (vh - sr.top) / (vh + sr.height) : -sr.top / Math.max(1, sr.height - vh);
+      sc.style.setProperty("--p", clamp(sp, 0, 1).toFixed(4));
+    }
+    for (var m = 0; m < stackCards.length; m++) {
+      var card = stackCards[m], next = stackCards[m + 1], ct = card.getBoundingClientRect().top;
+      if (ct > vh) { if (card._q !== 0) { card._q = 0; card.style.setProperty("--q", 0); } continue; }
+      var cover = next ? clamp(1 - next.getBoundingClientRect().top / vh, 0, 1) : 0;
+      card._q = clamp(1 - ct / vh, 0, 1);
+      card.style.setProperty("--q", card._q.toFixed(4));
+      card.style.setProperty("--p", cover.toFixed(4));
+      var covered = cover > 0.98;
+      if (covered !== !!card._covered) {
+        card._covered = covered;
+        $$("video[data-bg-src]", card).forEach(function (v) { v._covered = covered; if (covered) v.pause(); else if (typeof bgPlay === "function") bgPlay(v); });
+      }
     }
     if (vhero && header) header.classList.toggle("is-over", y < vhero.offsetHeight - header.offsetHeight);
   }
@@ -191,7 +215,7 @@
   try { userPaused = localStorage.getItem("meon-videos") === "paused"; } catch (e) {}
   var bgFits = function (v) { var m = v.getAttribute("data-media"); return !m || window.matchMedia(m).matches; };
   var bgPlay = function (v) {
-    if (reduceMotion || saveData || userPaused || !v._in || !bgFits(v)) return;
+    if (reduceMotion || saveData || userPaused || !v._in || v._covered || !bgFits(v)) return;
     if (!v.getAttribute("src")) { v.muted = true; v.src = v.getAttribute("data-bg-src"); }
     var p = v.play(); if (p && p.catch) p.catch(function () {});
   };

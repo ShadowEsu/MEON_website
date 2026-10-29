@@ -20,7 +20,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 ## Page anatomy
 1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.
 2. Header: white, always visible, with a hairline appearing on scroll. On the home page it floats see-through over the video hero, with white controls, until the hero scrolls away. Logo badge on the left, the nav centred (Home, Noodles mega menu, Countries, Pairings and sides, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
-3. Home (video-first, 29 Oct 2026, same brand): a full-screen video hero (portrait cut on phones, the wide 3-up cut on desktop) with the big square logo, "Your bowl, your rules.", the address and two actions (Browse the noodle wall, Get directions), plus a pause button for every background video. Then the flavour banners, the five booth-shoot bowls ("Straight out of the machine."), the four "Do it yourself" steps as full-screen panels (full-bleed media on phones; on desktop video steps sit in a 9:16 frame beside the words), the noodle wall, Most picked, roulette, countries, heat check, Build your bowl, the @meonnoodles reel strip, reviews and a closing "Find us in Northbridge." band over the street video. No count-up facts and no stats on the home page.
+3. Home (video-first, 29 Oct 2026, same brand): a full-screen video hero, pinned while you scroll (one portrait clip on phones, three portrait clips side by side on desktop), with the big square logo, "Your bowl, your rules.", the address and two actions (Browse the noodle wall, Get directions), plus a pause button for every background video. Then the flavour banners, the five booth-shoot bowls ("Straight out of the machine."), the four "Do it yourself" steps as stacked full-screen video cards (full-bleed on phones; on desktop the clip sits in a 9:16 frame beside the words), the "Bring your crew." video wall, the noodle wall, Most picked, roulette, countries, heat check, Build your bowl, Instagram-style @meonnoodles reel cards, reviews and a closing "Find us in Northbridge." band over the street video. No count-up facts and no stats on the home page.
    Other pages: page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
 4. Content sections.
 5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
@@ -44,7 +44,10 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 
 | Effect | Where |
 | --- | --- |
-| Background videos: muted loops, loaded only near the screen, playing only while on screen; never loaded for reduce motion or Save-Data; one pause button for all of them | Home (hero, steps 1 and 4, closing band, reel strip) |
+| Background videos: muted loops, loaded only near the screen, playing only while on screen (a covered step card pauses); never loaded for reduce motion or Save-Data; one pause button for all of them | Home (hero, step cards, video wall, closing band, reel cards) |
+| Pinned hero: the footage shrinks into a rounded card and the words lift away as you scroll; the three desktop columns drift at different speeds and rise in on load | Home hero (`[data-scene]`, `--p`) |
+| Stacked cards: each step card sticks, the next slides up over it; the covered card sinks back and dims, the arriving clip tilts in | Home steps (`[data-stack]`, `--p`/`--q`) |
+| Video wall: four columns of clips and photos drift at different speeds through the section | Home "Bring your crew." (`[data-scene="through"]`) |
 | Glyphs in the big logo rise in one after another, then take turns to hop (they never disappear) | Home hero logo |
 | Auto-scrolling reel strip (Preston asked for it, 29 Oct 2026): one transform animation, paused on hover, focus, the pause button and off-screen; a still, swipeable row for reduce motion | Home (`#instagram`) |
 | Masked word reveal | Every heading with `data-split` |

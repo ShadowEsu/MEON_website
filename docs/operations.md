@@ -80,20 +80,24 @@ The MEON Card has been taken off the website completely. `/meon-card/` redirects
 
 ## Videos
 
-The home page is built around short, muted background clips cut from MEON's own footage (29 Oct 2026, Preston: full-screen video hero, videos and photos as you scroll, an auto-scrolling Instagram strip near the bottom). The promo and the website tour came off the site the same day. The clips have no sound, no captions and no prices in frame. Some are slowed down, some sped up.
+The home page is built around every clip Preston sent and MEON's own @meonnoodles reels (29 Oct 2026, Preston: full-screen video hero, videos and photos as you scroll, Instagram-style reels near the bottom, "all the videos I showed you", "great animation"). The promo and the website tour came off the site the same day. The clips have no sound and no prices, offers, dates or hours in frame. Some are slowed down, some sped up.
 
 | File in `src/assets/video/` | Where | What it is |
 | --- | --- | --- |
-| `hero-phone.mp4` | Home hero, phones | 17 s portrait montage: the MEON sign, someone pointing at it, the stairs, the noodle wall, walking past the counter |
-| `hero-wide.mp4` | Home hero, desktop | 12 s, three portrait clips side by side (street, sign and walk-in, wall and counter); portrait footage stretched to 16:9 would go soft |
-| `wall-glide.mp4` | Step 1, Pick a packet | The noodle wall, slowed down |
-| `enjoy-friends.mp4` | Step 4, Enjoy your meal | Friends eating, from the @meonnoodles reel DedzCYDhezV (before its captions) |
+| `hero-phone.mp4` | Home hero, phones | Portrait montage: the MEON sign, walking in, the noodle wall, a bowl, friends |
+| `hero-col-a.mp4`, `hero-col-b.mp4`, `hero-col-c.mp4` | Home hero, desktop | Three portrait clips side by side (outside and the sign, inside the shop, people and bowls). They drift at different speeds as the hero scrolls away |
+| `step-pick.mp4`, `step-pairings.mp4`, `step-cook.mp4`, `step-enjoy.mp4` | The four "Do it yourself" cards | Picking a packet, the pairings fridge, the cooking machine, eating |
+| `wall-01.mp4` … `wall-12.mp4` | "Bring your crew." video wall | Short loops from the rest of the footage (store tour, street, entrance, the dancing man, packets, friends); half slowed, half sped up |
 | `street-front.mp4` | Closing "Find us in Northbridge." band | The street and the MEON sign, slowed down |
-| `ig-*.mp4` | Instagram strip | 6-second previews of @meonnoodles reels (trimmed before any price). Each opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
+| `ig-*.mp4` | Instagram cards near the bottom | 8-second previews of @meonnoodles reels. Each card opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
 
-Every clip has a `.webp` poster of the same name. Posters are all that visitors with "reduce motion" or Save-Data get, and what everyone sees until a clip starts. A clip loads only when it nears the screen and plays only while on screen; the hero loads just the cut that fits the screen. The pause button in the hero stops every background video and the strip, and the browser remembers the choice.
+Three @meonnoodles reels are left out because offer or date text is in every frame: the Year 12 posters (DeeCRVIhNv3, DemU3WUhE3S) and Halloween week (De_7IVhhlAg). The site shows no prices or offers.
 
-Sources: Preston's WhatsApp clips of the shop and @meonnoodles' own reels. The collab reel by @little_miss_fussy_eats is a third-party creator's and is not re-hosted. `meon-work/rebuild/make_videos.sh` cuts and encodes everything (H.264, no audio, `+faststart`). File names don't need dates: the build adds a content hash to every asset URL. To change a clip, replace the file, run `npm run build` and redeploy. Sharper originals (not WhatsApp copies) would make the hero look better.
+**Motion.** The hero is pinned while you scroll: the footage shrinks into a rounded card and the words lift away (desktop columns drift at different speeds). The steps are stacked full-screen cards; each one slides up over the last. The video wall's columns drift at different speeds. `site.js` drives it all from one scroll loop that sets `--p`/`--q` on each scene; `site.css` turns those into transforms. With "reduce motion" the hero, cards and wall are plain sections.
+
+Every clip has a `.webp` poster of the same name. Posters are all that visitors with "reduce motion" or Save-Data get, and what everyone sees until a clip starts. A clip loads only when it nears the screen and plays only while on screen (a step card covered by the next one pauses); the hero loads just the cut that fits the screen. The pause button in the hero stops every background video and the reel strip, and the browser remembers the choice.
+
+Sources: Preston's WhatsApp clips of the shop (`meon-work/rebuild/src-video/v1`-`v7`) and @meonnoodles' own reels. The collab reel by @little_miss_fussy_eats is a third-party creator's and is not re-hosted. `meon-work/rebuild/make_videos_v2.sh` cuts and encodes everything (H.264, no audio, `+faststart`); `meon-work/rebuild/clips-v2.json` lists each file's sources, in and out points and speed. File names don't need dates: the build adds a content hash to every asset URL. To change a clip, replace the file, run `npm run build` and redeploy. Sharper originals (not WhatsApp copies) would make the hero look better.
 
 **Own footage only.** Clips on the site come only from footage MEON shot itself. Never re-host collab reels, reposts, or another creator's or guest's video, even when it's on MEON's profile; link to it instead. Before a new clip goes on the site, the owner confirms that everyone recognisable in it (presenter, staff, diners, passers-by) agreed to be on the website, with a parent's OK for anyone who might be under 18. If someone asks to be taken out, cut or replace the clip and redeploy.
 

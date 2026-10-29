@@ -329,21 +329,35 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .mascot-lg { width: min(300px, 70vw); overflow: visible; }
 .mascot-stage { display: grid; place-items: center; }
 
-/* ---------- Home: full-screen video hero ----------
-   The poster paints first; site.js loads only the cut that fits (portrait on phones, the wide 3-up on desktop). */
-.vhero { position: relative; isolation: isolate; display: flex; align-items: flex-end; min-height: max(560px, 100vh); min-height: max(560px, 100svh); color: #fff; background: #1a1412; overflow: hidden; }
-/* The poster <picture> sits under the video wrappers: keep them see-through until a clip plays */
+/* ---------- Home: full-screen video hero, pinned while you scroll ----------
+   The section is taller than the screen; its stage sticks to the top while site.js feeds the scroll progress into --p
+   (0 to 1). Desktop: three portrait clips side by side drift at different speeds; phones: one portrait clip (site.js
+   loads only the cut that fits). As --p grows the footage shrinks into a rounded card and the words lift away.
+   No JS or reduced motion: a plain full-screen hero. */
+.vhero { position: relative; color: #fff; background: var(--ink); }
+.js .vhero { height: 185vh; height: 185svh; }
+.vhero-stage { position: sticky; top: 0; isolation: isolate; display: flex; align-items: flex-end; min-height: max(560px, 100vh); min-height: max(560px, 100svh); overflow: hidden; }
+.vhero-media { position: absolute; inset: 0; z-index: -2; overflow: hidden; background: #1a1412; transform: scale(calc(1 - var(--p, 0) * .12)); transform-origin: 50% 35%; border-radius: calc(var(--p, 0) * 36px); }
 .vhero-media .vbg { background: none; }
-.vhero-media { position: absolute; inset: 0; z-index: -2; }
 .vhero-media picture { position: absolute; inset: 0; }
-.vbg--wide { display: none; }
-@media (min-width: 900px) { .vbg--phone { display: none; } .vbg--wide { display: block; } }
-.vhero::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+.vhero-cols { display: none; }
+@media (min-width: 900px) {
+  .vbg--phone { display: none; }
+  .vhero-cols { position: absolute; inset: -22% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--ink); }
+  .vcol { position: relative; overflow: hidden; transform: translate3d(0, calc(var(--p, 0) * var(--drift) * 1vh), 0); }
+  .vcol--a { --drift: -16; } .vcol--b { --drift: 9; } .vcol--c { --drift: -24; }
+  .js .vcol { animation: vcol-in 1.3s var(--ease) both; }
+  .js .vcol--b { animation-delay: .14s; }
+  .js .vcol--c { animation-delay: .28s; }
+}
+/* The entrance uses `translate`, the scroll drift uses `transform`, so the two never fight */
+@keyframes vcol-in { from { translate: 0 24%; opacity: 0; } }
+.vhero-stage::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(180deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 22%), linear-gradient(0deg, rgba(12,9,8,.86) 0%, rgba(12,9,8,.45) 38%, rgba(12,9,8,0) 62%); }
 @media (min-width: 900px) {
-  .vhero::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%), linear-gradient(90deg, rgba(12,9,8,.78) 0%, rgba(12,9,8,.4) 38%, rgba(12,9,8,0) 62%), linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 40%); }
+  .vhero-stage::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%), linear-gradient(90deg, rgba(12,9,8,.78) 0%, rgba(12,9,8,.4) 38%, rgba(12,9,8,0) 62%), linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 40%); }
 }
-.vhero-inner { padding: calc(var(--header-h) + 32px) 0 clamp(64px, 10vh, 120px); }
+.vhero-inner { padding: calc(var(--header-h) + 32px) 0 clamp(64px, 10vh, 120px); transform: translate3d(0, calc(var(--p, 0) * -16vh), 0); opacity: calc(1 - var(--p, 0) * 1.7); }
 .vhero-logo { display: block; width: clamp(128px, 12vw, 184px); height: auto; aspect-ratio: 1; margin-bottom: clamp(18px, 2.4vw, 30px); border-radius: 3px; box-shadow: 0 24px 60px -24px rgba(0,0,0,.75); }
 .videos-paused .vhero-logo .lw, .videos-paused .vhero-cue i { animation-play-state: paused; }
 .vhero-title { font-size: clamp(3rem, 8.2vw, 7.4rem); line-height: .9; letter-spacing: -.05em; margin: 0 0 18px; max-width: 10ch; text-wrap: balance; text-shadow: 0 2px 40px rgba(0,0,0,.3); }
@@ -427,40 +441,51 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .fresh-tag { font-size: .8rem; padding: 7px 12px; }
 }
 
-/* ---------- Home: how it works, one full-screen panel per step ----------
-   Phones: every step is full-bleed media with the words over it. Desktop: video steps and the portrait photo sit in a
-   tall 9:16 frame beside the words (portrait footage stretched to 16:9 would go soft); the overhead photo stays full-bleed. */
+/* ---------- Home: the four steps as stacked full-screen cards ----------
+   Each card sticks to the top and the next one slides up over it. site.js sets --q (how far this card has arrived,
+   0 to 1) and --p (how far the next card covers it): arriving media settles in, a covered card sinks back and dims.
+   Desktop: the portrait clip sits in a tall rounded frame beside the words; phones: the clip fills a rounded frame at the
+   top and the words sit below it, so the reels' own burned-in captions never run into the headline.
+   No JS or reduced motion: the cards simply follow each other. */
 .story { background: var(--ink); color: #fff; padding-top: clamp(80px, 11vw, 150px); }
 .story-head { margin-bottom: clamp(40px, 6vw, 80px); }
 .story-head .eyebrow { color: #ff5a5f; }
 .story-head h2 { margin: 0 0 18px; }
 .story-head .lead { color: rgba(255,255,255,.74); margin: 0; }
-.story-steps { list-style: none; margin: 0; padding: 0; }
-.panel { position: relative; isolation: isolate; display: grid; min-height: 100vh; min-height: 100svh; overflow: hidden; color: #fff; background: #1a1412; }
-.panel-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
-.panel-media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.panel-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(12,9,8,.88) 0%, rgba(12,9,8,.45) 38%, rgba(12,9,8,0) 66%); }
-.panel-copy { align-self: end; width: min(100% - var(--gutter) * 2, var(--wrap)); margin-inline: auto; padding-bottom: clamp(48px, 9vh, 104px); }
-.panel-copy h3 { font-size: clamp(2.6rem, 6.6vw, 5.8rem); line-height: .9; letter-spacing: -.05em; margin: 16px 0; max-width: 11ch; text-wrap: balance; }
-.panel-copy p { font-size: clamp(1.06rem, 1.45vw, 1.28rem); line-height: 1.5; max-width: 34ch; margin: 0 0 24px; color: rgba(255,255,255,.9); }
-.panel-copy p.panel-tip { font-size: 1rem; padding: 12px 16px; border-left: 3px solid var(--brand); background: rgba(255,255,255,.1); border-radius: 0 8px 8px 0; }
-.panel-num { display: inline-block; padding: 6px 10px; border-radius: 6px; background: var(--brand); color: #fff; font-weight: 700; font-size: .9rem; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
-@media (max-width: 760px) { .panel-copy { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
+.stack { list-style: none; margin: 0; padding: 0; }
+.scard { position: relative; isolation: isolate; display: grid; height: max(560px, 100vh); height: max(560px, 100svh); overflow: hidden; color: #fff; background: #1a1412;
+  transform: scale(calc(1 - var(--p, 0) * .07)); transform-origin: 50% 30%; border-radius: calc(var(--p, 0) * 32px); }
+.js .scard { position: sticky; top: 0; }
+.scard::after { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: #0c0908; opacity: calc(var(--p, 0) * .65); }
+.scard-media { position: relative; overflow: hidden; }
+.scard-copy { opacity: calc(.15 + var(--q, 1) * .85); transform: translate3d(0, calc((1 - var(--q, 1)) * 9vh), 0); }
+.scard-copy h3 { font-size: clamp(2.6rem, 6.6vw, 5.8rem); line-height: .9; letter-spacing: -.05em; margin: 16px 0; max-width: 11ch; text-wrap: balance; }
+.scard-copy p { font-size: clamp(1.06rem, 1.45vw, 1.28rem); line-height: 1.5; max-width: 34ch; margin: 0 0 24px; color: rgba(255,255,255,.9); }
+.scard-copy p.scard-tip { font-size: 1rem; padding: 12px 16px; border-left: 3px solid var(--brand); background: rgba(255,255,255,.1); border-radius: 0 8px 8px 0; }
+.scard-num { display: inline-block; padding: 6px 10px; border-radius: 6px; background: var(--brand); color: #fff; font-weight: 700; font-size: .9rem; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.scard--red { background: var(--brand); }
+.scard--red .scard-num { background: #fff; color: var(--brand); }
+.scard--ink { background: var(--ink); }
+.scard--light { background: var(--soft); color: var(--ink); }
+.scard--light .scard-copy p { color: var(--ink-2); }
+.scard--light .scard-copy p.scard-tip { background: #fff; }
+@media (max-width: 899px) {
+  .scard { grid-template-rows: minmax(0, 1fr) auto; padding: calc(var(--header-h) + 10px) 12px 0; }
+  .scard-media { border-radius: 22px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.6); transform: translate3d(0, calc((1 - var(--q, 1)) * 10vh), 0); }
+  .scard-copy { padding: 16px 8px 26px; }
+  .scard-copy h3 { font-size: clamp(2.1rem, 9.6vw, 3.2rem); margin: 10px 0 8px; }
+  .scard-copy p { font-size: 1rem; margin: 0 0 14px; }
+  .scard-copy p.scard-tip { font-size: .92rem; padding: 9px 12px; }
+}
+@media (max-width: 760px) { .scard-copy { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 900px) {
-  .panel--framed { grid-template-columns: 1fr 1fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: clamp(56px, 8vh, 96px) max(var(--gutter), (100% - var(--wrap)) / 2); }
-  .panel--framed .panel-media { position: relative; inset: auto; z-index: 0; grid-row: 1; grid-column: 2; justify-self: center; height: min(80vh, 840px); aspect-ratio: 9 / 16; border-radius: 24px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.65); }
-  .panel--framed .panel-media::after { display: none; }
-  .panel--framed .panel-copy { grid-row: 1; grid-column: 1; width: auto; margin: 0; padding: 0; align-self: center; }
-  .panel--flip .panel-media { grid-column: 1; }
-  .panel--flip .panel-copy { grid-column: 2; }
-  .panel--red { background: var(--brand); }
-  .panel--red .panel-num { background: #fff; color: var(--brand); }
-  .panel--ink { background: var(--ink); }
-  .panel--light { background: var(--soft); color: var(--ink); }
-  .panel--light .panel-copy p { color: var(--ink-2); }
-  .panel--light .panel-copy p.panel-tip { background: #fff; }
-  .panel--full .panel-media::after { background: linear-gradient(90deg, rgba(12,9,8,.82) 0%, rgba(12,9,8,.35) 42%, rgba(12,9,8,0) 66%); }
-  .panel--full .panel-copy { align-self: center; padding: 0; }
+  .scard { grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: clamp(56px, 8vh, 96px) max(var(--gutter), (100% - var(--wrap)) / 2); }
+  .scard-media { grid-row: 1; grid-column: 2; justify-self: center; height: min(80vh, 840px); aspect-ratio: 9 / 16; border-radius: 28px;
+    box-shadow: 0 50px 90px -40px rgba(0,0,0,.65); transform: translate3d(0, calc((1 - var(--q, 1)) * 16vh), 0) rotate(calc((1 - var(--q, 1)) * -7deg)); }
+  .scard-copy { grid-row: 1; grid-column: 1; width: auto; margin: 0; padding: 0; align-self: center; }
+  .scard:nth-child(even) { grid-template-columns: .9fr 1.1fr; }
+  .scard:nth-child(even) .scard-media { grid-column: 1; transform: translate3d(0, calc((1 - var(--q, 1)) * 16vh), 0) rotate(calc((1 - var(--q, 1)) * 7deg)); }
+  .scard:nth-child(even) .scard-copy { grid-column: 2; }
 }
 
 /* ---------- Noodle cards (no boxes) ---------- */
@@ -816,6 +841,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .js .reveal, [data-split] .w > span, .js .img-reveal img, .js .footer-big .lw { opacity: 1; transform: none; }
   .js .img-reveal::after { transform: scaleY(0); }
   .vhero-logo .lw { animation: none !important; opacity: 1; transform: none; }
+  /* The home scenes become plain sections: no pinned hero, no stacked cards, no drifting columns */
+  .js .vhero { height: auto; }
+  .js .scard { position: relative; }
+  .vwall .vwall-col { transform: none; }
 }
 
 /* ---------- FAQ ---------- */
@@ -897,10 +926,22 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 /* Padding (not gap) between cards so the doubled row loops at exactly -50% */
 .insta-row { display: flex; width: max-content; list-style: none; margin: 0; padding: 10px 0 18px; animation: insta-scroll 64s linear infinite; }
 .insta-row li { flex: none; padding-right: clamp(12px, 1.4vw, 18px); }
-.reel { position: relative; display: block; width: clamp(170px, 18vw, 250px); aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; background: #1a1412; box-shadow: 0 22px 40px -26px rgba(18,16,16,.55); transition: transform .5s var(--ease); }
-.reel:hover, .reel:focus-visible { transform: translateY(-6px) rotate(-1.2deg); }
-.reel-badge { position: absolute; top: 10px; right: 10px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(18,16,16,.55); color: #fff; }
-.reel-badge svg.i { width: 18px; height: 18px; }
+/* Instagram-style cards: account row, the reel, the action row and a two-line caption */
+.reel { position: relative; display: flex; flex-direction: column; width: clamp(230px, 21vw, 300px); border-radius: 22px; overflow: hidden; background: #fff; color: var(--ink); text-decoration: none; box-shadow: 0 26px 46px -30px rgba(18,16,16,.6), 0 0 0 1px rgba(18,16,16,.07); transition: transform .5s var(--ease); }
+.reel:hover, .reel:focus-visible { transform: translateY(-8px) rotate(-1deg); }
+.reel-top { display: flex; align-items: center; gap: 9px; padding: 10px 12px; font-size: .86rem; font-weight: 600; }
+.reel-top > svg.i { width: 19px; height: 19px; margin-left: auto; }
+.reel-av { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--brand); color: #fff; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #f7a23b; }
+.reel-av svg.i { width: 16px; height: 16px; }
+.reel-media { position: relative; display: block; aspect-ratio: 9 / 16; background: #1a1412; }
+.reel-play { position: absolute; right: 10px; bottom: 10px; z-index: 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: rgba(18,16,16,.55); color: #fff; }
+.reel-play svg.i { width: 13px; height: 13px; }
+.reel-bottom { display: grid; gap: 7px; padding: 10px 12px 14px; }
+.reel-acts { display: flex; gap: 14px; }
+.reel-acts svg.i { width: 22px; height: 22px; }
+.reel-cap { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .82rem; line-height: 1.38; color: var(--ink-2); }
+.reel-cap b { color: var(--ink); margin-right: 3px; }
+
 .insta-track:hover .insta-row, .videos-paused .insta-row { animation-play-state: paused; }
 /* Keyboard: stop and rewind, so the focused card is never left scrolled off-screen */
 .insta-track:focus-within { overflow-x: auto; }
@@ -911,6 +952,29 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .insta-row { animation: none; padding-inline: var(--gutter); }
   .insta-row li { scroll-snap-align: start; }
   .insta-row li[aria-hidden] { display: none; }
+}
+
+/* ---------- Home: the video wall. Four columns of shop clips and booth photos drift at different speeds while the
+   section scrolls through (site.js sets --p from 0, entering, to 1, leaving; .5 without JS). Phones show columns 1 and 3. */
+.vwall { --p: .5; position: relative; isolation: isolate; height: 140vh; height: 140svh; min-height: 820px; overflow: hidden; background: var(--ink); color: #fff; }
+.vwall-cols { position: absolute; inset: 0; z-index: -2; display: grid; grid-template-columns: repeat(4, 1fr); align-items: center; gap: 14px; padding-inline: 14px;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 13%, #000 87%, transparent); mask-image: linear-gradient(180deg, transparent, #000 13%, #000 87%, transparent); }
+.vwall-col { display: flex; flex-direction: column; gap: 14px; transform: translate3d(0, calc((var(--p) - .5) * var(--drift) * 1vh), 0); }
+.vwall-col--1 { --drift: -34; } .vwall-col--2 { --drift: 22; } .vwall-col--3 { --drift: -46; } .vwall-col--4 { --drift: 16; }
+.vtile { position: relative; margin: 0; aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; background: #1a1412; }
+.vtile > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vwall::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 46% at 50% 50%, rgba(12,9,8,.82), rgba(12,9,8,.35) 70%, rgba(12,9,8,.15)); }
+.vwall-copy { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; padding: 0 var(--gutter); text-align: center; }
+.vwall-copy .eyebrow { color: #ff5a5f; }
+.vwall-copy h2 { font-size: clamp(3.2rem, 10vw, 9rem); line-height: .88; letter-spacing: -.055em; margin: 0 0 20px; text-shadow: 0 4px 50px rgba(0,0,0,.5); }
+.vwall-copy .lead { color: rgba(255,255,255,.9); max-width: 32ch; margin: 0 0 28px; }
+@media (max-width: 899px) {
+  .vwall { height: 120vh; height: 120svh; min-height: 700px; }
+  .vwall-cols { grid-template-columns: 1fr 1fr; gap: 12px; padding-inline: 12px; }
+  .vwall-col { gap: 12px; }
+  .vwall-col--2, .vwall-col--4 { display: none; }
+  .vwall-col--1 { --drift: -18; } .vwall-col--3 { --drift: 16; }
+  .vtile { border-radius: 14px; }
 }
 
 /* ---------- Home: closing visit band (street video) ---------- */
@@ -1045,7 +1109,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vibe .vibe-yes { background: var(--brand); color: #fff; }
 .vibe .vibe-no { background: transparent; color: rgba(255,255,255,.7); padding: 9px 10px; }
 .vibe button { white-space: nowrap; }
-@media (max-width: 760px) { .vibe { bottom: calc(76px + env(safe-area-inset-bottom)); gap: 8px; padding: 8px; } .vibe p { font-size: .86rem; } .vibe .vibe-eq { display: none; } .vibe button { padding: 8px 12px; font-size: .84rem; } .vibe .vibe-no { padding: 8px 6px; } }
+/* Phones: drop in under the header, clear of the buttons at the bottom of the full-screen cards */
+@media (max-width: 760px) {
+  .vibe { top: calc(var(--header-h) + 10px); bottom: auto; transform: translate(-50%, calc(-100% - var(--header-h) - 20px)); gap: 8px; padding: 8px; }
+  .vibe p { font-size: .86rem; } .vibe .vibe-eq { display: none; } .vibe button { padding: 8px 12px; font-size: .84rem; } .vibe .vibe-no { padding: 8px 6px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .bb-bowl, .heat-meo { animation: none !important; transition: none !important; }

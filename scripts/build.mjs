@@ -446,12 +446,29 @@ const shootImg = (r, name, { sizes = "100vw", cls = "", eager = false, alt } = {
   return `<img${cls ? ` class="${cls}"` : ""} src="${r(asset(`img/shoot/${name}-1600.webp`))}" srcset="${[800, 1600, 2400].map((x) => `${r(asset(`img/shoot/${name}-${x}.webp`))} ${x}w`).join(", ")}" sizes="${sizes}" width="${w}" height="${h}" alt="${esc(alt ?? s.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 };
 
-// @meonnoodles reels for the Instagram strip: 6-second muted previews (the reels' own captions, trimmed before any price).
-// Clips that came from Preston's WhatsApp copies have no known post link, so they open the profile.
+// @meonnoodles reels for the Instagram strip: 8-second muted previews (the reels' own captions, trimmed before any price),
+// shown as Instagram-style cards. Clips cut from Preston's WhatsApp videos have no post link, so they open the profile.
 const REELS = [
-  ["DewSjLLBLqQ", "reel/DewSjLLBLqQ/"], ["DefupZzh1I7", "reel/DefupZzh1I7/"], ["store-tour", ""], ["DedzCYDhezV", "reel/DedzCYDhezV/"], ["DetKN4Bh0FW", "reel/DetKN4Bh0FW/"],
-  ["sign", ""], ["DejHoDVhePt", "reel/DejHoDVhePt/"], ["DeOXYn5hSUT", "reel/DeOXYn5hSUT/"], ["walk-in", ""],
-].map(([file, post]) => ({ file: `ig-${file}`, url: post ? `${site.instagram.replace(/\/$/, "")}/${post}` : site.instagram }));
+  ["DewSjLLBLqQ", "reel/DewSjLLBLqQ/", "Your bowl, your rules. Noodles from around the world, endless combinations."],
+  ["DefupZzh1I7", "reel/DefupZzh1I7/", "Baddest bosses ain't in LA. Come have some noodles at MEON, Northbridge."],
+  ["store-tour", "", "Store tour: the noodle wall, the cooking stations and the tables."],
+  ["DedzCYDhezV", "reel/DedzCYDhezV/", "Come to MEON at Shop 8, 45 Francis Street, Northbridge."],
+  ["DetKN4Bh0FW", "reel/DetKN4Bh0FW/", "How many of these have you tried?"],
+  ["sign", "", "Look for the red sign on Francis Street."],
+  ["DejHoDVhePt", "reel/DejHoDVhePt/", "Noodle night with the crew."],
+  ["DeOXYn5hSUT", "reel/DeOXYn5hSUT/", "New cook-it-yourself noodles in Perth."],
+  ["walk-in", "", "Walk in, pick a packet, cook it your way."],
+].map(([file, post, cap]) => ({ file: `ig-${file}`, cap, url: post ? `${site.instagram.replace(/\/$/, "")}/${post}` : site.instagram }));
+
+// The video wall: shop clips that aren't in the hero or the steps, plus two booth-shoot photos. On desktop the four
+// columns drift at different speeds as you scroll; phones show the first two columns.
+const VWALL = [
+  ["wall-01", "wall-02", "photo:shin-black-top", "wall-03"],
+  ["wall-04", "wall-05", "wall-06"],
+  ["wall-07", "photo:shin-black-lift", "wall-08", "wall-09"],
+  ["wall-10", "wall-11", "wall-12"],
+];
+const vwallTile = (r, t) => `<figure class="vtile">${t.startsWith("photo:") ? shootImg(r, t.slice(6), { sizes: "(min-width: 900px) 22vw, 46vw", alt: "" }) : bgVideo(r, t)}</figure>`;
 
 const TICKER = ["Buldak", "Tom yum", "Mi goreng", "Tonkotsu", "Jjajang", "Laksa", "Shin Black", "Pancit canton", "Kimchi", "Salted egg", "Hokkaido miso", "Chapagetti"];
 const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="section-head">
@@ -475,8 +492,10 @@ const half = Math.ceil(withPhotos.length / 2);
 const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-1" title="${esc(`${n.brand} ${n.name}`)}"><img src="${r(n.thumb)}" alt="" width="200" height="200" loading="lazy" decoding="async"></a>`).join("");
 
 // ---------- Home ----------
-// Video-first (Preston, 29 Oct 2026): a full-screen hero from MEON's own footage, the booth-shoot bowls, the four steps over
-// video and photos, then the Instagram strip. Same brand: the red, the mixed logo, Bricolage Grotesque.
+// Video-first (Preston, 29 Oct 2026): every clip he sent. A pinned full-screen hero (three drifting columns on desktop),
+// the booth-shoot bowls, the four steps as stacked full-screen video cards, a drifting video wall, then Instagram-style
+// reel cards. Scroll choreography lives in site.js (one loop, --p/--q) and site.css. Same brand: the red, the mixed logo,
+// Bricolage Grotesque.
 const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "tonkotsu-top"];
 // Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
@@ -486,23 +505,25 @@ addPage("", layout({
   overlay: true,
   description: `MEON is a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}: ${COUNT} noodles ${REGION}, a pairings and sides bar and your own cooking machine. Dine in or take it away.`,
   body: (r) => `
-<section class="vhero" aria-labelledby="vhero-h">
-  <div class="vhero-media">
-    <picture><source media="(min-width: 900px)" srcset="${r(asset("video/hero-wide.webp"))}"><img class="vbg-poster" src="${r(asset("video/hero-phone.webp"))}" alt="" fetchpriority="high" decoding="async"></picture>
-    ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", poster: false })}
-    ${bgVideo(r, "hero-wide", { cls: "vbg--wide", media: "(min-width: 900px)", poster: false })}
-  </div>
-  <div class="wrap vhero-inner">
-    ${logoMark("vhero-logo", "MEON")}
-    <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
-    <p class="vhero-sub">Cook-it-yourself instant noodles from across Asia, at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</p>
-    <div class="actions">
-      <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
-      <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
+<section class="vhero" aria-labelledby="vhero-h" data-scene>
+  <div class="vhero-stage">
+    <div class="vhero-media">
+      <picture><source media="(min-width: 900px)" srcset="${r(asset("video/hero-col-b.webp"))}"><img class="vbg-poster" src="${r(asset("video/hero-phone.webp"))}" alt="" fetchpriority="high" decoding="async"></picture>
+      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", poster: false })}
+      <div class="vhero-cols">${["a", "b", "c"].map((k) => `<div class="vcol vcol--${k}">${bgVideo(r, `hero-col-${k}`, { media: "(min-width: 900px)" })}</div>`).join("")}</div>
     </div>
+    <div class="wrap vhero-inner">
+      ${logoMark("vhero-logo", "MEON")}
+      <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
+      <p class="vhero-sub">Cook-it-yourself instant noodles from across Asia, at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</p>
+      <div class="actions">
+        <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
+        <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
+      </div>
+    </div>
+    <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
+    <a class="vhero-cue" href="#fresh"><span class="visually-hidden">See the bowls</span><i aria-hidden="true"></i></a>
   </div>
-  <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
-  <a class="vhero-cue" href="#fresh"><span class="visually-hidden">See the bowls</span><i aria-hidden="true"></i></a>
 </section>
 
 <div class="ticker" data-hscroll aria-hidden="true">
@@ -531,24 +552,34 @@ addPage("", layout({
     <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
     <p class="lead">You choose, you cook, and the crew is there if you need a hand.</p>
   </div>
-  <ol class="story-steps">
-    <li class="panel panel--framed panel--red">
-      <div class="panel-media">${bgVideo(r, "wall-glide")}</div>
-      <div class="panel-copy reveal"><span class="panel-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
+  <ol class="stack" data-stack>
+    <li class="scard scard--red">
+      <div class="scard-media">${bgVideo(r, "step-pick")}</div>
+      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
     </li>
-    <li class="panel panel--full">
-      <div class="panel-media">${shootImg(r, "shin-black-top", { sizes: "100vw" })}</div>
-      <div class="panel-copy reveal"><span class="panel-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--white" href="${r("pairings-and-sides/")}">See the pairings and sides ${icon.arrow}</a></div>
+    <li class="scard scard--ink">
+      <div class="scard-media">${bgVideo(r, "step-pairings")}</div>
+      <div class="scard-copy"><span class="scard-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--white" href="${r("pairings-and-sides/")}">See the pairings and sides ${icon.arrow}</a></div>
     </li>
-    <li class="panel panel--framed panel--light panel--flip">
-      <div class="panel-media">${shootImg(r, "shin-black-lift", { sizes: "(min-width: 900px) 480px, 100vw" })}</div>
-      <div class="panel-copy reveal"><span class="panel-num">03</span><h3>Cook it your way</h3><p>Press 1, then 2 on the machine to start cooking.</p><p class="panel-tip">Egg or cheese? Add it on top of the noodles in the last 30 seconds.</p></div>
+    <li class="scard scard--light">
+      <div class="scard-media">${bgVideo(r, "step-cook")}</div>
+      <div class="scard-copy"><span class="scard-num">03</span><h3>Cook it your way</h3><p>Press 1, then 2 on the machine to start cooking.</p><p class="scard-tip">Egg or cheese? Add it on top of the noodles in the last 30 seconds.</p></div>
     </li>
-    <li class="panel panel--framed panel--ink">
-      <div class="panel-media">${bgVideo(r, "enjoy-friends")}</div>
-      <div class="panel-copy reveal"><span class="panel-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away. Slurping is encouraged.</p></div>
+    <li class="scard scard--red">
+      <div class="scard-media">${bgVideo(r, "step-enjoy")}</div>
+      <div class="scard-copy"><span class="scard-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away. Slurping is encouraged.</p></div>
     </li>
   </ol>
+</section>
+
+<section class="vwall" aria-labelledby="vwall-h" data-scene="through">
+  <div class="vwall-cols" aria-hidden="true">${VWALL.map((col, i) => `<div class="vwall-col vwall-col--${i + 1}">${col.map((t) => vwallTile(r, t)).join("")}</div>`).join("")}</div>
+  <div class="vwall-copy">
+    <p class="eyebrow">MEON time</p>
+    <h2 id="vwall-h" data-split>Bring your crew.</h2>
+    <p class="lead">A wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
+    <a class="btn btn--white btn--lg" href="${r("visit/")}">Plan your visit ${icon.arrow}</a>
+  </div>
 </section>
 
 <section class="wall-sec" aria-label="On the noodle wall">
@@ -654,7 +685,11 @@ addPage("", layout({
   <div class="insta-track">
     <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
       const copy = i >= REELS.length;
-      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this MEON reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>${bgVideo(r, v.file)}<span class="reel-badge" aria-hidden="true">${icon.insta}</span></a></li>`;
+      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this MEON reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
+        <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
+        <span class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></span>
+        <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
+      </a></li>`;
     }).join("")}</ul>
   </div>
 </section>
