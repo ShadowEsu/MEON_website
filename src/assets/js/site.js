@@ -210,7 +210,10 @@
     if (vToggle) { vToggle.setAttribute("aria-pressed", String(on)); vToggle.setAttribute("aria-label", on ? "Play the background videos" : "Pause the background videos"); }
     bgVids.forEach(function (v) { if (on) v.pause(); else bgPlay(v); });
   };
-  if (reduceMotion || saveData) { if (vToggle) vToggle.hidden = true; }
+  if (reduceMotion || saveData) {
+    if (vToggle) vToggle.hidden = true;
+    if (saveData) document.documentElement.classList.add("videos-paused"); // the reel strip stays still too
+  }
   else {
     if (userPaused) setVideosPaused(true);
     if (vToggle) vToggle.addEventListener("click", function () { setVideosPaused(!userPaused); });

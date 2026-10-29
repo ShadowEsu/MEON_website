@@ -421,7 +421,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
 </section>`;
 }
 
-// Numbers count up; text values (like "Dine in") show as written.
+// Numbers count up (country pages).
 const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd>${typeof n === "number" ? `<span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span>` : esc(n)}</dd></div>`).join("")}</dl>`;
 
 // Background clips (src/assets/video), cut from MEON's own footage by meon-work/rebuild/make_videos.sh (29 Oct 2026):
@@ -478,6 +478,8 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 // Video-first (Preston, 29 Oct 2026): a full-screen hero from MEON's own footage, the booth-shoot bowls, the four steps over
 // video and photos, then the Instagram strip. Same brand: the red, the mixed logo, Bricolage Grotesque.
 const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "tonkotsu-top"];
+// Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
+const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
 addPage("", layout({
   urlPath: "",
   active: "",
@@ -517,7 +519,7 @@ addPage("", layout({
     <div class="fresh-grid">
       ${FRESH.map((name, i) => {
         const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: i === 0 ? "(min-width: 900px) 34vw, 100vw" : "(min-width: 900px) 24vw, 50vw" })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
+        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
       }).join("")}
     </div>
   </div>
@@ -649,7 +651,7 @@ addPage("", layout({
       ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
     </div>
   </div>
-  <div class="insta-track" data-insta>
+  <div class="insta-track">
     <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
       const copy = i >= REELS.length;
       return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this MEON reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>${bgVideo(r, v.file)}<span class="reel-badge" aria-hidden="true">${icon.insta}</span></a></li>`;
@@ -1091,7 +1093,7 @@ addPage("qr-generator/", layout({
 <div class="no-print">${pageHero(r, { crumbs: [["QR generator"]], eyebrow: "Staff · runs in your browser", title: "QR code generator.", lead: "Make a branded QR code for any noodle, page, deal or link. Download a PNG for print or an SVG for signage.", seed: 9 })}</div>
 <section class="section section--tight"><div class="wrap">
   <div class="qrgen" data-qrgen data-site="${esc(SITE_URL)}" data-logo="${r("assets/img/logo-192.png")}">
-    <form class="qrgen-form panel">
+    <form class="qrgen-form">
       <div class="field"><label for="qg-preset">Start from</label>
         <select id="qg-preset">
           <option value="">Custom link or text</option>

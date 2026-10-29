@@ -139,13 +139,13 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
    Browsers without :has() simply keep the solid header. */
 .has-vhero .site-header { position: fixed; left: 0; right: 0; top: 0; }
 .site-header--over { transition: background-color .4s var(--ease), border-color .3s; }
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega.is-open)) { background: transparent; border-color: transparent; }
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega.is-open)) :is(.search-btn, .sound-btn, .nav-toggle) { background: rgba(18,16,16,.38); border-color: rgba(255,255,255,.45); color: #fff; }
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega.is-open)) .nav-toggle span,
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega.is-open)) .nav-toggle span::before,
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega.is-open)) .nav-toggle span::after { background: #fff; }
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) { background: transparent; border-color: transparent; }
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.search-btn, .sound-btn, .nav-toggle) { background: rgba(18,16,16,.38); border-color: rgba(255,255,255,.45); color: #fff; }
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span,
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span::before,
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span::after { background: #fff; }
 @media (min-width: 1025px) {
-  .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega.is-open)) :is(.nav > a, .nav-item > a, .mega-toggle) { color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.35); }
+  .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.nav > a, .nav-item > a, .mega-toggle) { color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.35); }
 }
 .bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; height: var(--header-h); }
 .bar > .logo { justify-self: start; grid-column: 1; }
@@ -288,7 +288,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .tabbar { display: none; }
 @media (max-width: 760px) {
   .tabbar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
     background: rgba(255,255,255,.97); border-top: 1px solid var(--line);
   }
   .tabbar a, .tabbar button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; text-decoration: none; font-size: .68rem; font-weight: 500; color: var(--muted); cursor: pointer; }
@@ -331,7 +331,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 
 /* ---------- Home: full-screen video hero ----------
    The poster paints first; site.js loads only the cut that fits (portrait on phones, the wide 3-up on desktop). */
-.vhero { position: relative; isolation: isolate; display: flex; align-items: flex-end; min-height: 560px; height: 100vh; height: 100svh; color: #fff; background: #1a1412; overflow: hidden; }
+.vhero { position: relative; isolation: isolate; display: flex; align-items: flex-end; min-height: max(560px, 100vh); min-height: max(560px, 100svh); color: #fff; background: #1a1412; overflow: hidden; }
+/* The poster <picture> sits under the video wrappers: keep them see-through until a clip plays */
+.vhero-media .vbg { background: none; }
 .vhero-media { position: absolute; inset: 0; z-index: -2; }
 .vhero-media picture { position: absolute; inset: 0; }
 .vbg--wide { display: none; }
@@ -342,7 +344,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .vhero::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%), linear-gradient(90deg, rgba(12,9,8,.78) 0%, rgba(12,9,8,.4) 38%, rgba(12,9,8,0) 62%), linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 40%); }
 }
 .vhero-inner { padding: calc(var(--header-h) + 32px) 0 clamp(64px, 10vh, 120px); }
-.vhero-logo { display: block; width: clamp(104px, 12vw, 180px); height: auto; aspect-ratio: 1; margin-bottom: clamp(18px, 2.4vw, 30px); border-radius: 3px; box-shadow: 0 24px 60px -24px rgba(0,0,0,.75); }
+.vhero-logo { display: block; width: clamp(128px, 12vw, 184px); height: auto; aspect-ratio: 1; margin-bottom: clamp(18px, 2.4vw, 30px); border-radius: 3px; box-shadow: 0 24px 60px -24px rgba(0,0,0,.75); }
+.videos-paused .vhero-logo .lw, .videos-paused .vhero-cue i { animation-play-state: paused; }
 .vhero-title { font-size: clamp(3rem, 8.2vw, 7.4rem); line-height: .9; letter-spacing: -.05em; margin: 0 0 18px; max-width: 10ch; text-wrap: balance; text-shadow: 0 2px 40px rgba(0,0,0,.3); }
 .vhero-sub { font-size: clamp(1.05rem, 1.5vw, 1.3rem); line-height: 1.45; max-width: 34ch; margin: 0 0 28px; color: rgba(255,255,255,.92); }
 /* The big logo: letters rise in, then the four glyphs under "meon" (み อี 哦 ㄴ) arrive one after another and keep
@@ -356,6 +359,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .btn--glass:hover { --bg: #fff; --fg: var(--ink); --bd: #fff; }
 .vpause { position: absolute; z-index: 2; right: var(--gutter); bottom: clamp(20px, 4vh, 36px); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); background: rgba(18,16,16,.4); color: #fff; cursor: pointer; transition: background-color .25s; }
 .vpause:hover { background: rgba(18,16,16,.55); }
+.vpause[hidden] { display: none; }
 .vpause span { width: 12px; height: 14px; border-inline: 4px solid currentColor; }
 .videos-paused .vpause span { width: 0; height: 0; border-style: solid; border-width: 7px 0 7px 12px; border-color: transparent transparent transparent currentColor; margin-left: 3px; }
 .vhero-cue { position: absolute; z-index: 2; left: 50%; bottom: clamp(18px, 3.5vh, 32px); width: 26px; height: 42px; margin-left: -13px; border: 2px solid rgba(255,255,255,.7); border-radius: 14px; }
@@ -446,7 +450,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .panel--framed { grid-template-columns: 1fr 1fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: clamp(56px, 8vh, 96px) max(var(--gutter), (100% - var(--wrap)) / 2); }
   .panel--framed .panel-media { position: relative; inset: auto; z-index: 0; grid-row: 1; grid-column: 2; justify-self: center; height: min(80vh, 840px); aspect-ratio: 9 / 16; border-radius: 24px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.65); }
   .panel--framed .panel-media::after { display: none; }
-  .panel--framed .panel-copy { grid-row: 1; grid-column: 1; width: auto; margin: 0; padding: 0; }
+  .panel--framed .panel-copy { grid-row: 1; grid-column: 1; width: auto; margin: 0; padding: 0; align-self: center; }
   .panel--flip .panel-media { grid-column: 1; }
   .panel--flip .panel-copy { grid-column: 2; }
   .panel--red { background: var(--brand); }
@@ -750,7 +754,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .chip { display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; font-size: .78rem; font-weight: 500; text-decoration: none; }
 .chip:hover { border-color: var(--ink); }
 .qrgen { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 64px); align-items: start; }
-.panel { padding: 0; }
+.qrgen-form { padding: 0; }
 .field { display: grid; gap: 6px; margin-bottom: 18px; }
 .field label { font-size: .86rem; font-weight: 600; }
 .field input[type="text"], .field select { width: 100%; }
@@ -811,7 +815,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; transition-delay: 0s !important; }
   .js .reveal, [data-split] .w > span, .js .img-reveal img, .js .footer-big .lw { opacity: 1; transform: none; }
   .js .img-reveal::after { transform: scaleY(0); }
-  .vhero-logo .lw { opacity: 1; transform: none; }
+  .vhero-logo .lw { animation: none !important; opacity: 1; transform: none; }
 }
 
 /* ---------- FAQ ---------- */
@@ -897,7 +901,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .reel:hover, .reel:focus-visible { transform: translateY(-6px) rotate(-1.2deg); }
 .reel-badge { position: absolute; top: 10px; right: 10px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(18,16,16,.55); color: #fff; }
 .reel-badge svg.i { width: 18px; height: 18px; }
-.insta-track:hover .insta-row, .insta-track:focus-within .insta-row, .videos-paused .insta-row { animation-play-state: paused; }
+.insta-track:hover .insta-row, .videos-paused .insta-row { animation-play-state: paused; }
+/* Keyboard: stop and rewind, so the focused card is never left scrolled off-screen */
+.insta-track:focus-within { overflow-x: auto; }
+.insta-track:focus-within .insta-row { animation: none; }
 @keyframes insta-scroll { to { transform: translate3d(-50%, 0, 0); } }
 @media (prefers-reduced-motion: reduce) {
   .insta-track { overflow-x: auto; -webkit-mask-image: none; mask-image: none; scroll-snap-type: x mandatory; }
@@ -917,10 +924,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .visit-band .lead { color: rgba(255,255,255,.9); margin: 0 0 28px; max-width: 40ch; }
 @media (max-width: 760px) { .visit-band-inner { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 900px) {
-  .visit-band-media { inset: auto; top: 50%; right: max(var(--gutter), (100% - var(--wrap)) / 2); z-index: 0; height: min(80vh, 840px); aspect-ratio: 9 / 16; translate: 0 -50%; border-radius: 24px; overflow: hidden; box-shadow: 0 50px 90px -40px rgba(60,0,4,.6); }
+  .visit-band-media { inset: auto; top: 50%; right: max(var(--gutter), (100% - var(--wrap)) / 2); z-index: 0; height: min(80vh, 840px, 70vw); aspect-ratio: 9 / 16; translate: 0 -50%; border-radius: 24px; overflow: hidden; box-shadow: 0 50px 90px -40px rgba(60,0,4,.6); }
   .visit-band-media::after { display: none; }
   .visit-band-inner { align-items: center; padding-block: clamp(80px, 10vh, 120px); }
-  .visit-band-copy { max-width: 50%; }
+  .visit-band-copy { max-width: 46%; }
 }
 
 .rv-google { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 18px 0 6px; }

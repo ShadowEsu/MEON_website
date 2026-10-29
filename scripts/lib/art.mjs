@@ -81,8 +81,8 @@ export function spiceMeter(level, r, { large = false, max = 5 } = {}) {
    Each letter and glyph is a .lw group (with --i) so CSS can move it. */
 const logoParts = () => [...LOGO.word, ...LOGO.glyphs].map((d, i) => `<g class="lw" style="--i:${i}"><path d="${d}"/></g>`).join("");
 
-// The red square logo with its white frame.
-export function logoMark(cls = "logo-mark", label = "") {
+// The red square logo with its white frame (home hero, About). Small sizes use logoBadge so the glyphs stay readable.
+export function logoMark(cls, label = "") {
   const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
   const { outer, inner } = LOGO.frame, sw = inner[0] - outer[0], at = (outer[0] + inner[0]) / 2, S = LOGO.size;
   return `<svg class="${cls}" viewBox="0 0 ${S} ${S}" ${a11y} focusable="false"><rect width="${S}" height="${S}" fill="#ec1b25"/><rect x="${at}" y="${at}" width="${S - 2 * at}" height="${S - 2 * at}" rx="6" fill="none" stroke="#fff" stroke-width="${sw}"/><g fill="#fff" fill-rule="evenodd">${logoParts()}</g></svg>`;

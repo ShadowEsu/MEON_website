@@ -45,10 +45,10 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 | Catalogue weights, catalogue-only noodles, drinks (no prices) | `data/catalogue.json` (from the Square catalogue export; see `docs/operations.md`) |
 | Noodle photos | `src/assets/img/noodles/<slug>.webp` (800×800) + `src/assets/img/noodles/sm/<slug>.webp` (400×400), mapped in `data/images.json` |
 | Countries (intro copy, flag, colour) | `data/countries.json` |
-| Pairings & sides (groups: Meat and seafood, Vegetables and more, Egg and cheese, Sides) | `data/toppings.json` |
+| Pairings and sides (groups: Meat and seafood, Vegetables and more, Egg and cheese, Sides) | `data/toppings.json` |
 | Cook time (230 s, shown as 3:50) | `COOK_SECONDS` and `COOK_TIME` in `scripts/lib/copy.mjs` |
 | Spice ladder copy (0 to 5, against Shin Ramyun = 3) | `SPICE_LADDER` in `scripts/build.mjs` |
-| Logo | traced from the official artwork by `python3 scripts/trace_logo.py` into `scripts/lib/logo-mixed.json`; drawn by `logoMark()` and `logoLockup()` in `scripts/lib/art.mjs` |
+| Logo | traced from the official artwork by `python3 scripts/trace_logo.py` into `scripts/lib/logo-mixed.json`; drawn by `logoBadge()` (header), `logoMark()` (square) and `logoLockup()` (footer) in `scripts/lib/art.mjs` |
 | Page copy & layout | `scripts/build.mjs`; flavour descriptions and cook steps in `scripts/lib/copy.mjs`; illustrations in `scripts/lib/art.mjs` |
 | Styles / behaviour | `src/assets/css/site.css`, `src/assets/js/site.js` |
 
@@ -57,7 +57,7 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 - `data/source/Meon_Website_format2.md` — export of the Drive doc *Meon_Website_format2.docx* (names, countries, diet, fun notes, and spice for noodles new to the site). Source of truth.
 - `data/source/meon_wix_cms_fixed_final.csv` — Wix CMS export (fills missing soup/dry and weights).
 - Spice: every noodle is rated 0 to 5 against Shin Ramyun = 3 (Indomie Mi Goreng = 1, Mama Creamy Tom Yum = 2), recalibrated on 28 Oct 2026. Re-running `scripts/parse_library.py` keeps the spice already in `data/noodles.json` and takes the doc's spice only for noodles new to the site.
-- `data/catalogue.json` — items from MEON's Square catalogue export (16 Oct 2026), with no prices. It adds the till's packet weight to 14 noodles where it differs, 27 noodles that are in the till but not yet in the Drive doc (`extraNoodles`), and the drinks on the Pairings & sides page. The till's sides live in `data/toppings.json`. SKUs, stock counts and barcodes are never copied in.
+- `data/catalogue.json` — items from MEON's Square catalogue export (16 Oct 2026), with no prices. It adds the till's packet weight to 14 noodles where it differs, 27 noodles that are in the till but not yet in the Drive doc (`extraNoodles`), and the drinks on the Pairings and sides page. The till's sides live in `data/toppings.json`. SKUs, stock counts and barcodes are never copied in.
 - Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Pairing and side photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet.
 
 ## Dev helpers

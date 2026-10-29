@@ -26,7 +26,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
 6. Red closing band (`ctaBand()`) with big type and three mascots. The home page closes with its own video band instead.
 7. Ink footer with the giant red logo lockup, its letters and glyphs rising in one by one.
-8. Phones: a bottom tab bar (Home, Noodles, Search, Countries, Visit).
+8. Phones: a bottom tab bar (Noodles, Search, Countries, Visit).
 
 ## Noodle page (shelf landing)
 The page is built for someone standing at the shelf with their phone. The order is:
@@ -82,7 +82,7 @@ These were the main causes of lag, and some are common "AI website" tells.
 
 ## Sound
 `music.js` plays **MEON FM** (`assets/audio/meon-fm.mp3`), an original 103-second seamless loop in the same style as the promo videos: electric piano, marimba melody, bass and soft drums. If the file can't load it falls back to a lo-fi loop generated live with the Web Audio API. No licensing issues.
-- On the first visit to the home page a small "Turn the vibes on?" prompt offers it (browsers don't allow sound before a tap). The answer is remembered.
+- On the first visit to the home page a small "Turn the vibes on?" prompt offers it once the video hero has scrolled away, so it never covers the hero's buttons (browsers don't allow sound before a tap). The answer is remembered.
 - The **Sound** button starts it, and the choice is remembered. Browsers block autoplay, so a returning visitor's music resumes on their first tap.
 - While music plays, mascots blip when tapped and the roulette chimes.
 

@@ -93,19 +93,29 @@
     update(+input.value, false);
   }
 
-  /* ---------- Sound prompt: offer the soundtrack on the first visit to the home page ---------- */
+  /* ---------- Sound prompt: offer the soundtrack on the first visit to the home page ----------
+     It waits until the video hero has scrolled away, so it never covers the hero's buttons. */
   var soundBtn = $("[data-sound]");
-  if (soundBtn && $(".vhero") && store.get("meon-sound") === null) {
-    var vibe = document.createElement("div");
-    vibe.className = "vibe";
-    vibe.setAttribute("role", "dialog");
-    vibe.setAttribute("aria-label", "Turn on the MEON soundtrack");
-    vibe.innerHTML = '<span class="vibe-eq" aria-hidden="true"><i></i><i></i><i></i></span><p>Turn the vibes on?</p><button class="vibe-yes" type="button">Sound on</button><button class="vibe-no" type="button">Not now</button>';
-    document.body.appendChild(vibe);
-    var close = function () { vibe.classList.remove("is-on"); setTimeout(function () { vibe.remove(); }, 800); };
-    $(".vibe-yes", vibe).addEventListener("click", function () { soundBtn.click(); close(); });
-    $(".vibe-no", vibe).addEventListener("click", function () { store.set("meon-sound", "off"); close(); });
-    setTimeout(function () { vibe.classList.add("is-on"); }, 1800);
-    setTimeout(function () { if (document.body.contains(vibe)) close(); }, 16000);
+  var vhero = $(".vhero");
+  if (soundBtn && vhero && store.get("meon-sound") === null) {
+    var offerSound = function () {
+      var vibe = document.createElement("div");
+      vibe.className = "vibe";
+      vibe.setAttribute("role", "dialog");
+      vibe.setAttribute("aria-label", "Turn on the MEON soundtrack");
+      vibe.innerHTML = '<span class="vibe-eq" aria-hidden="true"><i></i><i></i><i></i></span><p>Turn the vibes on?</p><button class="vibe-yes" type="button">Sound on</button><button class="vibe-no" type="button">Not now</button>';
+      document.body.appendChild(vibe);
+      var close = function () { vibe.classList.remove("is-on"); setTimeout(function () { vibe.remove(); }, 800); };
+      $(".vibe-yes", vibe).addEventListener("click", function () { soundBtn.click(); close(); });
+      $(".vibe-no", vibe).addEventListener("click", function () { store.set("meon-sound", "off"); close(); });
+      setTimeout(function () { vibe.classList.add("is-on"); }, 600);
+      setTimeout(function () { if (document.body.contains(vibe)) close(); }, 14000);
+    };
+    var afterHero = function () {
+      if (window.scrollY < vhero.offsetHeight * 0.8) return;
+      window.removeEventListener("scroll", afterHero);
+      offerSound();
+    };
+    window.addEventListener("scroll", afterHero, { passive: true });
   }
 })();
