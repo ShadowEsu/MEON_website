@@ -429,7 +429,14 @@ const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffi
 // that is all reduced-motion and Save-Data visitors get. The video file loads only when it nears the screen (site.js).
 // The promo and website tour came down on 29 Oct 2026 (Preston: "get rid of it for now").
 const asset = (p) => fingerprint(`assets/${p}`);
-const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false } = {}) => `<div class="vbg${cls ? " " + cls : ""}">${poster ? `<img class="vbg-poster" src="${r(asset(`video/${name}.webp`))}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : ""}<video class="vbg-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" data-bg-src="${r(asset(`video/${name}.mp4`))}"${media ? ` data-media="${media}"` : ""}></video></div>`;
+// A 1x1 transparent GIF: an eager poster's <picture> serves it outside the video's own `media`, so a phone never
+// downloads the desktop posters (or the reverse) just because they sit in a hidden box.
+const BLANK_GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+const bgPoster = (r, name, media, eager) => {
+  const img = `<img class="vbg-poster" src="${r(asset(`video/${name}.webp`))}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+  return eager && media ? `<picture><source media="not all and ${media}" srcset="${BLANK_GIF}">${img}</picture>` : img;
+};
+const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false } = {}) => `<div class="vbg${cls ? " " + cls : ""}">${poster ? bgPoster(r, name, media, eager) : ""}<video class="vbg-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" data-bg-src="${r(asset(`video/${name}.mp4`))}"${media ? ` data-media="${media}"` : ""}></video></div>`;
 
 // Photos from MEON's booth shoot (src/assets/img/shoot, made by meon-work/rebuild/make_photos.py): 800/1600/2400 px wide.
 const SHOOT = {
@@ -461,7 +468,7 @@ const REELS = [
 ].map(([file, post, cap]) => ({ file: `ig-${file}`, cap, url: post ? `${site.instagram.replace(/\/$/, "")}/${post}` : site.instagram }));
 
 // The video wall: shop clips that aren't in the hero or the steps, plus two booth-shoot photos. On desktop the four
-// columns drift at different speeds as you scroll; phones show the first two columns.
+// columns drift at different speeds as you scroll; phones show columns 1 and 3.
 const VWALL = [
   ["wall-01", "wall-02", "photo:shin-black-top", "wall-03"],
   ["wall-04", "wall-05", "wall-06"],
@@ -508,9 +515,8 @@ addPage("", layout({
 <section class="vhero" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
     <div class="vhero-media">
-      <picture><source media="(min-width: 900px)" srcset="${r(asset("video/hero-col-b.webp"))}"><img class="vbg-poster" src="${r(asset("video/hero-phone.webp"))}" alt="" fetchpriority="high" decoding="async"></picture>
-      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", poster: false })}
-      <div class="vhero-cols">${["a", "b", "c"].map((k) => `<div class="vcol vcol--${k}">${bgVideo(r, `hero-col-${k}`, { media: "(min-width: 900px)" })}</div>`).join("")}</div>
+      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
+      <div class="vhero-cols">${["a", "b", "c"].map((k) => `<div class="vcol vcol--${k}">${bgVideo(r, `hero-col-${k}`, { media: "(min-width: 900px)", eager: true })}</div>`).join("")}</div>
     </div>
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
@@ -685,9 +691,9 @@ addPage("", layout({
   <div class="insta-track">
     <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
       const copy = i >= REELS.length;
-      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this MEON reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
+      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
         <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
-        <span class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></span>
+        <div class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></div>
         <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
       </a></li>`;
     }).join("")}</ul>

@@ -336,14 +336,15 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
    No JS or reduced motion: a plain full-screen hero. */
 .vhero { position: relative; color: #fff; background: var(--ink); }
 .js .vhero { height: 185vh; height: 185svh; }
+/* Screens shorter than the stage (landscape phones): no pin, so the buttons are reachable by plain scrolling */
+@media (max-height: 560px) { .js .vhero { height: auto; } }
 .vhero-stage { position: sticky; top: 0; isolation: isolate; display: flex; align-items: flex-end; min-height: max(560px, 100vh); min-height: max(560px, 100svh); overflow: hidden; }
-.vhero-media { position: absolute; inset: 0; z-index: -2; overflow: hidden; background: #1a1412; transform: scale(calc(1 - var(--p, 0) * .12)); transform-origin: 50% 35%; border-radius: calc(var(--p, 0) * 36px); }
-.vhero-media .vbg { background: none; }
-.vhero-media picture { position: absolute; inset: 0; }
+.vhero-media { position: absolute; inset: 0; z-index: -2; overflow: hidden; background: #1a1412; transform: scale(calc(1 - var(--p, 0) * .12)); transform-origin: 50% 35%; transition: border-radius .5s var(--ease); }
+.vhero.is-moving .vhero-media { border-radius: 28px; }
 .vhero-cols { display: none; }
 @media (min-width: 900px) {
   .vbg--phone { display: none; }
-  .vhero-cols { position: absolute; inset: -22% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--ink); }
+  .vhero-cols { position: absolute; inset: -27% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--ink); }
   .vcol { position: relative; overflow: hidden; transform: translate3d(0, calc(var(--p, 0) * var(--drift) * 1vh), 0); }
   .vcol--a { --drift: -16; } .vcol--b { --drift: 9; } .vcol--c { --drift: -24; }
   .js .vcol { animation: vcol-in 1.3s var(--ease) both; }
@@ -358,6 +359,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .vhero-stage::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%), linear-gradient(90deg, rgba(12,9,8,.78) 0%, rgba(12,9,8,.4) 38%, rgba(12,9,8,0) 62%), linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 40%); }
 }
 .vhero-inner { padding: calc(var(--header-h) + 32px) 0 clamp(64px, 10vh, 120px); transform: translate3d(0, calc(var(--p, 0) * -16vh), 0); opacity: calc(1 - var(--p, 0) * 1.7); }
+/* Faded out: no clicks or focus on the invisible buttons (site.js sets .is-late past --p .58) */
+.vhero.is-late .vhero-inner { visibility: hidden; }
 .vhero-logo { display: block; width: clamp(128px, 12vw, 184px); height: auto; aspect-ratio: 1; margin-bottom: clamp(18px, 2.4vw, 30px); border-radius: 3px; box-shadow: 0 24px 60px -24px rgba(0,0,0,.75); }
 .videos-paused .vhero-logo .lw, .videos-paused .vhero-cue i { animation-play-state: paused; }
 .vhero-title { font-size: clamp(3rem, 8.2vw, 7.4rem); line-height: .9; letter-spacing: -.05em; margin: 0 0 18px; max-width: 10ch; text-wrap: balance; text-shadow: 0 2px 40px rgba(0,0,0,.3); }
@@ -453,9 +456,13 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .story-head h2 { margin: 0 0 18px; }
 .story-head .lead { color: rgba(255,255,255,.74); margin: 0; }
 .stack { list-style: none; margin: 0; padding: 0; }
+/* Scaled from the top edge, so a card's measured top (which site.js reads for the card below it) never moves */
 .scard { position: relative; isolation: isolate; display: grid; height: max(560px, 100vh); height: max(560px, 100svh); overflow: hidden; color: #fff; background: #1a1412;
-  transform: scale(calc(1 - var(--p, 0) * .07)); transform-origin: 50% 30%; border-radius: calc(var(--p, 0) * 32px); }
+  transform: scale(calc(1 - var(--p, 0) * .07)); transform-origin: 50% 0; transition: border-radius .5s var(--ease); }
+.scard.is-sinking { border-radius: 28px; }
 .js .scard { position: sticky; top: 0; }
+/* Screens shorter than a card (landscape phones): the cards just follow each other, so every button stays reachable */
+@media (max-height: 560px) { .js .scard { position: relative; } }
 .scard::after { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: #0c0908; opacity: calc(var(--p, 0) * .65); }
 .scard-media { position: relative; overflow: hidden; }
 .scard-copy { opacity: calc(.15 + var(--q, 1) * .85); transform: translate3d(0, calc((1 - var(--q, 1)) * 9vh), 0); }
@@ -469,18 +476,20 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .scard--light { background: var(--soft); color: var(--ink); }
 .scard--light .scard-copy p { color: var(--ink-2); }
 .scard--light .scard-copy p.scard-tip { background: #fff; }
-@media (max-width: 899px) {
-  .scard { grid-template-rows: minmax(0, 1fr) auto; padding: calc(var(--header-h) + 10px) 12px 0; }
+@media (max-width: 899.98px) {
+  .scard { grid-template-rows: minmax(34vh, 1fr) auto; grid-template-rows: minmax(34svh, 1fr) auto; padding: calc(var(--header-h) + 10px) 12px 0; }
   .scard-media { border-radius: 22px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.6); transform: translate3d(0, calc((1 - var(--q, 1)) * 10vh), 0); }
-  .scard-copy { padding: 16px 8px 26px; }
-  .scard-copy h3 { font-size: clamp(2.1rem, 9.6vw, 3.2rem); margin: 10px 0 8px; }
-  .scard-copy p { font-size: 1rem; margin: 0 0 14px; }
-  .scard-copy p.scard-tip { font-size: .92rem; padding: 9px 12px; }
+  .scard-copy { padding: 14px 8px 24px; }
+  .scard-copy h3 { font-size: clamp(1.9rem, 8.6vw, 3rem); margin: 10px 0 8px; }
+  .scard-copy p { font-size: .98rem; line-height: 1.45; margin: 0 0 12px; }
+  .scard-copy p.scard-tip { font-size: .9rem; padding: 8px 12px; }
 }
-@media (max-width: 760px) { .scard-copy { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); } }
+/* Tablets in portrait: a centred 9:16 frame rather than a wide crop of portrait footage */
+@media (min-width: 560px) and (max-width: 899.98px) { .scard-media { justify-self: center; height: 100%; aspect-ratio: 9 / 16; } }
+@media (max-width: 760px) { .scard-copy { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 900px) {
-  .scard { grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: clamp(56px, 8vh, 96px) max(var(--gutter), (100% - var(--wrap)) / 2); }
-  .scard-media { grid-row: 1; grid-column: 2; justify-self: center; height: min(80vh, 840px); aspect-ratio: 9 / 16; border-radius: 28px;
+  .scard { grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: calc(var(--header-h) + 24px) max(var(--gutter), (100% - var(--wrap)) / 2) clamp(32px, 6vh, 72px); }
+  .scard-media { grid-row: 1; grid-column: 2; justify-self: center; height: min(calc(100vh - var(--header-h) - 96px), 840px); aspect-ratio: 9 / 16; border-radius: 28px;
     box-shadow: 0 50px 90px -40px rgba(0,0,0,.65); transform: translate3d(0, calc((1 - var(--q, 1)) * 16vh), 0) rotate(calc((1 - var(--q, 1)) * -7deg)); }
   .scard-copy { grid-row: 1; grid-column: 1; width: auto; margin: 0; padding: 0; align-self: center; }
   .scard:nth-child(even) { grid-template-columns: .9fr 1.1fr; }
@@ -845,6 +854,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .js .vhero { height: auto; }
   .js .scard { position: relative; }
   .vwall .vwall-col { transform: none; }
+  .js .vcol { animation: none; }
 }
 
 /* ---------- FAQ ---------- */
@@ -924,7 +934,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .insta-head .lead { margin: 0; max-width: 40ch; }
 .insta-track { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
 /* Padding (not gap) between cards so the doubled row loops at exactly -50% */
-.insta-row { display: flex; width: max-content; list-style: none; margin: 0; padding: 10px 0 18px; animation: insta-scroll 64s linear infinite; }
+.insta-row { display: flex; width: max-content; list-style: none; margin: 0; padding: 16px 0 18px; animation: insta-scroll 64s linear infinite; }
 .insta-row li { flex: none; padding-right: clamp(12px, 1.4vw, 18px); }
 /* Instagram-style cards: account row, the reel, the action row and a two-line caption */
 .reel { position: relative; display: flex; flex-direction: column; width: clamp(230px, 21vw, 300px); border-radius: 22px; overflow: hidden; background: #fff; color: var(--ink); text-decoration: none; box-shadow: 0 26px 46px -30px rgba(18,16,16,.6), 0 0 0 1px rgba(18,16,16,.07); transition: transform .5s var(--ease); }
@@ -968,7 +978,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vwall-copy .eyebrow { color: #ff5a5f; }
 .vwall-copy h2 { font-size: clamp(3.2rem, 10vw, 9rem); line-height: .88; letter-spacing: -.055em; margin: 0 0 20px; text-shadow: 0 4px 50px rgba(0,0,0,.5); }
 .vwall-copy .lead { color: rgba(255,255,255,.9); max-width: 32ch; margin: 0 0 28px; }
-@media (max-width: 899px) {
+@media (max-width: 899.98px) {
   .vwall { height: 120vh; height: 120svh; min-height: 700px; }
   .vwall-cols { grid-template-columns: 1fr 1fr; gap: 12px; padding-inline: 12px; }
   .vwall-col { gap: 12px; }

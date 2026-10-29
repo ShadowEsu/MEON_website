@@ -54,23 +54,61 @@
   var parallax = reduceMotion ? [] : $$("[data-parallax]");
   var hscroll = reduceMotion ? [] : $$("[data-hscroll]");
   var vhero = $(".vhero");
-  /* Home scenes: [data-scene] gets --p, the scroll progress through it (default: while its sticky stage is pinned;
-     "through": from entering the screen to leaving it). [data-stack] cards get --q (how far the card has slid in)
-     and --p (how far the next card covers it); a fully covered card pauses its videos. */
+  /* Home scenes. [data-scene] gets --p, the scroll progress through it: by default while its sticky first child (the
+     stage) is pinned, i.e. over (scene height - stage height); "through" runs from entering the screen to leaving it.
+     .is-moving once it has started (rounded corners), .is-late past .58 (the faded hero words stop taking clicks).
+     [data-stack] cards get --q (how far the card has slid in) and --p (how far the next card covers it), .is-sinking
+     once covered at all; a fully covered card pauses its videos. All scene and card reads happen before any write. */
   var scenes = reduceMotion ? [] : $$("[data-scene]");
-  var stackCards = reduceMotion ? [] : $$("[data-stack] > li");
+  var stackEl = reduceMotion ? null : $("[data-stack]");
+  var stackCards = stackEl ? $$("[data-stack] > li") : [];
+  var sceneP = [], cardTops = [];
   var lastY = window.scrollY, ticking = false;
   var navOpen = function () { var n = $("#site-nav"); return n && n.classList.contains("is-open"); };
   function frame() {
     ticking = false;
     var y = window.scrollY, vh = window.innerHeight;
-    if (header) header.classList.toggle("is-scrolled", y > 8);
+    // Reads first
+    var heroOver = !!(vhero && header) && y < vhero.offsetHeight - header.offsetHeight;
+    for (var k = 0; k < scenes.length; k++) {
+      var sc = scenes[k], sr = sc.getBoundingClientRect();
+      if (sr.bottom < -100 || sr.top > vh + 100) { sceneP[k] = null; continue; }
+      if (sc.getAttribute("data-scene") === "through") sceneP[k] = (vh - sr.top) / (vh + sr.height);
+      else { var pin = sr.height - sc.firstElementChild.offsetHeight; sceneP[k] = pin > 1 ? -sr.top / pin : 0; }
+    }
+    var stackOn = false;
+    if (stackEl) {
+      var str = stackEl.getBoundingClientRect();
+      stackOn = str.bottom > -50 && str.top < vh + 50;
+      if (stackOn) for (var m = 0; m < stackCards.length; m++) cardTops[m] = stackCards[m].getBoundingClientRect().top;
+    }
+    // Then writes
+    if (header) { header.classList.toggle("is-scrolled", y > 8); if (vhero) header.classList.toggle("is-over", heroOver); }
     lastY = y;
     if (progress) {
       var max = document.documentElement.scrollHeight - vh;
       progress.style.setProperty("--p", max > 0 ? (y / max).toFixed(4) : 0);
     }
     if (backTop) backTop.classList.toggle("is-visible", y > 900);
+    for (k = 0; k < scenes.length; k++) {
+      if (sceneP[k] === null) continue;
+      var sp = clamp(sceneP[k], 0, 1);
+      scenes[k].style.setProperty("--p", sp.toFixed(4));
+      scenes[k].classList.toggle("is-moving", sp > 0.005);
+      scenes[k].classList.toggle("is-late", sp > 0.58);
+    }
+    if (stackOn) for (m = 0; m < stackCards.length; m++) {
+      var card = stackCards[m], q = clamp(1 - cardTops[m] / vh, 0, 1);
+      var cover = m + 1 < stackCards.length ? clamp(1 - cardTops[m + 1] / vh, 0, 1) : 0;
+      card.style.setProperty("--q", q.toFixed(4));
+      card.style.setProperty("--p", cover.toFixed(4));
+      card.classList.toggle("is-sinking", cover > 0.005);
+      var covered = cover > 0.98;
+      if (covered !== !!card._covered) {
+        card._covered = covered;
+        $$("video[data-bg-src]", card).forEach(function (v) { v._covered = covered; if (covered) v.pause(); else if (typeof bgPlay === "function") bgPlay(v); });
+      }
+    }
     for (var i = 0; i < parallax.length; i++) {
       var el = parallax[i], b = el.getBoundingClientRect();
       if (b.bottom < -200 || b.top > vh + 200) continue;
@@ -86,31 +124,18 @@
         row.style.transform = "translate3d(" + (-p * span * parseFloat(row.getAttribute("data-speed") || 1)).toFixed(1) + "px,0,0)";
       });
     }
-    for (var k = 0; k < scenes.length; k++) {
-      var sc = scenes[k], sr = sc.getBoundingClientRect();
-      if (sr.bottom < -100 || sr.top > vh + 100) continue;
-      var sp = sc.getAttribute("data-scene") === "through" ? (vh - sr.top) / (vh + sr.height) : -sr.top / Math.max(1, sr.height - vh);
-      sc.style.setProperty("--p", clamp(sp, 0, 1).toFixed(4));
-    }
-    for (var m = 0; m < stackCards.length; m++) {
-      var card = stackCards[m], next = stackCards[m + 1], ct = card.getBoundingClientRect().top;
-      if (ct > vh) { if (card._q !== 0) { card._q = 0; card.style.setProperty("--q", 0); } continue; }
-      var cover = next ? clamp(1 - next.getBoundingClientRect().top / vh, 0, 1) : 0;
-      card._q = clamp(1 - ct / vh, 0, 1);
-      card.style.setProperty("--q", card._q.toFixed(4));
-      card.style.setProperty("--p", cover.toFixed(4));
-      var covered = cover > 0.98;
-      if (covered !== !!card._covered) {
-        card._covered = covered;
-        $$("video[data-bg-src]", card).forEach(function (v) { v._covered = covered; if (covered) v.pause(); else if (typeof bgPlay === "function") bgPlay(v); });
-      }
-    }
-    if (vhero && header) header.classList.toggle("is-over", y < vhero.offsetHeight - header.offsetHeight);
   }
   function requestFrame() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
   window.addEventListener("scroll", requestFrame, { passive: true });
   window.addEventListener("resize", requestFrame, { passive: true });
   frame();
+  /* Keyboard focus inside a covered step card: bring that card back to its own place in the stack, so the focus ring
+     isn't hidden under a later card */
+  if (stackEl) stackEl.addEventListener("focusin", function (e) {
+    var li = e.target.closest ? e.target.closest("[data-stack] > li") : null;
+    if (!li || !li.classList.contains("is-sinking")) return;
+    window.scrollTo(0, stackEl.getBoundingClientRect().top + window.scrollY + stackCards.indexOf(li) * li.offsetHeight);
+  });
   if (backTop) backTop.addEventListener("click", function () { scrollToY(0); });
 
   /* ---------- Navigation ---------- */
@@ -207,7 +232,7 @@
   /* ---------- Background videos ----------
      Muted loops. The file loads only when the video nears the screen and plays only while it's on screen.
      Reduced motion or Save-Data: never load the videos; the posters stay. Hero videos carry data-media
-     so a phone only fetches the portrait cut and a desktop only the wide one. The pause button stops
+     so a phone only fetches the portrait cut and a desktop only the three column clips. The pause button stops
      every background video and the Instagram strip, and the choice is remembered. */
   var bgVids = $$("video[data-bg-src]");
   var saveData = !!(navigator.connection && navigator.connection.saveData);
