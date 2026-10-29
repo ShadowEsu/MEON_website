@@ -485,7 +485,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .scard-copy p.scard-tip { font-size: .9rem; padding: 8px 12px; }
 }
 /* Tablets in portrait: a centred 9:16 frame rather than a wide crop of portrait footage */
-@media (min-width: 560px) and (max-width: 899.98px) { .scard-media { justify-self: center; height: 100%; aspect-ratio: 9 / 16; } }
+@media (min-width: 560px) and (max-width: 899.98px) { .scard-media { justify-self: center; height: 100%; aspect-ratio: 9 / 16; } .scard-copy { justify-self: center; width: min(100%, 34rem); } }
 @media (max-width: 760px) { .scard-copy { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 900px) {
   .scard { grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: calc(var(--header-h) + 24px) max(var(--gutter), (100% - var(--wrap)) / 2) clamp(32px, 6vh, 72px); }

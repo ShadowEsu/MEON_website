@@ -528,27 +528,7 @@ addPage("", layout({
       </div>
     </div>
     <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
-    <a class="vhero-cue" href="#fresh"><span class="visually-hidden">See the bowls</span><i aria-hidden="true"></i></a>
-  </div>
-</section>
-
-<div class="ticker" data-hscroll aria-hidden="true">
-  <div class="ticker-band ticker-band--red"><div class="wall-row" data-speed="1.4">${TICKER.concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("bowl")}`).join("")}</div></div>
-  <div class="ticker-band ticker-band--ink"><div class="wall-row" data-speed="-1.1">${TICKER.slice().reverse().concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("flame")}`).join("")}</div></div>
-</div>
-
-<section class="fresh" id="fresh" aria-labelledby="fresh-h">
-  <div class="wrap">
-    <div class="fresh-head reveal">
-      <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
-      <p class="lead">Real bowls from the noodle wall, shot at MEON. Pick one to see its packet.</p>
-    </div>
-    <div class="fresh-grid">
-      ${FRESH.map((name, i) => {
-        const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
-      }).join("")}
-    </div>
+    <a class="vhero-cue" href="#how"><span class="visually-hidden">See how it works</span><i aria-hidden="true"></i></a>
   </div>
 </section>
 
@@ -585,6 +565,50 @@ addPage("", layout({
     <h2 id="vwall-h" data-split>Bring your crew.</h2>
     <p class="lead">A wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
     <a class="btn btn--white btn--lg" href="${r("visit/")}">Plan your visit ${icon.arrow}</a>
+  </div>
+</section>
+
+
+<section class="insta" id="instagram" aria-labelledby="insta-h">
+  <div class="wrap insta-head">
+    <div class="reveal">
+      <p class="eyebrow">${esc(site.instagramHandle)}</p>
+      <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
+      <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
+    </div>
+    <div class="actions">
+      <a class="btn btn--red" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} Follow ${esc(site.instagramHandle)}</a>
+      ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
+    </div>
+  </div>
+  <div class="insta-track">
+    <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
+      const copy = i >= REELS.length;
+      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
+        <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
+        <div class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></div>
+        <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
+      </a></li>`;
+    }).join("")}</ul>
+  </div>
+</section>
+<div class="ticker" data-hscroll aria-hidden="true">
+  <div class="ticker-band ticker-band--red"><div class="wall-row" data-speed="1.4">${TICKER.concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("bowl")}`).join("")}</div></div>
+  <div class="ticker-band ticker-band--ink"><div class="wall-row" data-speed="-1.1">${TICKER.slice().reverse().concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("flame")}`).join("")}</div></div>
+</div>
+
+<section class="fresh" id="fresh" aria-labelledby="fresh-h">
+  <div class="wrap">
+    <div class="fresh-head reveal">
+      <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
+      <p class="lead">Real bowls from the noodle wall, shot at MEON. Pick one to see its packet.</p>
+    </div>
+    <div class="fresh-grid">
+      ${FRESH.map((name, i) => {
+        const n = noodles.find((x) => x.slug === SHOOT[name].slug);
+        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
+      }).join("")}
+    </div>
   </div>
 </section>
 
@@ -673,30 +697,6 @@ addPage("", layout({
       <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
       <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side ${icon.arrow}</a></div>
     </div>
-  </div>
-</section>
-
-<section class="insta" id="instagram" aria-labelledby="insta-h">
-  <div class="wrap insta-head">
-    <div class="reveal">
-      <p class="eyebrow">${esc(site.instagramHandle)}</p>
-      <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
-      <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
-    </div>
-    <div class="actions">
-      <a class="btn btn--red" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} Follow ${esc(site.instagramHandle)}</a>
-      ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
-    </div>
-  </div>
-  <div class="insta-track">
-    <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
-      const copy = i >= REELS.length;
-      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
-        <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
-        <div class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></div>
-        <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
-      </a></li>`;
-    }).join("")}</ul>
   </div>
 </section>
 
