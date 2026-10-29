@@ -23,10 +23,15 @@
     "img/noodles/more/lucky-me-instant-pancit-canton-kalamansi-1.webp"
   ],
   "lucky-me-instant-pancit-canton-original": [
-    "img/noodles/more/lucky-me-instant-pancit-canton-original-1.webp"
+    "img/noodles/more/lucky-me-instant-pancit-canton-original-1.webp",
+    "img/noodles/more/lucky-me-instant-pancit-canton-original-2.webp",
+    "img/noodles/more/lucky-me-instant-pancit-canton-original-3.webp"
   ],
   "lucky-me-instant-pancit-canton-sweet-and-spicy": [
-    "img/noodles/more/lucky-me-instant-pancit-canton-sweet-and-spicy-1.webp"
+    "img/noodles/more/lucky-me-instant-pancit-canton-sweet-and-spicy-1.webp",
+    "img/noodles/more/lucky-me-instant-pancit-canton-sweet-and-spicy-2.webp",
+    "img/noodles/more/lucky-me-instant-pancit-canton-sweet-and-spicy-3.webp",
+    "img/noodles/more/lucky-me-instant-pancit-canton-sweet-and-spicy-4.webp"
   ],
   "maggi-2-minute-chicken-flavour": [
     "img/noodles/more/maggi-2-minute-chicken-flavour-1.webp"
@@ -41,7 +46,9 @@
   ],
   "mama-tom-yum-shrimp": [
     "img/noodles/more/mama-tom-yum-shrimp-1.webp",
-    "img/noodles/more/mama-tom-yum-shrimp-2.webp"
+    "img/noodles/more/mama-tom-yum-shrimp-2.webp",
+    "img/noodles/more/mama-tom-yum-shrimp-3.webp",
+    "img/noodles/more/mama-tom-yum-shrimp-4.webp"
   ],
   "master-kong-kangsifu-braised-beef-instant-noodle": [
     "img/noodles/more/master-kong-kangsifu-braised-beef-instant-noodle-1.webp",
@@ -59,7 +66,9 @@
     "img/noodles/more/master-kong-kangsifu-seafood-flavour-2.webp"
   ],
   "mykuali-penang-white-curry-noodles": [
-    "img/noodles/more/mykuali-penang-white-curry-noodles-1.webp"
+    "img/noodles/more/mykuali-penang-white-curry-noodles-1.webp",
+    "img/noodles/more/mykuali-penang-white-curry-noodles-2.webp",
+    "img/noodles/more/mykuali-penang-white-curry-noodles-3.webp"
   ],
   "nissin-demae-iccho-japan-series-black-garlic-oil-tonkotsu": [
     "img/noodles/more/nissin-demae-iccho-japan-series-black-garlic-oil-tonkotsu-1.webp",
@@ -70,7 +79,9 @@
   ],
   "nissin-demae-ramen-tonkotsu": [
     "img/noodles/more/nissin-demae-ramen-tonkotsu-1.webp",
-    "img/noodles/more/nissin-demae-ramen-tonkotsu-2.webp"
+    "img/noodles/more/nissin-demae-ramen-tonkotsu-2.webp",
+    "img/noodles/more/nissin-demae-ramen-tonkotsu-3.webp",
+    "img/noodles/more/nissin-demae-ramen-tonkotsu-4.webp"
   ],
   "nissin-ramen-hokkaido-miso": [
     "img/noodles/more/nissin-ramen-hokkaido-miso-1.webp",
@@ -95,7 +106,10 @@
   ],
   "nongshim-shin-black-premium": [
     "img/noodles/more/nongshim-shin-black-premium-1.webp",
-    "img/noodles/more/nongshim-shin-black-premium-2.webp"
+    "img/noodles/more/nongshim-shin-black-premium-2.webp",
+    "img/noodles/more/nongshim-shin-black-premium-3.webp",
+    "img/noodles/more/nongshim-shin-black-premium-4.webp",
+    "img/noodles/more/nongshim-shin-black-premium-5.webp"
   ],
   "nongshim-shin-noodle-soup-original": [
     "img/noodles/more/nongshim-shin-noodle-soup-original-1.webp",
@@ -103,7 +117,9 @@
   ],
   "nongshim-tempura-udon": [
     "img/noodles/more/nongshim-tempura-udon-1.webp",
-    "img/noodles/more/nongshim-tempura-udon-2.webp"
+    "img/noodles/more/nongshim-tempura-udon-2.webp",
+    "img/noodles/more/nongshim-tempura-udon-3.webp",
+    "img/noodles/more/nongshim-tempura-udon-4.webp"
   ],
   "ottogi-jin-jjambbong": [
     "img/noodles/more/ottogi-jin-jjambbong-1.webp",
@@ -138,5 +154,11 @@
   "wai-wai-quick-zabb-tom-yum-shrimp": [
     "img/noodles/more/wai-wai-quick-zabb-tom-yum-shrimp-1.webp",
     "img/noodles/more/wai-wai-quick-zabb-tom-yum-shrimp-2.webp"
+  ],
+  "samyang-samyang-ramen": [
+    "img/noodles/more/samyang-samyang-ramen-1.webp",
+    "img/noodles/more/samyang-samyang-ramen-2.webp",
+    "img/noodles/more/samyang-samyang-ramen-3.webp",
+    "img/noodles/more/samyang-samyang-ramen-4.webp"
   ]
 }

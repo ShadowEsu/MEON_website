@@ -10,7 +10,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
   - `--red #d7141d` for text and buttons, because it meets contrast rules
   - `--soft #f6f4f1` is the only tint, used for alternating sections
 - **No emojis anywhere.** Icons are a custom line set (`svgIcon()` in `art.mjs`, also published as `assets/img/icons.svg` for JavaScript). Flags are real artwork from flag-icons (MIT), copied to `assets/img/flags/`.
-- **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone. `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. `logoMark()` in `art.mjs` draws the red square (header, home hero tile, About); `logoLockup()` draws the lettering alone in the current colour (footer, red on ink).
+- **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone, and the four glyphs must be readable wherever it appears (Preston, 29 Oct 2026). `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. In the square the glyphs are under 6% of its height, so small sizes use the wide badge: `logoBadge()` in `art.mjs` (header), `logoMark()` the red square (home hero, About), `logoLockup()` the lettering alone in the current colour (footer, red on ink).
 - **No boxes:**
   - cards are a photo plus text
   - sections are separated by hairlines (`--line`) and space
@@ -18,13 +18,13 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 - **Copy is specific and plain.** It uses full stops, few exclamation marks, no "slurp" or "noodle heaven", and no em dash in headings.
 
 ## Page anatomy
-1. Announcement line: "Dine in or take it away. 100+ noodles from across Asia, all on one wall."
-2. Header: white, always visible, with a hairline appearing on scroll. Logo on the left, the nav centred (Home, Noodles mega menu, Countries, Pairings & sides, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
-3. Home: the centred launch hero. It has a pill line, the giant "Slurp the world." headline and a "Tonight I'm craving…" typewriter, then actions, with the mascot crew around the headline (never over the photos). Below that sit a photo stage with the red mixed-logo tile and the count-up facts (100+ instant noodles · 20+ pairings and sides · 230 seconds to a perfect bowl, every time · Dine in or take it away).
+1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.
+2. Header: white, always visible, with a hairline appearing on scroll. On the home page it floats see-through over the video hero, with white controls, until the hero scrolls away. Logo badge on the left, the nav centred (Home, Noodles mega menu, Countries, Pairings and sides, About), and **Sound**, **Search** (Ctrl/⌘ K or "/") and **Visit** on the right.
+3. Home (video-first, 29 Oct 2026, same brand): a full-screen video hero (portrait cut on phones, the wide 3-up cut on desktop) with the big square logo, "Your bowl, your rules.", the address and two actions (Browse the noodle wall, Get directions), plus a pause button for every background video. Then the flavour banners, the five booth-shoot bowls ("Straight out of the machine."), the four "Do it yourself" steps as full-screen panels (full-bleed media on phones; on desktop video steps sit in a 9:16 frame beside the words), the noodle wall, Most picked, roulette, countries, heat check, Build your bowl, the @meonnoodles reel strip, reviews and a closing "Find us in Northbridge." band over the street video. No count-up facts and no stats on the home page.
    Other pages: page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
 4. Content sections.
 5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
-6. Red closing band (`ctaBand()`) with big type and three mascots.
+6. Red closing band (`ctaBand()`) with big type and three mascots. The home page closes with its own video band instead.
 7. Ink footer with the giant red logo lockup, its letters and glyphs rising in one by one.
 8. Phones: a bottom tab bar (Home, Noodles, Search, Countries, Visit).
 
@@ -44,19 +44,19 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 
 | Effect | Where |
 | --- | --- |
-| Typewriter ("Tonight I'm craving…") | Home hero |
+| Background videos: muted loops, loaded only near the screen, playing only while on screen; never loaded for reduce motion or Save-Data; one pause button for all of them | Home (hero, steps 1 and 4, closing band, reel strip) |
+| Glyphs in the big logo rise in one after another, then take turns to hop (they never disappear) | Home hero logo |
+| Auto-scrolling reel strip (Preston asked for it, 29 Oct 2026): one transform animation, paused on hover, focus, the pause button and off-screen; a still, swipeable row for reduce motion | Home (`#instagram`) |
 | Masked word reveal | Every heading with `data-split` |
 | Fade and rise | `.reveal` elements, staggered with `--rd` |
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags, About logo, plates) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |
-| Sticky heading with a progress line | Do it yourself |
-| Count-up numbers | `.facts` |
+| Count-up numbers | `.facts` (country pages) |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
-| Mascots: blink, eyes follow the cursor, gentle drift; wave and squish on hover; tap to talk | Home hero, page heroes, red band, timer, back-to-top |
-| Logo: letters and glyphs hop when you hover; nothing cycles | Header mark, home hero tile, About logo, footer |
+| Mascots: blink, eyes follow the cursor; wave and squish on hover; tap to talk | Page heroes, red band, timer, back-to-top |
+| Logo: letters and glyphs hop when you hover | Header badge, About logo, footer |
 | Paper confetti | Roulette win, timer finished |
-| Throwable mascots: drag, throw, bounce off the edges; tap to talk | Home hero crew |
 | Crossing flavour banners (red and ink) that move with your scroll | Under the home hero (`.ticker`) |
 | Build your bowl: pairings and sides drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
 | Heat check: chilli slider warms the section, the mascot sweats, matching noodles appear | Home (`#spice`) |
@@ -76,7 +76,7 @@ Removed on purpose:
 - backdrop blur
 - animated blur and drop-shadow filters
 - card tilt (cards now wiggle slightly instead)
-- auto-scrolling marquees (the flavour banners only move when you scroll)
+- auto-scrolling marquees, except the home reel strip Preston asked for (the flavour banners only move when you scroll)
 
 These were the main causes of lag, and some are common "AI website" tells.
 

@@ -36,11 +36,11 @@ for (const file of htmlFiles) {
   }
   for (const m of html.matchAll(/href="#([^"]+)"/g)) if (!ids.includes(m[1])) problems.push(`${rel}: anchor #${m[1]} not found`);
 }
-// Cross-page anchors like toppings/#egg
-const toppingsHtml = fs.readFileSync(path.join(OUT, "toppings", "index.html"), "utf8");
+// Cross-page anchors like pairings-and-sides/#egg
+const pairingsHtml = fs.readFileSync(path.join(OUT, "pairings-and-sides", "index.html"), "utf8");
 for (const file of htmlFiles) {
-  for (const m of fs.readFileSync(file, "utf8").matchAll(/href="[^"]*toppings\/#([^"]+)"/g)) {
-    if (!toppingsHtml.includes(`id="${m[1]}"`)) problems.push(`${path.relative(OUT, file)}: toppings anchor #${m[1]} missing`);
+  for (const m of fs.readFileSync(file, "utf8").matchAll(/href="[^"]*pairings-and-sides\/#([^"]+)"/g)) {
+    if (!pairingsHtml.includes(`id="${m[1]}"`)) problems.push(`${path.relative(OUT, file)}: pairings anchor #${m[1]} missing`);
   }
 }
 // Content-Security-Policy (vercel.json): every inline script must be allowed by its sha256 hash,

@@ -1,11 +1,11 @@
 # Getting MEON to the top of Google
 
-Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "ramen Canning Bridge" or "noodle bar near me", a few things decide who shows up first. The website side is done (list below). The rest needs you, because Google wants the business owner to do it. Work through the steps in order; the first two matter most.
+Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "ramen Northbridge" or "noodle bar near me", a few things decide who shows up first. The website side is done (list below). The rest needs you, because Google wants the business owner to do it. Work through the steps in order; the first two matter most.
 
 ## Already done in the website
 
 - **Structured data (schema.org)** that Google reads directly:
-  - `Restaurant` on the home page: name, logo, photos, cuisine, price range, menu link, map link and suburb. It still needs the street address, postcode, phone, opening hours and map coordinates: Google treats the address as required for a local business, so add them in `data/site.json` once they match the Google Business Profile.
+  - `Restaurant` on the home page: name, logo, photos, cuisine, price range, menu link, map link and the street address (Shop 8, 45 Francis Street, Northbridge WA 6003). It still needs the phone, opening hours and map coordinates; add them in `data/site.json` once they match the Google Business Profile.
   - `WebSite`
   - a full `Menu` of all 199 noodles, grouped by country
   - a `MenuItem` for every noodle (description with country and packet size, and diet; no price, because prices stay off the site)
@@ -13,14 +13,14 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
   - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
-- **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Canning Bridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
+- **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Northbridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
 - **199 unique noodle pages**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
 - **An FAQ on the Visit page**: questions people actually ask (location, online orders and delivery, how many noodles, vegetarian and vegan options, how spicy, how long the noodles take).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
 - **Robots**: `robots.txt` points to the sitemap, and the staff QR pages are hidden from Google.
 - **AI assistants**: `llms.txt` gives AI assistants a clean summary of MEON and every noodle. Google says it has no effect on Google Search.
 - **Speed (a ranking factor)**:
-  - the main photo is preloaded
+  - the first image (the home hero poster, each noodle page's photo) loads first; background videos load only near the screen
   - images are sized and lazy-loaded
   - one font file
   - scripts are deferred
@@ -84,7 +84,7 @@ Mismatched details confuse Google and lower your ranking.
 
 ### 7. Keep the website fresh
 - Add new noodles as they arrive (see `docs/operations.md`). New pages mean new searches you can rank for.
-- Add your street address, phone, hours and map coordinates to `data/site.json` as soon as you can. They feed the structured data Google uses for the map pack.
+- Add your phone, hours and map coordinates to `data/site.json` as soon as you can. They feed the structured data Google uses for the map pack.
 - Keep `@meonnoodles` active and link to the website in your bio.
 
 ## How long it takes

@@ -88,6 +88,15 @@ export function logoMark(cls = "logo-mark", label = "") {
   return `<svg class="${cls}" viewBox="0 0 ${S} ${S}" ${a11y} focusable="false"><rect width="${S}" height="${S}" fill="#ec1b25"/><rect x="${at}" y="${at}" width="${S - 2 * at}" height="${S - 2 * at}" rx="6" fill="none" stroke="#fff" stroke-width="${sw}"/><g fill="#fff" fill-rule="evenodd">${logoParts()}</g></svg>`;
 }
 
+// The same red logo cropped wide around the lettering, for the header: in the square the four glyphs are under
+// 6% of its height, so at header size they would read as blank. Here they are about 18% of the height.
+export function logoBadge(cls = "logo-badge", label = "") {
+  const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
+  const [wx0, wy0, wx1] = LOGO.wordBox, [gx0, , gx1, gy1] = LOGO.glyphBox, pad = 58, fr = 22, sw = 14;
+  const x = Math.min(wx0, gx0) - pad, y = wy0 - pad, w = Math.max(wx1, gx1) - Math.min(wx0, gx0) + 2 * pad, h = gy1 - wy0 + 2 * pad;
+  return `<svg class="${cls}" viewBox="${x} ${y} ${w} ${h}" ${a11y} focusable="false"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ec1b25"/><rect x="${x + fr}" y="${y + fr}" width="${w - 2 * fr}" height="${h - 2 * fr}" rx="6" fill="none" stroke="#fff" stroke-width="${sw}"/><g fill="#fff" fill-rule="evenodd">${logoParts()}</g></svg>`;
+}
+
 // The lettering without the square, in the current text colour (footer).
 export function logoLockup(cls = "logo-lockup", label = "") {
   const a11y = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`;
@@ -136,24 +145,6 @@ export function mascot({ className = "", label = "", color = "#ff8a4c", belly = 
 </svg>`;
 }
 
-// The crew around the home hero (positions in %, size in px). Speech bubbles appear when tapped.
-export const CREW = [
-  { x: 5, y: 10, s: 84, color: "#ff8a4c", acc: "chef", d: 7, delay: -1, say: "Yes, chef" },
-  { x: 88, y: 7, s: 72, color: "#ff8fb0", acc: "party", d: 6, delay: -3, say: "Party bowl?" },
-  { x: 11, y: 34, s: 64, color: "#5cc3f0", acc: "shades", d: 8, delay: -2, say: "Too cool for mild", hideSm: true },
-  { x: 89, y: 30, s: 80, color: "#ffc83d", acc: "bowl", d: 6.5, delay: -4, say: "Smells so good" },
-  { x: 3, y: 50, s: 58, color: "#6fd08c", acc: "beanie", d: 7.5, delay: -5, say: "Cosy noodle weather", hideSm: true },
-  { x: 86, y: 62, s: 66, color: "#ff5b5b", acc: "chilli", d: 5.5, delay: -2.5, say: "Level 5 or bust", hideSm: true },
-  { x: 24, y: 4, s: 48, color: "#a78bfa", acc: "crown", d: 9, delay: -6, say: "Noodle royalty", hideSm: true },
-  { x: 70, y: 4, s: 50, color: "#ff8a4c", acc: "chopsticks", d: 6, delay: -1.5, say: "Pick me a packet", hideSm: true },
-];
-
-export function crew(list = CREW, cls = "crew") {
-  return `<div class="${cls}" aria-hidden="true">${list.map(
-    (m, i) => `<div class="meo${m.hideSm ? " hide-sm" : ""}" style="left:${m.x}%;top:${m.y}%;--s:${m.s}px;--d:${m.d}s;--delay:${m.delay}s;--i:${i}" data-say="${m.say}"><span class="meo-bubble">${m.say}</span>${mascot({ color: m.color, acc: m.acc, wave: m.acc !== "chopsticks" })}</div>`
-  ).join("")}</div>`;
-}
-
 // One mascot that peeks into an inner-page hero; `seed` varies the character per page.
 const PEEKERS = [
   { color: "#ff8a4c", acc: "chef", say: "Yes, chef" }, { color: "#ffc83d", acc: "bowl", say: "Smells so good" },
@@ -167,14 +158,6 @@ export function peeker(seed = 0) {
 }
 
 export const steamOverlay = `<svg class="steam-overlay" viewBox="0 0 200 90" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M60 90c-12-16 12-24 0-40s12-26 0-46"/><path d="M100 90c-12-16 12-24 0-40s12-26 0-46"/><path d="M140 90c-12-16 12-24 0-40s12-26 0-46"/></svg>`;
-
-// Step illustrations (flat, two-colour)
-export const stepArt = {
-  packet: `<svg class="step-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M14 8h36l-3 6 3 6-3 6 3 6-3 6 3 6-3 6 3 6H14l3-6-3-6 3-6-3-6 3-6-3-6 3-6z" fill="#ec1b25" stroke="#17110f" stroke-width="2.5" stroke-linejoin="round"/><rect x="20" y="22" width="24" height="16" rx="3" fill="#fff" stroke="#17110f" stroke-width="2.5"/><path d="M24 30c3-3 5 3 8 0s5 3 8 0" fill="none" stroke="#17110f" stroke-width="2.2" stroke-linecap="round"/></svg>`,
-  egg: `<svg class="step-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><ellipse cx="32" cy="36" rx="22" ry="20" fill="#fff" stroke="#17110f" stroke-width="2.5"/><circle cx="32" cy="38" r="10" fill="#ffc83d" stroke="#17110f" stroke-width="2.5"/></svg>`,
-  pot: `<svg class="step-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M8 28h48v6c0 13-10 22-24 22S8 47 8 34z" fill="#17110f"/><path d="M4 28h56" stroke="#17110f" stroke-width="2.5" stroke-linecap="round"/><path d="M22 20c-4-5 4-7 0-12M32 20c-4-5 4-7 0-12M42 20c-4-5 4-7 0-12" fill="none" stroke="#ec1b25" stroke-width="2.5" stroke-linecap="round" class="step-steam"/></svg>`,
-  bowl: `<svg class="step-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M50 4 30 30M58 8 34 32" stroke="#17110f" stroke-width="2.5" stroke-linecap="round"/><path d="M6 32h52c0 14-11 24-26 24S6 46 6 32z" fill="#fff" stroke="#17110f" stroke-width="2.5" stroke-linejoin="round"/><path d="M12 38h40" stroke="#ec1b25" stroke-width="3.5"/><path d="M14 32c4-6 8 6 12 0s8 6 12 0 8 6 12 0" fill="none" stroke="#17110f" stroke-width="2.5" stroke-linecap="round"/></svg>`,
-};
 
 // Sad bowl for empty states / 404
 export const emptyBowl = `<svg class="empty-bowl" viewBox="0 0 200 160" aria-hidden="true" focusable="false"><path d="M20 70h160c0 46-36 78-80 78S20 116 20 70z" fill="#fff" stroke="#17110f" stroke-width="5" stroke-linejoin="round"/><path d="M34 92h132" stroke="#ec1b25" stroke-width="8"/><ellipse class="meo-eye" cx="78" cy="112" rx="6" ry="8" fill="#17110f"/><ellipse class="meo-eye" cx="122" cy="112" rx="6" ry="8" fill="#17110f"/><path d="M88 134c8-8 16-8 24 0" fill="none" stroke="#17110f" stroke-width="5" stroke-linecap="round"/><path d="M70 50c-8-12 8-16 0-30M100 50c-8-12 8-16 0-30M130 50c-8-12 8-16 0-30" fill="none" stroke="rgba(23,17,15,.3)" stroke-width="5" stroke-linecap="round" class="meo-steam"/></svg>`;

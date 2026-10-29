@@ -1,19 +1,19 @@
 # MEON website
 
-MEON is an instant-noodle bar at Canning Bridge, Perth, Western Australia. This repo builds the MEON website: a fast, static site with **a page for every noodle on the wall** (and shelf QR codes ready to print).
+MEON is a cook-it-yourself instant-noodle bar at Shop 8, 45 Francis Street, Northbridge, Perth, Western Australia. This repo builds the MEON website: a fast, static site with **a page for every noodle on the wall** (and shelf QR codes ready to print).
 
 - 199 noodles from 12 countries, each with its own page (story, spice level, diet, soup/dry, packet size, **"press 1, then 2"** on the cooking machine, a 3:50 cook timer, pairing ideas, similar noodles)
 - Noodle library with search, country / style / spice / diet filters and sorting (filters are shareable URLs, e.g. `/noodles/?country=jp&type=Soup`)
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download. Both are staff pages hidden from Google; no codes are printed yet, so the public pages don't mention QR codes
-- Country pages, Pairings & sides (`/toppings/`: pairings, egg and cheese, ready-to-eat sides, then a drinks list), About, Visit
+- Country pages, Pairings and sides (`/pairings-and-sides/`: pairings, egg and cheese, ready-to-eat sides, then a drinks list; the old `/toppings/` address redirects there), About, Visit
 - No prices anywhere: prices change, so they stay off the site
 - Professional, calm design: one typeface (Bricolage Grotesque), ink and white with MEON red as the only colour, hairlines instead of boxes, no emojis (custom line icons and real flag artwork)
 - Noodle pages built for someone at the shelf: photo, "press 1, then 2" and the cook timer first, then facts, cooking steps and pairings
-- Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, sticky "Do it yourself" steps, magnetic buttons, living mascots, logo letters that hop on hover, typewriter. Transform/opacity only, paused off-screen, off for "reduce motion"
+- Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, magnetic buttons, mascots, logo letters that hop on hover and glyphs that take turns in the big home logo. Transform/opacity only, paused off-screen, off for "reduce motion"
 - Guest reviews: star rating, name and comment on the home page and every noodle page, stored in Supabase (see `docs/operations.md`)
 - Optional background music: an original lo-fi loop generated in the browser (off by default)
-- Videos on the home page ("Watch"), remade on 28 Oct 2026 and ending on the mixed logo: a 48-second promo, a 1:13 website tour, and a 9:16 promo for Reels and TikTok, each with a download button
+- Video-first home page (29 Oct 2026): a full-screen video hero (a portrait cut on phones, a wide 3-up cut on desktop), the booth-shoot bowls, the four "Do it yourself" steps over video and photos, and an auto-scrolling strip of @meonnoodles reels. Background clips are muted, load only near the screen and stay still for "reduce motion" and Save-Data (see `docs/operations.md`, Videos)
 - SEO: Restaurant, WebSite, Menu (199 items), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
 - Dine in or take it away: no online ordering
 

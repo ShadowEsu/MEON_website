@@ -59,7 +59,7 @@ When there's a new list of the packets on the wall, send it to Claude ("here's t
 **The site shows no prices** (Preston, 28 Oct 2026: prices change, so they stay off the site). Items come from the Square catalogue export (`MLKQPB3Z0PNN4_catalogue-2026-10-16-1334.xlsx`, 16 October 2026):
 - **Noodle pages**: 14 noodles use the till's packet weight where it differed from the old one (`noodles` in `data/catalogue.json`).
 - **New noodles**: 27 noodles were in the till but not on the site (`extraNoodles` in `data/catalogue.json`). They have their own page and shelf QR code (on `/qr/`), with an illustrated packet and a spice rating. Their diet says "Ask the crew" until the crew confirms it.
-- **Pairings & sides page**: the "Sides" group of `data/toppings.json` holds the ready-to-eat sides (chicken wings, fried Spam, shrimp katsu, tempura prawn, soft-boiled egg, seasoned seaweed), including the till's sides that used to be in `data/catalogue.json`. The drinks list at the end of the page comes from `drinks` in `data/catalogue.json`.
+- **Pairings and sides page**: the "Sides" group of `data/toppings.json` holds the ready-to-eat sides (chicken wings, fried Spam, shrimp katsu, tempura prawn, soft-boiled egg, seasoned seaweed), including the till's sides that used to be in `data/catalogue.json`. The drinks list at the end of the page comes from `drinks` in `data/catalogue.json`.
 
 Never copied from the till: prices, SKUs, stock counts, barcodes (GTINs), Square tokens, the $0 "Yr12 Drink Promo" and the "Pairings 4.20 Per 100g" line.
 
@@ -67,7 +67,7 @@ When the till changes, send Claude the new catalogue export ("here's the new Squ
 
 ## Pairings and sides
 
-The `/toppings/` page is titled "Pairings & sides" (and so is the nav link). The page address stays `/toppings/`. `data/toppings.json` has four groups:
+The page is `/pairings-and-sides/`, titled "Pairings and sides" (and so is the nav link; always written with "and", never "&"). The old address `/toppings/` redirects there permanently (`vercel.json`), so old links and anything already shared keep working. The data file is still `data/toppings.json`, with four groups:
 - **Meat and seafood** and **Vegetables and more**: pairings. They go in the bowl with the noodles at the start, so they cook together.
 - **Egg and cheese**: added on top of the noodles in the last 30 seconds (on the noodles, not the bowl, or the bowl burns).
 - **Sides**: ready to eat, and they don't go in the machine.
@@ -80,18 +80,22 @@ The MEON Card has been taken off the website completely. `/meon-card/` redirects
 
 ## Videos
 
-All three videos were remade on 28 October 2026 to Preston's facts ("press 1, then 2", the 3:50 cook time, pairings and sides, egg and cheese in the last 30 seconds, spice against Shin Ramyun = 3, no QR codes, no prices) and end on the mixed MEON logo. They play in the "Watch" section on the home page (below "Do it yourself") with download buttons. To take one off the site, set `hidden: true` for it in `VIDEOS` in `scripts/build.mjs`; the "Watch" section appears only while at least one video is shown, and its lead line changes with what's shown. The files are in `src/assets/video/`:
+The home page is built around short, muted background clips cut from MEON's own footage (29 Oct 2026, Preston: full-screen video hero, videos and photos as you scroll, an auto-scrolling Instagram strip near the bottom). The promo and the website tour came off the site the same day. The clips have no sound, no captions and no prices in frame. Some are slowed down, some sped up.
 
-| File | What it is |
-| --- | --- |
-| `meon-promo-20261028.mp4` | 48-second promo, 16:9: 100+ noodles from across Asia, pairings and sides (beef roll, fishcake, meatballs, lettuce, mushrooms), press 1 then 2, 3 min 50 sec, egg and cheese in the last 30 seconds, spice 0 to 5, dine in or take it away |
-| `meon-promo-vertical-20261028.mp4` | The same promo in 9:16, for Reels, TikTok and Stories (text kept inside the Instagram safe area) |
-| `meon-website-tour-20261028.mp4` | 1:13 tour of the website: home facts and "Do it yourself" steps, the roulette, the spice slider, a search for Shin Ramyun and its noodle page with "1 then 2" and the 3:50 timer, Pairings & sides |
-| `poster-*-20261028.jpg` | The still image shown before a video plays |
+| File in `src/assets/video/` | Where | What it is |
+| --- | --- | --- |
+| `hero-phone.mp4` | Home hero, phones | 17 s portrait montage: the MEON sign, someone pointing at it, the stairs, the noodle wall, walking past the counter |
+| `hero-wide.mp4` | Home hero, desktop | 12 s, three portrait clips side by side (street, sign and walk-in, wall and counter); portrait footage stretched to 16:9 would go soft |
+| `wall-glide.mp4` | Step 1, Pick a packet | The noodle wall, slowed down |
+| `enjoy-friends.mp4` | Step 4, Enjoy your meal | Friends eating, from the @meonnoodles reel DedzCYDhezV (before its captions) |
+| `street-front.mp4` | Closing "Find us in Northbridge." band | The street and the MEON sign, slowed down |
+| `ig-*.mp4` | Instagram strip | 6-second previews of @meonnoodles reels (trimmed before any price). Each opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
+
+Every clip has a `.webp` poster of the same name. Posters are all that visitors with "reduce motion" or Save-Data get, and what everyone sees until a clip starts. A clip loads only when it nears the screen and plays only while on screen; the hero loads just the cut that fits the screen. The pause button in the hero stops every background video and the strip, and the browser remembers the choice.
+
+Sources: Preston's WhatsApp clips of the shop and @meonnoodles' own reels. The collab reel by @little_miss_fussy_eats is a third-party creator's and is not re-hosted. `meon-work/rebuild/make_videos.sh` cuts and encodes everything (H.264, no audio, `+faststart`). File names don't need dates: the build adds a content hash to every asset URL. To change a clip, replace the file, run `npm run build` and redeploy. Sharper originals (not WhatsApp copies) would make the hero look better.
 
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
-
-To swap a video, add the new file under a **new dated name** (for example `meon-promo-20261215.mp4`, and the same for its poster), point `file` and `poster` for it in `VIDEOS` at the new names, delete the old files, then run `npm run build` and redeploy. Never reuse a file name: `/assets` is cached for 30 days, so returning visitors would keep seeing the old cut. The download names (`dl`) stay the same, and the sizes on the download buttons update automatically. To make new versions (they need "press 1, then 2", the 3:50 timer, the mixed logo and no QR codes), ask Claude to "re-make the MEON promo" or "re-record the website tour".
 
 ## Guest reviews
 
@@ -160,12 +164,11 @@ After any change: `npm run build && npm run check`. Pushing to GitHub doesn't de
 
 ## Still to confirm
 
-- Street address, postcode, phone, email and opening hours, copied exactly from the Google Business Profile into `data/site.json` (Google treats the address as required for a local business)
-- The official suburb: "Canning Bridge" is a precinct, not a postal suburb (it spans Applecross/Mount Pleasant 6153 and Como 6152). Put the suburb from the Business Profile into `suburb` in `data/site.json`
-- Whether MEON already has a Google Maps place (an online directory copy of a Facebook page lists "Meon Noodles Perth Australia" at Shop 7/8, 45 Francis St, Northbridge). If there is one, claim it rather than making a second listing
+- Phone, email and opening hours. The address is Shop 8, 45 Francis Street, Northbridge WA 6003 (Preston, 29 Oct 2026, matching MEON's Instagram). Opening hours are on Instagram and change often, so the site points there instead of listing them
+- Whether MEON already has a Google Maps place at 45 Francis Street. If there is one, claim it rather than making a second listing, and paste its link into `googleBusinessUrl` and its coordinates into `geo`
 - The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy. If that's MEON's company, point it at the Vercel project rather than buying a new domain
 - Nongshim Shin Noodle Soup Original is marked vegetarian-friendly in the Drive doc; check the packet on the wall (many Shin Ramyun versions list beef)
-- New videos: all three are hidden until they're remade (see Videos)
+- The promo and website tour videos were taken down on 29 Oct 2026 (Preston: "get rid of it for now"); the home page now uses short background clips instead (see Videos)
 - 130 noodles still need a shoot photo (they show an illustrated packet)
 - The updated noodle list of what is actually on the wall
 - The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)

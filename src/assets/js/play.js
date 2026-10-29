@@ -1,4 +1,4 @@
-/* MEON play layer: throwable mascots, build-your-bowl, heat check and the sound prompt.
+/* MEON play layer: build-your-bowl, heat check and the sound prompt.
    Kept deliberately light: nothing runs until someone touches it, so scrolling and
    loading stay fast. Everything respects "reduce motion". */
 (function () {
@@ -6,59 +6,11 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var M = window.MEON || {};
   var sfx = function (kind) { if (window.MeonMusic && window.MeonMusic.playing && window.MeonMusic[kind]) window.MeonMusic[kind](); };
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
-
-  /* ---------- Throwable mascots around the hero ---------- */
-  var crewBox = $(".hero .crew");
-  if (crewBox && !reduceMotion) {
-    $$(".meo", crewBox).forEach(function (m) {
-      var drag = null, block = false;
-      m.addEventListener("pointerdown", function (e) {
-        if (e.button !== 0) return;
-        var box = crewBox.getBoundingClientRect(), r = m.getBoundingClientRect();
-        drag = { id: e.pointerId, ox: e.clientX - r.left, oy: e.clientY - r.top, sx: e.clientX, sy: e.clientY, moved: false, vx: 0, vy: 0, lx: e.clientX, ly: e.clientY, lt: performance.now(), box: box };
-        cancelAnimationFrame(m._fly);
-        m.setPointerCapture(e.pointerId);
-      });
-      m.addEventListener("pointermove", function (e) {
-        if (!drag || e.pointerId !== drag.id) return;
-        if (!drag.moved && Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) < 6) return;
-        if (!drag.moved) { drag.moved = true; m.classList.add("is-dragging"); }
-        var now = performance.now(), dt = Math.max(8, now - drag.lt);
-        drag.vx = (e.clientX - drag.lx) / dt * 16; drag.vy = (e.clientY - drag.ly) / dt * 16;
-        drag.lx = e.clientX; drag.ly = e.clientY; drag.lt = now;
-        m.style.left = (e.clientX - drag.box.left - drag.ox) + "px";
-        m.style.top = (e.clientY - drag.box.top - drag.oy) + "px";
-        m.style.rotate = Math.max(-25, Math.min(25, drag.vx * 2)) + "deg";
-      });
-      var release = function (e) {
-        if (!drag || e.pointerId !== drag.id) return;
-        var d = drag; drag = null;
-        m.classList.remove("is-dragging");
-        if (!d.moved) return;
-        block = true; setTimeout(function () { block = false; }, 50);
-        if (M.talk) M.talk(m, ["Wheee!", "Again!", "I can fly", "Put me down!", "Noodle launch"][Math.floor(Math.random() * 5)]);
-        var x = parseFloat(m.style.left), y = parseFloat(m.style.top), vx = d.vx, vy = d.vy, rot = parseFloat(m.style.rotate) || 0;
-        var W = d.box.width - m.offsetWidth, H = d.box.height - m.offsetHeight;
-        var fly = function () {
-          vx *= 0.94; vy *= 0.94; x += vx; y += vy; rot *= 0.92;
-          if (x < 0) { x = 0; vx = -vx * 0.6; } if (x > W) { x = W; vx = -vx * 0.6; }
-          if (y < 0) { y = 0; vy = -vy * 0.6; } if (y > H) { y = H; vy = -vy * 0.6; }
-          m.style.left = x + "px"; m.style.top = y + "px"; m.style.rotate = rot.toFixed(1) + "deg";
-          if (Math.abs(vx) + Math.abs(vy) > 0.3) m._fly = requestAnimationFrame(fly); else m.style.rotate = "0deg";
-        };
-        m._fly = requestAnimationFrame(fly);
-      };
-      m.addEventListener("pointerup", release);
-      m.addEventListener("pointercancel", release);
-      m.addEventListener("click", function (e) { if (block) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
-    });
-  }
 
   /* ---------- Build your bowl ---------- */
   var bowl = $("[data-bowl]");
@@ -143,7 +95,7 @@
 
   /* ---------- Sound prompt: offer the soundtrack on the first visit to the home page ---------- */
   var soundBtn = $("[data-sound]");
-  if (soundBtn && $(".hero--launch") && store.get("meon-sound") === null) {
+  if (soundBtn && $(".vhero") && store.get("meon-sound") === null) {
     var vibe = document.createElement("div");
     vibe.className = "vibe";
     vibe.setAttribute("role", "dialog");

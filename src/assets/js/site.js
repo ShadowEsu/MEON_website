@@ -53,8 +53,7 @@
   var backTop = $(".back-top");
   var parallax = reduceMotion ? [] : $$("[data-parallax]");
   var hscroll = reduceMotion ? [] : $$("[data-hscroll]");
-  var how = $("[data-how]");
-  var howBar = $(".how-progress span");
+  var vhero = $(".vhero");
   var lastY = window.scrollY, ticking = false;
   var navOpen = function () { var n = $("#site-nav"); return n && n.classList.contains("is-open"); };
   function frame() {
@@ -82,10 +81,7 @@
         row.style.transform = "translate3d(" + (-p * span * parseFloat(row.getAttribute("data-speed") || 1)).toFixed(1) + "px,0,0)";
       });
     }
-    if (how && howBar) {
-      var hb = how.getBoundingClientRect();
-      howBar.style.setProperty("--hp", clamp((vh * 0.6 - hb.top) / hb.height, 0, 1).toFixed(3));
-    }
+    if (vhero && header) header.classList.toggle("is-over", y < vhero.offsetHeight - header.offsetHeight);
   }
   function requestFrame() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
   window.addEventListener("scroll", requestFrame, { passive: true });
@@ -160,7 +156,7 @@
   });
 
   /* ---------- Reveal on scroll ---------- */
-  var heroTitle = $(".hero-title, .page-title, .noodle h1");
+  var heroTitle = $(".page-title, .noodle h1");
   var reveals = $$(".reveal, .img-reveal, [data-split], [data-reveal-letters]").filter(function (el) { return el !== heroTitle; });
   if ("IntersectionObserver" in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {
@@ -173,52 +169,51 @@
   requestAnimationFrame(function () {
     setTimeout(function () {
       if (heroTitle) heroTitle.classList.add("is-in");
-      var crew = $(".crew"); if (crew) crew.classList.add("is-ready");
     }, 60);
   });
-
-  /* ---------- Typewriter (home hero) ---------- */
-  var typed = $("[data-typer]");
-  if (typed && !reduceMotion) {
-    var words = [];
-    try { words = JSON.parse(typed.getAttribute("data-typer")); } catch (e) { words = []; }
-    if (words.length > 1) {
-      var wi = 0, ci = words[0].length, deleting = true;
-      var stepType = function () {
-        var w = Array.from(words[wi]);
-        if (deleting) {
-          ci--; typed.textContent = w.slice(0, ci).join("");
-          if (ci <= 0) { deleting = false; wi = (wi + 1) % words.length; }
-          setTimeout(stepType, 34);
-        } else {
-          var nw = Array.from(words[wi]);
-          ci++; typed.textContent = nw.slice(0, ci).join("");
-          if (ci >= nw.length) { deleting = true; setTimeout(stepType, 1800); } else setTimeout(stepType, 65);
-        }
-      };
-      setTimeout(stepType, 2400);
-    }
-  }
 
   /* ---------- Pause decorative loops when off-screen ---------- */
   if ("IntersectionObserver" in window) {
     var po = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { en.target.classList.toggle("is-off", !en.isIntersecting); });
     }, { rootMargin: "120px" });
-    $$(".crew, .peeker, .logo-anim, .cta-mascots, .mascot-stage, .flag--hero, .footer-big, .noodle-photo").forEach(function (el) { po.observe(el); });
+    $$(".peeker, .logo-anim, .cta-mascots, .mascot-stage, .flag--hero, .footer-big, .noodle-photo, .vhero-logo, .insta-track").forEach(function (el) { po.observe(el); });
   }
 
-  /* ---------- Autoplay videos only when visible ---------- */
-  var vids = $$("video[data-autoplay]");
-  if (vids.length && "IntersectionObserver" in window) {
-    var vio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        var v = en.target;
-        if (en.isIntersecting && !reduceMotion) { if (v.preload === "none") v.preload = "auto"; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-        else v.pause();
-      });
-    }, { threshold: 0.25 });
-    vids.forEach(function (v) { vio.observe(v); });
+  /* ---------- Background videos ----------
+     Muted loops. The file loads only when the video nears the screen and plays only while it's on screen.
+     Reduced motion or Save-Data: never load the videos; the posters stay. Hero videos carry data-media
+     so a phone only fetches the portrait cut and a desktop only the wide one. The pause button stops
+     every background video and the Instagram strip, and the choice is remembered. */
+  var bgVids = $$("video[data-bg-src]");
+  var saveData = !!(navigator.connection && navigator.connection.saveData);
+  var userPaused = false;
+  try { userPaused = localStorage.getItem("meon-videos") === "paused"; } catch (e) {}
+  var bgFits = function (v) { var m = v.getAttribute("data-media"); return !m || window.matchMedia(m).matches; };
+  var bgPlay = function (v) {
+    if (reduceMotion || saveData || userPaused || !v._in || !bgFits(v)) return;
+    if (!v.getAttribute("src")) { v.muted = true; v.src = v.getAttribute("data-bg-src"); }
+    var p = v.play(); if (p && p.catch) p.catch(function () {});
+  };
+  bgVids.forEach(function (v) { v.addEventListener("playing", function () { v.classList.add("is-playing"); }); });
+  if (bgVids.length && "IntersectionObserver" in window && !reduceMotion && !saveData) {
+    var bio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { var v = en.target; v._in = en.isIntersecting; if (v._in) bgPlay(v); else if (!v.paused) v.pause(); });
+    }, { rootMargin: "160px 0px" });
+    bgVids.forEach(function (v) { bio.observe(v); });
+  }
+  var vToggle = $("[data-video-toggle]");
+  var setVideosPaused = function (on) {
+    userPaused = on;
+    try { localStorage.setItem("meon-videos", on ? "paused" : "on"); } catch (e) {}
+    document.documentElement.classList.toggle("videos-paused", on);
+    if (vToggle) { vToggle.setAttribute("aria-pressed", String(on)); vToggle.setAttribute("aria-label", on ? "Play the background videos" : "Pause the background videos"); }
+    bgVids.forEach(function (v) { if (on) v.pause(); else bgPlay(v); });
+  };
+  if (reduceMotion || saveData) { if (vToggle) vToggle.hidden = true; }
+  else {
+    if (userPaused) setVideosPaused(true);
+    if (vToggle) vToggle.addEventListener("click", function () { setVideosPaused(!userPaused); });
   }
 
   /* ---------- Count-up numbers ---------- */
@@ -243,7 +238,6 @@
   /* ---------- Mascots: eyes follow the cursor, gentle drift, tap to hop & talk ---------- */
   if (finePointer && !reduceMotion) {
     var pupils = $$(".meo-pupils");
-    var drifters = $$(".crew .meo");
     var mx = 0, my = 0, pending = false;
     var look = function () {
       pending = false;
@@ -255,7 +249,6 @@
         var dx = mx - (b.left + b.width / 2), dy = my - (b.top + b.height * 0.52), d = Math.sqrt(dx * dx + dy * dy) || 1, k = Math.min(1, d / 300);
         p.setAttribute("transform", "translate(" + (dx / d * 4.5 * k).toFixed(2) + " " + (dy / d * 4.5 * k).toFixed(2) + ")");
       });
-      drifters.forEach(function (m, i) { var depth = 8 + (i % 4) * 6; m.style.translate = (-cx0 * depth).toFixed(1) + "px " + (-cy0 * depth).toFixed(1) + "px"; });
     };
     window.addEventListener("pointermove", function (e) { mx = e.clientX; my = e.clientY; if (!pending) { pending = true; requestAnimationFrame(look); } }, { passive: true });
   }
@@ -487,24 +480,6 @@
     });
     apply();
   }
-
-  /* ---------- Videos: big play button, one at a time, background music pauses ---------- */
-  $$("[data-video]").forEach(function (box) {
-    var v = $("video", box), btn = $(".watch-play", box);
-    if (!v || !btn) return;
-    btn.addEventListener("click", function () {
-      v.controls = true;
-      var p = v.play(); if (p && p.catch) p.catch(function () {});
-    });
-    v.addEventListener("play", function () {
-      box.classList.add("is-playing");
-      $$("[data-video] video").forEach(function (o) { if (o !== v && !o.paused) o.pause(); });
-      if (window.MeonMusic && window.MeonMusic.playing) {
-        window.MeonMusic.stop();
-        var sb = $("[data-sound]"); if (sb) { sb.setAttribute("aria-pressed", "false"); sb.setAttribute("aria-label", "Play background music"); }
-      }
-    });
-  });
 
   /* ---------- Noodle photo gallery (thumbnails swap the main photo) ---------- */
   var galleryMain = $("[data-gallery-main]");
@@ -875,9 +850,6 @@
       window.addEventListener("pointerdown", resume, true); window.addEventListener("keydown", resume, true);
     }
   }
-
-  // Shared with play.js
-  window.MEON = { talk: talk, confetti: confetti };
 
   /* ---------- Year ---------- */
   $$("[data-year]").forEach(function (el) { el.textContent = String(new Date().getFullYear()); });

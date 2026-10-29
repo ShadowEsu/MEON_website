@@ -78,7 +78,7 @@ const REGULARS_OPENER = (n) => `Straight from ${n.country}, ${n.brand}'s ${n.nam
 const OPENERS = [
   (n) => `${n.name} by ${n.brand} is ${/^[AEIOU]/.test(n.countryAdj) ? "an" : "a"} ${n.countryAdj} favourite you can cook here at MEON.`,
   REGULARS_OPENER,
-  (n) => `${n.brand} ${n.name} brings a proper taste of ${n.country} to Canning Bridge.`,
+  (n) => `${n.brand} ${n.name} brings a proper taste of ${n.country} to Northbridge.`,
   (n) => `Craving something from ${n.country}? ${n.brand}'s ${n.name} is a great place to start.`,
 ];
 

@@ -1,8 +1,9 @@
 // Dev helper: clicks through the interactive features and fails on any console error.
-// PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs
+// PLAYWRIGHT_PATH=/path/to/playwright/index.mjs PW_CHANNEL=chrome node scripts/smoke.mjs
+// PW_CHANNEL=chrome: the background videos are H.264, which Playwright's bundled Chromium can't play.
 const { chromium } = await import(process.env.PLAYWRIGHT_PATH || "playwright");
 const BASE = process.env.BASE || "http://localhost:4173";
-const browser = await chromium.launch({ args: ["--no-sandbox"] });
+const browser = await chromium.launch({ args: ["--no-sandbox"], ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}) });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
 await ctx.route(/^https:\/\//, async (route) => { try { await route.fulfill({ response: await route.fetch() }); } catch { await route.abort(); } });
 const page = await ctx.newPage();
@@ -22,11 +23,18 @@ ok(hits >= 10, `search "buldak" returns results (${hits})`);
 await Promise.all([page.waitForURL(/\/noodles\//, { timeout: 8000 }).catch(() => {}), page.keyboard.press("Enter")]);
 ok(/\/noodles\/samyang-buldak/.test(page.url()), `Enter opens first result (${page.url()})`);
 
-await page.goto(BASE + "/", { waitUntil: "networkidle" });
-await page.waitForTimeout(800);
-await page.click(".crew .meo >> nth=0", { force: true });
+await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
+await page.waitForTimeout(2500);
+ok(await page.$eval(".vhero .vbg--wide video", (v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0), "wide hero video loads and plays on desktop");
+ok(await page.$eval(".vhero .vbg--phone video", (v) => !v.getAttribute("src")), "phone hero video is not fetched on desktop");
+ok(await page.$eval(".logo-badge", (s) => s.querySelectorAll(".lw").length === 8 && s.getBoundingClientRect().height >= 44), "header logo has meon plus the four glyphs, at a readable size");
+ok(!(await page.$(".facts")) && !(await page.$("#watch")), "no facts row and no Watch section on the home page");
+ok((await page.$$eval(".insta-row .reel", (e) => e.length)) >= 12, "Instagram strip is filled");
+await page.goto(BASE + "/countries/", { waitUntil: "networkidle" });
+await page.click(".peeker .meo", { force: true });
 await page.waitForTimeout(200);
-ok(await page.$eval(".crew .meo", (m) => m.classList.contains("is-talking")), "mascot talks when tapped");
+ok(await page.$eval(".peeker .meo", (m) => m.classList.contains("is-talking")), "mascot talks when tapped");
+await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.evaluate(() => document.querySelector("[data-roulette]").scrollIntoView());
 await page.click("[data-spin]");
 await page.waitForTimeout(3100);
@@ -47,7 +55,7 @@ ok(await page.$eval("[data-qr-banner]", (e) => !e.hidden), "QR scan banner appea
 await page.click("[data-timer-start]");
 await page.waitForTimeout(1300);
 const t = await page.$eval(".timer-readout", (e) => e.textContent);
-ok(t === "3:29" || t === "3:28", `cook timer starts at 3:30 and counts down (${t})`);
+ok(t === "3:49" || t === "3:48", `cook timer starts at 3:50 and counts down (${t})`);
 
 await page.goto(BASE + "/qr-generator/", { waitUntil: "networkidle" });
 await page.selectOption("#qg-preset", "/noodles/nongshim-shin-black-premium/");
@@ -57,7 +65,7 @@ ok(/shin-black-premium\/\?src=qr/.test(info), `QR generator encodes chosen noodl
 const nonBlank = await page.$eval("#qg-canvas", (c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let dark = 0; for (let i = 0; i < d.length; i += 4 * 97) if (d[i] < 80) dark++; return dark; });
 ok(nonBlank > 100, "QR canvas is drawn");
 
-for (const p of ["/countries/", "/countries/japan/", "/toppings/", "/about/", "/visit/", "/qr/", "/404.html"]) {
+for (const p of ["/countries/", "/countries/japan/", "/pairings-and-sides/", "/about/", "/visit/", "/qr/", "/404.html"]) {
   await page.goto(BASE + p, { waitUntil: "networkidle" });
 }
 ok(true, "visited all page types");

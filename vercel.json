@@ -61,6 +61,16 @@
       "source": "/meon-card/",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/toppings/",
+      "destination": "/pairings-and-sides/",
+      "permanent": true
+    },
+    {
+      "source": "/toppings/:path*",
+      "destination": "/pairings-and-sides/:path*",
+      "permanent": true
     }
   ]
 }
