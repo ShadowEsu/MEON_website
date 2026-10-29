@@ -95,6 +95,8 @@ Every clip has a `.webp` poster of the same name. Posters are all that visitors 
 
 Sources: Preston's WhatsApp clips of the shop and @meonnoodles' own reels. The collab reel by @little_miss_fussy_eats is a third-party creator's and is not re-hosted. `meon-work/rebuild/make_videos.sh` cuts and encodes everything (H.264, no audio, `+faststart`). File names don't need dates: the build adds a content hash to every asset URL. To change a clip, replace the file, run `npm run build` and redeploy. Sharper originals (not WhatsApp copies) would make the hero look better.
 
+**Own footage only.** Clips on the site come only from footage MEON shot itself. Never re-host collab reels, reposts, or another creator's or guest's video, even when it's on MEON's profile; link to it instead. Before a new clip goes on the site, the owner confirms that everyone recognisable in it (presenter, staff, diners, passers-by) agreed to be on the website, with a parent's OK for anyone who might be under 18. If someone asks to be taken out, cut or replace the clip and redeploy.
+
 All the music is original and generated for MEON, so there are no licensing issues on Instagram, TikTok or YouTube.
 
 ## Guest reviews
@@ -168,6 +170,7 @@ After any change: `npm run build && npm run check`. Pushing to GitHub doesn't de
 - Whether MEON already has a Google Maps place at 45 Francis Street. If there is one, claim it rather than making a second listing, and paste its link into `googleBusinessUrl` and its coordinates into `geo`
 - The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy. If that's MEON's company, point it at the Vercel project rather than buying a new domain
 - Nongshim Shin Noodle Soup Original is marked vegetarian-friendly in the Drive doc; check the packet on the wall (many Shin Ramyun versions list beef)
+- Consent for the people in the current clips (Security M-1, 29 Oct): the owner confirms that the recognisable people (the presenter, diners, the dancing man, staff) agreed to be on the website, and that a parent agreed for anyone who might be under 18. Until then, any clip someone objects to comes off at once
 - The promo and website tour videos were taken down on 29 Oct 2026 (Preston: "get rid of it for now"); the home page now uses short background clips instead (see Videos)
 - 130 noodles still need a shoot photo (they show an illustrated packet)
 - The updated noodle list of what is actually on the wall
