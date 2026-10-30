@@ -74,7 +74,7 @@ const noodles = noodlesRaw.map((n) => {
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(diet)) dietTokens.push("seafood");
   const unrated = n.spice == null;
-  return { ...n, diet, note: badge(n.funNote), c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
