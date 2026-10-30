@@ -387,9 +387,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vpause[hidden] { display: none; }
 .vpause-ic { width: 12px; height: 14px; border-inline: 4px solid currentColor; }
 .videos-paused :is(.vpause, .vpause-hdr) .vpause-ic { width: 0; height: 0; border-style: solid; border-width: 7px 0 7px 12px; border-color: transparent transparent transparent currentColor; margin-left: 3px; }
-/* Paused (always so at first under reduced motion): the hero button becomes a labelled "Play videos" pill. */
+/* Paused (always so at first under reduced motion): the hero button becomes a labelled "Play videos" pill. Its backing is
+   near-opaque so the white label stays above 4.5:1 over any frame, even the yellow star on /noodles/ (Design, 30 Oct). */
 .vpause-text { display: none; }
-.videos-paused .vpause { padding: 0 18px 0 15px; }
+.videos-paused .vpause { padding: 0 18px 0 15px; background: rgba(17,17,17,.78); }
+.videos-paused .vpause:hover { background: rgba(17,17,17,.9); }
 .videos-paused .vpause .vpause-text { display: inline; }
 .vhero-cue { position: absolute; z-index: 2; left: 50%; bottom: clamp(18px, 3.5vh, 32px); width: 26px; height: 42px; margin-left: -13px; border: 2px solid rgba(255,255,255,.7); border-radius: 14px; }
 .vhero-cue i { position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: #fff; animation: cue 1.8s var(--ease-io) infinite; }
