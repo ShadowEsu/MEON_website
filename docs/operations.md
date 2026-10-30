@@ -34,7 +34,7 @@ The main noodle photos come from the MEON photo shoot. The photographer's shared
 - the **bowl-with-packet** shot as the main photo
 - the top-down and close-up shots as extra photos (`data/gallery.json`)
 
-Only Steven's MEON shoot photos are used (42 noodles so far). The old stock photos from the Wix site were removed: many had harsh black backgrounds or showed cup noodles, which MEON doesn't sell. Noodles without a shoot photo show an illustrated packet in a flavour colour. When more noodles are photographed, ask Claude to "add the new noodle photos from the shoot folder".
+The main noodle photos are Steven's MEON shoot photos (43 noodles so far). The old stock photos from the Wix site were removed: many had harsh black backgrounds or showed cup noodles, which MEON doesn't sell. For noodles the shoot hasn't covered, a free packet photo may stand in, but only a public-domain or CC0 one that shows the exact packet and no recognisable people, recorded in `docs/credits.md` (Preston, 29 Oct 2026; one so far: Indomie Soto Mie). Noodles with neither show an illustrated packet in a flavour colour. When more noodles are photographed, ask Claude to "add the new noodle photos from the shoot folder"; a shoot photo replaces a free one.
 
 Some shoot folders are named differently from the packet in the photo. The site follows the packet:
 - "Samyang Ramen Original Mild" is Samyang Bulgogi
@@ -177,7 +177,7 @@ After any change: `npm run build && npm run check`. Pushing to GitHub doesn't de
 - Nongshim Shin Noodle Soup Original is marked vegetarian-friendly in the Drive doc; check the packet on the wall (many Shin Ramyun versions list beef)
 - Consent for the people in the current clips (Security M-1, 29 Oct): the owner confirms that the recognisable people (the presenter, diners, the dancing man, staff) agreed to be on the website, and that a parent agreed for anyone who might be under 18. Until then, any clip someone objects to comes off at once
 - The promo and website tour videos were taken down on 29 Oct 2026 (Preston: "get rid of it for now"); the home page now uses short background clips instead (see Videos)
-- 130 noodles still need a shoot photo (they show an illustrated packet)
+- 155 noodles still need a photo (they show an illustrated packet). A search of Wikimedia Commons and Openverse on 29 Oct 2026 found a public-domain or CC0 photo for only one (Indomie Soto Mie); several packets (Neoguri, Chapaguri, Sarigomtang, Ahn Sung Tang Myun Seafood, Jin Ramen Mild, Odongtong, Mama) exist only under CC BY-SA, which needs a visible credit. Shooting the packets on the wall is the way to cover the rest
 - The updated noodle list of what is actually on the wall
 - The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)
 - Diet for the 27 noodles added from the till (in `data/catalogue.json`)

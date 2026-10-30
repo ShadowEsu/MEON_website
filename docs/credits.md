@@ -4,7 +4,7 @@ Every image on the site that MEON didn't make itself, with where it came from an
 
 ## MEON's own
 
-- **Noodle photos** (`src/assets/img/noodles/`): Steven's MEON photo shoot, commissioned by MEON.
+- **Noodle photos** (`src/assets/img/noodles/`): Steven's MEON photo shoot, commissioned by MEON, except the packet photos listed under "Noodle photos from free libraries" below.
 - **Booth-shoot bowl photos** (`src/assets/img/shoot/`, used on the home page, Visit page and as the share image): MEON's own shoot on a black background (MEON's Drive, one folder per noodle), resized from the 4K originals.
 - **Background videos** (`src/assets/video/`): MEON's own footage. The shop clips are Preston's; the step, wall and `ig-*.mp4` clips also use MEON's own @meonnoodles reels. Reels by other creators (for example the @little_miss_fussy_eats collab) are not re-hosted.
 - **Topping photos on the MEON lid** (`toppings/meatballs.webp`, `toppings/spring-onion.webp`, `photos/topping-*.webp`): MEON's own topping shoot (MEON's Drive folder "Toppings pics").
@@ -30,6 +30,16 @@ All files are in `src/assets/img/toppings/`, cropped to 480 × 480. None of thes
 `egg.webp` came from the old Wix site and was matched to its library page by reverse image search. The other eight Wix-era topping photos had no licence on record, so they were replaced with the Commons photos above.
 
 To add a new topping photo, prefer a shot on the MEON lid. If you use a library photo, add a row here with the link, author and licence.
+
+## Noodle photos from free libraries
+
+Packet photos for noodles that the MEON shoot hasn't covered yet (Preston, 29 Oct 2026: "completely free, no copyright"). Only public-domain or CC0 photos are used: no CC BY or BY-SA, no "free to use" sites with their own terms, and no recognisable people. Each one was checked against the packet's brand, product and flavour. Files are 900 × 900 in `src/assets/img/noodles/` with a 400 × 400 copy in `sm/`; replace them with the shoot photo when that noodle is photographed.
+
+| File | Source | Author | Licence | Edits |
+|---|---|---|---|---|
+| `indomie-soto-mie.webp` | [Flickr: IMG_20160623_174010](https://www.flickr.com/photos/138690323@N08/27579257520) | Ricky Maulana (Flickr: aries5485) | [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/) (Flickr "Public domain") | Cropped to a square around the packet (from 3264 × 2448) and resized |
+
+The packet is Indonesia's domestic Indomie Soto Mie design from about 2016; the one on our wall may look slightly different.
 
 ## Code libraries that ship artwork
 
