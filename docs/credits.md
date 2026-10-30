@@ -41,7 +41,7 @@ Packet photos for noodles that the MEON shoot hasn't covered yet (Preston, 29 Oc
 
 The packet is Indonesia's domestic Indomie Soto Mie design from about 2016; the one on our wall may look slightly different.
 
-Flickr owners can change a licence later, so each row records the date it was checked and an archived copy of the page; the photo stays covered by the licence it had when we took it.
+Flickr owners can change a licence later, so each row records the date it was checked and an archived copy of the page. A capture of the Flickr page as checked is kept in MEON's private records.
 
 ## Code libraries that ship artwork
 
