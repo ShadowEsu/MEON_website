@@ -274,9 +274,14 @@
     bgVids.forEach(function (v) { bio.observe(v); });
     ["touchend", "click", "keydown"].forEach(function (t) { document.addEventListener(t, bgRetry, { capture: true, passive: true }); });
     if (heroToggle) {
-      // Over half the hero button hidden (off screen or under the fixed header) counts as gone.
-      new IntersectionObserver(function (entries) { heroToggleOn = entries[0].intersectionRatio > 0.5; syncHeaderToggle(); },
-        { rootMargin: "-" + (header ? header.offsetHeight : 0) + "px 0px 0px 0px", threshold: [0, 0.5, 1] }).observe(heroToggle);
+      // Over half the hero button hidden (off screen or under the fixed header) counts as gone: the header's toggle takes
+      // over, and the hero's own button and scroll cue hide, so the header never shows two toggles or a cue over one.
+      var heroBox = heroToggle.closest(".vhero");
+      new IntersectionObserver(function (entries) {
+        heroToggleOn = entries[0].intersectionRatio > 0.5;
+        heroBox.classList.toggle("vhero--under", !heroToggleOn);
+        syncHeaderToggle();
+      }, { rootMargin: "-" + (header ? header.offsetHeight : 0) + "px 0px 0px 0px", threshold: [0, 0.5, 1] }).observe(heroToggle);
     }
   }
   var showVideosPaused = function (on) {

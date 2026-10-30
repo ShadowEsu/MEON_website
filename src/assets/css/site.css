@@ -400,6 +400,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vhero-cue i { position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: #fff; animation: cue 1.8s var(--ease-io) infinite; }
 @keyframes cue { 0% { transform: none; opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(14px); opacity: 0; } }
 @media (max-width: 899px) { .vhero-cue { display: none; } .vpause { top: calc(var(--header-h) + 14px); bottom: auto; } .vhero .actions .btn { flex: 1 1 100%; } }
+/* Once the hero's button slides under the fixed header, the header's toggle takes over (site.js): hide the hero's
+   own button and the scroll cue so the header never shows two toggles or a cue on top of one. */
+.vhero--under .vpause, .vhero--under .vhero-cue { visibility: hidden; }
 @media (max-width: 760px) { .vhero-inner { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); } }
 /* Inner pages (Pairings and sides, Noodles, Countries, About, Visit; videoHero() in build.mjs). The reels carry their own
    burned-in captions, so the words never sit on the footage: desktop splits the hero (words on ink on the left, two
