@@ -33,7 +33,7 @@ ok(!(await page.$(".facts")) && !(await page.$("#watch")), "no facts row and no 
 ok((await page.$$eval(".insta-row .reel", (e) => e.length)) >= 12, "Instagram strip is filled");
 for (const p of ["pairings-and-sides/", "noodles/", "countries/", "about/", "visit/"]) {
   await page.goto(BASE + "/" + p, { waitUntil: "domcontentloaded" });
-  ok(await page.$eval(".vhero--page", (h) => h.querySelectorAll(".vcol video").length === 3 && !!h.querySelector(".vbg--phone video") && !!h.querySelector("h1")), `/${p} has the video hero (3 desktop clips, 1 phone clip, h1)`);
+  ok(await page.$eval(".vhero--page", (h) => h.querySelectorAll(".vcol video").length === 2 && !!h.querySelector(".vbg--phone video") && !!h.querySelector("h1")), `/${p} has the video hero (2 desktop clips, 1 phone clip, h1)`);
 }
 await page.goto(BASE + "/privacy/", { waitUntil: "networkidle" });
 await page.click(".peeker .meo", { force: true });

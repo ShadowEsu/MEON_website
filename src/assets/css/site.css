@@ -346,9 +346,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vhero-cols { display: none; }
 @media (min-width: 900px) {
   .vbg--phone { display: none; }
-  .vhero-cols { position: absolute; inset: -27% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--ink); }
+  /* A small overscan (10%) and gentle drift, so each column shows most of its clip (Preston: "zoom out") */
+  .vhero-cols { position: absolute; inset: -10% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--ink); }
   .vcol { position: relative; overflow: hidden; transform: translate3d(0, calc(var(--p, 0) * var(--drift) * 1vh), 0); }
-  .vcol--a { --drift: -16; } .vcol--b { --drift: 9; } .vcol--c { --drift: -24; }
+  .vcol--a { --drift: -6; } .vcol--b { --drift: 4; } .vcol--c { --drift: -9; }
   .js .vcol { animation: vcol-in 1.3s var(--ease) both; }
   .js .vcol--b { animation-delay: .14s; }
   .js .vcol--c { animation-delay: .28s; }
@@ -387,8 +388,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 @media (max-width: 899px) { .vhero-cue { display: none; } .vpause { top: calc(var(--header-h) + 14px); bottom: auto; } .vhero .actions .btn { flex: 1 1 100%; } }
 @media (max-width: 760px) { .vhero-inner { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); } }
 /* Inner pages (Pairings and sides, Noodles, Countries, About, Visit; videoHero() in build.mjs). The reels carry their own
-   burned-in captions, so the words never sit on the footage: desktop splits the hero (words on ink on the left, the
-   three clip columns on the right); phones frame the clip under the header with the words below it. Not pinned:
+   burned-in captions, so the words never sit on the footage: desktop splits the hero (words on ink on the left, two
+   clip columns on the right); phones frame the whole 9:16 clip under the header with the words below it. Not pinned:
    site.js "leave" mode runs --p from 0 to 1 as the hero scrolls away, so the footage shrinks into a rounded card, the
    desktop columns drift and the words lift away. */
 .js .vhero--page { height: auto; }
@@ -408,9 +409,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   /* the transparent header's links sit over the top of the footage */
   .vhero--page .vhero-media::after { content: ""; position: absolute; inset: 0 0 auto; height: 150px; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(12,9,8,.6), rgba(12,9,8,0)); }
   .vhero--page .vhero-inner { grid-column: 1; grid-row: 1; padding: calc(var(--header-h) + 32px) clamp(28px, 4vw, 64px) clamp(40px, 7vh, 88px) max(var(--gutter), (100vw - var(--wrap)) / 2); }
+  .vhero--page .vhero-cols { grid-template-columns: repeat(2, 1fr); inset: -6% 0; }
+  .vhero--page .vcol--a { --drift: -5; } .vhero--page .vcol--b { --drift: 5; }
 }
 @media (max-width: 899.98px) {
-  .vhero--page .vhero-media { height: 54vh; height: 54svh; margin: calc(var(--header-h) + 8px) 12px 0; border-radius: 22px; }
+  .vhero--page .vhero-media { justify-self: center; height: min(58vh, (100vw - 24px) * 16 / 9); height: min(58svh, (100vw - 24px) * 16 / 9); aspect-ratio: 9 / 16; margin: calc(var(--header-h) + 8px) 0 0; border-radius: 22px; }
   .vhero--page .vhero-inner { padding: 22px var(--gutter) 40px; }
   .vhero--page .actions .btn--sm { flex: 0 0 auto; }
   .vhero--page .vpause { top: calc(var(--header-h) + 22px); right: 24px; }
@@ -515,8 +518,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .scard-copy p { font-size: .98rem; line-height: 1.45; margin: 0 0 12px; }
   .scard-copy p.scard-tip { font-size: .9rem; padding: 8px 12px; }
 }
-/* Tablets in portrait: a centred 9:16 frame rather than a wide crop of portrait footage */
-@media (min-width: 560px) and (max-width: 899.98px) { .scard-media { justify-self: center; height: 100%; aspect-ratio: 9 / 16; } .scard-copy { justify-self: center; width: min(100%, 34rem); } }
+/* Phones and tablets in portrait: a centred 9:16 frame shows the whole clip rather than a wide crop of portrait footage
+   (never narrower than 220px, so short screens crop a little instead of shrinking the clip to a sliver) */
+@media (max-width: 899.98px) { .scard-media { justify-self: center; height: 100%; aspect-ratio: 9 / 16; min-width: min(100%, 220px); } .scard-copy { justify-self: center; width: min(100%, 34rem); } }
 @media (max-width: 760px) { .scard-copy { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 900px) {
   .scard { grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(40px, 6vw, 110px); padding: calc(var(--header-h) + 24px) max(var(--gutter), (100% - var(--wrap)) / 2) clamp(32px, 6vh, 72px); }
@@ -968,8 +972,6 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .reel-av { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--brand); color: #fff; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #f7a23b; }
 .reel-av svg.i { width: 16px; height: 16px; }
 .reel-media { position: relative; display: block; aspect-ratio: 9 / 16; background: #1a1412; }
-.reel-play { position: absolute; right: 10px; bottom: 10px; z-index: 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: rgba(18,16,16,.55); color: #fff; }
-.reel-play svg.i { width: 13px; height: 13px; }
 .reel-bottom { display: grid; gap: 7px; padding: 10px 12px 14px; }
 .reel-acts { display: flex; gap: 14px; }
 .reel-acts svg.i { width: 22px; height: 22px; }
@@ -996,6 +998,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vwall-col { display: flex; flex-direction: column; gap: 14px; transform: translate3d(0, calc((var(--p) - .5) * var(--drift) * 1vh), 0); }
 .vwall-col--1 { --drift: -34; } .vwall-col--2 { --drift: 22; } .vwall-col--3 { --drift: -46; } .vwall-col--4 { --drift: 16; }
 .vtile { position: relative; margin: 0; aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; background: #1a1412; }
+.vtile--wide { aspect-ratio: 16 / 9; }
 .vtile > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .vwall::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 46% at 50% 50%, rgba(12,9,8,.82), rgba(12,9,8,.35) 70%, rgba(12,9,8,.15)); }
 .vwall-copy { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; padding: 0 var(--gutter); text-align: center; }

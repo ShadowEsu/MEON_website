@@ -367,11 +367,12 @@ function pageHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = ""
 </section>`;
 }
 
-// Inner-page video hero (Preston, 29 Oct 2026: the other pages get the home's look). Full-bleed footage: three portrait
-// clips side by side on desktop, one on phones (`phone`, picked without big burned-in captions so nothing runs into the
-// title), with the breadcrumbs, title, lead and actions over it. Not pinned: as the page scrolls on, the footage shrinks
-// into a rounded card and the words lift away (data-scene="leave", site.js). Posters only for reduced motion and
-// Save-Data; the pause button stops every background video. The page's layout() needs `overlay: true`.
+// Inner-page video hero (Preston, 29 Oct 2026: the other pages get the home's look). Full-bleed footage: two portrait
+// clips side by side on desktop (two, not three, so each shows most of its frame: "zoom out"), one on phones (`phone`,
+// picked without big burned-in captions so nothing runs into the title), with the breadcrumbs, title, lead and actions
+// over it. Not pinned: as the page scrolls on, the footage shrinks into a rounded card and the words lift away
+// (data-scene="leave", site.js). Posters only for Save-Data; the pause button stops every background video. The page's
+// layout() needs `overlay: true`.
 function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "", clips, phone, logo = false }) {
   return `<section class="vhero vhero--page" aria-labelledby="page-h" data-scene="leave">
   <div class="vhero-stage">
@@ -450,9 +451,9 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
 // Numbers count up (country pages).
 const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd>${typeof n === "number" ? `<span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span>` : esc(n)}</dd></div>`).join("")}</dl>`;
 
-// Background clips (src/assets/video), cut from MEON's own footage by meon-work/rebuild/make_videos.sh (29 Oct 2026):
-// muted loops with no captions or prices in frame, sped up or slowed down as part of the edit. Each has a .webp poster:
-// that is all reduced-motion and Save-Data visitors get. The video file loads only when it nears the screen (site.js).
+// Background clips (src/assets/video), cut from MEON's own footage by meon-work/rebuild/make_videos_v3.sh (29 Oct 2026):
+// muted loops at their sources' own size with no captions or prices in frame, sped up or slowed down as part of the edit.
+// Each has a .webp poster: that is all Save-Data visitors get. The video file loads only when it nears the screen (site.js).
 // The promo and website tour came down on 29 Oct 2026 (Preston: "get rid of it for now").
 const asset = (p) => fingerprint(`assets/${p}`);
 // A 1x1 transparent GIF: an eager poster's <picture> serves it outside the video's own `media`, so a phone never
@@ -494,14 +495,16 @@ const REELS = [
 ].map(([file, post, cap]) => ({ file: `ig-${file}`, cap, url: post ? `${site.instagram.replace(/\/$/, "")}/${post}` : site.instagram }));
 
 // The video wall: shop clips that aren't in the hero or the steps, plus two booth-shoot photos. On desktop the four
-// columns drift at different speeds as you scroll; phones show columns 1 and 3.
+// columns drift at different speeds as you scroll; phones show columns 1 and 3, so those hold the portrait clips. The
+// landscape shop clips and the top-down photo keep their whole frame in wide 16:9 tiles (columns 2 and 4).
 const VWALL = [
-  ["wall-01", "wall-02", "photo:shin-black-top", "wall-03"],
-  ["wall-04", "wall-05", "wall-06"],
-  ["wall-07", "photo:shin-black-lift", "wall-08", "wall-09"],
-  ["wall-10", "wall-11", "wall-12"],
+  ["wall-01", "wall-02", "photo:shin-black-lift", "wall-03"],
+  ["wall-04", "wall-10", "wall-05"],
+  ["wall-08", "wall-09", "wall-07", "wall-11"],
+  ["wall-06", "wall-12", "photo:shin-black-top"],
 ];
-const vwallTile = (r, t) => `<figure class="vtile">${t.startsWith("photo:") ? shootImg(r, t.slice(6), { sizes: "(min-width: 900px) 22vw, 46vw", alt: "" }) : bgVideo(r, t)}</figure>`;
+const WIDE_TILES = new Set(["wall-04", "wall-05", "wall-06", "photo:shin-black-top"]);
+const vwallTile = (r, t) => `<figure class="vtile${WIDE_TILES.has(t) ? " vtile--wide" : ""}">${t.startsWith("photo:") ? shootImg(r, t.slice(6), { sizes: "(min-width: 900px) 22vw, 46vw", alt: "" }) : bgVideo(r, t)}</figure>`;
 
 const TICKER = ["Buldak", "Tom yum", "Mi goreng", "Tonkotsu", "Jjajang", "Laksa", "Shin Black", "Pancit canton", "Kimchi", "Salted egg", "Hokkaido miso", "Chapagetti"];
 const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="section-head">
@@ -575,7 +578,7 @@ addPage("", layout({
       const copy = i >= REELS.length;
       return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
         <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
-        <div class="reel-media">${bgVideo(r, v.file)}<span class="reel-play">${svgIcon("play")}</span></div>
+        <div class="reel-media">${bgVideo(r, v.file)}</div>
         <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
       </a></li>`;
     }).join("")}</ul>
@@ -770,7 +773,7 @@ addPage("noodles/", layout({
   }],
   description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["wall-06", "ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
+${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
 <div data-library>
   <div class="filters">
     <div class="wrap">
@@ -926,7 +929,7 @@ addPage("countries/", layout({
   overlay: true,
   description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7", "wall-09"], phone: "wall-10" })}
+${videoHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
 <section class="section section--tight"><div class="wrap">
   <div class="country-list country-list--full">
     ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
@@ -985,7 +988,7 @@ addPage("pairings-and-sides/", layout({
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms, lettuce and more to cook with your noodles, plus chicken wings and fried Spam on the side.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
-  clips: ["step-pairings", "ig-DeOXYn5hSUT", "step-cook"], phone: "step-pairings" })}
+  clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
@@ -1008,7 +1011,7 @@ addPage("about/", layout({
   overlay: true,
   description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "wall-07", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
+${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2 data-split>What we do.</h2>
@@ -1053,7 +1056,8 @@ ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Priv
     <p>The site keeps a few small notes in your browser. They are not cookies and they never leave your device:</p>
     <ul>
       <li>which pages you've already reviewed, so the form doesn't ask twice;</li>
-      <li>whether you turned the background music on.</li>
+      <li>whether you turned the background music on;</li>
+      <li>whether you paused the videos, until you close the tab.</li>
     </ul>
     <p>Clearing your browser's site data removes them.</p>
   </div>
@@ -1066,7 +1070,7 @@ ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Priv
   <div class="reveal">
     <h2 data-split>No tracking.</h2>
     <p>We don't use analytics, advertising or tracking cookies. If that changes, we'll update this page first, and anything that needs your agreement will ask for it.</p>
-    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 28 October 2026.</p>
+    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>
   </div>
 </div></section>
 ${ctaBand(r)}
@@ -1084,7 +1088,7 @@ addPage("visit/", layout({
   jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }],
   description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Dine in or take it away: walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["wall-08", "ig-sign", "wall-12"], phone: "ig-sign" })}
+${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
 <section class="section section--tight"><div class="wrap">
   <div class="info-cols">
     <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Directions ${icon.arrow}</a></div>

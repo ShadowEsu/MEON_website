@@ -233,38 +233,47 @@
   }
 
   /* ---------- Background videos ----------
-     Muted loops. The file loads only when the video nears the screen and plays only while it's on screen.
-     Reduced motion or Save-Data: never load the videos; the posters stay. Hero videos carry data-media
-     so a phone only fetches the portrait cut and a desktop only the three column clips. The pause button stops
-     every background video and the Instagram strip, and the choice is remembered. */
+     Muted loops that start on their own on every device, reduced motion included (Preston, 29 Oct 2026: "autoplays on
+     mobile phones ... so nobody has to press play"); the pause button stops them all. A file loads only when its video
+     nears the screen and plays only while it's on screen. Save-Data: never load the videos; the posters stay. Hero videos
+     carry data-media so a phone only fetches the portrait cut and a desktop only the column clips. When the browser
+     refuses to start a video by itself (an iPhone in Low Power Mode), the visitor's next tap, click or key starts every
+     video on screen. The pause choice lasts for the visit (sessionStorage), so the next visit plays again. */
   var bgVids = $$("video[data-bg-src]");
   var saveData = !!(navigator.connection && navigator.connection.saveData);
   var userPaused = false;
-  try { userPaused = localStorage.getItem("meon-videos") === "paused"; } catch (e) {}
+  try { localStorage.removeItem("meon-videos"); userPaused = sessionStorage.getItem("meon-videos") === "paused"; } catch (e) {}
   var bgFits = function (v) { var m = v.getAttribute("data-media"); return !m || window.matchMedia(m).matches; };
+  var bgBlocked = false;
   var bgPlay = function (v) {
-    if (reduceMotion || saveData || userPaused || !v._in || v._covered || !bgFits(v)) return;
+    if (saveData || userPaused || !v._in || v._covered || !bgFits(v)) return;
     if (!v.getAttribute("src")) { v.muted = true; v.src = v.getAttribute("data-bg-src"); }
-    var p = v.play(); if (p && p.catch) p.catch(function () {});
+    var p = v.play(); if (p && p.catch) p.catch(function () { if (v.paused && v._in) bgBlocked = true; });
+  };
+  var bgRetry = function () {
+    if (!bgBlocked || userPaused) return;
+    bgBlocked = false;
+    bgVids.forEach(function (v) { if (v.paused) bgPlay(v); });
   };
   bgVids.forEach(function (v) { v.addEventListener("playing", function () { v.classList.add("is-playing"); }); });
-  if (bgVids.length && "IntersectionObserver" in window && !reduceMotion && !saveData) {
+  if (bgVids.length && "IntersectionObserver" in window && !saveData) {
     var bio = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { var v = en.target; v._in = en.isIntersecting; if (v._in) bgPlay(v); else if (!v.paused) v.pause(); });
     }, { rootMargin: "160px 0px" });
     bgVids.forEach(function (v) { bio.observe(v); });
+    ["touchend", "click", "keydown"].forEach(function (t) { document.addEventListener(t, bgRetry, { capture: true, passive: true }); });
   }
   var vToggle = $("[data-video-toggle]");
   var setVideosPaused = function (on) {
     userPaused = on;
-    try { localStorage.setItem("meon-videos", on ? "paused" : "on"); } catch (e) {}
+    try { sessionStorage.setItem("meon-videos", on ? "paused" : "on"); } catch (e) {}
     document.documentElement.classList.toggle("videos-paused", on);
     if (vToggle) { vToggle.setAttribute("aria-pressed", String(on)); vToggle.setAttribute("aria-label", on ? "Play the background videos" : "Pause the background videos"); }
     bgVids.forEach(function (v) { if (on) v.pause(); else bgPlay(v); });
   };
-  if (reduceMotion || saveData) {
+  if (saveData) {
     if (vToggle) vToggle.hidden = true;
-    if (saveData) document.documentElement.classList.add("videos-paused"); // the reel strip stays still too
+    document.documentElement.classList.add("videos-paused"); // the reel strip stays still too
   }
   else {
     if (userPaused) setVideosPaused(true);

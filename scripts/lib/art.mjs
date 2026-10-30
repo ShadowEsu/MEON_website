@@ -16,7 +16,6 @@ const ICONS = {
   share: `<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/>${S("m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1")}`,
   print: S("M7 9V3.5h10V9M7 17H4.5v-7.5h15V17H17M7 14h10v6.5H7z"),
   dice: `<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1" fill="currentColor"/>`,
-  play: `<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>`,
   qr: `<rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/>${S("M13.5 13.5h3v3h-3zM18 18h2.5v2.5H18zM13.5 19h2M19 13.5h1.5")}`,
   home: S("M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"),
   bowl: `${S("M3 11.5h18a9 9 0 0 1-18 0Z")}${S("M14.5 3.5 11 11.5M19.5 4.5l-6 7")}`,
