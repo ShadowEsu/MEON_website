@@ -37,9 +37,11 @@ Packet photos for noodles that the MEON shoot hasn't covered yet (Preston, 29 Oc
 
 | File | Source | Author | Licence | Edits |
 |---|---|---|---|---|
-| `indomie-soto-mie.webp` | [Flickr: IMG_20160623_174010](https://www.flickr.com/photos/138690323@N08/27579257520) | Ricky Maulana (Flickr: aries5485) | [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/) (Flickr "Public domain") | Cropped to a square around the packet (from 3264 × 2448) and resized |
+| `indomie-soto-mie.webp` | [Flickr: IMG_20160623_174010](https://www.flickr.com/photos/138690323@N08/27579257520) ([archived 26 Feb 2025](https://web.archive.org/web/20250226035308/https://www.flickr.com/photos/138690323@N08/27579257520)) | Ricky Maulana (Flickr: aries5485), his own photo | [Public Domain Mark 1.0](https://creativecommons.org/publicdomain/mark/1.0/) (Flickr "Public domain", licence id 10), checked on the page 30 Oct 2026 and in the 2025 archive copy | Cropped to a square around the packet (from 3264 × 2448) and resized |
 
 The packet is Indonesia's domestic Indomie Soto Mie design from about 2016; the one on our wall may look slightly different.
+
+Flickr owners can change a licence later, so each row records the date it was checked and an archived copy of the page; the photo stays covered by the licence it had when we took it.
 
 ## Code libraries that ship artwork
 
