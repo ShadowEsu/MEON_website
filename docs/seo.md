@@ -15,7 +15,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
   - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
 - **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Northbridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
 - **199 unique noodle pages**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
-- **An FAQ on the Visit page**: questions people actually ask (location, online orders and delivery, how many noodles, vegetarian and vegan options, how spicy, how long the noodles take).
+- **An FAQ on the Visit page**: questions people actually ask (location, online orders and delivery, how many noodles, vegetarian options, how spicy, how long the noodles take).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
 - **Robots**: `robots.txt` points to the sitemap, and the staff QR pages are hidden from Google.
 - **AI assistants**: `llms.txt` gives AI assistants a clean summary of MEON and every noodle. Google says it has no effect on Google Search.

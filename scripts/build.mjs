@@ -65,15 +65,16 @@ const noodles = noodlesRaw.map((n) => {
   const img = images[n.slug] && fs.existsSync(path.join(SRC, "assets", images[n.slug])) ? fingerprint(`assets/${images[n.slug]}`) : null;
   const thumb = img && fs.existsSync(path.join(SRC, "assets", "img", "noodles", "sm", `${n.slug}.webp`)) ? fingerprint(`assets/img/noodles/sm/${n.slug}.webp`) : img;
   const more = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))).map((p) => fingerprint(`assets/${p}`)) : [];
+  // Diet label (Preston, 29 Oct 2026): "Vegetarian", never "vegetarian-friendly" or "vegan".
+  const diet = /Vegetarian/.test(n.diet) ? "Vegetarian" : n.diet;
   const dietTokens = [];
-  if (/Vegetarian/.test(n.diet)) dietTokens.push("veg");
-  if (/Vegan/.test(n.diet)) dietTokens.push("vegan");
-  if (/Meat/.test(n.diet)) dietTokens.push("meat");
-  const m = n.diet.match(/\((\w+)\)/);
+  if (diet === "Vegetarian") dietTokens.push("veg");
+  if (/Meat/.test(diet)) dietTokens.push("meat");
+  const m = diet.match(/\((\w+)\)/);
   if (m) dietTokens.push(m[1].toLowerCase());
-  if (/Seafood/.test(n.diet)) dietTokens.push("seafood");
+  if (/Seafood/.test(diet)) dietTokens.push("seafood");
   const unrated = n.spice == null;
-  return { ...n, note: badge(n.funNote), c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, diet, note: badge(n.funNote), c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
@@ -229,7 +230,7 @@ ${body(r)}
           <li><a href="${r("noodles/")}">Noodle library</a></li>
           <li><a href="${r("noodles/?type=Soup")}">Soup noodles</a></li>
           <li><a href="${r("noodles/?type=Dry")}">Dry noodles</a></li>
-          <li><a href="${r("noodles/?diet=veg")}">Vegetarian-friendly</a></li>
+          <li><a href="${r("noodles/?diet=veg")}">Vegetarian</a></li>
           <li><a href="${r("noodles/?spice=hot")}">Spicy (3+)</a></li>
         </ul>
       </div>
@@ -267,7 +268,7 @@ ${body(r)}
     <div class="search-field">${icon.search}<input type="search" id="site-search" placeholder="Search noodles, flavours, countries" autocomplete="off" spellcheck="false" aria-controls="search-results" enterkeyhint="go"><button class="btn btn--line btn--sm" type="button" data-search-close>Close</button></div>
     <div class="search-empty" id="search-status" role="status" aria-live="polite" hidden></div>
     <div class="search-results" id="search-results" role="listbox"></div>
-    <div class="search-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open</span><span>Try “vegan”, “tom yum” or “Japan”</span></div>
+    <div class="search-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open</span><span>Try “Buldak”, “tom yum” or “Japan”</span></div>
   </div>
 </div>
 <nav class="tabbar" aria-label="Quick navigation">
@@ -337,7 +338,7 @@ function noodleCard(n, r, i = 0) {
 function megaNoodles(r) {
   const quick = [
     ["noodles/", "bowl", "All noodles"], ["noodles/?type=Soup", "soup", "Soup noodles"], ["noodles/?type=Dry", "chopsticks", "Dry noodles"],
-    ["noodles/?diet=veg", "leaf", "Vegetarian-friendly"], ["noodles/?diet=vegan", "sprout", "Vegan"], ["noodles/?spice=hot", "flame", "Spicy (3+)"],
+    ["noodles/?diet=veg", "leaf", "Vegetarian"], ["noodles/?spice=hot", "flame", "Spicy (3+)"],
     ["noodles/?spice=mild", "drop", "No heat"], ["noodles/?sort=photo", "camera", "With photos first"],
   ];
   return `<div class="mega" id="mega-noodles">
@@ -511,7 +512,7 @@ const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Open in Google Maps" on this page for directions.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
   ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
-  ["Do you have vegetarian or vegan noodles?", `Yes, plenty of our noodles are vegetarian-friendly and some are vegan. Use the diet filter in the noodle library, and always check the packet if you have allergies.`],
+  ["Do you have vegetarian noodles?", `Yes, plenty of our noodles are vegetarian. Use the diet filter in the noodle library, and always check the packet if you have allergies.`],
   ["How spicy are the noodles?", "Every noodle has a spice rating from 0 (no heat) to 5 (extreme), measured against Shin Ramyun, which is a 3. Indomie Mi Goreng is a 1 and Mama Creamy Tom Yum is a 2. You can filter the library by spice level or let the roulette pick for you."],
   ["How long do the noodles take?", `Every noodle cooks for ${COOK_TIME}. Press 1, then 2 on the cooking machine to start it. Add egg and cheese on top of the noodles in the last 30 seconds.`],
 ];
@@ -780,9 +781,9 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`
         <label class="visually-hidden" for="f-type">Style</label>
         <select class="select" id="f-type"><option value="all">Soup and dry</option><option value="Soup">Soup</option><option value="Dry">Dry</option><option value="Porridge">Porridge</option></select>
         <label class="visually-hidden" for="f-spice">Spice</label>
-        <select class="select" id="f-spice"><option value="all">Any spice</option><option value="mild">No heat (0)</option><option value="medium">Medium (1–2)</option><option value="hot">Hot (3+)</option>${[0, 1, 2, 3, 4, 5].map((l) => `<option value="${l}">Exactly ${l} of 5</option>`).join("")}</select>
+        <select class="select" id="f-spice"><option value="all">Any spice</option><option value="mild">No heat</option><option value="medium">Medium</option><option value="hot">Hot</option></select>
         <label class="visually-hidden" for="f-diet">Diet</label>
-        <select class="select" id="f-diet"><option value="all">Any diet</option><option value="veg">Vegetarian-friendly</option><option value="vegan">Vegan</option><option value="chicken">Chicken</option><option value="beef">Beef</option><option value="pork">Pork</option><option value="seafood">Seafood</option></select>
+        <select class="select" id="f-diet"><option value="all">Any diet</option><option value="veg">Vegetarian</option><option value="chicken">Chicken</option><option value="beef">Beef</option><option value="pork">Pork</option><option value="seafood">Seafood</option></select>
       </div>
       <div class="filter-pills" aria-label="Quick country filters">
         ${countries.map((c) => `<button class="pill" type="button" data-pill="country" data-value="${c.code}" aria-pressed="false">${flag(c.code, r, { w: 16 })}${esc(c.name)}</button>`).join("")}
@@ -796,7 +797,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`
     </div>
     <div class="card-grid card-grid--long">${noodles.map((n, i) => noodleCard(n, r, i)).join("")}</div>
     <div class="empty-state">${emptyBowl}<h2>Nothing matches yet.</h2><p class="lead">Try a different filter, or ask the crew. New packets arrive all the time.</p><button class="btn btn--red" type="button" data-reset>Clear filters</button></div>
-    <p class="note">* Vegetarian-friendly means the noodle and seasoning are generally meat-free, but recipes vary by batch and region. Always check the packet if you have dietary requirements or allergies.</p>
+    <p class="note">* Vegetarian means the noodle and seasoning are generally meat-free, but recipes vary by batch and region. Always check the packet if you have dietary requirements or allergies.</p>
   </div>
 </div>
 ${ctaBand(r)}
@@ -891,7 +892,7 @@ noodles.forEach((n, idx) => {
           <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.img)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
         </section>` : ""}
 
-        <p class="note">${n.dietNote ? "* Vegetarian-friendly means the noodle and seasoning are generally meat-free, but recipes vary. Always check the packet if you have dietary requirements or allergies." : "Always check the packet for allergens and full ingredients."}</p>
+        <p class="note">${n.dietNote ? "* Vegetarian means the noodle and seasoning are generally meat-free, but recipes vary. Always check the packet if you have dietary requirements or allergies." : "Always check the packet for allergens and full ingredients."}</p>
         <div class="noodle-actions">
           <button class="btn btn--line btn--sm" type="button" data-share data-url="${esc(`${SITE_URL}/${n.url}`)}" data-title="${esc(`${n.brand} ${n.name} at MEON`)}">${icon.share} Share</button>
           <button class="btn btn--line btn--sm" type="button" data-search-open>${icon.search} Find another noodle</button>
@@ -983,7 +984,7 @@ addPage("pairings-and-sides/", layout({
   overlay: true,
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms, lettuce and more to cook with your noodles, plus chicken wings and fried Spam on the side.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is exactly how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
+${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT", "step-cook"], phone: "step-pairings" })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
@@ -1229,8 +1230,7 @@ const searchIndex = [
   ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.img || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
-    ["Vegetarian-friendly noodles", "Filter: vegetarian-friendly", "noodles/?diet=veg", "leaf"],
-    ["Vegan noodles", "Filter: vegan", "noodles/?diet=vegan", "sprout"],
+    ["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"],
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
     ["Dry noodles", "Filter: dry, mix-and-eat", "noodles/?type=Dry", "chopsticks"],
     ["Soup noodles", "Filter: soup", "noodles/?type=Soup", "soup"],

@@ -16,6 +16,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
   - sections are separated by hairlines (`--line`) and space
   - nothing is a card inside a card
 - **Copy is specific and plain.** It uses full stops, few exclamation marks, no "slurp" or "noodle heaven", and no em dash in headings.
+- **Filter and diet wording** (Preston, 29 Oct 2026): spice filters are just "No heat", "Medium" and "Hot" (no "exactly" options); the diet label is "Vegetarian" (never "vegetarian-friendly"), and there is no vegan filter or label. A product's own name keeps its wording.
 
 ## Page anatomy
 1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.

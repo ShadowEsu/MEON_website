@@ -382,7 +382,7 @@
     var nq = norm(q.trim()), html = "", note = "";
     if (!nq) {
       html = '<div class="search-group">Popular searches</div><div class="search-suggest">' +
-        ["Buldak", "Tom yum", "Vegan", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"].map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>";
+        ["Buldak", "Tom yum", "Vegetarian", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"].map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>";
       html += '<div class="search-group">Jump to</div>' + (index || []).filter(function (x) { return x.g === "Pages"; }).slice(0, 6).map(item).join("");
     } else {
       var terms = queryTerms(q);
