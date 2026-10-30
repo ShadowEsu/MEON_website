@@ -550,7 +550,7 @@ addPage("", layout({
   <div class="vhero-stage">
     <div class="vhero-media">
       ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
-      <div class="vhero-cols">${["a", "b", "c"].map((k) => `<div class="vcol vcol--${k}">${bgVideo(r, `hero-col-${k}`, { media: "(min-width: 900px)", eager: true })}</div>`).join("")}</div>
+      <div class="vhero-cols"><div class="vcol vcol--a">${bgVideo(r, "hero-col-a", { media: "(min-width: 900px)", eager: true })}</div></div>
     </div>
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
@@ -582,7 +582,7 @@ addPage("", layout({
     <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
       const copy = i >= REELS.length;
       return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
-        <span class="reel-top" aria-hidden="true"><span class="reel-av">${svgIcon("bowl")}</span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
+        <span class="reel-top" aria-hidden="true"><span class="reel-av"><img src="${r("assets/img/logo-96.webp")}" alt="" width="32" height="32" loading="lazy" decoding="async"></span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
         <div class="reel-media">${bgVideo(r, v.file)}</div>
         <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
       </a></li>`;

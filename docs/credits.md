@@ -25,9 +25,9 @@ All files are in `src/assets/img/toppings/`, cropped to 480 × 480. None of thes
 | `shrimp-katsu.webp` | [Wikimedia Commons: Ebi Fry 003.jpg](https://commons.wikimedia.org/wiki/File:Ebi_Fry_003.jpg) | Ocdp | CC0 |
 | `corn.webp` | [Wikimedia Commons: Corn on the cob (sweet corn).jpg](https://commons.wikimedia.org/wiki/File:Corn_on_the_cob_(sweet_corn).jpg) | Nutrition, Food Safety & Health (via Flickr, licence review passed) | CC0 |
 | `extra-noodles.webp` | [Wikimedia Commons: Lucky Me instant pancit canton noodles (Philippines) 02.jpg](https://commons.wikimedia.org/wiki/File:Lucky_Me_instant_pancit_canton_noodles_(Philippines)_02.jpg), cropped to the noodle block | Obsidian Soul | CC0 |
-| `egg.webp` | [Pexels photo 162712](https://www.pexels.com/photo/162712/) | Pexels (uploaded as "Pixabay") | [Pexels licence](https://www.pexels.com/license/) |
+| `egg.webp` | [Wikimedia Commons: Three chicken eggs.jpg](https://commons.wikimedia.org/wiki/File:Three_chicken_eggs.jpg), from [Flickr 24327051445](https://www.flickr.com/photos/137643065@N06/24327051445), cropped square | www.Pixel.la Free Stock Photos (Flickr 137643065@N06) | CC0 (Flickr licence id 9, checked on the page 30 Oct 2026; Commons licence review passed 16 Sep 2016) |
 
-`egg.webp` came from the old Wix site and was matched to its library page by reverse image search. The other eight Wix-era topping photos had no licence on record, so they were replaced with the Commons photos above.
+Only CC0, public-domain or MEON's own photos are used (Preston, 30 Oct 2026: no photos that need a visible credit, so no CC BY or BY-SA; and no "free to use" sites with their own terms). `egg.webp` was the old Wix site's Pexels photo (Pexels licence); on 30 Oct 2026 it was replaced with the CC0 photo above, since MEON's topping shoot has no egg. The other eight Wix-era topping photos had no licence on record, so they were replaced with the Commons photos above. Captures of the Flickr and Commons pages as checked are kept in MEON's private records.
 
 To add a new topping photo, prefer a shot on the MEON lid. If you use a library photo, add a row here with the link, author and licence.
 

@@ -25,7 +25,7 @@ ok(/\/noodles\/samyang-buldak/.test(page.url()), `Enter opens first result (${pa
 
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(2500);
-ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 3 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the three desktop hero columns load and play");
+ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 1 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the one desktop hero clip loads and plays");
 ok(await page.$eval(".vhero .vbg--phone video", (v) => !v.getAttribute("src")), "phone hero video is not fetched on desktop");
 ok((await page.$$eval(".stack > li video", (vs) => vs.length)) === 4 && (await page.$$eval(".vwall video", (vs) => vs.length)) === 12, "four step-card videos and a twelve-clip video wall");
 ok(await page.$eval(".logo-badge", (s) => { const r = s.getBoundingClientRect(); return s.querySelectorAll(".lw").length === 8 && Math.abs(r.width - r.height) < 1 && r.height >= 50; }), "header logo is the square with meon plus the four glyphs");

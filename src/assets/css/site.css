@@ -351,20 +351,23 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vhero-cols { display: none; }
 @media (min-width: 900px) {
   .vbg--phone { display: none; }
-  /* A small overscan (10%) and gentle drift, so each column shows most of its clip (Preston: "zoom out") */
-  .vhero-cols { position: absolute; inset: -10% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--ink); }
-  .vcol { position: relative; overflow: hidden; transform: translate3d(0, calc(var(--p, 0) * var(--drift) * 1vh), 0); }
-  .vcol--a { --drift: -6; } .vcol--b { --drift: 4; } .vcol--c { --drift: -9; }
+  /* One clip, the left one (Preston, 30 Oct 2026: "I only want the left one, not all 3"), shown whole at 9:16 on the
+     left, the words beside it on the dark stage */
+  .vhero { --clip-w: min(46vw, max(560px, 100vh) * 9 / 16); --clip-w: min(46vw, max(560px, 100svh) * 9 / 16); }
+  .vhero-cols { position: absolute; inset: 0; display: grid; grid-template-columns: var(--clip-w) 1fr; background: var(--ink); }
+  .vcol { position: relative; overflow: hidden; transform: translate3d(0, calc(var(--p, 0) * var(--drift, 0) * 1vh), 0); }
   .js .vcol { animation: vcol-in 1.3s var(--ease) both; }
   .js .vcol--b { animation-delay: .14s; }
-  .js .vcol--c { animation-delay: .28s; }
+  .vhero:not(.vhero--page) .vhero-inner { width: auto; max-width: none; margin: 0 max(var(--gutter), (100vw - var(--wrap)) / 2) 0 calc(var(--clip-w) + clamp(40px, 5vw, 88px)); padding-left: 0; padding-right: 0; }
+  .vhero .vhero-cue { left: calc(var(--clip-w) + (100% - var(--clip-w)) / 2); }
 }
 /* The entrance uses `translate`, the scroll drift uses `transform`, so the two never fight */
 @keyframes vcol-in { from { translate: 0 24%; opacity: 0; } }
 .vhero-stage::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(180deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 22%), linear-gradient(0deg, rgba(12,9,8,.86) 0%, rgba(12,9,8,.45) 38%, rgba(12,9,8,0) 62%); }
 @media (min-width: 900px) {
-  .vhero-stage::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%), linear-gradient(90deg, rgba(12,9,8,.78) 0%, rgba(12,9,8,.4) 38%, rgba(12,9,8,0) 62%), linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 40%); }
+  /* the words sit on the dark stage, so only the header's strip over the clip needs shade */
+  .vhero-stage::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%); }
 }
 .vhero-inner { padding: calc(var(--header-h) + 32px) 0 clamp(64px, 10vh, 120px); transform: translate3d(0, calc(var(--p, 0) * -16vh), 0); opacity: calc(1 - var(--p, 0) * 1.7); }
 /* Faded out: no clicks or focus on the invisible buttons (site.js sets .is-late past --p .58) */
@@ -980,8 +983,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .reel:hover, .reel:focus-visible { transform: translateY(-8px) rotate(-1deg); }
 .reel-top { display: flex; align-items: center; gap: 9px; padding: 10px 12px; font-size: .86rem; font-weight: 600; }
 .reel-top > svg.i { width: 19px; height: 19px; margin-left: auto; }
-.reel-av { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--brand); color: #fff; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #f7a23b; }
-.reel-av svg.i { width: 16px; height: 16px; }
+/* MEON's real logo in Instagram's story ring (Preston, 30 Oct 2026: "the actual real logo") */
+.reel-av { width: 32px; height: 32px; flex: none; border-radius: 50%; overflow: hidden; background: var(--brand); box-shadow: 0 0 0 2px #fff, 0 0 0 4px #f7a23b; }
+.reel-av img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .reel-media { position: relative; display: block; aspect-ratio: 9 / 16; background: #1a1412; }
 .reel-bottom { display: grid; gap: 7px; padding: 10px 12px 14px; }
 .reel-acts { display: flex; gap: 14px; }
