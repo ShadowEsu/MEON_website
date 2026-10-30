@@ -1031,6 +1031,28 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .visit-band-copy { max-width: 46%; }
 }
 
+/* ---------- Home: "Follow us." at the end (Preston, 29 Oct 2026: Instagram and TikTok logos at the end of the home page).
+   The two logos keep their own colours so they read at a glance; everything else is the site's ink on white. */
+.follow { background: #fff; padding: clamp(72px, 10vw, 130px) 0; }
+.follow-inner { display: grid; gap: clamp(28px, 4vw, 52px); align-items: center; }
+.follow h2 { font-size: clamp(3rem, 9vw, 7.4rem); line-height: .88; letter-spacing: -.055em; margin: 0 0 18px; }
+.follow .lead { max-width: 34ch; margin: 0; }
+.follow-links { display: grid; gap: 14px; }
+.follow-link { display: flex; align-items: center; gap: 18px; padding: 14px 24px 14px 14px; border-radius: 24px; background: var(--soft); color: var(--ink); text-decoration: none; transition: transform .45s var(--ease), background-color .25s; }
+.follow-link:hover { transform: translateY(-4px); background: #eeeae4; }
+.follow-link:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.follow-logo { flex: none; width: 68px; height: 68px; display: grid; place-items: center; border-radius: 20px; color: #fff; }
+.follow-logo svg.i { width: 36px; height: 36px; }
+.follow-logo--ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+.follow-logo--tt { background: #000; }
+.follow-logo--tt svg.i { width: 31px; height: 31px; filter: drop-shadow(-2px -1.5px 0 #25f4ee) drop-shadow(2px 1.5px 0 #fe2c55); }
+.follow-name { display: grid; gap: 2px; margin-right: auto; }
+.follow-name strong { font-size: clamp(1.3rem, 2.4vw, 1.75rem); line-height: 1.1; letter-spacing: -.02em; }
+.follow-name small { font-size: 1rem; color: var(--ink-2); }
+.follow-link > .arrow { width: 24px; height: 24px; transition: transform .4s var(--ease); }
+.follow-link:hover > .arrow { transform: translateX(4px); }
+@media (min-width: 900px) { .follow-inner { grid-template-columns: 1.1fr .9fr; } }
+
 .rv-google { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 18px 0 6px; }
 .rv-google svg.i { color: #f5a400; }
 

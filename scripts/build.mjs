@@ -221,7 +221,7 @@ ${body(r)}
         <p>Dine in or take it away at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</p>
         <div class="footer-socials">
           ${site.instagram ? `<a class="footer-social" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}
-          ${site.tiktok ? `<a class="footer-social" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
+          ${site.tiktok ? `<a class="footer-social" href="${esc(site.tiktok)}" target="_blank" rel="noopener">${icon.tiktok} TikTok</a>` : ""}
         </div>
       </div>
       <div>
@@ -398,7 +398,7 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
   return `<section class="cta-band" data-anim>
   <div class="wrap cta-inner">
     <div class="cta-copy">
-      <p class="eyebrow">Visit MEON</p>
+      <p class="eyebrow">Come visit us</p>
       <h2 data-split>${title}</h2>
       <p class="lead">${esc(text)}</p>
       <div class="actions">
@@ -570,7 +570,7 @@ addPage("", layout({
     </div>
     <div class="actions">
       <a class="btn btn--red" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} Follow ${esc(site.instagramHandle)}</a>
-      ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">TikTok</a>` : ""}
+      ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">${icon.tiktok} TikTok</a>` : ""}
     </div>
   </div>
   <div class="insta-track">
@@ -589,7 +589,7 @@ addPage("", layout({
   <div class="wrap story-head reveal">
     <p class="eyebrow">Do it yourself</p>
     <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
-    <p class="lead">You choose, you cook, and the crew is there if you need a hand.</p>
+    <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
   </div>
   <ol class="stack" data-stack>
     <li class="scard scard--red">
@@ -616,7 +616,7 @@ addPage("", layout({
   <div class="vwall-copy">
     <p class="eyebrow">MEON time</p>
     <h2 id="vwall-h" data-split>Bring your crew.</h2>
-    <p class="lead">A wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
+    <p class="lead">We've got a wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
     <a class="btn btn--white btn--lg" href="${r("visit/")}">Plan your visit ${icon.arrow}</a>
   </div>
 </section>
@@ -631,7 +631,7 @@ addPage("", layout({
   <div class="wrap">
     <div class="fresh-head reveal">
       <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
-      <p class="lead">Real bowls from the noodle wall, shot at MEON. Pick one to see its packet.</p>
+      <p class="lead">Real bowls from our noodle wall, shot in our shop. Pick one to see its packet.</p>
     </div>
     <div class="fresh-grid">
       ${FRESH.map((name, i) => {
@@ -736,14 +736,27 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
   <div class="visit-band-media">${bgVideo(r, "street-front")}</div>
   <div class="wrap visit-band-inner">
     <div class="visit-band-copy reveal">
-      <p class="eyebrow">Visit MEON</p>
+      <p class="eyebrow">Come visit us</p>
       <h2 id="visit-h" data-split>Find us in ${esc(site.suburb)}.</h2>
       <p class="visit-band-addr">${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</p>
       <p class="lead">Dine in or take it away. ${esc(site.hoursNote)}</p>
       <div class="actions">
         <a class="btn btn--white btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Get directions</a>
-        <a class="btn btn--ghost-white btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="follow" aria-labelledby="follow-h">
+  <div class="wrap follow-inner">
+    <div class="follow-copy reveal">
+      <p class="eyebrow">${esc(site.instagramHandle)}</p>
+      <h2 id="follow-h" data-split>Follow us.</h2>
+      <p class="lead">We post our newest packets, store tours and late-night bowls. Come say hi.</p>
+    </div>
+    <div class="follow-links reveal">
+      <a class="follow-link" href="${esc(site.instagram)}" target="_blank" rel="noopener"><span class="follow-logo follow-logo--ig">${icon.insta}</span><span class="follow-name"><strong>Instagram</strong><small>${esc(site.instagramHandle)}</small></span>${icon.arrow}</a>
+      ${site.tiktok ? `<a class="follow-link" href="${esc(site.tiktok)}" target="_blank" rel="noopener"><span class="follow-logo follow-logo--tt">${icon.tiktok}</span><span class="follow-name"><strong>TikTok</strong><small>@${esc(site.tiktok.split("@")[1] || "")}</small></span>${icon.arrow}</a>` : ""}
     </div>
   </div>
 </section>

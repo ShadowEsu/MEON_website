@@ -9,7 +9,7 @@ Every image on the site that MEON didn't make itself, with where it came from an
 - **Background videos** (`src/assets/video/`): MEON's own footage. The shop clips are Preston's; the step, wall and `ig-*.mp4` clips also use MEON's own @meonnoodles reels. Reels by other creators (for example the @little_miss_fussy_eats collab) are not re-hosted.
 - **Topping photos on the MEON lid** (`toppings/meatballs.webp`, `toppings/spring-onion.webp`, `photos/topping-*.webp`): MEON's own topping shoot (MEON's Drive folder "Toppings pics").
 - **Logo** (`logo-*.png`, favicons): MEON's own.
-- **Chilli in the spice meter** (`src/assets/img/chilli.svg`), mascots, icons and illustrated packets: drawn in code for this site (`scripts/lib/art.mjs`).
+- **Chilli in the spice meter** (`src/assets/img/chilli.svg`), mascots, icons and illustrated packets: drawn in code for this site (`scripts/lib/art.mjs`). The TikTok glyph in the "Follow us." links is the [Simple Icons](https://simpleicons.org/?q=tiktok) TikTok path (CC0); it links only to MEON's own TikTok.
 
 ## Topping photos from free libraries
 
