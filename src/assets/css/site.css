@@ -140,7 +140,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .has-vhero .site-header { position: fixed; left: 0; right: 0; top: 0; }
 .site-header--over { transition: background-color .4s var(--ease), border-color .3s; }
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) { background: transparent; border-color: transparent; }
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.search-btn, .sound-btn, .nav-toggle) { background: rgba(18,16,16,.38); border-color: rgba(255,255,255,.45); color: #fff; }
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.search-btn, .sound-btn, .nav-toggle, .vpause-hdr) { background: rgba(18,16,16,.38); border-color: rgba(255,255,255,.45); color: #fff; }
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span,
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span::before,
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span::after { background: #fff; }
@@ -185,6 +185,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .sound-btn[aria-pressed="true"] .eq i:nth-child(2) { animation-delay: -.3s; animation-duration: .8s; }
 .sound-btn[aria-pressed="true"] .eq i:nth-child(3) { animation-delay: -.6s; animation-duration: 1.1s; }
 .sound-btn[aria-pressed="true"] .eq i:nth-child(4) { animation-delay: -.15s; animation-duration: .9s; }
+/* The background-video play/pause in the header: shown by site.js only once the hero's own button has scrolled away and
+   a video is in view, so there's never two. No transition: it simply appears (reduced motion included). */
+.vpause-hdr { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm); border: 1px solid var(--line-2); background: #fff; color: var(--ink); cursor: pointer; }
+.vpause-hdr:hover { border-color: var(--ink); }
+.vpause-hdr[hidden] { display: none; }
 .nav-toggle { display: none; width: 44px; height: 44px; border-radius: var(--radius-sm); border: 1px solid var(--line-2); background: #fff; align-items: center; justify-content: center; cursor: pointer; }
 .nav-toggle span, .nav-toggle span::before, .nav-toggle span::after { display: block; width: 18px; height: 1.75px; background: var(--ink); border-radius: 2px; position: relative; transition: transform .35s var(--ease), background-color .2s; }
 .nav-toggle span::before, .nav-toggle span::after { content: ""; position: absolute; left: 0; }
@@ -377,11 +382,15 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .btn--lg { min-height: 56px; padding: 0 28px; font-size: 1.04rem; }
 .btn--glass { --bg: rgba(18,16,16,.32); --fg: #fff; --bd: rgba(255,255,255,.7); }
 .btn--glass:hover { --bg: #fff; --fg: var(--ink); --bd: #fff; }
-.vpause { position: absolute; z-index: 2; right: var(--gutter); bottom: clamp(20px, 4vh, 36px); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); background: rgba(18,16,16,.4); color: #fff; cursor: pointer; transition: background-color .25s; }
+.vpause { position: absolute; z-index: 2; right: var(--gutter); bottom: clamp(20px, 4vh, 36px); min-width: 44px; height: 44px; display: grid; grid-auto-flow: column; gap: 9px; place-items: center; place-content: center; border-radius: 22px; border: 1px solid rgba(255,255,255,.5); background: rgba(18,16,16,.4); color: #fff; font-weight: 600; font-size: .95rem; cursor: pointer; transition: background-color .25s; }
 .vpause:hover { background: rgba(18,16,16,.55); }
 .vpause[hidden] { display: none; }
-.vpause span { width: 12px; height: 14px; border-inline: 4px solid currentColor; }
-.videos-paused .vpause span { width: 0; height: 0; border-style: solid; border-width: 7px 0 7px 12px; border-color: transparent transparent transparent currentColor; margin-left: 3px; }
+.vpause-ic { width: 12px; height: 14px; border-inline: 4px solid currentColor; }
+.videos-paused :is(.vpause, .vpause-hdr) .vpause-ic { width: 0; height: 0; border-style: solid; border-width: 7px 0 7px 12px; border-color: transparent transparent transparent currentColor; margin-left: 3px; }
+/* Paused (always so at first under reduced motion): the hero button becomes a labelled "Play videos" pill. */
+.vpause-text { display: none; }
+.videos-paused .vpause { padding: 0 18px 0 15px; }
+.videos-paused .vpause .vpause-text { display: inline; }
 .vhero-cue { position: absolute; z-index: 2; left: 50%; bottom: clamp(18px, 3.5vh, 32px); width: 26px; height: 42px; margin-left: -13px; border: 2px solid rgba(255,255,255,.7); border-radius: 14px; }
 .vhero-cue i { position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: #fff; animation: cue 1.8s var(--ease-io) infinite; }
 @keyframes cue { 0% { transform: none; opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(14px); opacity: 0; } }
@@ -416,7 +425,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .vhero--page .vhero-media { justify-self: center; height: min(58vh, (100vw - 24px) * 16 / 9); height: min(58svh, (100vw - 24px) * 16 / 9); aspect-ratio: 9 / 16; margin: calc(var(--header-h) + 8px) 0 0; border-radius: 22px; }
   .vhero--page .vhero-inner { padding: 22px var(--gutter) 40px; }
   .vhero--page .actions .btn--sm { flex: 0 0 auto; }
-  .vhero--page .vpause { top: calc(var(--header-h) + 22px); right: 24px; }
+  .vhero--page .vpause { top: 12px; right: 12px; bottom: auto; } /* inside the clip frame's top-right corner */
 }
 
 /* Facts row (country pages) */

@@ -233,16 +233,19 @@
   }
 
   /* ---------- Background videos ----------
-     Muted loops that start on their own on every device, reduced motion included (Preston, 29 Oct 2026: "autoplays on
-     mobile phones ... so nobody has to press play"); the pause button stops them all. A file loads only when its video
-     nears the screen and plays only while it's on screen. Save-Data: never load the videos; the posters stay. Hero videos
-     carry data-media so a phone only fetches the portrait cut and a desktop only the column clips. When the browser
-     refuses to start a video by itself (an iPhone in Low Power Mode), the visitor's next tap, click or key starts every
-     video on screen. The pause choice lasts for the visit (sessionStorage), so the next visit plays again. */
+     Muted loops that start on their own on every phone (Preston, 29 Oct 2026: "autoplays on mobile phones ... so nobody
+     has to press play"). Reduced motion (BOSS, 30 Oct 2026): they start paused and the hero button shows "Play videos";
+     one tap plays them all. A file loads only when its video nears the screen and plays only while it's on screen.
+     Save-Data: never load the videos; the posters stay. Hero videos carry data-media so a phone only fetches the portrait
+     cut and a desktop only the column clips. When the browser refuses to start a video by itself (an iPhone in Low Power
+     Mode), the visitor's next tap, click or key starts every video on screen. The play/pause choice lasts for the visit
+     (sessionStorage). The hero's button scrolls away with the hero, so a copy in the header takes over while a video
+     is in view. */
   var bgVids = $$("video[data-bg-src]");
   var saveData = !!(navigator.connection && navigator.connection.saveData);
-  var userPaused = false;
-  try { localStorage.removeItem("meon-videos"); userPaused = sessionStorage.getItem("meon-videos") === "paused"; } catch (e) {}
+  var storedVideos = null;
+  try { localStorage.removeItem("meon-videos"); storedVideos = sessionStorage.getItem("meon-videos"); } catch (e) {}
+  var userPaused = storedVideos ? storedVideos === "paused" : reduceMotion;
   var bgFits = function (v) { var m = v.getAttribute("data-media"); return !m || window.matchMedia(m).matches; };
   var bgBlocked = false;
   var bgPlay = function (v) {
@@ -255,29 +258,45 @@
     bgBlocked = false;
     bgVids.forEach(function (v) { if (v.paused) bgPlay(v); });
   };
+  var vToggles = $$("[data-video-toggle]");
+  var heroToggle = $(".vhero [data-video-toggle]");
+  var headerToggle = $("[data-video-toggle-header]");
+  var heroToggleOn = !!heroToggle; // until its observer reports
+  var syncHeaderToggle = function () {
+    if (headerToggle) headerToggle.hidden = saveData || heroToggleOn || !bgVids.some(function (v) { return v._in && bgFits(v); });
+  };
   bgVids.forEach(function (v) { v.addEventListener("playing", function () { v.classList.add("is-playing"); }); });
   if (bgVids.length && "IntersectionObserver" in window && !saveData) {
     var bio = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { var v = en.target; v._in = en.isIntersecting; if (v._in) bgPlay(v); else if (!v.paused) v.pause(); });
+      syncHeaderToggle();
     }, { rootMargin: "160px 0px" });
     bgVids.forEach(function (v) { bio.observe(v); });
     ["touchend", "click", "keydown"].forEach(function (t) { document.addEventListener(t, bgRetry, { capture: true, passive: true }); });
+    if (heroToggle) {
+      // Over half the hero button hidden (off screen or under the fixed header) counts as gone.
+      new IntersectionObserver(function (entries) { heroToggleOn = entries[0].intersectionRatio > 0.5; syncHeaderToggle(); },
+        { rootMargin: "-" + (header ? header.offsetHeight : 0) + "px 0px 0px 0px", threshold: [0, 0.5, 1] }).observe(heroToggle);
+    }
   }
-  var vToggle = $("[data-video-toggle]");
-  var setVideosPaused = function (on) {
+  var showVideosPaused = function (on) {
     userPaused = on;
-    try { sessionStorage.setItem("meon-videos", on ? "paused" : "on"); } catch (e) {}
     document.documentElement.classList.toggle("videos-paused", on);
-    if (vToggle) { vToggle.setAttribute("aria-pressed", String(on)); vToggle.setAttribute("aria-label", on ? "Play the background videos" : "Pause the background videos"); }
+    vToggles.forEach(function (t) { t.setAttribute("aria-pressed", String(on)); t.setAttribute("aria-label", on ? "Play videos" : "Pause videos"); });
     bgVids.forEach(function (v) { if (on) v.pause(); else bgPlay(v); });
   };
   if (saveData) {
-    if (vToggle) vToggle.hidden = true;
+    vToggles.forEach(function (t) { t.hidden = true; });
     document.documentElement.classList.add("videos-paused"); // the reel strip stays still too
   }
   else {
-    if (userPaused) setVideosPaused(true);
-    if (vToggle) vToggle.addEventListener("click", function () { setVideosPaused(!userPaused); });
+    if (userPaused) showVideosPaused(true);
+    vToggles.forEach(function (t) {
+      t.addEventListener("click", function () {
+        showVideosPaused(!userPaused);
+        try { sessionStorage.setItem("meon-videos", userPaused ? "paused" : "on"); } catch (e) {}
+      });
+    });
   }
 
   /* ---------- Count-up numbers ---------- */

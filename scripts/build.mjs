@@ -203,6 +203,7 @@ ${overlay ? "" : `<div class="announce"><span>Cook-it-yourself instant noodles a
       <a class="nav-mobile-only" href="${r("visit/")}"${cur("visit/")}>Visit us</a>
     </nav>
     <div class="header-actions">
+      ${overlay ? `<button class="vpause-hdr" type="button" data-video-toggle data-video-toggle-header aria-pressed="false" aria-label="Pause videos" hidden><span class="vpause-ic" aria-hidden="true"></span></button>` : ""}
       <button class="sound-btn" type="button" data-sound aria-pressed="false" aria-label="Play background music"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="sound-label">Sound</span></button>
       <button class="search-btn" type="button" data-search-open aria-label="Search noodles">${icon.search}<span class="label">Search</span><kbd>⌘K</kbd></button>
       <a class="btn btn--red btn--sm header-visit" href="${r("visit/")}" data-magnetic>Visit</a>
@@ -367,11 +368,15 @@ function pageHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = ""
 </section>`;
 }
 
+// The hero's play/pause button: an icon while the videos play, a "Play videos" pill while they're paused. site.js swaps
+// the label; a copy in the header (layout) takes over once this one scrolls away.
+const heroVideoToggle = `<button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause videos"><span class="vpause-ic" aria-hidden="true"></span><span class="vpause-text">Play videos</span></button>`;
+
 // Inner-page video hero (Preston, 29 Oct 2026: the other pages get the home's look). Full-bleed footage: two portrait
 // clips side by side on desktop (two, not three, so each shows most of its frame: "zoom out"), one on phones (`phone`,
 // picked without big burned-in captions so nothing runs into the title), with the breadcrumbs, title, lead and actions
 // over it. Not pinned: as the page scrolls on, the footage shrinks into a rounded card and the words lift away
-// (data-scene="leave", site.js). Posters only for Save-Data; the pause button stops every background video. The page's
+// (data-scene="leave", site.js). Posters only for Save-Data; the play/pause button sits inside the clip frame. The page's
 // layout() needs `overlay: true`.
 function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "", clips, phone, logo = false }) {
   return `<section class="vhero vhero--page" aria-labelledby="page-h" data-scene="leave">
@@ -379,6 +384,7 @@ function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "
     <div class="vhero-media">
       ${bgVideo(r, phone, { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
       <div class="vhero-cols">${clips.map((c, i) => `<div class="vcol vcol--${"abc"[i]}">${bgVideo(r, c, { media: "(min-width: 900px)", eager: true })}</div>`).join("")}</div>
+      ${heroVideoToggle}
     </div>
     <div class="wrap vhero-inner">
       ${crumbs.length ? crumbsNav(r, crumbs) : ""}
@@ -388,7 +394,6 @@ function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "
       ${lead ? `<p class="vhero-sub">${lead}</p>` : ""}
       ${actions ? `<div class="actions">${actions}</div>` : ""}
     </div>
-    <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
   </div>
 </section>`;
 }
@@ -556,7 +561,7 @@ addPage("", layout({
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
       </div>
     </div>
-    <button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause the background videos"><span aria-hidden="true"></span></button>
+    ${heroVideoToggle}
     <a class="vhero-cue" href="#instagram"><span class="visually-hidden">See our Instagram videos</span><i aria-hidden="true"></i></a>
   </div>
 </section>
@@ -1070,7 +1075,7 @@ ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Priv
     <ul>
       <li>which pages you've already reviewed, so the form doesn't ask twice;</li>
       <li>whether you turned the background music on;</li>
-      <li>whether you paused the videos, until you close the tab.</li>
+      <li>whether you paused or played the videos, until you close the tab.</li>
     </ul>
     <p>Clearing your browser's site data removes them.</p>
   </div>
