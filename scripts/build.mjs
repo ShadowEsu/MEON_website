@@ -785,7 +785,7 @@ addPage("", layout({
     </div>
   </div>
   <div class="wrap">
-    <ol class="bb-real reveal" aria-label="One real bowl, step by step">
+    <ol class="bb-real reveal" tabindex="0" aria-label="One real bowl, step by step">
       ${[
         ["build-1-noodles", "Start with your noodles."],
         ["build-2-pairings", "Pairings go in at the start: enoki and fishcake here."],
