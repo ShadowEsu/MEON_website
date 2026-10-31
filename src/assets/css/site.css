@@ -16,7 +16,7 @@
   --red-deep: #b70f17;
   --ink: #121010;
   --ink-2: #3b3735;
-  --muted: #77716c;
+  --muted: #6e6863;          /* 5:1 on --soft, 5.5:1 on white (WCAG AA for small text) */
   --line: #ebe7e2;
   --line-2: #d9d3cc;
   --soft: #f6f4f1;
@@ -202,7 +202,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 /* Mega menu */
 .bar { position: relative; }
 .nav-item { display: flex; align-items: center; }
-.mega-toggle { width: 26px; height: 26px; margin-left: -8px; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--ink-2); padding: 0; }
+.mega-toggle { width: 26px; height: 26px; margin-left: 0; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--ink-2); padding: 0; }
 .chev { width: 15px; height: 15px; transition: transform .35s var(--ease); }
 .mega {
   position: absolute; left: 0; right: 0; top: 100%; display: grid; grid-template-columns: 1fr 1.6fr .9fr; gap: 32px; padding: 28px 0 32px;
@@ -252,7 +252,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 40px; }
 .footer-lead { color: #fff; font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; max-width: 18ch; }
 .footer-social { display: inline-flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; font-weight: 500; }
-.site-footer h4 { color: #fff; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; margin-bottom: 16px; }
+.site-footer h2 { color: #fff; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; margin-bottom: 16px; }
 .site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: .95rem; }
 .site-footer a { text-decoration: none; transition: color .2s; }
 .site-footer a:hover { color: #fff; }
@@ -370,8 +370,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .vhero-stage::before { background: linear-gradient(180deg, rgba(12,9,8,.5) 0%, rgba(12,9,8,0) 20%); }
 }
 .vhero-inner { padding: calc(var(--header-h) + 32px) 0 clamp(64px, 10vh, 120px); transform: translate3d(0, calc(var(--p, 0) * -16vh), 0); opacity: calc(1 - var(--p, 0) * 1.7); }
-/* Faded out: no clicks or focus on the invisible buttons (site.js sets .is-late past --p .58) */
-.vhero.is-late .vhero-inner { visibility: hidden; }
+/* Faded out (site.js sets .is-late past --p .58): no clicks, and the invisible links and buttons leave the tab order.
+   The heading and text stay in the accessibility tree, so the page keeps its h1 for screen readers after scrolling. */
+.vhero.is-late .vhero-inner { pointer-events: none; }
+.vhero.is-late .vhero-inner :is(a, button) { visibility: hidden; }
 .vhero-logo { display: block; width: clamp(128px, 12vw, 184px); height: auto; aspect-ratio: 1; margin-bottom: clamp(18px, 2.4vw, 30px); border-radius: 3px; box-shadow: 0 24px 60px -24px rgba(0,0,0,.75); }
 .videos-paused .vhero-logo .lw, .videos-paused .vhero-cue i { animation-play-state: paused; }
 .vhero-title { font-size: clamp(3rem, 8.2vw, 7.4rem); line-height: .9; letter-spacing: -.05em; margin: 0 0 18px; max-width: 10ch; text-wrap: balance; text-shadow: 0 2px 40px rgba(0,0,0,.3); }
@@ -522,7 +524,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .scard-copy p.scard-tip { font-size: 1rem; padding: 12px 16px; border-left: 3px solid var(--brand); background: rgba(255,255,255,.1); border-radius: 0 8px 8px 0; }
 .scard-num { display: inline-block; padding: 6px 10px; border-radius: 6px; background: var(--brand); color: #fff; font-weight: 700; font-size: .9rem; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
 .scard--red { background: var(--brand); }
-.scard--red .scard-num { background: #fff; color: var(--brand); }
+.scard--red .scard-num { background: #fff; color: var(--red); }
 .scard--ink { background: var(--ink); }
 .scard--light { background: var(--soft); color: var(--ink); }
 .scard--light .scard-copy p { color: var(--ink-2); }
@@ -631,10 +633,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .card-stage { display: grid; place-items: center; perspective: 1200px; }
 
 /* ---------- CTA band ---------- */
-.cta-band { background: var(--brand); color: #fff; padding: clamp(80px, 11vw, 150px) 0; overflow: hidden; }
+.cta-band { background: var(--red); color: #fff; padding: clamp(80px, 11vw, 150px) 0; overflow: hidden; }
 .cta-inner { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: center; }
 .cta-copy .eyebrow, .cta-copy .lead { color: #fff; }
-.cta-copy .lead { opacity: .9; margin-bottom: 32px; }
+.cta-copy .lead { margin-bottom: 32px; }
 .cta-copy h2 { font-size: clamp(2.6rem, 6.4vw, 5.6rem); line-height: .96; letter-spacing: -.045em; margin-bottom: 22px; max-width: 12ch; }
 .cta-mascots { display: flex; justify-content: center; align-items: flex-end; }
 .cta-mascots svg { width: clamp(90px, 12vw, 150px); overflow: visible; animation: bob 2.8s ease-in-out infinite; }
@@ -1041,14 +1043,14 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 }
 
 /* ---------- Home: closing visit band (street video) ---------- */
-.visit-band { position: relative; isolation: isolate; overflow: hidden; color: #fff; background: var(--brand); }
+.visit-band { position: relative; isolation: isolate; overflow: hidden; color: #fff; background: var(--red); }
 .visit-band-media { position: absolute; inset: 0; z-index: -1; }
 .visit-band-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(196,16,26,.96) 0%, rgba(196,16,26,.72) 42%, rgba(12,9,8,.1) 74%); }
 .visit-band-inner { display: flex; align-items: flex-end; min-height: 100vh; min-height: 100svh; padding-block: calc(var(--header-h) + 40px) clamp(56px, 9vh, 110px); }
-.visit-band .eyebrow { color: #fff; opacity: .85; }
+.visit-band .eyebrow { color: #fff; }
 .visit-band h2 { font-size: clamp(2.8rem, 7.6vw, 6.6rem); line-height: .9; letter-spacing: -.05em; margin: 0 0 20px; max-width: 9ch; text-wrap: balance; }
 .visit-band-addr { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 600; line-height: 1.3; margin: 0 0 12px; }
-.visit-band .lead { color: rgba(255,255,255,.9); margin: 0 0 28px; max-width: 40ch; }
+.visit-band .lead { color: #fff; margin: 0 0 28px; max-width: 40ch; }
 @media (max-width: 760px) { .visit-band-inner { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 900px) {
   .visit-band-media { inset: auto; top: 50%; right: max(var(--gutter), (100% - var(--wrap)) / 2); z-index: 0; height: min(80vh, 840px, 70vw); aspect-ratio: 9 / 16; translate: 0 -50%; border-radius: 24px; overflow: hidden; box-shadow: 0 50px 90px -40px rgba(60,0,4,.6); }
@@ -1201,7 +1203,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vibe .vibe-eq i:nth-child(2) { animation-delay: -.3s; } .vibe .vibe-eq i:nth-child(3) { animation-delay: -.6s; }
 .vibe p { margin: 0; font-weight: 600; font-size: .95rem; white-space: nowrap; }
 .vibe button { font: inherit; font-weight: 700; font-size: .9rem; border-radius: 999px; padding: 9px 16px; cursor: pointer; border: 0; }
-.vibe .vibe-yes { background: var(--brand); color: #fff; }
+.vibe .vibe-yes { background: var(--red); color: #fff; }
 .vibe .vibe-no { background: transparent; color: rgba(255,255,255,.7); padding: 9px 10px; }
 .vibe button { white-space: nowrap; }
 /* Phones: drop in under the header, clear of the buttons at the bottom of the full-screen cards */
