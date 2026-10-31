@@ -13,7 +13,7 @@ MEON is a cook-it-yourself instant-noodle bar at Shop 8, 45 Francis Street, Nort
 - Motion with plain native scrolling (no scroll smoothing, no intro screen): masked headline reveals, image reveals, parallax, scroll-linked noodle wall, magnetic buttons, mascots, logo letters that hop on hover and glyphs that take turns in the big home logo. Transform/opacity only, paused off-screen, off for "reduce motion"
 - Guest reviews: star rating, name and comment on the home page and every noodle page, stored in Supabase (see `docs/operations.md`)
 - Optional background music: an original lo-fi loop generated in the browser (off by default)
-- Video-first home page (29 Oct 2026): a pinned full-screen video hero (one portrait clip on phones, three drifting columns on desktop), the booth-shoot bowls, the four "Do it yourself" steps as stacked full-screen video cards, a drifting video wall and Instagram-style @meonnoodles reel cards. Background clips are muted, load only near the screen and stay still for "reduce motion" and Save-Data (see `docs/operations.md`, Videos)
+- Video-first home page (29 Oct 2026): a pinned full-screen video hero (one portrait clip on phones; on desktop one clip shown whole at 9:16 on the left with the words beside it), the booth-shoot bowls, the four "Do it yourself" steps as stacked full-screen video cards, a drifting video wall and Instagram-style @meonnoodles reel cards with MEON's logo. Background clips are muted, load only near the screen and stay still for "reduce motion" and Save-Data (see `docs/operations.md`, Videos)
 - SEO: Restaurant, WebSite, Menu (199 items), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
 - Dine in or take it away: no online ordering
 

@@ -8,14 +8,16 @@ Folder: https://drive.google.com/drive/folders/1B13fCWhjdPt7kiS31U0OfAv0-pZjTImV
 
 | File | What it's for |
 | --- | --- |
-| **MEON — Website Guide & Important Info** | The guide (this page, in short), site map, things to confirm |
-| **MEON — Shelf QR Codes (print me)** | All 172 QR codes on one printable doc, with names |
-| **MEON — QR Codes (one per noodle, PNG)** (folder) | 172 separate QR images, e.g. `045 Nissin Demae Ramen Sesame Oil (JP).png`. Use them for single labels, menus and social posts |
-| **MEON — Noodle Database** | Every noodle: brand, country, spice, diet, soup/dry, weight, page URL |
-| **MEON — Deals & Promotions** | Current deals and member-card perks |
+| **MEON — Website Guide & Important Info** | The guide (this page, in short), what's on the site, things to confirm, with its sources at the bottom |
+| **MEON — Shelf QR Codes (print me)** | All 199 noodle QR codes on one printable doc, with names, plus a home and a noodle library code |
+| **MEON — QR Codes (one per noodle, PNG)** (folder) | 199 separate QR images numbered in the site's order, e.g. `045 Nissin Demae Ramen Sesame Oil (JP).png`; 173 to 199 are the noodles from the till. Use them for single labels, menus and social posts |
+| **MEON — Noodle Database** | Every noodle (199): brand, country, style, spice, diet, grams, fun note, whether the site has MEON's photo, page URL and shelf QR file |
+| **MEON — Deals & Promotions** | What the website shows for deals: none since 28 Oct 2026 (no prices, offers or MEON Card) |
 | **MEON — Website Views Log** | Page-view snapshots. It is updated **only when you ask** (see below) |
 
-The QR PNGs come from `scripts/make_qr_pngs.py`. Each file was checked: it decodes to the right page, and its Drive MD5 matches the generated file.
+All five were rewritten in place from this repo on 30 Oct 2026 (the 4 Oct versions are in each file's Drive version history). When the site changes, update them the same way: edit the existing files so their links and history stay.
+
+The QR PNGs come from `scripts/make_qr_pngs.py`, which numbers noodles in the site's order (`data/noodles.json`, then the till's `extraNoodles`), so new noodles never renumber existing files. Every file was checked to decode to the right page (zxing, 30 Oct 2026: 199 of 199). Pillow versions write different PNG bytes for the same code, so compare decoded URLs, not MD5s, against files already in Drive.
 
 ## QR codes
 
@@ -172,14 +174,14 @@ After any change: `npm run build && npm run check`. Pushing to GitHub doesn't de
 ## Still to confirm
 
 - Phone, email and opening hours. The address is Shop 8, 45 Francis Street, Northbridge WA 6003 (Preston, 29 Oct 2026, matching MEON's Instagram). Opening hours are on Instagram and change often, so the site points there instead of listing them
+- Which unit MEON is: the site says Shop 8 (above), but MEON's own "We Are OPEN" posters (MEON's designer, April and May 2026, in the shared MEON Drive folder) say "Shop 7 & 8, 45 Francis St. Northbridge 6003". If it's both units, change `streetAddress` in `data/site.json`
 - Whether MEON already has a Google Maps place at 45 Francis Street. If there is one, claim it rather than making a second listing, and paste its link into `googleBusinessUrl` and its coordinates into `geo`
-- The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy. If that's MEON's company, point it at the Vercel project rather than buying a new domain
+- The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy, and MEON's printed packaging already shows "www.meon.au" (the designer's packaging file in the shared MEON Drive folder), so anyone typing it today lands on a parked page. If that's MEON's company, point it at the Vercel project rather than buying a new domain
 - Nongshim Shin Noodle Soup Original is marked vegetarian-friendly in the Drive doc; check the packet on the wall (many Shin Ramyun versions list beef)
 - The promo and website tour videos were taken down on 29 Oct 2026 (Preston: "get rid of it for now"); the home page now uses short background clips instead (see Videos)
 - 155 noodles still need a photo (they show an illustrated packet). A search of Wikimedia Commons and Openverse on 29 Oct 2026 found a public-domain or CC0 photo for only one (Indomie Soto Mie). Photos that need a visible credit (CC BY, CC BY-SA) are not used (Preston, 30 Oct 2026), so shooting the packets on the wall is the way to cover the rest
 - The updated noodle list of what is actually on the wall
 - The Google Business Profile review link (paste it into `googleBusinessUrl` in `data/site.json`; until then the review buttons open MEON on Google Maps)
 - Diet for the 27 noodles added from the till (in `data/catalogue.json`)
-- Shelf QR PNGs in Drive: the 27 new noodles' codes are on `/qr/` but not yet in the Drive folder (run `python3 scripts/make_qr_pngs.py` and upload)
 - Till items not added yet: "Kang Shi Fu Hot & Spicy Beef" (may be the Braised Beef Spicy Red already on the site) and "Nissin Black Garlic Demae Ramen" (may be the same packet as the Black Garlic Oil Tonkotsu)
 - Myojo's country: the new Myojo Mee Goreng says Singapore (Myojo is Nissin Foods Singapore's brand), while the Drive doc lists Myojo Mee Poh Dry as Malaysia

@@ -5,7 +5,9 @@
     python3 scripts/make_qr_pngs.py [outDir]        # default: qr-png/
 
 Each file is a 656x656 1-bit PNG (~1 KB) named "<nnn> <Brand> <Name> (<CC>).png",
-encoding <siteUrl>/noodles/<slug>/?src=qr. The output is deterministic, so the
+encoding <siteUrl>/noodles/<slug>/?src=qr. Noodles are numbered in the site's order
+(data/noodles.json, then extraNoodles from data/catalogue.json, as in build.mjs), so
+adding till noodles never renumbers existing files. The output is deterministic, so the
 md5 of every file can be compared against Drive's md5Checksum after upload.
 A manifest.csv (file, slug, url, md5) is written alongside.
 """
@@ -24,7 +26,8 @@ out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "qr-png")
 os.makedirs(out, exist_ok=True)
 
 site = json.load(open(os.path.join(ROOT, "data", "site.json")))
-noodles = json.load(open(os.path.join(ROOT, "data", "noodles.json")))
+catalogue = json.load(open(os.path.join(ROOT, "data", "catalogue.json")))
+noodles = json.load(open(os.path.join(ROOT, "data", "noodles.json"))) + catalogue["extraNoodles"]
 base = site["siteUrl"].rstrip("/")
 
 rows = []
