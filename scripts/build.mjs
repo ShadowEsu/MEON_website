@@ -56,11 +56,24 @@ fs.rmSync(OUT, { recursive: true, force: true });
 
 // Photos are cached for 30 days, so add a short content hash: a replaced photo gets a new URL.
 const fingerprint = (p) => `${p}?v=${crypto.createHash("sha1").update(fs.readFileSync(path.join(SRC, p))).digest("hex").slice(0, 8)}`;
+// Width of a .webp from its header (VP8X, VP8 or VP8L), for exact srcset descriptors.
+const webpWidth = (file) => {
+  const b = fs.readFileSync(file), chunk = b.toString("ascii", 12, 16);
+  if (chunk === "VP8X") return 1 + b.readUIntLE(24, 3);
+  if (chunk === "VP8 ") return b.readUInt16LE(26) & 0x3fff;
+  if (chunk === "VP8L") return 1 + (b.readUInt32LE(21) & 0x3fff);
+  throw new Error(`not a webp: ${file}`);
+};
 // Small copies of photos the site shows small (made by scripts/make_thumbs.py): "<name>-t<px>.webp" next to the original.
 // Falls back to the original when the copy hasn't been made yet.
 const smallCopy = (p, px) => { const t = p.replace(/\.webp$/, `-t${px}.webp`); return fingerprint(fs.existsSync(path.join(SRC, t)) ? t : p); };
-// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json. `small` is the 64 px icon (2x).
-const pairings = readJSON("toppings.json").map((t) => (t.img ? { ...t, img: fingerprint(t.img), small: smallCopy(t.img, 128) } : t));
+// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json. `small` is the 64 px icon (2x);
+// `mid` (384 px) and `w` (the original's width) give the Pairings grid a srcset when the 384 px copy exists.
+const pairings = readJSON("toppings.json").map((t) => {
+  if (!t.img) return t;
+  const mid = t.img.replace(/\.webp$/, "-t384.webp");
+  return { ...t, img: fingerprint(t.img), small: smallCopy(t.img, 128), ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, t.img)) } : {}) };
+});
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -479,14 +492,6 @@ const asset = (p) => fingerprint(`assets/${p}`);
 // A 1x1 transparent GIF: an eager poster's <picture> serves it outside the video's own `media`, so a phone never
 // downloads the desktop posters (or the reverse) just because they sit in a hidden box.
 const BLANK_GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-// Width of a .webp from its header (VP8X, VP8 or VP8L), for exact srcset descriptors.
-const webpWidth = (file) => {
-  const b = fs.readFileSync(file), chunk = b.toString("ascii", 12, 16);
-  if (chunk === "VP8X") return 1 + b.readUIntLE(24, 3);
-  if (chunk === "VP8 ") return b.readUInt16LE(26) & 0x3fff;
-  if (chunk === "VP8L") return 1 + (b.readUInt32LE(21) & 0x3fff);
-  throw new Error(`not a webp: ${file}`);
-};
 // `sizes` (card-sized clips only): adds the 480 px poster copy from scripts/make_thumbs.py to a srcset, so a card on a
 // 1-2x screen doesn't download the 720 px poster; 3x phones still pick the original.
 const bgPoster = (r, name, media, eager, sizes) => {
@@ -1044,7 +1049,7 @@ ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and si
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
-  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}" alt="${esc(t.name)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
+  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.name)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2 data-split>Drinks</h2>

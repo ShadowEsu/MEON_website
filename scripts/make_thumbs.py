@@ -2,6 +2,7 @@
 
   <name>-t192.webp  extra noodle photos (data/gallery.json), shown as 96 px gallery thumbnails
   <name>-t128.webp  pairing and side photos (data/toppings.json), shown as 64 px icons and 44 px search results
+  <name>-t384.webp  the same photos for the Pairings and sides grid (about 177-230 px), offered in a srcset
   <name>-t480.webp  posters of the card-sized clips (src/assets/video/ig-*.webp and step-*.webp), 480 px wide, offered in
                     a srcset next to the original so 1-2x screens skip the 720 px poster
 
@@ -22,6 +23,8 @@ def small_copy(src: Path, px: int) -> None:
     if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
         return
     with Image.open(src) as im:
+        if im.width <= px:  # never upscale: the build falls back to the original
+            return
         im = ImageOps.exif_transpose(im).convert("RGB")
         if src.parent.name == "video":  # posters keep their shape, scaled to px wide
             out = im.resize((px, round(im.height * px / im.width)), Image.LANCZOS)
@@ -39,6 +42,7 @@ for files in gallery.values():
 for t in json.loads((ROOT / "data" / "toppings.json").read_text()):
     if t.get("img") and (SRC / t["img"]).exists():
         small_copy(SRC / t["img"], 128)
+        small_copy(SRC / t["img"], 384)
 for poster in sorted((SRC / "assets" / "video").glob("*.webp")):
     if poster.stem.startswith(("ig-", "step-")) and not poster.stem.endswith("-t480"):
         small_copy(poster, 480)
