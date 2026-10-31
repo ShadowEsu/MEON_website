@@ -2,7 +2,7 @@
   "name": "meon-website",
   "version": "1.0.0",
   "private": true,
-  "description": "MEON — instant noodle dine-in, Canning Bridge, Perth WA. Static site with a page + QR code for every noodle.",
+  "description": "MEON — cook-it-yourself instant noodle bar, Northbridge, Perth WA. Static site with a page + QR code for every noodle.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
