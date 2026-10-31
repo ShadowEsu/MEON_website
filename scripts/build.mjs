@@ -56,15 +56,20 @@ fs.rmSync(OUT, { recursive: true, force: true });
 
 // Photos are cached for 30 days, so add a short content hash: a replaced photo gets a new URL.
 const fingerprint = (p) => `${p}?v=${crypto.createHash("sha1").update(fs.readFileSync(path.join(SRC, p))).digest("hex").slice(0, 8)}`;
-// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
-const pairings = readJSON("toppings.json").map((t) => (t.img ? { ...t, img: fingerprint(t.img) } : t));
+// Small copies of photos the site shows small (made by scripts/make_thumbs.py): "<name>-t<px>.webp" next to the original.
+// Falls back to the original when the copy hasn't been made yet.
+const smallCopy = (p, px) => { const t = p.replace(/\.webp$/, `-t${px}.webp`); return fingerprint(fs.existsSync(path.join(SRC, t)) ? t : p); };
+// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json. `small` is the 64 px icon (2x).
+const pairings = readJSON("toppings.json").map((t) => (t.img ? { ...t, img: fingerprint(t.img), small: smallCopy(t.img, 128) } : t));
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
   if (!c) throw new Error(`Unknown country ${n.country} for ${n.slug}`);
   const img = images[n.slug] && fs.existsSync(path.join(SRC, "assets", images[n.slug])) ? fingerprint(`assets/${images[n.slug]}`) : null;
   const thumb = img && fs.existsSync(path.join(SRC, "assets", "img", "noodles", "sm", `${n.slug}.webp`)) ? fingerprint(`assets/img/noodles/sm/${n.slug}.webp`) : img;
-  const more = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))).map((p) => fingerprint(`assets/${p}`)) : [];
+  const galleryFiles = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))) : [];
+  const more = galleryFiles.map((p) => fingerprint(`assets/${p}`));
+  const moreSmall = galleryFiles.map((p) => smallCopy(`assets/${p}`, 192)); // the 96 px gallery thumbnails (2x)
   // Diet label (Preston, 29 Oct 2026): "Vegetarian", never "vegetarian-friendly" or "vegan".
   const diet = /Vegetarian/.test(n.diet) ? "Vegetarian" : n.diet;
   const dietTokens = [];
@@ -74,7 +79,7 @@ const noodles = noodlesRaw.map((n) => {
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(diet)) dietTokens.push("seafood");
   const unrated = n.spice == null;
-  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, thumb, more, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, thumb, more, moreSmall, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
@@ -474,11 +479,28 @@ const asset = (p) => fingerprint(`assets/${p}`);
 // A 1x1 transparent GIF: an eager poster's <picture> serves it outside the video's own `media`, so a phone never
 // downloads the desktop posters (or the reverse) just because they sit in a hidden box.
 const BLANK_GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-const bgPoster = (r, name, media, eager) => {
-  const img = `<img class="vbg-poster" src="${r(asset(`video/${name}.webp`))}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+// Width of a .webp from its header (VP8X, VP8 or VP8L), for exact srcset descriptors.
+const webpWidth = (file) => {
+  const b = fs.readFileSync(file), chunk = b.toString("ascii", 12, 16);
+  if (chunk === "VP8X") return 1 + b.readUIntLE(24, 3);
+  if (chunk === "VP8 ") return b.readUInt16LE(26) & 0x3fff;
+  if (chunk === "VP8L") return 1 + (b.readUInt32LE(21) & 0x3fff);
+  throw new Error(`not a webp: ${file}`);
+};
+// `sizes` (card-sized clips only): adds the 480 px poster copy from scripts/make_thumbs.py to a srcset, so a card on a
+// 1-2x screen doesn't download the 720 px poster; 3x phones still pick the original.
+const bgPoster = (r, name, media, eager, sizes) => {
+  const small = `video/${name}-t480.webp`;
+  const set = sizes && fs.existsSync(path.join(SRC, "assets", small))
+    ? ` srcset="${r(asset(small))} 480w, ${r(asset(`video/${name}.webp`))} ${webpWidth(path.join(SRC, "assets", `video/${name}.webp`))}w" sizes="${sizes}"` : "";
+  const img = `<img class="vbg-poster" src="${r(asset(`video/${name}.webp`))}"${set} alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
   return eager && media ? `<picture><source media="not all and ${media}" srcset="${BLANK_GIF}">${img}</picture>` : img;
 };
-const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false } = {}) => `<div class="vbg${cls ? " " + cls : ""}">${poster ? bgPoster(r, name, media, eager) : ""}<video class="vbg-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" data-bg-src="${r(asset(`video/${name}.mp4`))}"${media ? ` data-media="${media}"` : ""}></video></div>`;
+const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false, sizes = "" } = {}) => `<div class="vbg${cls ? " " + cls : ""}">${poster ? bgPoster(r, name, media, eager, sizes) : ""}<video class="vbg-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" data-bg-src="${r(asset(`video/${name}.mp4`))}"${media ? ` data-media="${media}"` : ""}></video></div>`;
+// Displayed poster widths: reel cards are clamp(230px, 21vw, 300px); step cards are about 250 px on phones and up to
+// 472 px (840 px tall at 9:16) on desktop.
+const REEL_SIZES = "(min-width: 1429px) 300px, (min-width: 1096px) 21vw, 230px";
+const STEP_SIZES = "(min-width: 900px) 472px, 64vw";
 
 // Photos from MEON's booth shoot (src/assets/img/shoot, made by meon-work/rebuild/make_photos.py): 800/1600/2400 px wide.
 const SHOOT = {
@@ -593,7 +615,7 @@ addPage("", layout({
       const copy = i >= REELS.length;
       return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
         <span class="reel-top" aria-hidden="true"><span class="reel-av"><img src="${r("assets/img/logo-96.webp")}" alt="" width="32" height="32" loading="lazy" decoding="async"></span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
-        <div class="reel-media">${bgVideo(r, v.file)}</div>
+        <div class="reel-media">${bgVideo(r, v.file, { sizes: REEL_SIZES })}</div>
         <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
       </a></li>`;
     }).join("")}</ul>
@@ -608,19 +630,19 @@ addPage("", layout({
   </div>
   <ol class="stack" data-stack>
     <li class="scard scard--red">
-      <div class="scard-media">${bgVideo(r, "step-pick")}</div>
+      <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
       <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
     </li>
     <li class="scard scard--ink">
-      <div class="scard-media">${bgVideo(r, "step-pairings")}</div>
+      <div class="scard-media">${bgVideo(r, "step-pairings", { sizes: STEP_SIZES })}</div>
       <div class="scard-copy"><span class="scard-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--white" href="${r("pairings-and-sides/")}">See the pairings and sides ${icon.arrow}</a></div>
     </li>
     <li class="scard scard--light">
-      <div class="scard-media">${bgVideo(r, "step-cook")}</div>
+      <div class="scard-media">${bgVideo(r, "step-cook", { sizes: STEP_SIZES })}</div>
       <div class="scard-copy"><span class="scard-num">03</span><h3>Cook it your way</h3><p>Press 1, then 2 on the machine to start cooking.</p><p class="scard-tip">Egg or cheese? Add it on top of the noodles in the last 30 seconds.</p></div>
     </li>
     <li class="scard scard--red">
-      <div class="scard-media">${bgVideo(r, "step-enjoy")}</div>
+      <div class="scard-media">${bgVideo(r, "step-enjoy", { sizes: STEP_SIZES })}</div>
       <div class="scard-copy"><span class="scard-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away. Slurping is encouraged.</p></div>
     </li>
   </ol>
@@ -874,7 +896,7 @@ noodles.forEach((n, idx) => {
     <div class="noodle-grid">
       <div class="noodle-media">
         <figure class="noodle-photo img-reveal" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
-        ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : p)}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
+        ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : n.moreSmall[i - 1])}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
         ${n.note ? `<p class="noodle-note">${esc(n.note)}</p>` : ""}
       </div>
       <div class="noodle-body">
@@ -921,7 +943,7 @@ noodles.forEach((n, idx) => {
 
         ${tops.length ? `<section class="noodle-sec" aria-labelledby="top-h">
           <h2 id="top-h">Pairs well with</h2>
-          <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.img)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
+          <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.small)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
         </section>` : ""}
 
         <p class="note">${n.dietNote ? "* Vegetarian means the noodle and seasoning are generally meat-free, but recipes vary. Always check the packet if you have dietary requirements or allergies." : "Always check the packet for allergens and full ingredients."}</p>
@@ -1262,7 +1284,7 @@ write("assets/img/icons.svg", iconSprite());
 const searchIndex = [
   ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.thumb, f: n.countryCode, k: [n.flavour, n.diet, n.note, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
   ...countries.map((c) => ({ g: "Countries", t: c.name, s: `${countFor((n) => n.country === c.name)} noodles · ${c.headline}`, u: `countries/${c.slug}/`, f: c.code, k: "country" })),
-  ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.img || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
+  ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.small || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
     ["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"],
