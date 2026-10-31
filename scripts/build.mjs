@@ -485,6 +485,20 @@ const shootImg = (r, name, { sizes = "100vw", cls = "", eager = false, alt } = {
   return `<img${cls ? ` class="${cls}"` : ""} src="${r(asset(`img/shoot/${name}-1600.webp`))}" srcset="${[800, 1600, 2400].map((x) => `${r(asset(`img/shoot/${name}-${x}.webp`))} ${x}w`).join(", ")}" sizes="${sizes}" width="${w}" height="${h}" alt="${esc(alt ?? s.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 };
 
+// Bowls from MEON's own "Noodle Pics" shoot (MEON's Drive; same shoot as "Toppings pics"), square crops made by
+// meon-work/photos.noindex/bowls.py: 400/800/1200 px. `tags` are pairing ids from data/toppings.json that can be seen
+// in the photo; anything in a photo that isn't on MEON's pairings list (the fish balls, plain Spam slices) is left unnamed.
+const BOWLS = {
+  "build-1-noodles": { alt: "A MEON bowl of cooked noodles seen from above, before any pairings" },
+  "build-2-pairings": { alt: "The same bowl with enoki and fishcakes added", tags: ["enoki", "fishcake"] },
+  "build-3-egg": { alt: "The same bowl finished with an egg on top and spring onion", tags: ["egg", "spring-onion"] },
+  "bowl-side": { alt: "A MEON bowl from the side with beef roll and seaweed on top", tags: ["beef", "seaweed"] },
+  "bowl-seaweed": { alt: "A bowl of noodles from above with seaweed and spring onion", tags: ["seaweed", "spring-onion"] },
+  "bowl-beef-roll": { alt: "A bowl from above with beef roll, enoki, seaweed, an egg and spring onion", tags: ["beef", "enoki", "seaweed", "egg", "spring-onion"] },
+  "bowl-enoki-egg": { alt: "A bowl from above with enoki, an egg and spring onion", tags: ["enoki", "egg", "spring-onion"] },
+};
+const bowlImg = (r, name, sizes) => `<img src="${r(asset(`img/bowls/${name}-800.webp`))}" srcset="${[400, 800, 1200].map((x) => `${r(asset(`img/bowls/${name}-${x}.webp`))} ${x}w`).join(", ")}" sizes="${sizes}" width="800" height="800" alt="${esc(BOWLS[name].alt)}" loading="lazy" decoding="async">`;
+
 // @meonnoodles reels for the Instagram strip: 8-second muted previews (the reels' own captions, trimmed before any price),
 // shown as Instagram-style cards. Clips cut from Preston's WhatsApp videos have no post link, so they open the profile.
 const REELS = [
@@ -732,6 +746,15 @@ addPage("", layout({
       <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
       <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side ${icon.arrow}</a></div>
     </div>
+  </div>
+  <div class="wrap">
+    <ol class="bb-real reveal" aria-label="One real bowl, step by step">
+      ${[
+        ["build-1-noodles", "Start with your noodles."],
+        ["build-2-pairings", "Pairings go in at the start: enoki and fishcake here."],
+        ["build-3-egg", "Last 30 seconds: crack an egg on top."],
+      ].map(([name, cap], i) => `<li><figure><span class="bb-real-media">${bowlImg(r, name, "(min-width: 900px) 30vw, 80vw")}</span><figcaption><b>${i + 1}</b>${esc(cap)}</figcaption></figure></li>`).join("")}
+    </ol>
   </div>
 </section>
 
@@ -1007,6 +1030,11 @@ addPage("pairings-and-sides/", layout({
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
+<section class="section section--tight" id="bowls" aria-labelledby="bowls-h"><div class="wrap">
+  <h2 id="bowls-h" data-split>Built with our pairings.</h2>
+  <p class="lead pairing-note">Real MEON bowls. Tap a pairing to see it below.</p>
+  <div class="bowl-grid">${["bowl-side", "bowl-beef-roll", "bowl-seaweed", "bowl-enoki-egg"].map((name, i) => `<figure class="bowl-shot reveal" style="--rd:${i * 0.05}s"><span class="bowl-shot-media">${bowlImg(r, name, "(min-width: 1024px) 23vw, 46vw")}</span><figcaption>${BOWLS[name].tags.map((id) => { const t = pairings.find((p) => p.id === id); if (!t) throw new Error(`BOWLS ${name}: unknown pairing "${id}"`); return `<a href="#${t.id}">${esc(t.name)}</a>`; }).join("")}</figcaption></figure>`).join("")}</div>
+</div></section>
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>

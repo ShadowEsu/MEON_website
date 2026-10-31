@@ -785,6 +785,14 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .topping:target strong { color: var(--red); }
 @media (max-width: 1024px) { .topping-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .topping-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.bowl-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 22px; margin-top: 28px; }
+.bowl-shot { margin: 0; }
+.bowl-shot-media { display: block; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: #1c1d21; margin-bottom: 12px; }
+.bowl-shot-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bowl-shot figcaption { display: flex; flex-wrap: wrap; gap: 6px; }
+.bowl-shot figcaption a { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-2); font-size: .86rem; font-weight: 600; color: var(--ink); text-decoration: none; transition: border-color .2s, color .2s; }
+.bowl-shot figcaption a:hover, .bowl-shot figcaption a:focus-visible { border-color: var(--ink); color: var(--red); }
+@media (max-width: 1024px) { .bowl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ---------- Card / about / visit ---------- */
 .icon-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line-2); }
@@ -1164,6 +1172,16 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .bb-ic { width: 30px; height: 30px; display: grid; place-items: center; }
 .bb-ic svg { width: 100%; height: 100%; }
 .bb-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
+.bb-real { list-style: none; margin: clamp(44px, 6vw, 76px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+.bb-real figure { margin: 0; }
+.bb-real-media { display: block; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: #1c1d21; }
+.bb-real-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bb-real figcaption { display: flex; align-items: baseline; gap: 10px; margin-top: 14px; font-weight: 600; line-height: 1.35; }
+.bb-real figcaption b { flex: none; padding: 4px 9px; border-radius: 6px; background: var(--brand); color: #fff; font-size: .85rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) {
+  .bb-real { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); scrollbar-width: none; }
+  .bb-real li { scroll-snap-align: start; }
+}
 
 /* Cards: a little wiggle */
 .noodle-card .nc-media { transition: transform .5s var(--ease); }
