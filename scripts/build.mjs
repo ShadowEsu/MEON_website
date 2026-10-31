@@ -102,6 +102,17 @@ const NAV = [
 // Public wording: the range changes often, so the site says "100+" and "from across Asia".
 const COUNT = "100+";
 const REGION = "from across Asia";
+// Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
+// with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
+const fitDesc = (head, body, extras = [], max = 160) => {
+  const room = max - head.length - 1;
+  let b = body;
+  while (b.length > room && /[.!?]\s+\S.*[.!?]$/.test(b)) b = b.replace(/\s+[^.!?]+[.!?]$/, "");
+  if (b.length > room) b = b.slice(0, b.lastIndexOf(" ", room - 1)).replace(/[\s,;:–-]+$/, "") + "…";
+  let d = `${head} ${b}`;
+  for (const x of extras) { const pick = [x].flat().find((y) => d.length + 1 + y.length <= max); if (pick) d += " " + pick; }
+  return d;
+};
 
 // `overlay`: the header sits transparent over a full-screen video hero (home) until the page scrolls.
 function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/shoot/og-meon.jpg", preload = "", noindex = false, overlay = false, jsonld = [], scripts = [] }) {
@@ -148,7 +159,6 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     url: SITE_URL + "/",
     inLanguage: "en-AU",
     publisher: { "@id": `${SITE_URL}/#restaurant` },
-    potentialAction: { "@type": "SearchAction", target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/noodles/?q={search_term_string}` }, "query-input": "required name=search_term_string" },
   };
   const ld = [
     // The full Restaurant node lives on the home page only; a name-and-url stub on other pages reads as an incomplete local business.
@@ -194,7 +204,7 @@ ${analytics}
 <body data-root="${root}"${overlay ? ' class="has-vhero"' : ""}>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="scroll-progress" aria-hidden="true"><span></span></div>
-${overlay ? "" : `<div class="announce"><span>Cook-it-yourself instant noodles at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</span> <a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></div>`}
+${overlay ? "" : `<aside class="announce" aria-label="Where to find us"><span>Cook-it-yourself instant noodles at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</span> <a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></aside>`}
 <header class="site-header${overlay ? " site-header--over" : ""}" data-header>
   <div class="wrap bar">
     <a class="logo" href="${r("")}" aria-label="MEON home">${logoMark("logo-badge")}</a>
@@ -226,7 +236,7 @@ ${body(r)}
         </div>
       </div>
       <div>
-        <h4>Eat</h4>
+        <h2>Eat</h2>
         <ul>
           <li><a href="${r("noodles/")}">Noodle library</a></li>
           <li><a href="${r("noodles/?type=Soup")}">Soup noodles</a></li>
@@ -236,7 +246,7 @@ ${body(r)}
         </ul>
       </div>
       <div>
-        <h4>Explore</h4>
+        <h2>Explore</h2>
         <ul>
           <li><a href="${r("countries/")}">Countries</a></li>
           <li><a href="${r("pairings-and-sides/")}">Pairings and sides</a></li>
@@ -246,7 +256,7 @@ ${body(r)}
         </ul>
       </div>
       <div>
-        <h4>Visit</h4>
+        <h2>Visit</h2>
         <ul>
           <li>${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</li>
           <li><a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Open in Google Maps</a></li>
@@ -544,7 +554,7 @@ addPage("", layout({
   urlPath: "",
   active: "",
   overlay: true,
-  description: `MEON is a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}: ${COUNT} noodles ${REGION}, a pairings and sides bar and your own cooking machine. Dine in or take it away.`,
+  description: `MEON: a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}, cooked your way.`,
   body: (r) => `
 <section class="vhero" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
@@ -842,11 +852,11 @@ noodles.forEach((n, idx) => {
   addPage(n.url, layout({
     urlPath: n.url,
     title: `${n.name} – ${n.brand}`,
-    seoTitle: [`${n.brand} ${n.name} (${n.country}) · Instant Noodles at MEON Perth`, `${n.brand} ${n.name} (${n.country}) · MEON Perth`, `${n.brand} ${n.name} · MEON Perth`].find((t) => t.length <= 65) || `${n.brand} ${n.name} · MEON Perth`,
+    seoTitle: [`${n.brand} ${n.name} (${n.country}) · Instant Noodles at MEON Perth`, `${n.brand} ${n.name} (${n.country}) · MEON Perth`, `${n.brand} ${n.name} · MEON Perth`, `${n.brand} ${n.name} · MEON`, `${n.name} · MEON Perth`, `${n.name} · MEON`].find((t) => t.length <= 60) || `${n.name} · MEON`,
     active: "noodles/",
     image: n.img || "assets/img/shoot/og-meon.jpg",
     preload: n.img || "",
-    description: `${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}. ${shortBlurb(n)}${n.type ? ` ${n.type} noodle.` : ""}${n.unrated ? "" : ` Spice ${n.spice}/5.`}`,
+    description: fitDesc(`${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}.`, shortBlurb(n), [n.unrated ? [] : `Spice ${n.spice}/5.`, n.type ? `${n.type} noodle.` : []]),
     jsonld: [
       { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}${n.weightG ? `, ${n.weightG} g packet` : ""}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
@@ -942,7 +952,7 @@ ${ctaBand(r, { title: "Hungry for another?", text: "Take this packet off the wal
 addPage("countries/", layout({
   urlPath: "countries/",
   title: "Noodles by country",
-  seoTitle: "Instant Noodles by Country: Korea, Japan and more · MEON Perth",
+  seoTitle: "Instant Noodles by Country: Korea, Japan & More · MEON Perth",
   active: "countries/",
   overlay: true,
   description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
@@ -970,7 +980,7 @@ for (const c of countries) {
       { "@context": "https://schema.org", "@type": "ItemList", name: `${c.name} instant noodles at MEON`, numberOfItems: list.length, itemListElement: list.map((n, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE_URL}/${n.url}`, name: `${n.brand} ${n.name}` })) },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Countries", item: `${SITE_URL}/countries/` }, { "@type": "ListItem", position: 3, name: c.name, item: `${SITE_URL}/countries/${c.slug}/` }] },
     ],
-    description: `${list.length} instant noodles from ${c.name === "Philippines" ? "the Philippines" : c.name} at MEON ${site.suburb}, Perth. ${c.headline} Every packet has its own page with cooking steps and a cook timer.`,
+    description: fitDesc(`${list.length} instant noodles from ${c.name === "Philippines" ? "the Philippines" : c.name} at MEON ${site.suburb}, Perth.`, c.headline, [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
     body: (r) => `
 ${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: plural(list.length, "noodle"), title: esc(c.name), lead: `<strong>${esc(c.headline)}</strong> ${esc(c.intro)}`, actions: `<a class="btn btn--red" href="${r(`noodles/?country=${c.code}`)}" data-magnetic>Filter in the library ${icon.arrow}</a>`, aside: `<div class="flag-hero" data-parallax="0.06">${flag(c.code, r, { cls: "flag flag--hero", w: 360 })}</div>`,
   after: facts([[list.length, "Noodles"], [list.filter((n) => n.type === "Soup").length, "Soup"], [list.filter((n) => n.type === "Dry").length, "Dry"], [list.filter((n) => n.spiceKey >= 3).length, "Spicy (3+)"]]) })}
@@ -1003,7 +1013,7 @@ addPage("pairings-and-sides/", layout({
   seoTitle: "Noodle Pairings, Sides and Drinks · MEON Perth",
   active: "pairings-and-sides/",
   overlay: true,
-  description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms, lettuce and more to cook with your noodles, plus chicken wings and fried Spam on the side.",
+  description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
@@ -1100,11 +1110,11 @@ const addressLine = [site.streetAddress, `${site.suburb} ${site.state} ${site.po
 addPage("visit/", layout({
   urlPath: "visit/",
   title: "Visit us",
-  seoTitle: `Visit MEON Noodles · Instant Noodle Bar in ${site.suburb}, Perth`,
+  seoTitle: `Visit MEON · Instant Noodle Bar in ${site.suburb}, Perth`,
   active: "visit/",
   overlay: true,
   jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }],
-  description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Dine in or take it away: walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
+  description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
   body: (r) => `
 ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
 <section class="section section--tight"><div class="wrap">
