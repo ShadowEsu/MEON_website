@@ -989,8 +989,8 @@
   "funNote": null,
   "weightG": 79,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
