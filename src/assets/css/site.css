@@ -759,7 +759,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .prev-next a { padding: 18px 0; text-decoration: none; min-width: 0; }
 .prev-next a + a { text-align: right; padding-left: 16px; border-left: 1px solid var(--line); }
 .prev-next small { display: block; font-size: .78rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
-.prev-next strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .2s; }
+/* Names wrap to two lines (Design, 31 Oct 2026: "Shin Red - Super Spicy" was clipped at 390), never cut on one line */
+.prev-next strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; text-wrap: balance; overflow-wrap: anywhere; transition: color .2s; }
 .prev-next a:hover strong { color: var(--red); }
 @media (max-width: 900px) {
   .noodle-grid { grid-template-columns: 1fr; }
