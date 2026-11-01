@@ -18,14 +18,14 @@
     "name": "Meatballs",
     "group": "Meat and seafood",
     "desc": "Springy meatballs that soak up the broth as they cook.",
-    "img": "assets/img/toppings/meatballs.webp"
+    "icon": "pork"
   },
   {
     "id": "fishcake",
     "name": "Fishcake",
     "group": "Meat and seafood",
     "desc": "Bouncy fishcake adds savoury chew, cute shapes and instant joy.",
-    "img": "assets/img/photos/topping-fishcake.webp"
+    "icon": "bowl"
   },
   {
     "id": "crab-sticks",
@@ -46,7 +46,7 @@
     "name": "Spring onion",
     "group": "Vegetables and more",
     "desc": "Bright aroma, mild bite and that fresh finishing touch.",
-    "img": "assets/img/toppings/spring-onion.webp"
+    "icon": "sprout"
   },
   {
     "id": "onion",
@@ -74,7 +74,7 @@
     "name": "Enoki",
     "group": "Vegetables and more",
     "desc": "Delicate, slurpable mushroom strands that soak up the soup.",
-    "img": "assets/img/photos/topping-enoki.webp"
+    "icon": "mushroom"
   },
   {
     "id": "corn",
@@ -88,7 +88,7 @@
     "name": "Lettuce",
     "group": "Vegetables and more",
     "desc": "Crisp lettuce softens fast, adding freshness and light crunch.",
-    "img": "assets/img/photos/topping-lettuce.webp"
+    "icon": "leaf"
   },
   {
     "id": "cabbage",
@@ -102,7 +102,7 @@
     "name": "Seaweed",
     "group": "Vegetables and more",
     "desc": "Umami seaweed melts in the heat, boosting ocean flavour and aroma.",
-    "img": "assets/img/photos/topping-seaweed.webp"
+    "icon": "leaf"
   },
   {
     "id": "extra-noodles",
@@ -137,7 +137,7 @@
     "name": "Fried Spam",
     "group": "Sides",
     "desc": "Salty, savoury fried Spam slices, the classic Korean army-stew upgrade.",
-    "img": "assets/img/photos/topping-spam.webp"
+    "icon": "pork"
   },
   {
     "id": "shrimp-katsu",
