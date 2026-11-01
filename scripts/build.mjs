@@ -509,11 +509,11 @@ const STEP_SIZES = "(min-width: 900px) 472px, 64vw";
 
 // Photos from MEON's booth shoot (src/assets/img/shoot, made by meon-work/rebuild/make_photos.py): 800/1600/2400 px wide.
 const SHOOT = {
-  "tomyum-egg-prawn": { w: 3, h: 2, alt: "Mama Tom Yum Shrimp with a halved soft egg, crumbed prawns, chilli and spring onion", slug: "mama-tom-yum-shrimp" },
+  "tomyum-egg-prawn": { w: 3, h: 2, alt: "Wai Wai Quick Zabb Tom Yum Shrimp with a halved soft egg, crumbed prawns, chilli and spring onion", slug: "wai-wai-quick-zabb-tom-yum-shrimp" },
   "udon-tempura-close": { w: 2, h: 3, alt: "Nongshim Tempura Udon up close: crumbed prawns, a soft egg and spring onion", slug: "nongshim-tempura-udon" },
   "tonkotsu-nori-close": { w: 2, h: 3, alt: "Nissin Tonkotsu with nori, a soft egg and dumplings", slug: "nissin-demae-ramen-tonkotsu" },
   "tonkotsu-top": { w: 3, h: 2, alt: "A bowl of Nissin Tonkotsu from above, with nori, egg and dumplings", slug: "nissin-demae-ramen-tonkotsu" },
-  "white-curry-top": { w: 3, h: 2, alt: "MyKuali Penang White Curry from above, with fishballs, seaweed and chilli", slug: "mykuali-penang-white-curry-noodles" },
+  "white-curry-top": { w: 3, h: 2, alt: "Ibumie Penang White Curry Mee from above, with fishballs, seaweed and chilli", slug: "ibumie-penang-white-curry-mee" },
   "shin-black-top": { w: 3, h: 2, alt: "Shin Black from above with spam, a crumbed prawn, egg and spring onion", slug: "nongshim-shin-black-premium" },
   "shin-black-lift": { w: 2, h: 3, alt: "Shin Black noodles lifted out of the bowl with chopsticks", slug: "nongshim-shin-black-premium" },
 };
