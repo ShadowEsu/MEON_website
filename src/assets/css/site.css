@@ -436,6 +436,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .vhero--page .vhero-inner { grid-column: 1; grid-row: 1; padding: calc(var(--header-h) + 32px) clamp(28px, 4vw, 64px) clamp(40px, 7vh, 88px) max(var(--gutter), (100vw - var(--wrap)) / 2); }
   .vhero--page .vhero-cols { grid-template-columns: repeat(2, 1fr); inset: -6% 0; }
   .vhero--page .vcol--a { --drift: -5; } .vhero--page .vcol--b { --drift: 5; }
+  /* The whole 9:16 clip in each column, on ink, so no reel's burned-in caption is cut at the column edge (Design, 31 Oct 2026) */
+  .vhero--page .vcol .vbg { background: var(--ink); }
+  .vhero--page .vcol .vbg-poster, .vhero--page .vcol .vbg-video { object-fit: contain; }
 }
 @media (max-width: 899.98px) {
   .vhero--page .vhero-media { justify-self: center; height: min(58vh, (100vw - 24px) * 16 / 9); height: min(58svh, (100vw - 24px) * 16 / 9); aspect-ratio: 9 / 16; margin: calc(var(--header-h) + 8px) 0 0; border-radius: 22px; }
