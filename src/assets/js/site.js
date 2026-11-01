@@ -876,8 +876,28 @@
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (rows) { total = 0; sum = 0; rows.forEach(function (x) { total += x.reviews; sum += x.reviews * Number(x.average); }); drawSummary(); });
     };
+    // The list can't load (Supabase down or offline): say so with a retry instead of the false "No reviews yet". The form stays usable.
     var started = false;
-    var start = function () { if (started) return; started = true; Promise.all([loadStats(), loadMore()]).catch(function () { if (status) status.textContent = ""; }); };
+    var start = function () {
+      if (started) return;
+      started = true;
+      Promise.all([loadStats(), loadMore()]).then(function () {
+        var down = $(".rv-down", list);
+        if (!down) return;
+        var had = down.contains(document.activeElement);
+        down.remove();
+        var empty = $(".rv-empty", list); if (empty) empty.hidden = false;
+        if (had) { list.setAttribute("tabindex", "-1"); list.focus(); }
+      }).catch(function () {
+        started = false; offset = 0;
+        $$(".rv-item, .rv-more", list).forEach(function (el) { el.remove(); });
+        var empty = $(".rv-empty", list); if (empty) empty.hidden = true;
+        if (!$(".rv-down", list)) {
+          list.insertAdjacentHTML("afterbegin", '<div class="rv-down"><p>Reviews didn\'t load.</p><button class="btn btn--line btn--sm" type="button" data-rv-retry>Try again</button></div>');
+          $("[data-rv-retry]", list).addEventListener("click", start);
+        }
+      });
+    };
     if ("IntersectionObserver" in window) {
       var rio = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { rio.disconnect(); start(); } }, { rootMargin: "400px" });
       rio.observe(box);
@@ -885,32 +905,60 @@
 
     var doneKey = "meon-reviewed-" + (slug || "home");
     var t0 = Date.now();
-    var markDone = function (msg) { form.classList.add("is-done"); status.classList.remove("is-error"); status.textContent = msg; };
+    var btn = $("button[type=submit]", form), alt = $("[data-rv-alt]", form), errBox = $("[data-rv-errors]", form), posting = false;
+    var markDone = function (msg) { form.classList.add("is-done"); status.classList.remove("is-error"); status.textContent = msg; if (alt) alt.hidden = true; };
     try { if (localStorage.getItem(doneKey)) markDone("Thanks, you've already reviewed this. We appreciate it."); } catch (e) {}
+    // [rule, field that gets aria-invalid, field the summary link focuses (if different), message]
+    var RULES = [
+      ["rating", ".rv-rate", "input[name=rating][value='1']", "Choose a star rating"],
+      ["name", "input[name=name]", "", "Enter your first name"],
+      ["comment", "textarea[name=comment]", "", "Write a few words about it"],
+      ["consent", "input[name=consent]", "", "Tick the box so we can publish your review"]
+    ];
+    var showErrors = function (bad) {
+      var links = "";
+      RULES.forEach(function (rule) {
+        var el = $(rule[1], form), err = $('[data-rv-err="' + rule[0] + '"]', form), on = bad.indexOf(rule[0]) !== -1;
+        var desc = (el.getAttribute("aria-describedby") || "").split(" ").filter(function (x) { return x && x !== err.id; });
+        if (on) { el.setAttribute("aria-invalid", "true"); desc.unshift(err.id); links += '<li><a href="#' + (rule[2] ? $(rule[2], form) : el).id + '">' + rule[3] + "</a></li>"; }
+        else el.removeAttribute("aria-invalid");
+        if (desc.length) el.setAttribute("aria-describedby", desc.join(" ")); else el.removeAttribute("aria-describedby");
+        err.hidden = !on;
+      });
+      errBox.hidden = !bad.length;
+      if (!bad.length) return;
+      $(".rv-errors-h", errBox).textContent = "Fix " + bad.length + (bad.length === 1 ? " thing" : " things") + " to post your review";
+      $("ul", errBox).innerHTML = links;
+      errBox.focus();
+    };
+    errBox.addEventListener("click", function (e) {
+      var a = e.target.closest("a"), t = a && document.getElementById(a.getAttribute("href").slice(1));
+      if (!t) return;
+      e.preventDefault();
+      t.focus();
+      (t.closest(".field, .rv-rate, .rv-consent") || t).scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+    });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
+      if (posting) return; // the button stays focusable while posting (aria-disabled), so ignore repeat presses
       var fd = new FormData(form);
       var rating = parseInt(fd.get("rating"), 10), name = String(fd.get("name") || "").trim(), comment = String(fd.get("comment") || "").trim();
-      status.classList.add("is-error");
       if (fd.get("website")) return; // bot
-      if (!rating) { status.textContent = "Please choose a star rating."; return; }
-      if (!name) { status.textContent = "Please add your name."; return; }
-      if (comment.length < 3) { status.textContent = "Please write a few words about it."; return; }
-      var consentBox = $("input[name=consent]", form);
-      if (!consentBox.checked) {
-        consentBox.setAttribute("aria-invalid", "true");
-        status.textContent = "Please tick “Publish my first name and review on this site” to post it.";
-        consentBox.focus();
-        return;
-      }
-      consentBox.removeAttribute("aria-invalid");
-      if (Date.now() - t0 < 2500) { status.textContent = "One moment, then try again."; return; }
-      var btn = $("button[type=submit]", form); btn.disabled = true;
+      var bad = [];
+      if (!rating) bad.push("rating");
+      if (!name) bad.push("name");
+      if (comment.length < 3) bad.push("comment");
+      if (!$("input[name=consent]", form).checked) bad.push("consent");
+      showErrors(bad);
+      if (bad.length) { status.classList.remove("is-error"); status.textContent = ""; return; }
+      if (Date.now() - t0 < 2500) { status.classList.add("is-error"); status.textContent = "One moment, then try again."; return; }
+      posting = true; btn.setAttribute("aria-disabled", "true"); if (alt) alt.hidden = true;
       status.classList.remove("is-error"); status.textContent = "Posting…";
       var body = { name: name.slice(0, 40), rating: rating, comment: comment.slice(0, 600), noodle_slug: slug || null, source: /(^|[?&])src=qr(&|$)/.test(location.search) ? "qr" : "web", consent_version: form.getAttribute("data-consent") };
       fetch(base + table, { method: "POST", headers: Object.assign({ Prefer: "return=minimal" }, headers), body: JSON.stringify(body) })
         .then(function (r) {
           if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.message || "Something went wrong."); });
+          posting = false; btn.removeAttribute("aria-disabled");
           var empty = $(".rv-empty", list); if (empty) empty.remove();
           list.insertAdjacentHTML("afterbegin", itemHTML({ name: body.name, rating: rating, comment: body.comment, created_at: new Date().toISOString(), noodle_slug: body.noodle_slug }, true));
           total += 1; sum += rating; drawSummary();
@@ -918,7 +966,14 @@
           markDone("Thank you. Your review is live.");
           confetti();
         })
-        .catch(function (err) { btn.disabled = false; status.classList.add("is-error"); status.textContent = /Too many/.test(err.message) ? err.message : "Sorry, we couldn't post that. Please try again."; });
+        .catch(function (err) {
+          // The typed words stay; focus moves to the message, and Google is offered as another way to post
+          posting = false; btn.removeAttribute("aria-disabled"); btn.textContent = "Try again";
+          status.classList.add("is-error");
+          status.textContent = /Too many/.test(err.message) ? err.message : "Your review didn't post. Our review service isn't answering right now. Your words are still here.";
+          if (alt) alt.hidden = false;
+          status.focus();
+        });
     });
   });
 

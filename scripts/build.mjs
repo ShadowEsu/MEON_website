@@ -450,10 +450,14 @@ const GOOGLE_REVIEWS = site.googleBusinessUrl || site.mapsUrl;
 // Consent wording version for guest reviews (ledger 299). Each review row stores it in consent_version;
 // change it whenever the consent text or what the form collects changes, and update privacy/.
 const REVIEW_CONSENT = "reviews-2026-10-27";
+// Errors (Design, 31 Oct 2026): every rule is checked at once; a summary above the stars takes focus and links to each
+// field, and each field gets its own message (hidden "Error:" prefix), aria-invalid and aria-describedby (site.js).
 function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = "" } = {}) {
   const cfg = site.reviews || {};
   if (!cfg.supabaseUrl || !cfg.publishableKey) return "";
-  const stars = [1, 2, 3, 4, 5].map((v) => `<input type="radio" name="rating" id="rv-${slug || "all"}-${v}" value="${v}" required><label for="rv-${slug || "all"}-${v}" title="${v} star${v > 1 ? "s" : ""}">${svgIcon("star")}<span class="visually-hidden">${v} star${v > 1 ? "s" : ""}</span></label>`).reverse().join("");
+  const id = `rv-${slug || "all"}`;
+  const err = (name, text) => `<p class="rv-err" id="${id}-${name}-err" data-rv-err="${name}" hidden><span class="visually-hidden">Error:</span> ${text}</p>`;
+  const stars = [1, 2, 3, 4, 5].map((v) => `<input type="radio" name="rating" id="${id}-${v}" value="${v}" required><label for="${id}-${v}" title="${v} star${v > 1 ? "s" : ""}">${svgIcon("star")}<span class="visually-hidden">${v} star${v > 1 ? "s" : ""}</span></label>`).reverse().join("");
   return `<section class="section reviews" id="reviews" data-reviews data-slug="${esc(slug)}" data-endpoint="${esc(cfg.supabaseUrl)}" data-key="${esc(cfg.publishableKey)}" data-table="${esc(cfg.table || "meon_reviews")}">
   <div class="wrap reviews-grid">
     <div class="reviews-head">
@@ -463,16 +467,18 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
       <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
       <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a></div>
       <form class="rv-form" data-rv-form data-consent="${REVIEW_CONSENT}" novalidate>
-        <fieldset class="rv-rate"><legend>Your rating</legend><div class="rv-rate-stars">${stars}</div></fieldset>
-        <label class="field"><span>Your name</span><input name="name" type="text" maxlength="40" autocomplete="given-name" required></label>
-        <label class="field"><span>Your review</span><textarea name="comment" rows="4" minlength="3" maxlength="600" required placeholder="${slug ? "How was it? Spice, flavour, pairings you added…" : "Tell us about your visit"}"></textarea></label>
+        <div class="rv-errors" data-rv-errors tabindex="-1" aria-labelledby="${id}-errors-h" hidden><h3 class="rv-errors-h" id="${id}-errors-h"></h3><ul></ul></div>
+        <fieldset class="rv-rate" id="${id}-rating" role="radiogroup" aria-labelledby="${id}-rating-l"><legend id="${id}-rating-l">Your rating</legend><div class="rv-rate-stars">${stars}</div>${err("rating", "Choose a star rating")}</fieldset>
+        <div class="field"><label for="${id}-name">Your name</label><input id="${id}-name" name="name" type="text" maxlength="40" autocomplete="given-name" required>${err("name", "Enter your first name")}</div>
+        <div class="field"><label for="${id}-comment">Your review</label><textarea id="${id}-comment" name="comment" rows="4" minlength="3" maxlength="600" required placeholder="${slug ? "How was it? Spice, flavour, pairings you added…" : "Tell us about your visit"}"></textarea>${err("comment", "Write a few words about it")}</div>
         <label class="hp" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
         <div class="rv-consent">
           <label class="toggle"><input type="checkbox" name="consent" id="rv-consent-${slug || "all"}" required aria-required="true" aria-describedby="rv-consent-${slug || "all"}-detail"> Publish my first name and review on this site</label>
+          ${err("consent", "Tick the box so we can publish your review")}
           <p class="note" id="rv-consent-${slug || "all"}-detail">We keep your name, stars and review, the page, whether you scanned a shelf QR code, and the time, with Supabase, our database provider, until you ask us to remove them. <a href="${r("privacy/")}">How we handle reviews</a></p>
         </div>
-        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button></div>
-        <p class="rv-status" data-rv-status aria-live="polite"></p>
+        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button><a class="link-arrow" data-rv-alt href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener" hidden>Post it on Google instead ${icon.arrow}</a></div>
+        <p class="rv-status" data-rv-status aria-live="polite" tabindex="-1"></p>
         <p class="note">Please keep it friendly.</p>
       </form>
     </div>
