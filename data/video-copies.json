@@ -3,20 +3,20 @@
   "hero-col-a": {
     "h264_sha256": "bc71898ae55e1155ab526b34ec74d8b0dd7fa15e6b7afba5a50d2d61d7dc844e",
     "av1": {
-      "crf": 32,
-      "vmaf_mean": 96.64,
-      "vmaf_p1": 90.68
+      "encode": "av1-hl3-crf32",
+      "vmaf_mean": 96.61,
+      "vmaf_p1": 90.11
     }
   },
   "hero-phone": {
     "h264_sha256": "422f583382fcaac418d2ac19238b764e24d566a5af5c2311a74d40d12e6fbef6",
     "av1": {
-      "crf": 32,
-      "vmaf_mean": 95.41,
-      "vmaf_p1": 90.5
+      "encode": "av1-hl3-crf32",
+      "vmaf_mean": 95.44,
+      "vmaf_p1": 90.46
     },
     "hevc": {
-      "crf": 23,
+      "encode": "hevc-crf23",
       "vmaf_mean": 95.91,
       "vmaf_p1": 90.17
     }
@@ -24,12 +24,12 @@
   "ig-DeOXYn5hSUT": {
     "h264_sha256": "b7b2970d7651c67abf57c1bbf41da5c05af2068a3e31ca9668584f637bc571e1",
     "av1": {
-      "crf": 38,
-      "vmaf_mean": 98.03,
-      "vmaf_p1": 90.43
+      "encode": "av1-hl3-crf38",
+      "vmaf_mean": 98.06,
+      "vmaf_p1": 90.51
     },
     "hevc": {
-      "crf": 26,
+      "encode": "hevc-crf26",
       "vmaf_mean": 98.24,
       "vmaf_p1": 90.13
     }
@@ -37,7 +37,7 @@
   "ig-DedzCYDhezV": {
     "h264_sha256": "bb6cb28723516c125f356d86891334c85bb09b77d4f51b37bae84d1c21d79d40",
     "hevc": {
-      "crf": 23,
+      "encode": "hevc-crf23",
       "vmaf_mean": 98.37,
       "vmaf_p1": 90.56
     }
@@ -45,12 +45,12 @@
   "ig-DefupZzh1I7": {
     "h264_sha256": "86edf3c51b04cb3c79923a8a7e772274d6ac548ff5bffabee681c87ca95f34b2",
     "av1": {
-      "crf": 34,
-      "vmaf_mean": 95.08,
-      "vmaf_p1": 91.78
+      "encode": "av1-hl3-crf34",
+      "vmaf_mean": 95.1,
+      "vmaf_p1": 91.56
     },
     "hevc": {
-      "crf": 24,
+      "encode": "hevc-crf24",
       "vmaf_mean": 95.22,
       "vmaf_p1": 90.81
     }
@@ -58,12 +58,12 @@
   "ig-DewSjLLBLqQ": {
     "h264_sha256": "2d4bb776d3d3452117380a54f6a2670d6f5de857b79555370c6cf42061c245ee",
     "av1": {
-      "crf": 40,
-      "vmaf_mean": 98.42,
-      "vmaf_p1": 92.59
+      "encode": "av1-hl3-crf40",
+      "vmaf_mean": 98.38,
+      "vmaf_p1": 92.78
     },
     "hevc": {
-      "crf": 28,
+      "encode": "hevc-crf28",
       "vmaf_mean": 98.3,
       "vmaf_p1": 92.34
     }
@@ -71,12 +71,12 @@
   "ig-store-tour": {
     "h264_sha256": "ad58378f29434ffbdc4ab444f9e1fcd6c08dcc0a40a0a5e8183160b81812f4a6",
     "av1": {
-      "crf": 36,
-      "vmaf_mean": 99.21,
-      "vmaf_p1": 90.41
+      "encode": "av1-hl3-crf36",
+      "vmaf_mean": 99.18,
+      "vmaf_p1": 90.42
     },
     "hevc": {
-      "crf": 26,
+      "encode": "hevc-crf26",
       "vmaf_mean": 99.38,
       "vmaf_p1": 91.84
     }
@@ -84,12 +84,12 @@
   "step-pairings": {
     "h264_sha256": "b280e3309ad8be4950715b0ba4e23513b3358f4633d828711cd6a390792edb96",
     "av1": {
-      "crf": 34,
-      "vmaf_mean": 98.38,
-      "vmaf_p1": 91.1
+      "encode": "av1-hl3-crf34",
+      "vmaf_mean": 98.49,
+      "vmaf_p1": 91.44
     },
     "hevc": {
-      "crf": 26,
+      "encode": "hevc-crf26",
       "vmaf_mean": 98.25,
       "vmaf_p1": 90.66
     }
@@ -97,12 +97,12 @@
   "wall-12": {
     "h264_sha256": "d090eb94d066355d43f9f5d410c029602d1947e64eb9b5087ffb22d1be86c446",
     "av1": {
-      "crf": 34,
-      "vmaf_mean": 99.23,
+      "encode": "av1-hl3-crf34",
+      "vmaf_mean": 99.2,
       "vmaf_p1": 91.27
     },
     "hevc": {
-      "crf": 25,
+      "encode": "hevc-crf25",
       "vmaf_mean": 99.28,
       "vmaf_p1": 91.27
     }
