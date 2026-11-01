@@ -856,7 +856,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`
     <h2 class="visually-hidden">Noodles</h2>
     <div class="card-grid card-grid--long">${noodles.map((n, i) => noodleCard(n, r, i)).join("")}</div>
     <div class="empty-state">${emptyBowl}<h2>Nothing matches yet.</h2><p class="lead">Try a different filter, or ask the crew. New packets arrive all the time.</p><button class="btn btn--red" type="button" data-reset>Clear filters</button></div>
-    <p class="note">* Vegetarian means the noodle and seasoning are generally meat-free, but recipes vary by batch and region. Always check the packet if you have dietary requirements or allergies.</p>
+    <p class="note">* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary by batch and country: check the packet, and ask the crew if unsure.</p>
   </div>
 </div>
 ${ctaBand(r)}
@@ -951,7 +951,7 @@ noodles.forEach((n, idx) => {
           <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.small)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
         </section>` : ""}
 
-        <p class="note">${n.dietNote ? "* Vegetarian means the noodle and seasoning are generally meat-free, but recipes vary. Always check the packet if you have dietary requirements or allergies." : "Always check the packet for allergens and full ingredients."}</p>
+        <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
         <div class="noodle-actions">
           <button class="btn btn--line btn--sm" type="button" data-share data-url="${esc(`${SITE_URL}/${n.url}`)}" data-title="${esc(`${n.brand} ${n.name} at MEON`)}">${icon.share} Share</button>
           <button class="btn btn--line btn--sm" type="button" data-search-open>${icon.search} Find another noodle</button>
