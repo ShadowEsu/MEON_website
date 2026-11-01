@@ -95,7 +95,7 @@ These were the main causes of lag, and some are common "AI website" tells.
 
 ## Sound
 `music.js` plays **MEON FM** (`assets/audio/meon-fm.mp3`), an original 103-second seamless loop in the same style as the promo videos: electric piano, marimba melody, bass and soft drums. If the file can't load it falls back to a lo-fi loop generated live with the Web Audio API. No licensing issues.
-- On the first visit to the home page a small "Turn the vibes on?" prompt offers it once the video hero has scrolled away, so it never covers the hero's buttons (browsers don't allow sound before a tap); on phones it drops in under the header, clear of the step cards' buttons. The answer is remembered.
+- On the first visit to the home page a small "Turn the vibes on?" prompt offers it once the video hero has scrolled away, so it never covers the hero's buttons (browsers don't allow sound before a tap); on phones it drops in under the header, clear of the step cards' buttons. On phones it also stacks below the header (z-index 95: under the header's 100, over the tab bar's 90), so it slides in behind the header's controls and never covers the play/pause. The answer is remembered.
 - The **Sound** button starts it, and the choice is remembered. Browsers block autoplay, so a returning visitor's music resumes on their first tap.
 - While music plays, mascots blip when tapped and the roulette chimes.
 
