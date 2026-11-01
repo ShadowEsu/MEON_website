@@ -140,33 +140,69 @@
   window.addEventListener("resize", requestFrame, { passive: true });
   frame();
   /* Keyboard focus inside a covered step card: bring that card back to its own place in the stack, so the focus ring
-     isn't hidden under a later card */
+     isn't hidden under a later card. This reads the layout now instead of .is-sinking: the browser has just scrolled the
+     focused control into view, and the class only catches up on the next frame */
   if (stackEl) stackEl.addEventListener("focusin", function (e) {
     var li = e.target.closest ? e.target.closest("[data-stack] > li") : null;
-    if (!li || !li.classList.contains("is-sinking")) return;
-    window.scrollTo(0, stackEl.getBoundingClientRect().top + window.scrollY + stackCards.indexOf(li) * li.offsetHeight);
+    var i = stackCards.indexOf(li), next = stackCards[i + 1];
+    if (i < 0 || !next || getComputedStyle(li).position !== "sticky" || next.getBoundingClientRect().top >= window.innerHeight) return;
+    window.scrollTo(0, stackEl.getBoundingClientRect().top + window.scrollY + i * li.offsetHeight);
   });
   if (backTop) backTop.addEventListener("click", function () { scrollToY(0); });
+
+  /* ---------- Modal layers (phone menu, search) ----------
+     While one is open, the rest of the page is inert (no Tab stops, hidden from screen readers), and Tab wraps from its
+     last control back to its first */
+  var focusables = function (box) {
+    return $$('a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])', box).filter(function (el) {
+      return el.getClientRects().length && getComputedStyle(el).visibility !== "hidden";
+    });
+  };
+  var inertOutside = function (keep, on) {
+    Array.prototype.forEach.call(document.body.children, function (el) {
+      if (el.contains(keep)) return;
+      if (on && !el.inert) { el.inert = true; el.setAttribute("data-modal-inert", ""); }
+      else if (!on && el.hasAttribute("data-modal-inert")) { el.inert = false; el.removeAttribute("data-modal-inert"); }
+    });
+  };
+  var wrapTab = function (box, e) {
+    if (e.key !== "Tab") return;
+    var f = focusables(box);
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey ? document.activeElement === first : document.activeElement === last) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  };
+  var closeMenu = function () {};
 
   /* ---------- Navigation ---------- */
   var toggle = $(".nav-toggle");
   var nav = $("#site-nav");
   if (toggle && nav) {
+    var header = $("[data-header]");
     // Start the phone menu right under the header (the announcement bar can push the header down).
     var placeMenu = function () {
-      var hd = $("[data-header]");
-      if (hd) nav.style.setProperty("--nav-top", Math.max(0, Math.round(hd.getBoundingClientRect().bottom)) + "px");
+      if (header) nav.style.setProperty("--nav-top", Math.max(0, Math.round(header.getBoundingClientRect().bottom)) + "px");
     };
-    window.addEventListener("resize", function () { if (nav.classList.contains("is-open")) placeMenu(); }, { passive: true });
+    // The menu lives in the header: on open, keyboard focus moves to its first link and the page behind goes inert; the header
+    // (logo, search, sound and the close button) stays usable.
     var setOpen = function (open) {
       if (open) placeMenu();
       toggle.setAttribute("aria-expanded", String(open));
       toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       nav.classList.toggle("is-open", open);
       document.body.classList.toggle("is-locked", open);
+      inertOutside(toggle, open);
+      if (open) { var first = focusables(nav)[0]; if (first) first.focus({ preventScroll: true }); }
     };
+    closeMenu = function () { if (nav.classList.contains("is-open")) setOpen(false); };
+    // Widening past the phone layout hides the toggle, so close the menu rather than leave the page inert behind it.
+    window.addEventListener("resize", function () {
+      if (!nav.classList.contains("is-open")) return;
+      if (!toggle.getClientRects().length) setOpen(false); else placeMenu();
+    }, { passive: true });
     toggle.addEventListener("click", function () { setOpen(toggle.getAttribute("aria-expanded") !== "true"); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && nav.classList.contains("is-open")) setOpen(false); });
+    if (header) header.addEventListener("keydown", function (e) { if (nav.classList.contains("is-open")) wrapTab(header, e); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && nav.classList.contains("is-open")) { setOpen(false); toggle.focus(); } });
   }
   $$(".has-mega").forEach(function (item) {
     var btn = $(".mega-toggle", item);
@@ -181,7 +217,8 @@
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && item.classList.contains("is-open")) { set(false); btn.focus(); } });
     item.addEventListener("mouseleave", function () { if (window.matchMedia("(min-width: 1025px)").matches) set(false); });
   });
-  // Smooth in-page anchors
+  // Smooth in-page anchors (the skip link, the home hero's scroll cue, the pairing-group buttons). Keyboard focus moves with
+  // the scroll, as the browser would do itself without preventDefault.
   $$('a[href^="#"]').forEach(function (a) {
     a.addEventListener("click", function (e) {
       var id = a.getAttribute("href").slice(1), t = id && document.getElementById(id);
@@ -189,6 +226,8 @@
       e.preventDefault();
       scrollToY(t.getBoundingClientRect().top + window.scrollY - 90);
       history.replaceState(null, "", "#" + id);
+      if (!t.hasAttribute("tabindex") && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) { t.setAttribute("tabindex", "-1"); t.classList.add("anchor-target"); }
+      t.focus({ preventScroll: true });
     });
   });
 
@@ -483,9 +522,11 @@
   }
   function openSearch() {
     if (!overlay) return;
+    closeMenu();
     lastFocus = document.activeElement;
     overlay.classList.add("is-open");
     document.body.classList.add("is-locked");
+    inertOutside(overlay, true);
     loadIndex().then(function () { renderResults(sInput.value); });
     setTimeout(function () { sInput.focus(); sInput.select(); }, 40);
   }
@@ -493,11 +534,13 @@
     if (!overlay || !overlay.classList.contains("is-open")) return;
     overlay.classList.remove("is-open");
     document.body.classList.remove("is-locked");
+    inertOutside(overlay, false);
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   if (overlay) {
     $$("[data-search-open]").forEach(function (b) { b.addEventListener("click", openSearch); });
     $$("[data-search-close]", overlay).forEach(function (b) { b.addEventListener("click", closeSearch); });
+    overlay.addEventListener("keydown", function (e) { wrapTab(overlay, e); });
     sInput.addEventListener("input", function () { renderResults(sInput.value); });
     sInput.addEventListener("keydown", function (e) {
       if (e.key === "ArrowDown") { e.preventDefault(); setActive(active + 1); }
@@ -649,7 +692,7 @@
         pre.onload = function () {
           galleryMain.classList.add("is-swapping");
           var first = btn === $("[data-gallery-src]");
-          setTimeout(function () { mainImg.src = src; galleryMain.classList.toggle("is-alt", !first); galleryMain.classList.remove("is-swapping"); }, reduceMotion ? 0 : 200);
+          setTimeout(function () { mainImg.src = src; mainImg.alt = btn.getAttribute("data-gallery-alt") || mainImg.alt; galleryMain.classList.toggle("is-alt", !first); galleryMain.classList.remove("is-swapping"); }, reduceMotion ? 0 : 200);
         };
         pre.src = src;
       });
@@ -1045,10 +1088,8 @@
         document.head.appendChild(s);
       });
     };
-    var reflect = function (on) {
-      soundBtn.setAttribute("aria-pressed", String(on));
-      soundBtn.setAttribute("aria-label", on ? "Pause background music" : "Play background music");
-    };
+    // The name stays "Sound (background music)", matching the visible label; on/off is aria-pressed.
+    var reflect = function (on) { soundBtn.setAttribute("aria-pressed", String(on)); };
     soundBtn.addEventListener("click", function () {
       loadMusic().then(function (m) {
         if (m.playing) { m.stop(); setPref("off"); reflect(false); }

@@ -6,8 +6,8 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 - **One font:** Bricolage Grotesque (variable, with automatic optical size). It is used for headings and body text alike, set apart only by weight and size.
 - **One colour:**
   - ink `#121010` on white, with MEON red as the only accent
-  - `--brand #ec1b25` (the logo red) for big red blocks
-  - `--red #d7141d` for text and buttons, because it meets contrast rules
+  - `--brand #ec1b25` (the logo red) for the logo and red with only large type on it (the flavour ticker band): white on it is 4.4:1, enough for large text only
+  - `--red #d7141d` for text, buttons and any red block with normal-size white text (step card 1, its numbers, the mega-menu feature): white on it is 5.2:1 (Design, 1 Nov 2026)
   - `--soft #f6f4f1` is the only tint, used for alternating sections
 - **No emojis anywhere.** Icons are a custom line set (`svgIcon()` in `art.mjs`, also published as `assets/img/icons.svg` for JavaScript). Flags are real artwork from flag-icons (MIT), copied to `assets/img/flags/`.
 - **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone (Preston, 29 Oct 2026). `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. `logoMark()` in `art.mjs` is the red square, used everywhere it appears as a badge: the header on every page (Preston, 29 Oct 2026: "square please", never the wide crop, and always animated), the home hero and About. In the square the glyphs are about 6% of its height, so in the header they read as small marks; the big hero square is where they read clearly. `logoLockup()` is the lettering alone in the current colour (footer, red on ink).
@@ -25,6 +25,12 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
   - every button that opens search says **"Search noodles"** (the header and tab-bar buttons show "Search" for space, with "Search noodles" as their accessible name)
   - both reset buttons on `/noodles/` say **"Clear filters"** ("Clear search and filters" when a typed search found nothing)
   - the noodle count is the real number from the data, never "100+" (see `docs/operations.md`). It stays on one line; on a phone, if it doesn't fit beside the sort and "Clear filters", those move to their own row
+- **Keyboard and screen readers** (accessibility pass, 1 Nov 2026; `scripts/smoke.mjs` checks the keyboard and naming items, the build checks the alt text):
+  - the skip link and other in-page links move keyboard focus to where they scroll
+  - the phone menu and search behave as dialogs: the page behind is inert, Tab wraps inside, Escape closes and puts focus back on the button that opened them
+  - nothing focusable is invisible: the back-to-top button shows while focused, and a step card with a focused button comes out from under the next card
+  - a control's accessible name starts with its visible label ("Sound (background music)", "Search noodles"); a reel link's name is its caption
+  - photos say what they show (`data/photo-alts.json`, keyed by file; the build stops on a photo without one); photos inside a card link have empty alt, because the link text names the noodle
 
 ## Page anatomy
 1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.
@@ -96,7 +102,7 @@ These were the main causes of lag, and some are common "AI website" tells.
 ## Sound
 `music.js` plays **MEON FM** (`assets/audio/meon-fm.mp3`), an original 103-second seamless loop in the same style as the promo videos: electric piano, marimba melody, bass and soft drums. If the file can't load it falls back to a lo-fi loop generated live with the Web Audio API. No licensing issues.
 - On the first visit to the home page a small "Turn the vibes on?" prompt offers it once the video hero has scrolled away, so it never covers the hero's buttons (browsers don't allow sound before a tap); on phones it drops in under the header, clear of the step cards' buttons. On phones it also stacks below the header (z-index 95: under the header's 100, over the tab bar's 90), so it slides in behind the header's controls and never covers the play/pause. The answer is remembered.
-- The **Sound** button starts it, and the choice is remembered. Browsers block autoplay, so a returning visitor's music resumes on their first tap.
+- The **Sound** button starts it, and the choice is remembered. Browsers block autoplay, so a returning visitor's music resumes on their first tap. Its accessible name is "Sound (background music)" whether music is on or off; `aria-pressed` says which.
 - While music plays, mascots blip when tapped and the roulette chimes.
 
 ## Adding a page

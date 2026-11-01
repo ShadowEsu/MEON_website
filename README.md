@@ -25,7 +25,7 @@ Docs: [`docs/design-system.md`](docs/design-system.md) (rules, page anatomy, mot
 npm install
 npm run build      # writes ./site
 npm run serve      # http://localhost:4173
-npm run check      # validates links, titles, h1s, alt text, ids
+npm run check      # validates links, titles, h1s, alt text, ids, unused photo files, Restaurant schema facts
 ```
 
 Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JSON in `data/`.
@@ -58,12 +58,12 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 - `data/source/meon_wix_cms_fixed_final.csv` — Wix CMS export (fills missing soup/dry and weights).
 - Spice: every noodle is rated 0 to 5 against Shin Ramyun = 3 (Indomie Mi Goreng = 1, Mama Creamy Tom Yum = 2), recalibrated on 28 Oct 2026. Re-running `scripts/parse_library.py` keeps the spice already in `data/noodles.json` and takes the doc's spice only for noodles new to the site.
 - `data/catalogue.json` — items from MEON's Square catalogue export (16 Oct 2026), with no prices. It adds the till's packet weight to 14 noodles where it differs, 27 noodles that are in the till but not yet in the Drive doc (`extraNoodles`), and the drinks on the Pairings and sides page. The till's sides live in `data/toppings.json`. SKUs, stock counts and barcodes are never copied in.
-- Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Pairing and side photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet.
+- Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Pairing and side photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet. Every photo on the site needs its alt text in `data/photo-alts.json` (what the photo shows); delete photo files the site stops using, because `npm run check` fails on them.
 
 ## Dev helpers
 
 ```bash
-PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # clicks through search, filters, roulette, timer, QR generator
+PW_CHANNEL=chrome PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # search, filters, roulette, timer, QR generator, keyboard focus (1280 and 390 px)
 PLAYWRIGHT_PATH=... node scripts/sweep.mjs                              # every page × phone/desktop: console errors + overflow
 PLAYWRIGHT_PATH=... node scripts/screenshot.mjs <outDir> / /noodles/    # full-page screenshots
 python3 scripts/make_qr_pngs.py [outDir]                                # compact 1-bit QR PNGs for Drive (+ manifest.csv with md5s)

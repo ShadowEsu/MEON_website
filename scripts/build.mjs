@@ -29,6 +29,12 @@ const countries = readJSON("countries.json");
 const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON("images.json") : {};
 // Extra photos per noodle (top-down and close-ups from the MEON shoot), shown under the main photo.
 const gallery = fs.existsSync(path.join(ROOT, "data", "gallery.json")) ? readJSON("gallery.json") : {};
+// What each photo shows (alt text), keyed like images.json and gallery.json. A photo the site shows without one stops the build.
+const photoAlts = readJSON("photo-alts.json");
+const altFor = (p) => {
+  if (!photoAlts[p]) throw new Error(`No alt text for ${p}: add what the photo shows to data/photo-alts.json`);
+  return photoAlts[p];
+};
 const SITE_URL = (process.env.SITE_URL || site.siteUrl).replace(/\/+$/, "");
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
 const BUILD_ID = Date.now().toString(36);
@@ -72,7 +78,7 @@ const smallCopy = (p, px) => { const t = p.replace(/\.webp$/, `-t${px}.webp`); r
 const pairings = readJSON("toppings.json").map((t) => {
   if (!t.img) return t;
   const mid = t.img.replace(/\.webp$/, "-t384.webp");
-  return { ...t, img: fingerprint(t.img), small: smallCopy(t.img, 128), ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, t.img)) } : {}) };
+  return { ...t, img: fingerprint(t.img), alt: altFor(t.img.replace(/^assets\//, "")), small: smallCopy(t.img, 128), ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, t.img)) } : {}) };
 });
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
@@ -83,6 +89,8 @@ const noodles = noodlesRaw.map((n) => {
   const galleryFiles = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))) : [];
   const more = galleryFiles.map((p) => fingerprint(`assets/${p}`));
   const moreSmall = galleryFiles.map((p) => smallCopy(`assets/${p}`, 192)); // the 96 px gallery thumbnails (2x)
+  const imgAlt = img ? altFor(images[n.slug]) : null;
+  const moreAlts = galleryFiles.map(altFor);
   // Diet label (Preston, 29 Oct 2026): "Vegetarian", never "vegetarian-friendly" or "vegan".
   const diet = /Vegetarian/.test(n.diet) ? "Vegetarian" : n.diet;
   const dietTokens = [];
@@ -92,7 +100,7 @@ const noodles = noodlesRaw.map((n) => {
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(diet)) dietTokens.push("seafood");
   const unrated = n.spice == null;
-  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, thumb, more, moreSmall, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, imgAlt, thumb, more, moreAlts, moreSmall, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
 
@@ -161,10 +169,8 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     logo: `${SITE_URL}/assets/img/logo-512.png`,
     image: [`${SITE_URL}/assets/img/shoot/og-meon.jpg`, `${SITE_URL}/assets/img/shoot/tomyum-egg-prawn-1600.webp`, `${SITE_URL}/assets/img/shoot/shin-black-top-1600.webp`, `${SITE_URL}/assets/img/logo-512.png`],
     servesCuisine: ["Instant noodles", "Ramen", "Korean", "Japanese", "Indonesian", "Asian"],
-    priceRange: site.priceRange || "$",
     hasMenu: `${SITE_URL}/noodles/`,
     menu: `${SITE_URL}/noodles/`,
-    acceptsReservations: false,
     hasMap: site.mapsUrl,
     telephone: site.phone || undefined,
     email: site.email || undefined,
@@ -236,8 +242,8 @@ ${overlay ? "" : `<aside class="announce" aria-label="Where to find us"><span>Co
     </nav>
     <div class="header-actions">
       ${overlay ? `<button class="vpause-hdr" type="button" data-video-toggle data-video-toggle-header aria-pressed="false" aria-label="Pause videos" hidden><span class="vpause-ic" aria-hidden="true"></span></button>` : ""}
-      <button class="sound-btn" type="button" data-sound aria-pressed="false" aria-label="Play background music"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="sound-label">Sound</span></button>
-      <button class="search-btn" type="button" data-search-open aria-label="Search noodles">${icon.search}<span class="label">Search</span><kbd>⌘K</kbd></button>
+      <button class="sound-btn" type="button" data-sound aria-pressed="false" aria-label="Sound (background music)"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="sound-label">Sound</span></button>
+      <button class="search-btn" type="button" data-search-open aria-label="Search noodles">${icon.search}<span class="label">Search</span><kbd aria-hidden="true">⌘K</kbd></button>
       <a class="btn btn--red btn--sm header-visit" href="${r("visit/")}" data-magnetic>Visit</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
     </div>
@@ -300,7 +306,7 @@ ${body(r)}
   <div class="search-panel">
     <div class="search-field">${icon.search}<input type="search" id="site-search" placeholder="Search noodles, flavours, countries" autocomplete="off" spellcheck="false" aria-controls="search-results" enterkeyhint="go"><button class="btn btn--line btn--sm" type="button" data-search-close>Close</button></div>
     <div class="search-empty" id="search-status" role="status" aria-live="polite" hidden></div>
-    <div class="search-results" id="search-results" role="listbox"></div>
+    <div class="search-results" id="search-results" role="listbox" aria-label="Search results"></div>
     <div class="search-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open</span><span>Try “Buldak”, “tom yum” or “Japan”</span></div>
   </div>
 </div>
@@ -351,8 +357,9 @@ function packetArt(n, r) {
 </span>`;
 }
 
-function noodleMedia(n, r, { size = 400, eager = false, large = false } = {}) {
-  if (n.img) return `<img src="${r(large ? n.img : n.thumb)}" alt="${esc(`${n.brand} ${n.name}`)}" width="${size}" height="${size}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+// A noodle's photo, or its packet art when there's no photo. `alt` is "" on cards, whose link text already names the noodle.
+function noodleMedia(n, r, { size = 400, eager = false, large = false, alt = n.imgAlt } = {}) {
+  if (n.img) return `<img src="${r(large ? n.img : n.thumb)}" alt="${esc(alt)}" width="${size}" height="${size}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
   return packetArt(n, r);
 }
 
@@ -363,7 +370,7 @@ const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice ratin
 function noodleCard(n, r, i = 0) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note].filter(Boolean).join(" ");
   return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.05}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
-  <span class="nc-media">${noodleMedia(n, r)}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}</span>
+  <span class="nc-media">${noodleMedia(n, r, { alt: "" })}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}</span>
   <span class="nc-meta">${flag(n.countryCode, r, { w: 16 })}<span>${esc(n.country)}${n.type ? ` · ${esc(n.type)}` : ""}</span></span>
   <h3 class="nc-name">${esc(n.name)}</h3>
   <span class="nc-foot"><span class="nc-brand">${esc(n.brand)}</span>${spiceLine(n, r)}</span>
@@ -521,10 +528,10 @@ const STEP_SIZES = "(min-width: 900px) 472px, 64vw";
 // Photos from MEON's booth shoot (src/assets/img/shoot, made by meon-work/rebuild/make_photos.py): 800/1600/2400 px wide.
 const SHOOT = {
   "tomyum-egg-prawn": { w: 3, h: 2, alt: "Wai Wai Quick Zabb Tom Yum Shrimp with a halved soft egg, crumbed prawns, chilli and spring onion", slug: "wai-wai-quick-zabb-tom-yum-shrimp" },
-  "udon-tempura-close": { w: 2, h: 3, alt: "Nongshim Tempura Udon up close: crumbed prawns, a soft egg and spring onion", slug: "nongshim-tempura-udon" },
+  "udon-tempura-close": { w: 2, h: 3, alt: "Nongshim Tempura Udon up close: crumbed prawns, a halved soft-boiled egg, a fishcake slice and spring onion", slug: "nongshim-tempura-udon" },
   "tonkotsu-nori-close": { w: 2, h: 3, alt: "Nissin Tonkotsu with nori, a soft egg and dumplings", slug: "nissin-demae-ramen-tonkotsu" },
   "tonkotsu-top": { w: 3, h: 2, alt: "A bowl of Nissin Tonkotsu from above, with nori, egg and dumplings", slug: "nissin-demae-ramen-tonkotsu" },
-  "white-curry-top": { w: 3, h: 2, alt: "Ibumie Penang White Curry Mee from above, with fishballs, seaweed and chilli", slug: "ibumie-penang-white-curry-mee" },
+  "white-curry-top": { w: 3, h: 2, alt: "Ibumie Penang White Curry Mee from above, with fishballs, a poached egg, chilli paste, sliced chilli and spring onion", slug: "ibumie-penang-white-curry-mee" },
   "shin-black-top": { w: 3, h: 2, alt: "Shin Black from above with spam, a crumbed prawn, egg and spring onion", slug: "nongshim-shin-black-premium" },
   "shin-black-lift": { w: 2, h: 3, alt: "Shin Black noodles lifted out of the bowl with chopsticks", slug: "nongshim-shin-black-premium" },
 };
@@ -629,10 +636,11 @@ addPage("", layout({
   <div class="insta-track">
     <ul class="insta-row">${REELS.concat(REELS).map((v, i) => {
       const copy = i >= REELS.length;
-      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener" aria-label="${esc(v.cap.replace(/[.!?]$/, ""))}. ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}"${copy ? ' tabindex="-1"' : ""}>
+      return `<li${copy ? ' aria-hidden="true"' : ""}><a class="reel" href="${esc(v.url)}" target="_blank" rel="noopener"${copy ? ' tabindex="-1"' : ""}>
         <span class="reel-top" aria-hidden="true"><span class="reel-av"><img src="${r("assets/img/logo-96.webp")}" alt="" width="32" height="32" loading="lazy" decoding="async"></span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
         <div class="reel-media">${bgVideo(r, v.file, { sizes: REEL_SIZES })}</div>
-        <span class="reel-bottom" aria-hidden="true"><span class="reel-acts">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b>${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
+        <span class="reel-bottom"><span class="reel-acts" aria-hidden="true">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b aria-hidden="true">${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
+        <span class="visually-hidden"> ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}</span>
       </a></li>`;
     }).join("")}</ul>
   </div>
@@ -912,7 +920,7 @@ noodles.forEach((n, idx) => {
     <div class="noodle-grid">
       <div class="noodle-media">
         <figure class="noodle-photo img-reveal" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
-        ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : n.moreSmall[i - 1])}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
+        ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" data-gallery-alt="${esc(i === 0 ? n.imgAlt : n.moreAlts[i - 1])}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : n.moreSmall[i - 1])}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
         ${n.note ? `<p class="noodle-note">${esc(n.note)}</p>` : ""}
       </div>
       <div class="noodle-body">
@@ -1060,7 +1068,7 @@ ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and si
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
-  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.name)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
+  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2 data-split>Drinks</h2>
@@ -1219,6 +1227,7 @@ addPage("qr/", layout({
     <a class="btn btn--line btn--sm" href="${r("qr-generator/")}">${icon.qr} QR generator</a>
     <label class="search" style="max-width:340px"><span class="visually-hidden">Filter QR codes</span>${icon.search}<input type="search" placeholder="Filter…" data-qr-filter></label>
   </div>
+  <h2 class="visually-hidden">Codes</h2>
   <div class="qr-sheet">
     ${[...extraQR.map((x) => ({ slug: x.slug, name: x.name, brand: "MEON", cc: "", url: x.url })), ...noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, url: n.qrUrl }))]
       .map((q) => `<div class="qr-card"><span class="qr-brand">${q.cc ? flag(q.cc, r, { w: 16 }) : ""}${esc(q.brand)}</span><h3>${esc(q.name)}</h3><img src="${r(`assets/qr/${q.slug}.svg`)}" alt="QR code for ${esc(q.name)}" width="160" height="160" loading="lazy"><div class="qr-scan">Scan for info + cook timer</div><div class="qr-url">${esc(q.url)}</div><div class="no-print" style="margin-top:8px;display:flex;gap:6px;justify-content:center"><a class="chip" href="${r(`assets/qr/${q.slug}.svg`)}" download>SVG</a>${process.env.QR_PNG !== "0" ? `<a class="chip" href="${r(`assets/qr/${q.slug}.png`)}" download>PNG</a>` : ""}</div></div>`)

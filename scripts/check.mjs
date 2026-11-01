@@ -81,6 +81,19 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
 for (const f of files.filter((f) => f.endsWith(".css"))) {
   for (const m of fs.readFileSync(f, "utf8").matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)/g)) problems.push(`${path.relative(OUT, f)}: loads from another host: ${m[1].slice(0, 80)}`);
 }
+// Photos (BOSS, 1 Nov 2026): a photo file nothing on the site uses is still public at its URL (the black-cloth topping
+// photos and the wrong-packet noodle photos were), so delete it instead; git history keeps it.
+const siteText = files.filter((f) => /\.(html|json|css|js|txt|xml|webmanifest)$/.test(f)).map((f) => fs.readFileSync(f, "utf8")).join("\n");
+for (const f of files) {
+  const rel = path.relative(OUT, f).split(path.sep).join("/");
+  if (/^assets\/img\/(noodles|toppings|photos|shoot)\/.+\.(webp|jpe?g|png|avif)$/.test(rel) && !siteText.includes(rel)) problems.push(`${rel}: photo nothing on the site uses, but still public at its URL; delete it`);
+}
+// Restaurant schema (BOSS, 1 Nov 2026): only facts the owner has given us. No price band, reservations policy, ratings or
+// reviews; opening hours only once the owner sends them (data/site.json has none yet).
+const homeLd = [...fs.readFileSync(path.join(OUT, "index.html"), "utf8").matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => [JSON.parse(m[1])].flat());
+const restaurant = homeLd.find((n) => n["@type"] === "Restaurant");
+if (!restaurant) problems.push("index.html: no Restaurant schema");
+else for (const k of ["priceRange", "acceptsReservations", "aggregateRating", "review", "openingHours", "openingHoursSpecification"]) if (k in restaurant) problems.push(`index.html: Restaurant schema claims ${k}, which the owner hasn't given us`);
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }
 console.log("All good ✔");
