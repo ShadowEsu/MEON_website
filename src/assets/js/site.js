@@ -297,7 +297,7 @@
   /* Which file: a clip can carry smaller AV1 and HEVC copies next to its H.264 file (data-bg-av1, data-bg-hevc; REG-54,
      1 Nov 2026). One check per visit, before the first clip loads: AV1 where the device decodes it in hardware, else HEVC
      where it plays (browsers only report HEVC with a hardware decoder), else AV1 in software, else the H.264 file every
-     browser plays. A copy that fails to decode falls back to the H.264 file. */
+     browser plays. A copy that fails to decode falls back to the H.264 file, and so does every clip after it on that visit. */
   var bgCodec = null;
   var bgCodecReady = (function () {
     var types = { av1: 'video/mp4; codecs="av01.0.05M.08"', hevc: 'video/mp4; codecs="hvc1.1.6.L93.B0"' };
@@ -322,7 +322,7 @@
   bgVids.forEach(function (v) {
     v.addEventListener("error", function () {
       var h264 = v.getAttribute("data-bg-src"), cur = v.getAttribute("src");
-      if (cur && cur !== h264) { v.src = h264; bgPlay(v); }
+      if (cur && cur !== h264) { bgCodec = ""; v.src = h264; bgPlay(v); }
     });
   });
   // Pause; for reels and step cards also drop a clip that hasn't fully downloaded (a fully loaded one is kept for its return)
