@@ -19,6 +19,12 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 - **Copy is specific and plain.** It uses full stops, few exclamation marks, no "slurp" or "noodle heaven", and no em dash in headings.
 - **First person** (Preston, 29 Oct 2026): the shop speaks as "we", "us" and "our" ("Come visit us", "our crew is here if you need a hand"). Quotes of MEON's own Instagram captions keep their wording.
 - **Filter and diet wording** (Preston, 29 Oct 2026): spice filters are just "No heat", "Medium" and "Hot" (no "exactly" options); the diet label is "Vegetarian" (never "vegetarian-friendly"), and there is no vegan filter or label. A product's own name keeps its wording.
+- **One name per action** (Design, 31 Oct 2026):
+  - every Google Maps link says **"Get directions"** (announcement line, hero, visit band, visit page, footer)
+  - in-page links and buttons to `/visit/` say **"Visit us"**; the nav, footer page list and tab bar keep the page name "Visit"
+  - every button that opens search says **"Search noodles"** (the header and tab-bar buttons show "Search" for space, with "Search noodles" as their accessible name)
+  - both reset buttons on `/noodles/` say **"Clear filters"** ("Clear search and filters" when a typed search found nothing)
+  - the noodle count is the real number from the data, never "100+" (see `docs/operations.md`)
 
 ## Page anatomy
 1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.

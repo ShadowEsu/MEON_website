@@ -578,7 +578,7 @@
       else if (v === "mild") sorted.sort(function (a, b) { return a.dataset.spice - b.dataset.spice; });
       else if (v === "photo") sorted.sort(function (a, b) { return b.dataset.photo - a.dataset.photo; });
       sorted.forEach(function (el) { grid.appendChild(el); });
-      if (countEl) countEl.textContent = (shown === cards.length ? "All 100+ noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
+      if (countEl) countEl.textContent = (shown === cards.length ? "All " + cards.length + " noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
       if (empty) {
         empty.classList.toggle("is-visible", shown === 0);
         var typed = search ? search.value.trim() : "";

@@ -117,8 +117,9 @@ const NAV = [
   ["pairings-and-sides/", "Pairings and sides"],
   ["about/", "About"],
 ];
-// Public wording: the range changes often, so the site says "100+" and "from across Asia".
-const COUNT = "100+";
+// Public wording: the noodle count is built from the data (Design, 31 Oct 2026: no vague "100+" next to a list of 199), so
+// it stays true as packets come and go; the region stays "from across Asia".
+const COUNT = String(noodles.length);
 const REGION = "from across Asia";
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
@@ -277,7 +278,7 @@ ${body(r)}
         <h2>Visit</h2>
         <ul>
           <li>${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</li>
-          <li><a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Open in Google Maps</a></li>
+          <li><a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></li>
           ${site.phone ? `<li><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></li>` : ""}
           ${site.email ? `<li><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></li>` : ""}
           <li>Dine in or take away</li>
@@ -436,7 +437,7 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
       <p class="lead">${esc(text)}</p>
       <div class="actions">
         <a class="btn btn--white" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
-        <a class="btn btn--ghost-white" href="${r("visit/")}">${icon.pin} Getting here</a>
+        <a class="btn btn--ghost-white" href="${r("visit/")}">${icon.pin} Visit us</a>
       </div>
     </div>
     <div class="cta-mascots" aria-hidden="true">${mascot({ acc: "bowl", color: "#ffc83d" })}${mascot({ acc: "chef", color: "#ff8a4c" })}${mascot({ acc: "chilli", color: "#ffffff" })}</div>
@@ -560,7 +561,7 @@ const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="sect
 </div>`;
 
 const FAQ = [
-  ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Open in Google Maps" on this page for directions.`],
+  ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
   ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
   ["Do you have vegetarian noodles?", `Yes, plenty of our noodles are vegetarian. Use the diet filter in the noodle library, and always check the packet if you have allergies.`],
@@ -654,7 +655,7 @@ addPage("", layout({
     </li>
     <li class="scard scard--red">
       <div class="scard-media">${bgVideo(r, "step-enjoy", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away. Slurping is encouraged.</p></div>
+      <div class="scard-copy"><span class="scard-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away.</p></div>
     </li>
   </ol>
 </section>
@@ -665,7 +666,7 @@ addPage("", layout({
     <p class="eyebrow">MEON time</p>
     <h2 id="vwall-h" data-split>Bring your crew.</h2>
     <p class="lead">We've got a wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
-    <a class="btn btn--white btn--lg" href="${r("visit/")}">Plan your visit ${icon.arrow}</a>
+    <a class="btn btn--white btn--lg" href="${r("visit/")}">Visit us ${icon.arrow}</a>
   </div>
 </section>
 
@@ -857,7 +858,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`
   <div class="wrap">
     <div class="results-bar"><span data-result-count aria-live="polite">All ${COUNT} noodles</span>
       <span class="results-tools"><label class="visually-hidden" for="f-sort">Sort</label><select class="select" id="f-sort"><option value="featured">By country</option><option value="photo">Photos first</option><option value="az">A to Z</option><option value="hot">Hottest first</option><option value="mild">Mildest first</option></select>
-      <button class="btn btn--line btn--sm" type="button" data-reset>Reset</button></span>
+      <button class="btn btn--line btn--sm" type="button" data-reset>Clear filters</button></span>
     </div>
     <h2 class="visually-hidden">Noodles</h2>
     <div class="card-grid card-grid--long">${noodles.map((n, i) => noodleCard(n, r, i)).join("")}</div>
@@ -960,7 +961,7 @@ noodles.forEach((n, idx) => {
         <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
         <div class="noodle-actions">
           <button class="btn btn--line btn--sm" type="button" data-share data-url="${esc(`${SITE_URL}/${n.url}`)}" data-title="${esc(`${n.brand} ${n.name} at MEON`)}">${icon.share} Share</button>
-          <button class="btn btn--line btn--sm" type="button" data-search-open>${icon.search} Find another noodle</button>
+          <button class="btn btn--line btn--sm" type="button" data-search-open>${icon.search} Search noodles</button>
         </div>
         <nav class="prev-next" aria-label="More noodles">
           <a href="${r(prev.url)}"><small>Previous</small><strong>${esc(prev.name)}</strong></a>
@@ -1151,11 +1152,11 @@ addPage("visit/", layout({
   jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }],
   description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Open in Google Maps</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
+${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: esc(site.orderingNote), actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Get directions</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
 <section class="section section--tight"><div class="wrap">
   <h2 class="visually-hidden">Where, when and how to reach us</h2>
   <div class="info-cols">
-    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Directions ${icon.arrow}</a></div>
+    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions ${icon.arrow}</a></div>
     <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : `<p>${esc(site.hoursNote)}</p>`}</div>
     <div class="reveal" style="--rd:.12s">${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram ${icon.arrow}</a>` : ""}</div>
   </div>
