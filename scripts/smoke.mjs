@@ -32,6 +32,16 @@ await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(2500);
 ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 1 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the one desktop hero clip loads and plays");
 ok(await page.$eval(".vhero .vbg--phone video", (v) => !v.getAttribute("src")), "phone hero video is not fetched on desktop");
+// Smaller AV1/HEVC copies (REG-54): the hero plays one of its own files, and if the copy this device picked fails, the H.264 file.
+const heroFiles = () => page.$eval(".vhero .vcol video", (v) => ({ src: v.getAttribute("src") || "", files: ["data-bg-src", "data-bg-av1", "data-bg-hevc"].map((a) => v.getAttribute(a)).filter(Boolean), h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
+const picked = await heroFiles();
+ok(picked.files.length >= 2 && picked.files.includes(picked.src) && picked.playing, `the desktop hero has its H.264 file plus a smaller copy, and plays one of them (${picked.src.split("/").pop()})`);
+await page.route(/\.(av1|hevc)\.mp4/, (route) => route.fulfill({ status: 200, contentType: "video/mp4", body: "not a video" })); // a copy the device can't decode
+await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
+await page.waitForFunction(() => { const v = document.querySelector(".vhero .vcol video"); return v && !v.paused && v.currentTime > 0; }, null, { timeout: 10000 }).catch(() => {});
+const fallback = await heroFiles();
+ok(fallback.src === fallback.h264 && fallback.playing, `when the AV1/HEVC copy can't be decoded, the hero falls back to the H.264 file and plays (${fallback.src.split("/").pop()})`);
+await page.unroute(/\.(av1|hevc)\.mp4/);
 ok((await page.$$eval(".stack > li video", (vs) => vs.length)) === 4 && (await page.$$eval(".vwall video", (vs) => vs.length)) === 12, "four step-card videos and a twelve-clip video wall");
 ok(await page.$eval(".logo-badge", (s) => { const r = s.getBoundingClientRect(); return s.querySelectorAll(".lw").length === 8 && Math.abs(r.width - r.height) < 1 && r.height >= 50; }), "header logo is the square with meon plus the four glyphs");
 ok(!(await page.$(".facts")) && !(await page.$("#watch")), "no facts row and no Watch section on the home page");

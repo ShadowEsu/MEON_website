@@ -26,7 +26,7 @@ for (const file of htmlFiles) {
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
   const dup = ids.filter((v, i) => ids.indexOf(v) !== i);
   if (dup.length) problems.push(`${rel}: duplicate ids ${[...new Set(dup)].join(", ")}`);
-  for (const m of html.matchAll(/\s(?:href|src|poster)="([^"]+)"/g)) {
+  for (const m of html.matchAll(/\s(?:href|src|poster|data-bg-(?:src|av1|hevc))="([^"]+)"/g)) {
     let u = m[1];
     if (/^(https?:|mailto:|tel:|data:|#)/.test(u)) continue;
     u = u.split("#")[0].split("?")[0];
@@ -94,6 +94,16 @@ const homeLd = [...fs.readFileSync(path.join(OUT, "index.html"), "utf8").matchAl
 const restaurant = homeLd.find((n) => n["@type"] === "Restaurant");
 if (!restaurant) problems.push("index.html: no Restaurant schema");
 else for (const k of ["priceRange", "acceptsReservations", "aggregateRating", "review", "openingHours", "openingHoursSpecification"]) if (k in restaurant) problems.push(`index.html: Restaurant schema claims ${k}, which the owner hasn't given us`);
+// AV1/HEVC copies of the clips (REG-54): each must have been made from the H.264 file that's there now, or devices that
+// play the copy would see an old cut. data/video-copies.json records the H.264 file's hash at the time.
+const VID = path.join(OUT, "..", "src", "assets", "video");
+const copiesMan = JSON.parse(fs.readFileSync(path.join(OUT, "..", "data", "video-copies.json"), "utf8"));
+for (const f of fs.readdirSync(VID).filter((f) => /\.(av1|hevc)\.mp4$/.test(f))) {
+  const clip = f.replace(/\.(av1|hevc)\.mp4$/, ""), entry = copiesMan[clip];
+  const h264 = path.join(VID, `${clip}.mp4`);
+  if (!fs.existsSync(h264)) problems.push(`src/assets/video/${f}: no ${clip}.mp4 to fall back to`);
+  else if (!entry || entry.h264_sha256 !== crypto.createHash("sha256").update(fs.readFileSync(h264)).digest("hex")) problems.push(`src/assets/video/${f}: made from an older ${clip}.mp4; remake its copies (meon-work/clips) or delete them`);
+}
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }
 console.log("All good ✔");
