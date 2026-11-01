@@ -24,7 +24,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
   - in-page links and buttons to `/visit/` say **"Visit us"**; the nav, footer page list and tab bar keep the page name "Visit"
   - every button that opens search says **"Search noodles"** (the header and tab-bar buttons show "Search" for space, with "Search noodles" as their accessible name)
   - both reset buttons on `/noodles/` say **"Clear filters"** ("Clear search and filters" when a typed search found nothing)
-  - the noodle count is the real number from the data, never "100+" (see `docs/operations.md`)
+  - the noodle count is the real number from the data, never "100+" (see `docs/operations.md`). It stays on one line; on a phone, if it doesn't fit beside the sort and "Clear filters", those move to their own row
 
 ## Page anatomy
 1. Announcement line (every page except home): "Cook-it-yourself instant noodles at Shop 8, 45 Francis Street, Northbridge." with a Get directions link.
@@ -33,7 +33,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
    Pairings and sides, Noodles, Countries, About and Visit (29 Oct 2026, Preston: "update the other pages"): a video hero (`videoHero()`) with the header floating over it. Desktop: the words on ink on the left (breadcrumbs, a red eyebrow, the big title, a lead and actions; About also shows the big square logo) and two portrait clips side by side on the right; phones: the whole clip in a centred 9:16 rounded frame under the header, the words below. The reels have their own burned-in captions, so the words never sit on the footage. Not pinned: as the page scrolls on, the footage shrinks into a rounded card and the words lift away. Every other page (country pages, Privacy, the staff QR pages): page hero (`pageHero()`): breadcrumbs, then a small red eyebrow, then a large split-word title, a lead and actions. On the right is one visual or a peeking mascot (`peeker()`).
    Videos are "zoomed out" (Preston, 29 Oct 2026): each frame shows most or all of its clip (the desktop home clip, phone frames and the desktop inner-page columns show the whole 9:16 clip; the columns fit it on ink with `object-fit: contain`, Design, 31 Oct 2026, so no reel caption is cut at the column edge), and nothing is cropped tighter than that.
 4. Content sections.
-5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page.
+5. Reviews (`reviewsBlock()`): a star summary, a form and the latest reviews. It appears on the home page and on every noodle page. "Keep it friendly." is the review field's hint, directly under "Your review" and in its `aria-describedby` (Design, 31 Oct 2026). It is never a line under the Post button, where it would read like a telling-off after an error.
 6. Red closing band (`ctaBand()`) with big type and three mascots. The home page closes with its own video band instead.
 7. Ink footer with the giant red logo lockup, its letters and glyphs rising in one by one.
 8. Phones: a bottom tab bar (Noodles, Search, Countries, Visit).

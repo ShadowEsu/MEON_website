@@ -476,7 +476,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
         <div class="rv-errors" data-rv-errors tabindex="-1" aria-labelledby="${id}-errors-h" hidden><h3 class="rv-errors-h" id="${id}-errors-h"></h3><ul></ul></div>
         <fieldset class="rv-rate" id="${id}-rating" role="radiogroup" aria-labelledby="${id}-rating-l"><legend id="${id}-rating-l">Your rating</legend><div class="rv-rate-stars">${stars}</div>${err("rating", "Choose a star rating")}</fieldset>
         <div class="field"><label for="${id}-name">Your name</label><input id="${id}-name" name="name" type="text" maxlength="40" autocomplete="given-name" required>${err("name", "Enter your first name")}</div>
-        <div class="field"><label for="${id}-comment">Your review</label><textarea id="${id}-comment" name="comment" rows="4" minlength="3" maxlength="600" required placeholder="${slug ? "How was it? Spice, flavour, pairings you added…" : "Tell us about your visit"}"></textarea>${err("comment", "Write a few words about it")}</div>
+        <div class="field"><label for="${id}-comment">Your review</label><p class="note rv-hint" id="${id}-comment-hint">Keep it friendly.</p><textarea id="${id}-comment" name="comment" rows="4" minlength="3" maxlength="600" required aria-describedby="${id}-comment-hint" placeholder="${slug ? "How was it? Spice, flavour, pairings you added…" : "Tell us about your visit"}"></textarea>${err("comment", "Write a few words about it")}</div>
         <label class="hp" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
         <div class="rv-consent">
           <label class="toggle"><input type="checkbox" name="consent" id="rv-consent-${slug || "all"}" required aria-required="true" aria-describedby="rv-consent-${slug || "all"}-detail"> Publish my first name and review on this site</label>
@@ -485,7 +485,6 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
         </div>
         <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button><a class="link-arrow" data-rv-alt href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener" hidden>Post it on Google instead ${icon.arrow}</a></div>
         <p class="rv-status" data-rv-status aria-live="polite" tabindex="-1"></p>
-        <p class="note">Please keep it friendly.</p>
       </form>
     </div>
     <div class="rv-list" data-rv-list aria-live="polite"><div class="rv-empty">${mascot({ acc: "none", wave: true })}<strong>${slug ? "No reviews for this one yet" : "No reviews yet"}</strong><span>${slug ? "Tried it? Be the first to say how it was." : "Been in? Be the first to tell everyone."}</span></div></div>
