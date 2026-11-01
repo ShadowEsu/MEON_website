@@ -1227,9 +1227,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .vibe .vibe-yes { background: var(--red); color: #fff; }
 .vibe .vibe-no { background: transparent; color: rgba(255,255,255,.7); padding: 9px 10px; }
 .vibe button { white-space: nowrap; }
-/* Phones: drop in under the header, clear of the buttons at the bottom of the full-screen cards */
+/* Phones: drop in under the header, clear of the buttons at the bottom of the full-screen cards. It slides down from above
+   the screen, so it stacks below the header (100) and above the tab bar (90): it passes behind the header's controls,
+   never over the play/pause (it covered it for ~70 ms mid-slide, 1 Nov 2026) */
 @media (max-width: 760px) {
-  .vibe { top: calc(var(--header-h) + 10px); bottom: auto; transform: translate(-50%, calc(-100% - var(--header-h) - 20px)); gap: 8px; padding: 8px; }
+  .vibe { top: calc(var(--header-h) + 10px); bottom: auto; transform: translate(-50%, calc(-100% - var(--header-h) - 20px)); gap: 8px; padding: 8px; z-index: 95; }
   .vibe p { font-size: .86rem; } .vibe .vibe-eq { display: none; } .vibe button { padding: 8px 12px; font-size: .84rem; } .vibe .vibe-no { padding: 8px 6px; }
 }
 
