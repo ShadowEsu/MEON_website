@@ -926,7 +926,7 @@
         var had = down.contains(document.activeElement);
         down.remove();
         var empty = $(".rv-empty", list); if (empty) empty.hidden = false;
-        if (had) { list.setAttribute("tabindex", "-1"); list.focus(); }
+        if (had) { list.setAttribute("tabindex", "-1"); list.focus(); list.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } // start: the list can be taller than the screen
       }).catch(function () {
         started = false; offset = 0;
         $$(".rv-item, .rv-more", list).forEach(function (el) { el.remove(); });
@@ -968,7 +968,9 @@
       if (!bad.length) return;
       $(".rv-errors-h", errBox).textContent = "Fix " + bad.length + (bad.length === 1 ? " thing" : " things") + " to post your review";
       $("ul", errBox).innerHTML = links;
+      // focus() alone doesn't scroll a box that is already on screen, even under the fixed header or tab bar
       errBox.focus();
+      errBox.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
     };
     errBox.addEventListener("click", function (e) {
       var a = e.target.closest("a"), t = a && document.getElementById(a.getAttribute("href").slice(1));
@@ -1012,6 +1014,7 @@
           status.textContent = /Too many/.test(err.message) ? err.message : "Your review didn't post. Our review service isn't answering right now. Your words are still here.";
           if (alt) alt.hidden = false;
           status.focus();
+          status.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
         });
     });
   });

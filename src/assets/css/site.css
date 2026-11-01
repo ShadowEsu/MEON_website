@@ -310,6 +310,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .tabbar a[aria-current="page"] svg { color: var(--red); }
   .tabbar .tab-search { color: var(--ink); }
   body { padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px)); }
+  /* Focus and scroll-into-view stop clear of the fixed tab bar (WCAG 2.4.11), as scroll-padding-top does for the header */
+  html { scroll-padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
 }
 @media print { .tabbar { display: none !important; } body { padding-bottom: 0; } }
 
