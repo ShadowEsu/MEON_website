@@ -114,13 +114,13 @@ const swap = await page.evaluate(() => {
 ok(swap.src && swap.alt === swap.want && swap.want !== swap.first, `gallery photo 3 swaps the main photo and its alt text (${swap.alt.slice(0, 50)}…)`);
 // Accessible names as the browser computes them (what screen readers and voice control get) start with the visible label.
 const nameOf = async (sel) => (/^- button "([^"]*)"/.exec(await page.locator(sel).ariaSnapshot()) || [])[1] || "";
-const shown = (sel) => page.$eval(sel, (e) => e.textContent.trim());
+const labelText = (sel) => page.$eval(sel, (e) => e.textContent.trim());
 const searchName = await nameOf(".search-btn");
-ok(searchName.startsWith(await shown(".search-btn .label")), `the header Search button's name starts with its visible label ("${searchName}")`);
+ok(searchName.startsWith(await labelText(".search-btn .label")), `the header Search button's name starts with its visible label ("${searchName}")`);
 const soundOff = await nameOf(".sound-btn");
 await page.click(".sound-btn");
 await page.waitForFunction(() => document.querySelector(".sound-btn").getAttribute("aria-pressed") === "true", null, { timeout: 8000 }).catch(() => {});
-const soundOn = await nameOf(".sound-btn"), soundSeen = await shown(".sound-btn .sound-label");
+const soundOn = await nameOf(".sound-btn"), soundSeen = await labelText(".sound-btn .sound-label");
 const soundPressed = await page.$eval(".sound-btn", (b) => b.getAttribute("aria-pressed"));
 ok(soundPressed === "true" && soundOff.startsWith(soundSeen) && soundOn.startsWith(soundSeen), `the Sound button's name starts with its visible label, off and on ("${soundOn}", pressed ${soundPressed})`);
 await page.click(".sound-btn");
