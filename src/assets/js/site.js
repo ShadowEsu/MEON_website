@@ -54,6 +54,8 @@
   var parallax = reduceMotion ? [] : $$("[data-parallax]");
   var hscroll = reduceMotion ? [] : $$("[data-hscroll]");
   var vhero = $(".vhero");
+  // The hero's play/pause box, read with the other geometry each frame once "Background videos" below sets heroBtnMoved
+  var heroBtnEl = null, heroBtnRect = null, heroBtnMoved = null;
   /* Scenes. [data-scene] gets --p, the scroll progress through it: by default while its sticky first child (the
      stage) is pinned, i.e. over (scene height - stage height); "through" runs from entering the screen to leaving it;
      "leave" (inner-page video heroes, which start on screen) runs from the top of the page until it has scrolled away.
@@ -74,6 +76,7 @@
     var y = window.scrollY, vh = window.innerHeight;
     // Reads first
     var heroOver = !!(vhero && header) && y < vhero.offsetHeight - header.offsetHeight;
+    heroBtnRect = heroBtnMoved ? heroBtnEl.getBoundingClientRect() : null;
     for (var k = 0; k < scenes.length; k++) {
       var sc = scenes[k], sr = sc.getBoundingClientRect();
       if (sr.bottom < -100 || sr.top > vh + 100) { sceneP[k] = null; continue; }
@@ -90,6 +93,7 @@
     }
     // Then writes
     if (header) { header.classList.toggle("is-scrolled", y > 8); if (vhero) header.classList.toggle("is-over", heroOver); }
+    if (heroBtnRect) heroBtnMoved(heroBtnRect);
     lastY = y;
     if (progress) {
       var max = document.documentElement.scrollHeight - vh;
@@ -289,12 +293,19 @@
     if (heroToggle) {
       // Over half the hero button hidden (off screen or under the fixed header) counts as gone: the header's toggle takes
       // over, and the hero's own button and scroll cue hide, so the header never shows two toggles or a cue over one.
-      var heroBox = heroToggle.closest(".vhero");
-      new IntersectionObserver(function (entries) {
-        heroToggleOn = entries[0].intersectionRatio > 0.5;
-        heroBox.classList.toggle("vhero--under", !heroToggleOn);
-        syncHeaderToggle();
-      }, { rootMargin: "-" + (header ? header.offsetHeight : 0) + "px 0px 0px 0px", threshold: [0, 0.5, 1] }).observe(heroToggle);
+      var heroBox = heroToggle.closest(".vhero"), headerH = header ? header.offsetHeight : 0;
+      var setHeroOn = function (on) { heroToggleOn = on; heroBox.classList.toggle("vhero--under", !on); syncHeaderToggle(); };
+      new IntersectionObserver(function (entries) { setHeroOn(entries[0].intersectionRatio > 0.5); },
+        { rootMargin: "-" + headerH + "px 0px 0px 0px", threshold: [0, 0.5, 1] }).observe(heroToggle);
+      // The observer reports in a task queued after the frame; after a long jump on a busy phone that came ~800 ms late,
+      // with no toggle on screen while the hero still played (1 Nov 2026). The scroll frame applies the same rule (over
+      // half of the button below the header and on screen) from the button's own box, so the swap lands in the first
+      // frame drawn after any scroll.
+      heroBtnEl = heroToggle;
+      heroBtnMoved = function (r) {
+        var on = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, headerH)) > r.height / 2;
+        if (on !== heroToggleOn) setHeroOn(on);
+      };
     }
   }
   var showVideosPaused = function (on) {
