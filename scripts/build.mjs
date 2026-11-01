@@ -552,7 +552,11 @@ const bgPoster = (r, name, media, eager, sizes) => {
   const img = `<img class="vbg-poster" src="${r(asset(`video/${name}.webp`))}"${set} alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
   return eager && media ? `<picture><source media="not all and ${media}" srcset="${BLANK_GIF}">${img}</picture>` : img;
 };
-const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false, sizes = "" } = {}) => `<div class="vbg${cls ? " " + cls : ""}">${poster ? bgPoster(r, name, media, eager, sizes) : ""}<video class="vbg-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" data-bg-src="${r(asset(`video/${name}.mp4`))}"${media ? ` data-media="${media}"` : ""}></video></div>`;
+// Smaller AV1 and HEVC copies (`<name>.av1.mp4`, `<name>.hevc.mp4`, meon-work/clips/encode_variants.py, REG-54): site.js picks one
+// per device and keeps the H.264 file as the fallback every browser plays.
+const bgVariants = (r, name) => ["av1", "hevc"].filter((c) => fs.existsSync(path.join(SRC, "assets", `video/${name}.${c}.mp4`)))
+  .map((c) => ` data-bg-${c}="${r(asset(`video/${name}.${c}.mp4`))}"`).join("");
+const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false, sizes = "" } = {}) => `<div class="vbg${cls ? " " + cls : ""}">${poster ? bgPoster(r, name, media, eager, sizes) : ""}<video class="vbg-video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1" data-bg-src="${r(asset(`video/${name}.mp4`))}"${bgVariants(r, name)}${media ? ` data-media="${media}"` : ""}></video></div>`;
 // Displayed poster widths: reel cards are clamp(230px, 21vw, 300px); step cards are about 250 px on phones and up to
 // 472 px (840 px tall at 9:16) on desktop.
 const REEL_SIZES = "(min-width: 1429px) 300px, (min-width: 1096px) 21vw, 230px";
