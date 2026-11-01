@@ -14,6 +14,7 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 - **No boxes:**
   - cards are a photo plus text
   - sections are separated by hairlines (`--line`) and space
+  - borders of controls (inputs, selects, textareas, empty rating stars) use `--line-strong #8a847e`, 3.7:1 on white (WCAG 1.4.11); `--line-2` is only for hairlines
   - nothing is a card inside a card
 - **Copy is specific and plain.** It uses full stops, few exclamation marks, no "slurp" or "noodle heaven", and no em dash in headings.
 - **First person** (Preston, 29 Oct 2026): the shop speaks as "we", "us" and "our" ("Come visit us", "our crew is here if you need a hand"). Quotes of MEON's own Instagram captions keep their wording.
