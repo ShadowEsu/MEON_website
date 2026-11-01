@@ -7,7 +7,7 @@ Every image on the site that MEON didn't make itself, with where it came from an
 - **Noodle photos** (`src/assets/img/noodles/`): Steven's MEON photo shoot, commissioned by MEON, except the packet photos listed under "Noodle photos from free libraries" below.
 - **Booth-shoot bowl photos** (`src/assets/img/shoot/`, used on the home page, Visit page and as the share image): MEON's own shoot on a black background (MEON's Drive, one folder per noodle), resized from the 4K originals.
 - **Background videos** (`src/assets/video/`): MEON's own footage. The shop clips are Preston's; the step, wall and `ig-*.mp4` clips also use MEON's own @meonnoodles reels. Reels by other creators (for example the @little_miss_fussy_eats collab) are not re-hosted.
-- **Topping photos on the MEON lid** (`toppings/meatballs.webp`, `toppings/spring-onion.webp`, `photos/topping-*.webp`): MEON's own topping shoot (MEON's Drive folder "Toppings pics").
+- **Topping photos on the MEON lid** (`toppings/meatballs.webp`, `toppings/spring-onion.webp`, `photos/topping-*.webp`): MEON's own topping shoot (MEON's Drive folder "Toppings pics"). **Not used since 31 Oct 2026:** the owner doesn't want photos on the black background, so meatballs, fishcake, spring onion, enoki, lettuce, seaweed and Spam show line icons instead (`data/toppings.json`). The files stay in the repo for the record.
 - **Logo** (`logo-*.png`, favicons): MEON's own.
 - **Chilli in the spice meter** (`src/assets/img/chilli.svg`), mascots, icons and illustrated packets: drawn in code for this site (`scripts/lib/art.mjs`). The TikTok glyph in the "Follow us." links is the [Simple Icons](https://simpleicons.org/?q=tiktok) TikTok path (CC0); it links only to MEON's own TikTok.
 
