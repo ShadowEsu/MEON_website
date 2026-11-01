@@ -1011,7 +1011,8 @@
           // The typed words stay; focus moves to the message, and Google is offered as another way to post
           posting = false; btn.removeAttribute("aria-disabled"); btn.textContent = "Try again";
           status.classList.add("is-error");
-          status.textContent = /Too many/.test(err.message) ? err.message : "Your review didn't post. Our review service isn't answering right now. Your words are still here.";
+          // One neutral line for every failure (Design, 31 Oct 2026): true for a refusal, a rate limit or an outage; server text is never shown
+          status.textContent = "Your review didn't post. Your words are still here, so you can try again or post it on Google instead.";
           if (alt) alt.hidden = false;
           status.focus();
           status.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
