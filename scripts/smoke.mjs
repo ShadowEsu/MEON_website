@@ -36,11 +36,18 @@ ok(await page.$eval(".vhero .vbg--phone video", (v) => !v.getAttribute("src")), 
 const heroFiles = () => page.$eval(".vhero .vcol video", (v) => ({ src: v.getAttribute("src") || "", files: ["data-bg-src", "data-bg-av1", "data-bg-hevc"].map((a) => v.getAttribute(a)).filter(Boolean), h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
 const picked = await heroFiles();
 ok(picked.files.length >= 2 && picked.files.includes(picked.src) && picked.playing, `the desktop hero has its H.264 file plus a smaller copy, and plays one of them (${picked.src.split("/").pop()})`);
-await page.route(/\.(av1|hevc)\.mp4/, (route) => route.fulfill({ status: 200, contentType: "video/mp4", body: "not a video" })); // a copy the device can't decode
+const copyFiles = new Set();
+await page.route(/\.(av1|hevc)\.mp4/, (route) => { copyFiles.add(new URL(route.request().url()).pathname); return route.fulfill({ status: 200, contentType: "video/mp4", body: "not a video" }); }); // a copy the device can't decode
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => { const v = document.querySelector(".vhero .vcol video"); return v && !v.paused && v.currentTime > 0; }, null, { timeout: 10000 }).catch(() => {});
 const fallback = await heroFiles();
 ok(fallback.src === fallback.h264 && fallback.playing, `when the AV1/HEVC copy can't be decoded, the hero falls back to the H.264 file and plays (${fallback.src.split("/").pop()})`);
+// After one copy fails, later clips on that visit go straight to their H.264 file instead of fetching a copy first.
+const stepSel = '.stack video[data-bg-src*="step-pairings"]';
+await page.$eval(stepSel, (v) => v.scrollIntoView({ block: "center" }));
+await page.waitForFunction((s) => !!document.querySelector(s).getAttribute("src"), stepSel, { timeout: 10000 }).catch(() => {});
+const later = await page.$eval(stepSel, (v) => ({ src: v.getAttribute("src") || "", h264: v.getAttribute("data-bg-src"), hasCopy: v.hasAttribute("data-bg-av1") || v.hasAttribute("data-bg-hevc") }));
+ok(later.hasCopy && later.src === later.h264 && copyFiles.size === 1, `after a copy fails, a later clip with copies loads its H.264 file directly (${later.src.split("/").pop() || "no src"}; copies fetched: ${[...copyFiles].map((p) => p.split("/").pop()).join(", ")})`);
 await page.unroute(/\.(av1|hevc)\.mp4/);
 ok((await page.$$eval(".stack > li video", (vs) => vs.length)) === 4 && (await page.$$eval(".vwall video", (vs) => vs.length)) === 12, "four step-card videos and a twelve-clip video wall");
 ok(await page.$eval(".logo-badge", (s) => { const r = s.getBoundingClientRect(); return s.querySelectorAll(".lw").length === 8 && Math.abs(r.width - r.height) < 1 && r.height >= 50; }), "header logo is the square with meon plus the four glyphs");
