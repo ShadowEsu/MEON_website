@@ -112,12 +112,17 @@ const swap = await page.evaluate(() => {
   return { src: img.getAttribute("src") === b[2].getAttribute("data-gallery-src"), alt: img.alt, want: b[2].getAttribute("data-gallery-alt"), first: b[0].getAttribute("data-gallery-alt") };
 });
 ok(swap.src && swap.alt === swap.want && swap.want !== swap.first, `gallery photo 3 swaps the main photo and its alt text (${swap.alt.slice(0, 50)}…)`);
-const soundName = () => page.$eval(".sound-btn", (b) => ({ label: b.getAttribute("aria-label"), seen: b.querySelector(".sound-label").textContent.trim(), pressed: b.getAttribute("aria-pressed") }));
-const soundOff = await soundName();
+// Accessible names as the browser computes them (what screen readers and voice control get) start with the visible label.
+const nameOf = async (sel) => (/^- button "([^"]*)"/.exec(await page.locator(sel).ariaSnapshot()) || [])[1] || "";
+const shown = (sel) => page.$eval(sel, (e) => e.textContent.trim());
+const searchName = await nameOf(".search-btn");
+ok(searchName.startsWith(await shown(".search-btn .label")), `the header Search button's name starts with its visible label ("${searchName}")`);
+const soundOff = await nameOf(".sound-btn");
 await page.click(".sound-btn");
 await page.waitForFunction(() => document.querySelector(".sound-btn").getAttribute("aria-pressed") === "true", null, { timeout: 8000 }).catch(() => {});
-const soundOn = await soundName();
-ok(soundOn.pressed === "true" && [soundOff, soundOn].every((s) => s.label.startsWith(s.seen)), `the Sound button's name starts with its visible label, off and on ("${soundOn.label}", pressed ${soundOn.pressed})`);
+const soundOn = await nameOf(".sound-btn"), soundSeen = await shown(".sound-btn .sound-label");
+const soundPressed = await page.$eval(".sound-btn", (b) => b.getAttribute("aria-pressed"));
+ok(soundPressed === "true" && soundOff.startsWith(soundSeen) && soundOn.startsWith(soundSeen), `the Sound button's name starts with its visible label, off and on ("${soundOn}", pressed ${soundPressed})`);
 await page.click(".sound-btn");
 
 const phone = watch(await phoneCtx.newPage());

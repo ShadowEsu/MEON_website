@@ -243,7 +243,7 @@ ${overlay ? "" : `<aside class="announce" aria-label="Where to find us"><span>Co
     <div class="header-actions">
       ${overlay ? `<button class="vpause-hdr" type="button" data-video-toggle data-video-toggle-header aria-pressed="false" aria-label="Pause videos" hidden><span class="vpause-ic" aria-hidden="true"></span></button>` : ""}
       <button class="sound-btn" type="button" data-sound aria-pressed="false" aria-label="Sound (background music)"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="sound-label">Sound</span></button>
-      <button class="search-btn" type="button" data-search-open aria-label="Search noodles">${icon.search}<span class="label">Search</span><kbd aria-hidden="true">⌘K</kbd></button>
+      <button class="search-btn" type="button" data-search-open>${icon.search}<span class="label" aria-hidden="true">Search</span><span class="visually-hidden">Search noodles</span><kbd aria-hidden="true">⌘K</kbd></button>
       <a class="btn btn--red btn--sm header-visit" href="${r("visit/")}" data-magnetic>Visit</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
     </div>
