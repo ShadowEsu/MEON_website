@@ -524,6 +524,9 @@
     var selCountry = $("#f-country"), selType = $("#f-type"), selSpice = $("#f-spice"), selDiet = $("#f-diet"), selSort = $("#f-sort");
     var countEl = $("[data-result-count]");
     var empty = $(".empty-state", library);
+    // A typed search gets its own empty copy (Design, 31 Oct 2026); filters alone keep the built copy
+    var emptyParts = empty ? [$("h2", empty), $(".lead", empty), $("[data-reset]", empty)] : [];
+    var emptyFilters = emptyParts.map(function (el) { return el.textContent; });
     var pills = $$(".pill[data-pill]", library);
     var grid = $(".card-grid", library);
     var original = cards.slice();
@@ -576,7 +579,12 @@
       else if (v === "photo") sorted.sort(function (a, b) { return b.dataset.photo - a.dataset.photo; });
       sorted.forEach(function (el) { grid.appendChild(el); });
       if (countEl) countEl.textContent = (shown === cards.length ? "All 100+ noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
-      if (empty) empty.classList.toggle("is-visible", shown === 0);
+      if (empty) {
+        empty.classList.toggle("is-visible", shown === 0);
+        var typed = search ? search.value.trim() : "";
+        var copy = typed ? ["No noodles match “" + typed + "”.", "Clear the search or a filter, or ask the crew in store.", "Clear search and filters"] : emptyFilters;
+        emptyParts.forEach(function (el, k) { el.textContent = copy[k]; });
+      }
       pills.forEach(function (b) { var sel = map[b.getAttribute("data-pill")]; b.setAttribute("aria-pressed", sel && sel.value === b.getAttribute("data-value") ? "true" : "false"); });
       writeParams();
       requestFrame();

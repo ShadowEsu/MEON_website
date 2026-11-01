@@ -680,6 +680,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .empty-state .lead { margin-inline: auto; }
 .empty-state + .note { margin-top: 48px; }
 @media (max-width: 700px) { .filters { position: static; } .filters-row .select { flex: 1 1 45%; } }
+/* Phones: a small bowl, so the empty message lands in the screen under the results count */
+@media (max-width: 600px) { .empty-state { padding: 20px 0 32px; } .empty-state .empty-bowl { width: 96px; margin-bottom: 12px; } .empty-state h2 { font-size: 1.6rem; } }
 
 /* ---------- Noodle page (QR landing) ---------- */
 .noodle { padding: clamp(20px, 3vw, 36px) 0 clamp(72px, 9vw, 120px); }
