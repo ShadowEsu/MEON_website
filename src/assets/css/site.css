@@ -570,7 +570,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .nc-meta .flag { width: 16px; }
 .nc-name { font-size: 1.08rem; font-weight: 600; letter-spacing: -.015em; line-height: 1.25; margin: 0 0 8px; transition: color .25s; }
 .noodle-card:hover .nc-name { color: var(--red); }
-.nc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; font-size: .86rem; color: var(--ink-2); }
+.nc-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; margin-top: auto; font-size: .86rem; color: var(--ink-2); }
+.nc-spice { display: inline-flex; align-items: center; gap: 6px; }
+.nc-spice-word { font-size: .8rem; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
 .nc-spice-soon { font-size: .78rem; color: var(--muted); }
 .placeholder-art { display: grid; place-items: center; align-content: center; gap: 6px; width: 100%; height: 100%; background: var(--soft); }
 .placeholder-mascot { width: 46%; overflow: visible; }

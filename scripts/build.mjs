@@ -356,7 +356,9 @@ function noodleMedia(n, r, { size = 400, eager = false, large = false } = {}) {
   return packetArt(n, r);
 }
 
-const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice rating soon</span>` : spiceMeter(n.spice, r);
+// The heat as a word next to the chillies (never icons alone), in the library filter's own bands: 0, 1-2, 3-5
+const spiceWord = (s) => (s === 0 ? "No heat" : s <= 2 ? "Medium" : "Hot");
+const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice rating soon</span>` : `<span class="nc-spice">${spiceMeter(n.spice, r)}<span class="nc-spice-word">${spiceWord(n.spice)}</span></span>`;
 
 function noodleCard(n, r, i = 0) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note].filter(Boolean).join(" ");
