@@ -294,12 +294,37 @@
   try { localStorage.removeItem("meon-videos"); storedVideos = sessionStorage.getItem("meon-videos"); } catch (e) {}
   var userPaused = storedVideos ? storedVideos === "paused" : reduceMotion;
   var bgFits = function (v) { var m = v.getAttribute("data-media"); return !m || window.matchMedia(m).matches; };
+  /* Which file: a clip can carry smaller AV1 and HEVC copies next to its H.264 file (data-bg-av1, data-bg-hevc; REG-54,
+     1 Nov 2026). One check per visit, before the first clip loads: AV1 where the device decodes it in hardware, else HEVC
+     where it plays (browsers only report HEVC with a hardware decoder), else AV1 in software, else the H.264 file every
+     browser plays. A copy that fails to decode falls back to the H.264 file. */
+  var bgCodec = null;
+  var bgCodecReady = (function () {
+    var types = { av1: 'video/mp4; codecs="av01.0.05M.08"', hevc: 'video/mp4; codecs="hvc1.1.6.L93.B0"' };
+    var mc = navigator.mediaCapabilities;
+    var ask = function (k) {
+      var probe = document.createElement("video").canPlayType(types[k]) === "probably";
+      if (!mc || !mc.decodingInfo) return Promise.resolve({ supported: probe, powerEfficient: probe });
+      return mc.decodingInfo({ type: "file", video: { contentType: types[k], width: 720, height: 1280, bitrate: 1500000, framerate: 30 } })
+        .catch(function () { return { supported: probe, powerEfficient: probe }; });
+    };
+    return Promise.all([ask("av1"), ask("hevc")]).then(function (r) {
+      bgCodec = r[0].supported && r[0].powerEfficient ? "av1" : r[1].supported ? "hevc" : r[0].supported ? "av1" : "";
+    }, function () { bgCodec = ""; });
+  })();
   var bgBlocked = false;
   var bgPlay = function (v) {
     if (saveData || userPaused || !v._in || v._covered || !bgFits(v)) return;
-    if (!v.getAttribute("src")) { v.muted = true; v.src = v.getAttribute("data-bg-src"); }
+    if (bgCodec === null) { bgCodecReady.then(function () { bgPlay(v); }); return; }
+    if (!v.getAttribute("src")) { v.muted = true; v.src = (bgCodec && v.getAttribute("data-bg-" + bgCodec)) || v.getAttribute("data-bg-src"); }
     var p = v.play(); if (p && p.catch) p.catch(function () { if (v.paused && v._in && !v._covered) bgBlocked = true; });
   };
+  bgVids.forEach(function (v) {
+    v.addEventListener("error", function () {
+      var h264 = v.getAttribute("data-bg-src"), cur = v.getAttribute("src");
+      if (cur && cur !== h264) { v.src = h264; bgPlay(v); }
+    });
+  });
   // Pause; for reels and step cards also drop a clip that hasn't fully downloaded (a fully loaded one is kept for its return)
   bgVids.forEach(function (v) { v._drop = !!v.closest(".reel, .scard"); });
   var bgStop = function (v) {
