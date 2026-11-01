@@ -18,7 +18,7 @@
      is forgiven only when nothing matched exactly. */
   var SPELLINGS = [
     ["ramen", "ramyun", "ramyeon", "ramyon"], ["jjajang", "jajang", "chajang", "jjajangmyeon", "jajangmyeon", "jjajangmyun"], ["jjambbong", "jjamppong", "jambbong", "champong"],
-    ["chapaguri", "jjapaguri", "ramdon"], ["chapagetti", "chapaghetti", "jjapaghetti", "jjapagetti"], ["yum", "yam"], ["kimchi", "kim chi"]
+    ["chapaguri", "jjapaguri", "ramdon"], ["chapagetti", "chapaghetti", "jjapaghetti", "jjapagetti"], ["yum", "yam"], ["kimchi", "kim chi", "kimchee"]
   ];
   var VARIANTS = {};
   SPELLINGS.forEach(function (g) { g.forEach(function (w) { VARIANTS[w] = g; }); });
@@ -392,16 +392,20 @@
   var overlay = $("#search");
   var sInput = $("#site-search");
   var sResults = $("#search-results"), sStatus = $("#search-status");
-  var index = null, loading = null, active = -1, lastFocus = null;
+  var index = null, loading = null, indexFailed = false, active = -1, lastFocus = null;
+  // A failed load is remembered as a failure (not as an empty index), so search says it didn't load instead of "no matches".
   function loadIndex() {
     if (index) return Promise.resolve(index);
     if (loading) return loading;
-    loading = fetch(ROOT + "search-index.json").then(function (r) { return r.json(); }).then(function (d) {
+    indexFailed = false;
+    loading = fetch(ROOT + "search-index.json").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
       index = d.map(function (x) { x._h = norm(x.t + " " + x.s + " " + (x.k || "")); x._t = norm(x.t); return x; });
       return index;
-    }).catch(function () { index = []; return index; });
+    }).catch(function () { indexFailed = true; loading = null; return null; });
     return loading;
   }
+  var POPULAR = ["Buldak", "Tom yum", "Vegetarian", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"];
+  function popularPills(cls) { return '<div class="search-suggest' + (cls || "") + '">' + POPULAR.map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>"; }
   function thumb(x) {
     if (x.i) return '<span class="thumb"><img src="' + ROOT + esc(x.i) + '" alt="" width="44" height="44" loading="lazy"></span>';
     if (x.f) return '<span class="thumb">' + flagImg(x.f, 28) + "</span>";
@@ -412,27 +416,36 @@
   }
   function renderResults(q) {
     if (!sResults) return;
-    var nq = norm(q.trim()), html = "", note = "";
-    if (!nq) {
-      html = '<div class="search-group">Popular searches</div><div class="search-suggest">' +
-        ["Buldak", "Tom yum", "Vegetarian", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"].map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>";
-      html += '<div class="search-group">Jump to</div>' + (index || []).filter(function (x) { return x.g === "Pages"; }).slice(0, 6).map(item).join("");
+    var nq = norm(q.trim()), html = "", note = [];
+    if (!index) {
+      // Still loading: show nothing yet (openSearch renders again once it arrives). Failed: say so and offer a retry.
+      if (indexFailed) {
+        note = ["Search didn't load. Check your connection and try again."];
+        html = '<div class="search-none"><button class="btn btn--red btn--sm" type="button" data-search-retry>Try again</button><a class="btn btn--line btn--sm" href="' + ROOT + 'noodles/">Browse the noodle wall</a></div>';
+      }
+    } else if (!nq) {
+      html = '<div class="search-group">Popular searches</div>' + popularPills();
+      html += '<div class="search-group">Jump to</div>' + index.filter(function (x) { return x.g === "Pages"; }).slice(0, 6).map(item).join("");
     } else {
       var terms = queryTerms(q);
-      var hits = (index || []).filter(function (x) { return matchesAll(x._h, terms, false); });
+      var hits = index.filter(function (x) { return matchesAll(x._h, terms, false); });
       var close = !hits.length;
-      if (close) hits = (index || []).filter(function (x) { return matchesAll(x._h, terms, true); });
+      if (close) hits = index.filter(function (x) { return matchesAll(x._h, terms, true); });
       hits.sort(function (a, b) {
         var sa = a._t.indexOf(nq) === 0 ? 0 : a._t.indexOf(nq) > -1 ? 1 : 2, sb = b._t.indexOf(nq) === 0 ? 0 : b._t.indexOf(nq) > -1 ? 1 : 2;
         return sa - sb;
       });
-      if (!hits.length) note = "No matches for “" + q.trim() + "”. Try a flavour like “kimchi” or a country like “Japan”.";
-      else if (close) note = "No exact matches for “" + q.trim() + "”. Showing close spellings.";
+      if (!hits.length) {
+        // No dead end: the popular searches stay, plus the whole library
+        note = ["No noodles match “" + q.trim() + "”.", "Check the spelling, or try one of these."];
+        html = popularPills(" search-suggest--center") + '<div class="search-none"><a class="btn btn--red btn--sm" href="' + ROOT + 'noodles/">Browse all ' + index.filter(function (x) { return x.g === "Noodles"; }).length + " noodles</a></div>";
+      }
+      else if (close) note = ["No exact matches for “" + q.trim() + "”. Showing close spellings."];
       var groups = {};
       hits.slice(0, 40).forEach(function (x) { (groups[x.g] = groups[x.g] || []).push(x); });
       ["Noodles", "Countries", "Pairings and sides", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
     }
-    if (sStatus) { sStatus.textContent = note; sStatus.hidden = !note; }
+    if (sStatus) { sStatus.innerHTML = note.map(function (l) { return "<span>" + esc(l) + "</span>"; }).join(""); sStatus.hidden = !note.length; }
     sResults.innerHTML = html;
     active = -1;
     if (nq && $(".search-item", sResults)) setActive(0);
@@ -470,6 +483,10 @@
     sResults.addEventListener("click", function (e) {
       var s = e.target.closest("[data-suggest]");
       if (s) { sInput.value = s.getAttribute("data-suggest"); renderResults(sInput.value); sInput.focus(); }
+      if (e.target.closest("[data-search-retry]")) {
+        sInput.focus();
+        loadIndex().then(function () { renderResults(sInput.value); });
+      }
     });
     document.addEventListener("keydown", function (e) {
       var tag = (e.target.tagName || "").toLowerCase();
