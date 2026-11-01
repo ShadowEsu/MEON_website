@@ -37,8 +37,8 @@
   "funNote": "No.1 Ramen in the World",
   "weightG": 130,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -51,8 +51,8 @@
   "funNote": null,
   "weightG": 118,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -107,8 +107,8 @@
   "funNote": null,
   "weightG": 134,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -121,8 +121,8 @@
   "funNote": "Was viral on tik tok before",
   "weightG": 140,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -135,8 +135,8 @@
   "funNote": "Was viral on tik tok before",
   "weightG": 140,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -149,8 +149,8 @@
   "funNote": null,
   "weightG": 140,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -191,8 +191,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -205,8 +205,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -219,8 +219,8 @@
   "funNote": null,
   "weightG": 135,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -233,8 +233,8 @@
   "funNote": null,
   "weightG": 130,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -313,7 +313,7 @@
   "brand": "Samyang",
   "country": "South Korea",
   "countryCode": "kr",
-  "flavour": "curry / chicken",
+  "flavour": "chicken",
   "funNote": null,
   "weightG": 140,
   "spice": 5,
@@ -417,7 +417,7 @@
   "spice": 3,
   "diet": "Vegetarian-friendly",
   "dietNote": true,
-  "type": "Soup"
+  "type": "Dry"
  },
  {
   "slug": "samyang-buldak-mala",
@@ -429,13 +429,13 @@
   "funNote": null,
   "weightG": 135,
   "spice": 4,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
   "slug": "samyang-cream-carbonara",
-  "name": "Cream Carbonara",
+  "name": "Buldak Cream Carbonara",
   "brand": "Samyang",
   "country": "South Korea",
   "countryCode": "kr",
@@ -485,8 +485,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 4,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -499,8 +499,8 @@
   "funNote": null,
   "weightG": 110,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat (Beef)",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -569,8 +569,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -625,8 +625,8 @@
   "funNote": null,
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -667,8 +667,8 @@
   "funNote": null,
   "weightG": 106,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -681,8 +681,8 @@
   "funNote": null,
   "weightG": 106,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -709,8 +709,8 @@
   "funNote": null,
   "weightG": 106,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat (Chicken)",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -723,8 +723,8 @@
   "funNote": "Hand pulled - Top Seller",
   "weightG": null,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -765,8 +765,8 @@
   "funNote": "Popular in US / Canada / Everywhere",
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -793,17 +793,17 @@
   "funNote": null,
   "weightG": 101,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
   "slug": "sapporo-ichiban-chow-mien",
-  "name": "Ichiban Chow Mien",
+  "name": "Ichiban Chow Mein",
   "brand": "Sapporo",
   "country": "Japan",
   "countryCode": "jp",
-  "flavour": "chow mien",
+  "flavour": "chow mein",
   "funNote": null,
   "weightG": 102,
   "spice": 0,
@@ -821,8 +821,8 @@
   "funNote": "Collab Noodle, Popular online",
   "weightG": 102,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -877,8 +877,8 @@
   "funNote": null,
   "weightG": 110,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -919,8 +919,8 @@
   "funNote": null,
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -933,8 +933,8 @@
   "funNote": null,
   "weightG": 100,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -947,9 +947,9 @@
   "funNote": null,
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
-  "type": "Soup"
+  "diet": "Ask the crew",
+  "dietNote": false,
+  "type": "Dry"
  },
  {
   "slug": "maggi-2-minute-noodles-asam-laksa",
@@ -961,8 +961,8 @@
   "funNote": null,
   "weightG": 79,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1031,8 +1031,8 @@
   "funNote": "High Rating + More Premium",
   "weightG": 110,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1059,8 +1059,8 @@
   "funNote": "High Rating + More Premium",
   "weightG": 105,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1081,14 +1081,14 @@
   "slug": "myojo-mee-poh-dry",
   "name": "Mee Poh Dry",
   "brand": "Myojo",
-  "country": "Malaysia",
-  "countryCode": "my",
+  "country": "Singapore",
+  "countryCode": "sg",
   "flavour": "mee poh",
   "funNote": "Top Rated in Malaysia",
   "weightG": 80,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1171,8 +1171,8 @@
   "funNote": null,
   "weightG": 75,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1215,26 +1215,26 @@
   "spice": 1,
   "diet": "Vegetarian-friendly",
   "dietNote": true,
-  "type": "Soup"
+  "type": "Dry"
  },
  {
   "slug": "mie-sedap-goreng",
   "name": "Goreng",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "goreng",
   "funNote": null,
   "weightG": 90,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
   "slug": "mie-sedap-soto",
   "name": "Soto",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "soto",
@@ -1248,7 +1248,7 @@
  {
   "slug": "mie-sedap-ayam-bawang",
   "name": "Ayam Bawang",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "chicken",
@@ -1262,7 +1262,7 @@
  {
   "slug": "mie-sedap-baso-special",
   "name": "Baso Special",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "baso",
@@ -1276,21 +1276,21 @@
  {
   "slug": "mie-sedap-sambal-goreng",
   "name": "Sambal Goreng",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "sambal / goreng",
   "funNote": null,
   "weightG": 88,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
   "slug": "mie-sedap-curry-chicken-special",
   "name": "Curry Chicken Special",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "signature",
@@ -1304,7 +1304,7 @@
  {
   "slug": "mie-sedap-white-curry",
   "name": "White Curry",
-  "brand": "Mie Sedap",
+  "brand": "Mie Sedaap",
   "country": "Indonesia",
   "countryCode": "id",
   "flavour": "signature",
@@ -1367,8 +1367,8 @@
   "funNote": null,
   "weightG": 80,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1409,8 +1409,8 @@
   "funNote": "Top Seller",
   "weightG": 55,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1437,8 +1437,8 @@
   "funNote": "New",
   "weightG": 60,
   "spice": 4,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1451,8 +1451,8 @@
   "funNote": "New",
   "weightG": 55,
   "spice": 4,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1500,15 +1500,15 @@
  {
   "slug": "nissin-nongshim-shin-ramyun-jay-fai-tom-yum-flavour",
   "name": "Nongshim Shin Ramyun Jay Fai Tom Yum Flavour",
-  "brand": "Nissin",
-  "country": "Thailand",
-  "countryCode": "th",
+  "brand": "Nongshim",
+  "country": "South Korea",
+  "countryCode": "kr",
   "flavour": "tom yum",
   "funNote": "Collab with Famous Chef / Bangkok Michelin starred restaurant",
   "weightG": 123,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1597,7 +1597,7 @@
  },
  {
   "slug": "patanjali-twisty-toasty-noodles",
-  "name": "Twisty Toasty Noodles",
+  "name": "Twisty Tasty Noodles",
   "brand": "Patanjali",
   "country": "India",
   "countryCode": "in",
@@ -1689,7 +1689,7 @@
   "funNote": null,
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Soup"
  },
@@ -1759,8 +1759,8 @@
   "funNote": null,
   "weightG": 108,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1794,30 +1794,30 @@
  {
   "slug": "chongqing-sichuan-baijia-chongqing-noodles-spicy-hot-flavour",
   "name": "Sichuan Baijia Chongqing Noodles Spicy Hot Flavour",
-  "brand": "Chongqing",
+  "brand": "Baijia",
   "country": "China",
   "countryCode": "cn",
   "flavour": "spicy",
   "funNote": "Top 10 rated noodle 2021",
   "weightG": 110,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
   "slug": "chongqing-sichuan-baijia-chongqing-noodles-burning-dry-noodle",
   "name": "Sichuan Baijia Chongqing Noodles Burning Dry Noodle",
-  "brand": "Chongqing",
+  "brand": "Baijia",
   "country": "China",
   "countryCode": "cn",
   "flavour": "spicy",
   "funNote": "Top 10 rated noodle 2021",
   "weightG": 110,
   "spice": 4,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
-  "type": "Soup"
+  "diet": "Ask the crew",
+  "dietNote": false,
+  "type": "Dry"
  },
  {
   "slug": "baixiang-pork-bone-soup-instant-noodle",
@@ -1885,8 +1885,8 @@
   "funNote": "Super Premium",
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1899,8 +1899,8 @@
   "funNote": "Super Premium",
   "weightG": 100,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1927,8 +1927,8 @@
   "funNote": "Superior Taste Award; hard to get",
   "weightG": 129,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1969,8 +1969,8 @@
   "funNote": null,
   "weightG": 85,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -2004,7 +2004,7 @@
  {
   "slug": "nissin-salted-egg-instant-noodle-regular",
   "name": "Salted Egg Instant Noodle Regular",
-  "brand": "Nissin / Irwin",
+  "brand": "Nissin / IRVINS",
   "country": "Singapore",
   "countryCode": "sg",
   "flavour": "salted egg",
@@ -2018,7 +2018,7 @@
  {
   "slug": "nissin-salted-egg-instant-noodle-spicy",
   "name": "Salted Egg Instant Noodle Spicy",
-  "brand": "Nissin / Irwin",
+  "brand": "Nissin / IRVINS",
   "country": "Singapore",
   "countryCode": "sg",
   "flavour": "spicy",
@@ -2032,7 +2032,7 @@
  {
   "slug": "nissin-salted-egg-instant-noodle-mala",
   "name": "Salted Egg Instant Noodle Mala",
-  "brand": "Nissin / Irwin",
+  "brand": "Nissin / IRVINS",
   "country": "Singapore",
   "countryCode": "sg",
   "flavour": "mala",
@@ -2053,8 +2053,8 @@
   "funNote": "Staple in Philippines home",
   "weightG": 60,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2067,8 +2067,8 @@
   "funNote": null,
   "weightG": 60,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2081,8 +2081,8 @@
   "funNote": "Staple in Philippines home",
   "weightG": 60,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2095,8 +2095,8 @@
   "funNote": null,
   "weightG": 60,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2133,12 +2133,12 @@
   "brand": "Lucky Me!",
   "country": "Philippines",
   "countryCode": "ph",
-  "flavour": "chow mien",
+  "flavour": "sweet & spicy",
   "funNote": null,
   "weightG": 60,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2193,8 +2193,8 @@
   "funNote": null,
   "weightG": 75,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Seafood",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -2291,8 +2291,8 @@
   "funNote": "Niche flavour",
   "weightG": 90,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Meat (Beef)",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2315,7 +2315,7 @@
   "brand": "Uniben",
   "country": "Vietnam",
   "countryCode": "vn",
-  "flavour": "shrimp",
+  "flavour": "lobster",
   "funNote": null,
   "weightG": 65,
   "spice": 1,
@@ -2375,8 +2375,8 @@
   "funNote": null,
   "weightG": 77,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -2403,8 +2403,8 @@
   "funNote": null,
   "weightG": 80,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  }
 ]
