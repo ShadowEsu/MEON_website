@@ -59,10 +59,13 @@
      "leave" (inner-page video heroes, which start on screen) runs from the top of the page until it has scrolled away.
      .is-moving once it has started (rounded corners), .is-late past .58 (the faded hero words stop taking clicks).
      [data-stack] cards get --q (how far the card has slid in) and --p (how far the next card covers it), .is-sinking
-     once covered at all; a fully covered card pauses its videos. All scene and card reads happen before any write. */
+     once covered at all. Only the active card (at least half slid in, not yet half covered) loads and plays its clip
+     (Design, 31 Oct 2026); the others pause. All scene and card reads happen before any write. */
   var scenes = reduceMotion ? [] : $$("[data-scene]");
   var stackEl = reduceMotion ? null : $("[data-stack]");
   var stackCards = stackEl ? $$("[data-stack] > li") : [];
+  // Until the first frame with the stack on screen decides, no card is active, so nearing the screen loads nothing
+  stackCards.forEach(function (li) { li._idle = true; $$("video[data-bg-src]", li).forEach(function (v) { v._covered = true; }); });
   var sceneP = [], cardTops = [];
   var lastY = window.scrollY, ticking = false;
   var navOpen = function () { var n = $("#site-nav"); return n && n.classList.contains("is-open"); };
@@ -106,10 +109,10 @@
       card.style.setProperty("--q", q.toFixed(4));
       card.style.setProperty("--p", cover.toFixed(4));
       card.classList.toggle("is-sinking", cover > 0.005);
-      var covered = cover > 0.98;
-      if (covered !== !!card._covered) {
-        card._covered = covered;
-        $$("video[data-bg-src]", card).forEach(function (v) { v._covered = covered; if (covered) v.pause(); else if (typeof bgPlay === "function") bgPlay(v); });
+      var idle = q < 0.5 || cover >= 0.5;
+      if (idle !== card._idle) {
+        card._idle = idle;
+        $$("video[data-bg-src]", card).forEach(function (v) { v._covered = idle; if (idle) { if (typeof bgStop === "function") bgStop(v); } else if (typeof bgPlay === "function") bgPlay(v); });
       }
     }
     for (var i = 0; i < parallax.length; i++) {
@@ -240,7 +243,8 @@
      cut and a desktop only the column clips. When the browser refuses to start a video by itself (an iPhone in Low Power
      Mode), the visitor's next tap, click or key starts every video on screen. The play/pause choice lasts for the visit
      (sessionStorage). The hero's button scrolls away with the hero, so a copy in the header takes over while a video
-     is in view. */
+     is in view. Reels (Instagram strip) and step cards drop a file that is still downloading when they leave the screen
+     (or stop being the active card), so clips nobody is watching stop using data (Design, 31 Oct 2026). */
   var bgVids = $$("video[data-bg-src]");
   var saveData = !!(navigator.connection && navigator.connection.saveData);
   var storedVideos = null;
@@ -251,7 +255,16 @@
   var bgPlay = function (v) {
     if (saveData || userPaused || !v._in || v._covered || !bgFits(v)) return;
     if (!v.getAttribute("src")) { v.muted = true; v.src = v.getAttribute("data-bg-src"); }
-    var p = v.play(); if (p && p.catch) p.catch(function () { if (v.paused && v._in) bgBlocked = true; });
+    var p = v.play(); if (p && p.catch) p.catch(function () { if (v.paused && v._in && !v._covered) bgBlocked = true; });
+  };
+  // Pause; for reels and step cards also drop a clip that hasn't fully downloaded (a fully loaded one is kept for its return)
+  bgVids.forEach(function (v) { v._drop = !!v.closest(".reel, .scard"); });
+  var bgStop = function (v) {
+    if (!v.paused) v.pause();
+    if (!v._drop || !v.getAttribute("src")) return;
+    var b = v.buffered;
+    if (b.length && v.duration && b.end(b.length - 1) >= v.duration - 0.25) return;
+    v.removeAttribute("src"); v.load(); v.classList.remove("is-playing");
   };
   var bgRetry = function () {
     if (!bgBlocked || userPaused) return;
@@ -268,7 +281,7 @@
   bgVids.forEach(function (v) { v.addEventListener("playing", function () { v.classList.add("is-playing"); }); });
   if (bgVids.length && "IntersectionObserver" in window && !saveData) {
     var bio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { var v = en.target; v._in = en.isIntersecting; if (v._in) bgPlay(v); else if (!v.paused) v.pause(); });
+      entries.forEach(function (en) { var v = en.target; v._in = en.isIntersecting; if (v._in) bgPlay(v); else bgStop(v); });
       syncHeaderToggle();
     }, { rootMargin: "160px 0px" });
     bgVids.forEach(function (v) { bio.observe(v); });
