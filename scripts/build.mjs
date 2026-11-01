@@ -1275,9 +1275,10 @@ write("404.html", layout({
   body: () => `
 <section class="lost"><div class="wrap">
   ${emptyBowl}
-  <h1>Page not found.</h1>
-  <p class="lead">We couldn't find that page. The packet may have moved shelves.</p>
-  <p class="actions"><a class="btn btn--red" href="/">Back to MEON</a> <button class="btn btn--line" type="button" data-search-open>Search noodles</button></p>
+  <h1>Page not found</h1>
+  <p class="lead">If you typed the address, check the spelling. The noodle may have a new page.</p>
+  <div class="lost-suggest" data-lost-suggest hidden><h2>Did you mean</h2><ul></ul></div>
+  <p class="actions"><a class="btn btn--red" href="/noodles/">Browse the noodle wall</a> <button class="btn btn--line" type="button" data-search-open>Search noodles</button></p>
 </div></section>
 `,
 }).replace(/(href|src)="\.\/"/g, '$1="/"').replace(/(href|src)="\.\/([^"]*)"/g, '$1="/$2"').replace(/data-root="\.\/"/, 'data-root="/"'));

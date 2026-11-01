@@ -498,6 +498,24 @@
     if (!/Mac|iPhone|iPad/.test(navigator.platform || "")) $$(".search-btn kbd").forEach(function (k) { k.textContent = "Ctrl K"; });
   }
 
+  /* ---------- 404: "Did you mean" for a mistyped noodle address (up to 3 noodles whose name or address has its words) ---------- */
+  var lostBox = $("[data-lost-suggest]");
+  var lostSlug = lostBox && /^\/noodles\/([^\/]+)\/?$/.exec(location.pathname);
+  if (lostSlug) loadIndex().then(function (idx) {
+    var raw = lostSlug[1];
+    try { raw = decodeURIComponent(raw); } catch (e) { /* malformed %-escape: use it as typed */ }
+    var words = queryTerms(raw.replace(/[^A-Za-z0-9]+/g, " ")).filter(function (w) { return w.length > 1; });
+    if (!idx || !words.length) return;
+    var all = idx.filter(function (x) { return x.g === "Noodles"; }).map(function (x) { return { x: x, h: x._h + " " + x.u, len: x.u.split("-").length }; });
+    var hits = all.filter(function (c) { return matchesAll(c.h, words, false); });
+    if (!hits.length) hits = all.filter(function (c) { return matchesAll(c.h, words, true); });
+    if (!hits.length) hits = all.filter(function (c) { return (c.n = words.filter(function (w) { return hasTerm(c.h, w, true); }).length); }).sort(function (a, b) { return b.n - a.n; });
+    hits = hits.sort(function (a, b) { return (b.n || 0) - (a.n || 0) || a.len - b.len; }).slice(0, 3);
+    if (!hits.length) return;
+    $("ul", lostBox).innerHTML = hits.map(function (c) { return '<li><a href="' + ROOT + esc(c.x.u) + '">' + esc(c.x.s.split(" · ")[0] + " " + c.x.t) + "</a></li>"; }).join("");
+    lostBox.hidden = false;
+  });
+
   /* ---------- Noodle library filters ---------- */
   var library = $("[data-library]");
   if (library) {

@@ -860,6 +860,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .lost .empty-bowl { width: min(260px, 64vw); margin: 0 auto 28px; }
 .lost .lead { margin-inline: auto; }
 .lost .actions { justify-content: center; }
+.lost-suggest { margin: 4px auto 28px; }
+.lost-suggest[hidden] { display: none; }
+.lost-suggest h2 { font-size: 1.15rem; letter-spacing: -.01em; margin: 0 0 10px; }
+.lost-suggest ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; justify-items: center; }
+.lost-suggest a { font-weight: 600; color: var(--red); }
 
 /* ---------- Confetti (paper shapes) ---------- */
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 160; overflow: hidden; }
