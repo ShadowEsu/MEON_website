@@ -807,7 +807,7 @@ addPage("", layout({
     <div class="food-head reveal">
       <p class="eyebrow">Real bowls, shot in our shop</p>
       <h2 id="food-h">Worth a <em>try</em>.</h2>
-      <p class="lead">Six packets from six countries, from our own photo shoot. Pick one to see how it cooks.</p>
+      <p class="lead">Six packets from six countries, photographed in our shop. Pick one to see how it cooks.</p>
     </div>
     <ul class="food-grid">${FOOD.map((n) => `<li class="food-tile reveal"><a href="${r(n.url)}"><span class="food-media"><img ${photoSet(r, n, "(min-width: 900px) 30vw, 50vw")} alt="${esc(n.imgAlt)}" width="900" height="900" loading="lazy" decoding="async"></span><span class="food-tag">${flag(n.countryCode, r, { w: 16 })}${esc(n.brand)} ${esc(n.name)}</span></a></li>`).join("")}</ul>
   </div>
