@@ -73,11 +73,11 @@ const FLAVOUR_NOTES = [
   { re: /spicy|hot|chilli|chili/, note: "A chilli-forward seasoning with a satisfying kick." },
 ];
 
-// The "regulars" line needs a track record, so noodles just added from the till (n.newToSite) never get it.
-const REGULARS_OPENER = (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is a bowl our regulars keep coming back for.`;
+// Each opener must be true of every noodle on the wall. No claims about what MEON's customers order or come back for: there's
+// no till data behind them (REG-82; check.mjs guards it).
 const OPENERS = [
   (n) => `${n.name} by ${n.brand} is ${/^[AEIOU]/.test(n.countryAdj) ? "an" : "a"} ${n.countryAdj} favourite you can cook here at MEON.`,
-  REGULARS_OPENER,
+  (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is on the noodle wall at MEON, ready to cook.`,
   (n) => `${n.brand} ${n.name} brings a proper taste of ${n.country} to Northbridge.`,
   (n) => `Craving something from ${n.country}? ${n.brand}'s ${n.name} is a great place to start.`,
 ];
@@ -108,8 +108,7 @@ export function flavourNote(n) {
 
 export function describe(n) {
   const ctx = { ...n, countryAdj: COUNTRY_ADJ[n.country] || n.country };
-  const openers = n.newToSite ? OPENERS.filter((o) => o !== REGULARS_OPENER) : OPENERS;
-  const opener = openers[hash(n.slug) % openers.length](ctx);
+  const opener = OPENERS[hash(n.slug) % OPENERS.length](ctx);
   const paras = [`${opener} ${flavourNote(n)}`];
   if (n.type && TYPE_LINES[n.type]) paras.push(TYPE_LINES[n.type]);
   return paras;

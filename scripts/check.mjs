@@ -78,6 +78,17 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
+// Claims about MEON's own customers (REG-82, BOSS 2 Nov 2026): "most picked", "our regulars", "best-sellers" and the like
+// need the till's numbers, which we don't have. The owner's library notes on packets (badges like "Brand bestseller") are
+// his words about the packet and are left out of this check.
+const CUSTOMER_CLAIM = /\b(?:most[- ]picked|most[- ]ordered|most[- ]loved|regulars|best[- ]?sell(?:er|ers|ing)|our (?:most )?popular|popular (?:with|among|at) (?:our|MEON)|crowd favourites? (?:at|here))\b/i;
+for (const f of [...htmlFiles, path.join(OUT, "llms.txt")]) {
+  const raw = fs.readFileSync(f, "utf8");
+  const meta = [...raw.matchAll(/<meta (?:name|property)="(?:description|og:description|twitter:description)" content="([^"]*)"/g)].map((m) => m[1]).join(" ");
+  const body = raw.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, " ").replace(/<(span|p)\b[^>]*class="(?:nc-note|noodle-note)"[^>]*>[\s\S]*?<\/\1>/g, " ").replace(/<[^>]+>/g, " ");
+  const claim = `${body} ${meta}`.replace(/&#39;|&rsquo;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ").match(CUSTOMER_CLAIM);
+  if (claim) problems.push(`${path.relative(OUT, f)}: claims what customers choose ("${claim[0]}") with no till data behind it`);
+}
 for (const f of files.filter((f) => f.endsWith(".css"))) {
   for (const m of fs.readFileSync(f, "utf8").matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)/g)) problems.push(`${path.relative(OUT, f)}: loads from another host: ${m[1].slice(0, 80)}`);
 }

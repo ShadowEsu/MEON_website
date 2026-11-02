@@ -20,7 +20,7 @@ const readJSON = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, "data", f), "
 const site = readJSON("site.json");
 // Packet weights, extra noodles, sides and drinks from MEON's Square catalogue (see data/catalogue.json). No prices on the site.
 const catalogue = readJSON("catalogue.json");
-const noodlesRaw = [...readJSON("noodles.json"), ...catalogue.extraNoodles.map((n) => ({ ...n, newToSite: true }))].map((n) => ({ ...n, ...catalogue.noodles[n.slug] }));
+const noodlesRaw = [...readJSON("noodles.json"), ...catalogue.extraNoodles].map((n) => ({ ...n, ...catalogue.noodles[n.slug] }));
 for (const slug of Object.keys(catalogue.noodles)) if (!noodlesRaw.some((n) => n.slug === slug)) throw new Error(`data/catalogue.json lists unknown noodle ${slug}`);
 const dupSlug = noodlesRaw.find((n, i) => noodlesRaw.findIndex((o) => o.slug === n.slug) !== i);
 if (dupSlug) throw new Error(`Duplicate noodle slug ${dupSlug.slug}`);
@@ -104,6 +104,9 @@ const noodles = noodlesRaw.map((n) => {
 });
 const withPhotos = noodles.filter((n) => n.img);
 
+// Home "Worth a try" cards: packets with a photo whose fun note (from the owner's library doc) sounds notable, then any with a
+// photo. Not sales or till data, so the heading never claims what customers pick most (REG-82; check.mjs guards it). A true
+// best-sellers list needs the till's numbers from the owner.
 const FEATURE_RE = /top|popular|viral|no\.1|award|premium|seller|hyped|featured|michelin|rated/i;
 const featured = [...noodles.filter((n) => n.img && n.funNote && FEATURE_RE.test(n.funNote)), ...noodles.filter((n) => n.img && !(n.funNote && FEATURE_RE.test(n.funNote)))].slice(0, 8);
 
@@ -713,7 +716,7 @@ addPage("", layout({
 
 <section class="section section--soft">
   <div class="wrap">
-    ${sectionHead("Most picked", "The bowls regulars come back for.", `<a class="link-arrow" href="${r("noodles/")}">All noodles ${icon.arrow}</a>`)}
+    ${sectionHead("Worth a try", "Good places to start.", `<a class="link-arrow" href="${r("noodles/")}">All noodles ${icon.arrow}</a>`)}
     <div class="card-grid">${featured.map((n, i) => noodleCard(n, r, i)).join("")}</div>
   </div>
 </section>
