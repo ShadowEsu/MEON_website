@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestPairings, badge, COUNTRY_ADJ, COOK_SECONDS, COOK_TIME } from "./lib/copy.mjs";
 import { indexNowKey } from "./lib/indexnow.mjs";
+import { schemaHoursFresh, SCHEMA_HOURS_MAX_DAYS } from "./lib/hours.mjs";
 import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoLockup, TOPPING_ART } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
@@ -142,19 +143,21 @@ const HOURS_NOTE = (site.hoursNote || "").replace(/\s*Please [^.]*\./g, "").trim
 const HOURS_LINE = site.hours.length ? `Open ${site.hours.map((h) => `${h.days} ${h.time}`).join(", ")}.` : HOURS_NOTE;
 // The same rows for search engines (Restaurant schema openingHoursSpecification, SEO 2 Nov 2026): "Monday – Thursday" /
 // "12pm – 9:30pm" become each day's opens/closes in 24-hour time. A closing time before the opening time means after
-// midnight (Fri–Sat 2:30am), which is how Google reads it. A row the parser can't read stops the build.
+// midnight (Fri–Sat 2:30am), which is how Google reads it. A row the parser can't read stops the build. Only while
+// hoursSource.checked is at most 90 days old (scripts/lib/hours.mjs, Security SHOULD-MS1).
 const WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const to24 = (t) => {
   const m = t.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
   if (!m || +m[1] < 1 || +m[1] > 12) throw new Error(`data/site.json hours: can't read the time "${t}"`);
   return `${String((+m[1] % 12) + (m[3].toLowerCase() === "pm" ? 12 : 0)).padStart(2, "0")}:${m[2] || "00"}`;
 };
-const HOURS_SPEC = site.hours.length && site.hoursSource ? site.hours.map((h) => {
+const HOURS_SPEC = site.hours.length && schemaHoursFresh(site.hoursSource) ? site.hours.map((h) => {
   const [a, b = a] = h.days.split(/\s*[–-]\s*/).map((d) => WEEK.indexOf(d.trim()));
   const times = h.time.split(/\s*[–-]\s*/);
   if (a < 0 || b < a || times.length !== 2) throw new Error(`data/site.json hours: can't read "${h.days}: ${h.time}"`);
   return { "@type": "OpeningHoursSpecification", dayOfWeek: WEEK.slice(a, b + 1), opens: to24(times[0]), closes: to24(times[1]) };
 }) : undefined;
+if (site.hours.length && !HOURS_SPEC) console.log(`Note: opening hours left out of the Restaurant schema: hoursSource.checked (${site.hoursSource?.checked || "none"}) is more than ${SCHEMA_HOURS_MAX_DAYS} days old. Re-check them and update data/site.json.`);
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
 const fitDesc = (head, body, extras = [], max = 160) => {
