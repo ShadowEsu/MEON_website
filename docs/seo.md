@@ -5,11 +5,11 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 ## Already done in the website
 
 - **Structured data (schema.org)** that Google reads directly:
-  - `Restaurant` on the home page: name, logo, photos, cuisine, price range, menu link, map link and the street address (Shop 8, 45 Francis Street, Northbridge WA 6003). It still needs the phone, opening hours and map coordinates; add them in `data/site.json` once they match the Google Business Profile.
+  - `Restaurant` on the home page: name, logo, photos, cuisine, menu link, the Google listing as the map link, the street address (Shop 8, 45 Francis Street, Northbridge WA 6003), map coordinates and opening hours. The hours are the same sourced rows the Visit page shows (`hours` in `data/site.json`), and `npm run check` fails if the two ever differ. No price range, ratings or reviews: those need the owner's facts first. It still needs a phone number, if MEON gets one.
   - `WebSite`
   - a full `Menu` of all 199 noodles, grouped by country
   - a `MenuItem` for every noodle (description with country and packet size, and diet; no price, because prices stay off the site)
-  - `BreadcrumbList` on every noodle and country page
+  - `BreadcrumbList` on every noodle and country page, and on Countries, Pairings and sides, About, Visit and Privacy
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
   - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
@@ -26,21 +26,22 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
   - scripts are deferred
   - long caching on assets
 - **Sharing and safety**: Open Graph and Twitter cards (good previews when links are shared), and security headers.
-- **Settings slots** in `data/site.json`: `googleSiteVerification`, `bingSiteVerification`, `googleBusinessUrl`, `geo` and `openingHours`.
+- **Settings slots** in `data/site.json`: `googleSiteVerification`, `bingSiteVerification`, `googleBusinessUrl`, `geo`, `hours` with `hoursSource`, and `indexNow`.
+- **IndexNow** (Bing, Yandex, Seznam, Naver; free, no account): the build publishes the site's key at `/<key>.txt` (the key comes from the domain, `scripts/lib/indexnow.mjs`, so a new domain gets a new key). After a deploy that adds or changes pages, run `npm run indexnow` to send every sitemap URL, or `npm run indexnow -- visit/ noodles/<slug>/` for just a few. Google doesn't use IndexNow; it reads the sitemap from Search Console.
 
 ## Your steps
 
 ### 1. Google Business Profile (the biggest win for "near me" searches)
-1. Go to <https://business.google.com>, search for MEON and **claim** it, or create a new profile.
+1. The profile exists already: "Meon", Asian restaurant, https://www.google.com/maps?cid=8133712238712901594 (5.0 from 36 reviews on 2 Nov 2026). Go to <https://business.google.com>, find it and **claim** it if you haven't, so you can edit it.
 2. Choose the categories:
    - primary: **Noodle shop**
    - secondary: **Ramen restaurant** and **Asian restaurant**
 3. Enter the exact street address, phone and opening hours. Use exactly the same details everywhere (see step 5).
-4. Website: `https://meon-noodles.vercel.app` (or your own domain later). Menu link: `/noodles/`.
+4. Website: `https://meon-noodles.vercel.app` (or your own domain later). Menu link: `/noodles/`. On 2 Nov 2026 the listing had **no website**, so Google can't connect the site to the shop yet. This is the single most useful step.
 5. Turn on the attributes "Dine-in", "Takeaway" and "No delivery".
 6. Upload at least 15 photos: shopfront, the noodle wall, bowls, the cooking stations and the crew. Add new ones every month.
 7. Post a Google update every week, for example "New this week: Buldak Mala".
-8. Copy your profile's share link into `googleBusinessUrl` in `data/site.json`.
+8. The listing's link is already in `googleBusinessUrl` in `data/site.json`.
 
 ### 2. Google Search Console (tells Google the site exists)
 1. Go to <https://search.google.com/search-console> and click **Add property**, then **URL prefix**.
@@ -51,10 +52,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 6. For Bing (and ChatGPT search, which uses Bing): go to <https://www.bing.com/webmasters> and choose **Import from Google Search Console**.
 
 ### 3. Reviews (the second-biggest local ranking factor)
-- Create a review QR code:
-  1. In your Google Business Profile, click **Ask for reviews** and copy the link.
-  2. Make a QR code from it at `/qr-generator/` (paste the link, untick `?src=qr`).
-  3. Put the code on every table: "Enjoyed your bowl? Leave us a review."
+- Ask for Google reviews the same way with every guest: never only the happy ones (asking "Enjoyed your bowl?" first is review gating, which Google doesn't allow), and never for anything in return.
 - Reply to every review, good or bad, within a few days.
 - Never buy or swap reviews. Google removes them and can penalise the profile.
 
@@ -84,7 +82,7 @@ Mismatched details confuse Google and lower your ranking.
 
 ### 7. Keep the website fresh
 - Add new noodles as they arrive (see `docs/operations.md`). New pages mean new searches you can rank for.
-- Add your phone, hours and map coordinates to `data/site.json` as soon as you can. They feed the structured data Google uses for the map pack.
+- If MEON gets a phone number, add it to `data/site.json` (and to the Google listing). The hours and map coordinates are in already.
 - Keep `@meonnoodles` active and link to the website in your bio.
 
 ## How long it takes
