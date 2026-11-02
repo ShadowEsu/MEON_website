@@ -1,5 +1,5 @@
 {
-  "_readme": "Edit this file to update business details. Empty strings are hidden on the site. After changing siteUrl, run `npm run build` so every QR code points at the new domain. SEO: paste the Search Console code into googleSiteVerification, your Google Business Profile link into googleBusinessUrl, exact map coordinates into geo, and opening hours into openingHours as {\"days\":[\"Monday\",\"Tuesday\"],\"opens\":\"11:00\",\"closes\":\"21:00\"}. See docs/seo.md.",
+  "_readme": "Edit this file to update business details. Empty strings are hidden on the site. After changing siteUrl, run `npm run build` so every QR code points at the new domain. Opening hours shown on the site go in hours, with hoursSource saying where MEON published them and when (npm run check fails without it, and notes when they're over 6 months old). SEO: paste the Search Console code into googleSiteVerification, your Google Business Profile link into googleBusinessUrl and exact map coordinates into geo. openingHours (the copy for search engines) stays empty until the Restaurant schema check in scripts/check.mjs allows it. See docs/seo.md.",
   "name": "MEON",
   "tagline": "Instant noodles from across Asia, cooked your way.",
   "siteUrl": "https://meon-noodles.vercel.app",
@@ -15,18 +15,28 @@
   "instagram": "https://www.instagram.com/meonnoodles/",
   "instagramHandle": "@meonnoodles",
   "tiktok": "https://www.tiktok.com/@meonnoodles",
-  "hours": [],
-  "hoursNote": "Opening hours are posted on our Instagram, @meonnoodles. Please check before you visit.",
+  "hours": [
+    { "days": "Monday – Thursday", "time": "12pm – 9:30pm" },
+    { "days": "Friday – Saturday", "time": "12pm – 2:30am" },
+    { "days": "Sunday", "time": "12pm – 6pm" }
+  ],
+  "hoursSource": {
+    "url": "https://www.instagram.com/meonnoodles/p/DerDVb1hdx2/",
+    "published": "2026-10-19",
+    "checked": "2026-11-02",
+    "note": "MEON's Instagram post \"NEW OPENING HOURS!\" (19 Oct 2026). The Instagram bio and the Google listing agreed on 2 Nov 2026."
+  },
+  "hoursNote": "Hours change now and then; the latest are on our Instagram, @meonnoodles.",
   "orderingNote": "Walk in, choose a packet and cook it your way. Dine in or take it away.",
   "analytics": {
     "vercel": false
   },
   "googleSiteVerification": "",
   "bingSiteVerification": "",
-  "googleBusinessUrl": "",
+  "googleBusinessUrl": "https://www.google.com/maps?cid=8133712238712901594",
   "geo": {
-    "lat": "",
-    "lng": ""
+    "lat": "-31.9480563",
+    "lng": "115.8590535"
   },
   "openingHours": [],
   "reviews": {

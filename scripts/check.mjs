@@ -154,6 +154,23 @@ for (const f of [...htmlFiles, path.join(OUT, "llms.txt")]) {
   const claim = `${body} ${meta}`.replace(/&#39;|&rsquo;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ").match(CUSTOMER_CLAIM);
   if (claim) problems.push(`${path.relative(OUT, f)}: claims what customers choose ("${claim[0]}") with no till data behind it`);
 }
+// Opening hours (BOSS, 2 Nov 2026): only as MEON published them, with where and when (data/site.json hoursSource), and
+// shown the same on the visit page and the home page. Hours over 6 months old get a note, not a failure, so an urgent fix
+// can still ship; re-check Instagram and update `checked`.
+const siteData = JSON.parse(fs.readFileSync(path.join(OUT, "..", "data", "site.json"), "utf8"));
+if ((siteData.hours || []).length) {
+  const src = siteData.hoursSource || {};
+  if (!/^https:\/\/(www\.)?(instagram\.com\/meonnoodles\/|google\.com\/maps)/.test(src.url || "") || !/^\d{4}-\d{2}-\d{2}$/.test(src.published || "") || !/^\d{4}-\d{2}-\d{2}$/.test(src.checked || ""))
+    problems.push("data/site.json: hours need hoursSource { url: MEON's Instagram post or Google listing, published: YYYY-MM-DD, checked: YYYY-MM-DD }");
+  else if ((Date.now() - Date.parse(src.checked)) / 864e5 > 183) console.log(`Note: opening hours were last checked on ${src.checked}; re-check ${src.url} and update data/site.json.`);
+  const text = (s) => s.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+  const visit = fs.readFileSync(path.join(OUT, "visit", "index.html"), "utf8");
+  const rows = [...(visit.match(/<table class="hours">([\s\S]*?)<\/table>/) || ["", ""])[1].matchAll(/<tr><td>([\s\S]*?)<\/td><td>([\s\S]*?)<\/td><\/tr>/g)].map((m) => `${text(m[1])} | ${text(m[2])}`);
+  const want = siteData.hours.map((h) => `${h.days} | ${h.time}`);
+  if (rows.join("\n") !== want.join("\n")) problems.push(`visit/index.html: the hours table shows [${rows.join("; ")}], data/site.json has [${want.join("; ")}]`);
+  const home = text(fs.readFileSync(path.join(OUT, "index.html"), "utf8"));
+  for (const h of siteData.hours) if (!home.includes(`${h.days} ${h.time}`)) problems.push(`index.html: doesn't show the hours "${h.days} ${h.time}"`);
+}
 for (const f of files.filter((f) => f.endsWith(".css"))) {
   for (const m of fs.readFileSync(f, "utf8").matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)/g)) problems.push(`${path.relative(OUT, f)}: loads from another host: ${m[1].slice(0, 80)}`);
 }
@@ -165,7 +182,7 @@ for (const f of files) {
   if (/^assets\/img\/(noodles|toppings|photos|shoot)\/.+\.(webp|jpe?g|png|avif)$/.test(rel) && !siteText.includes(rel)) problems.push(`${rel}: photo nothing on the site uses, but still public at its URL; delete it`);
 }
 // Restaurant schema (BOSS, 1 Nov 2026): only facts the owner has given us. No price band, reservations policy, ratings or
-// reviews; opening hours only once the owner sends them (data/site.json has none yet).
+// reviews. The opening hours MEON posted on Instagram are shown on the site (hours check above), not in the schema yet.
 const homeLd = [...fs.readFileSync(path.join(OUT, "index.html"), "utf8").matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => [JSON.parse(m[1])].flat());
 const restaurant = homeLd.find((n) => n["@type"] === "Restaurant");
 if (!restaurant) problems.push("index.html: no Restaurant schema");
