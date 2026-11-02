@@ -78,11 +78,12 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
-// Packet badges from the owner's notes (Security MUST-M1, 2 Nov 2026): a rank claim has to be true of that packet and
-// sourced. These were not: "India's favourite" (brand-level, on 4 Maggi packets), "Crowd favourite" (2nd/3rd most
-// popular), "A lighter pick" (unsourced health claim), an unattributed "No.1 ramen in the world", and "Top seller"
-// (until the owner confirms it means MEON's sales).
-const RANK_BADGE = /India(?:'|&#39;|&rsquo;|’)s favourite|Crowd favourite|A lighter pick|No\.\s?1 ramen in the world|Top seller/i;
+// Packet badges from the owner's notes (Security MUST-M1, 2 Nov 2026): a rank or award claim has to be true of that packet
+// and sourced. These were not: "India's favourite" (brand-level, on 4 Maggi packets), "Crowd favourite" (2nd/3rd most
+// popular), "A lighter pick" (unsourced health claim), an unattributed "No.1 ramen in the world" or "Top 10 noodle 2021",
+// "Vietnam's favourite", "Thailand's top product 2014", "Top rated in Malaysia", "Award winner", and "Top seller" (until
+// the owner confirms it means MEON's sales).
+const RANK_BADGE = /(?:India|Vietnam|Thailand)(?:'|&#39;|&rsquo;|’)s (?:favourite|top product)|Crowd favourite|A lighter pick|No\.\s?1 ramen in the world|Top 10 noodle 2021|Top rated in Malaysia|Award winner|Top seller/i;
 for (const f of [...htmlFiles, ...["llms.txt", "noodles.json", "search-index.json"].map((n) => path.join(OUT, n))]) {
   const hit = fs.readFileSync(f, "utf8").match(RANK_BADGE);
   if (hit) problems.push(`${path.relative(OUT, f)}: shows the unsourced packet claim "${hit[0]}"`);
