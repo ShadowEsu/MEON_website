@@ -76,8 +76,8 @@ const FLAVOUR_NOTES = [
 // Each opener must be true of every noodle on the wall. No claims about what MEON's customers order or come back for: there's
 // no till data behind them (REG-82; check.mjs guards it).
 const OPENERS = [
-  (n) => `${n.name} by ${n.brand} is ${/^[AEIOU]/.test(n.countryAdj) ? "an" : "a"} ${n.countryAdj} favourite you can cook here at MEON.`,
-  (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is on the noodle wall at MEON, ready to cook.`,
+  (n) => `${n.name} by ${n.brand} is ${/^[AEIOU]/.test(n.countryAdj) ? "an" : "a"} ${n.countryAdj} favourite you can cook here at Meon.`,
+  (n) => `Straight from ${n.country}, ${n.brand}'s ${n.name} is on the noodle wall at Meon, ready to cook.`,
   (n) => `${n.brand} ${n.name} brings a proper taste of ${n.country} to Northbridge.`,
   (n) => `Craving something from ${n.country}? ${n.brand}'s ${n.name} is a great place to start.`,
 ];
@@ -125,7 +125,7 @@ export const COOK_TIME = `${Math.floor(COOK_SECONDS / 60)} minutes ${COOK_SECOND
 
 // How cooking works at MEON: pairings go in with the noodles at the start; egg and cheese go on top of the
 // noodles (never on the bowl, it burns) in the last 30 seconds; sides are ready to eat and stay out of the machine.
-const PICK = ["Grab your packet", "Pick it off the wall and bring it to the cooking machine with a MEON bowl."];
+const PICK = ["Grab your packet", "Pick it off the wall and bring it to the cooking machine with a Meon bowl."];
 const PRESS = ["Press 1, then 2", `Press 1, then 2 on the machine. It cooks for ${COOK_TIME}.`];
 const LAST = ["Egg and cheese last", "In the last 30 seconds, crack the egg and add cheese on top of the noodles, not on the bowl, so it doesn't burn."];
 

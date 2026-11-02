@@ -1,4 +1,4 @@
-/* MEON — progressive enhancement. Every page works without this file.
+/* Meon — progressive enhancement. Every page works without this file.
    Motion rules: transform/opacity only, one scroll loop, pause what is off-screen, respect reduced motion. */
 (function () {
   "use strict";
@@ -47,13 +47,19 @@
   /* ---------- Native scrolling (instant, no smoothing library) ---------- */
   function scrollToY(y) { window.scrollTo({ top: y, behavior: reduceMotion ? "auto" : "smooth" }); }
 
-  /* ---------- One scroll loop: header, progress, parallax, scroll-linked rows, home scenes ---------- */
+  /* ---------- One scroll loop: header, progress, parallax, home scenes ---------- */
   var header = $("[data-header]");
   var progress = $(".scroll-progress span");
   var backTop = $(".back-top");
-  var parallax = reduceMotion ? [] : $$("[data-parallax]");
-  var hscroll = reduceMotion ? [] : $$("[data-hscroll]");
-  var vhero = $(".vhero");
+  // Parallax (Design, 2 Nov 2026): off on phones (640 px and narrower) and under reduced motion; at most 24 px elsewhere
+  var parallax = reduceMotion || (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) ? [] : $$("[data-parallax]");
+  // Home: the header is see-through over the full-screen hero until the page has scrolled 80 px, then a white bar
+  var overHero = $(".fhero") && header && header.classList.contains("site-header--over");
+  // The hero's card inset is in px (24, 12 on phones), applied as a scale: CSS divides it by this viewport width
+  var heroScene = $(".fhero");
+  var setHeroVw = function () { if (heroScene) heroScene.style.setProperty("--vwn", String(window.innerWidth)); };
+  setHeroVw();
+  window.addEventListener("resize", setHeroVw, { passive: true });
   // The hero's play/pause box, read with the other geometry each frame once "Background videos" below sets heroBtnMoved
   var heroBtnEl = null, heroBtnRect = null, heroBtnMoved = null;
   /* Scenes. [data-scene] gets --p, the scroll progress through it: by default while its sticky first child (the
@@ -75,7 +81,7 @@
     ticking = false;
     var y = window.scrollY, vh = window.innerHeight;
     // Reads first
-    var heroOver = !!(vhero && header) && y < vhero.offsetHeight - header.offsetHeight;
+    var heroOver = !!overHero && y < 80;
     heroBtnRect = heroBtnMoved ? heroBtnEl.getBoundingClientRect() : null;
     for (var k = 0; k < scenes.length; k++) {
       var sc = scenes[k], sr = sc.getBoundingClientRect();
@@ -92,7 +98,7 @@
       if (stackOn) for (var m = 0; m < stackCards.length; m++) cardTops[m] = stackCards[m].getBoundingClientRect().top;
     }
     // Then writes
-    if (header) { header.classList.toggle("is-scrolled", y > 8); if (vhero) header.classList.toggle("is-over", heroOver); }
+    if (header) { header.classList.toggle("is-scrolled", y > 8); if (overHero) header.classList.toggle("is-over", heroOver); }
     if (heroBtnRect) heroBtnMoved(heroBtnRect);
     lastY = y;
     if (progress) {
@@ -122,17 +128,8 @@
     for (var i = 0; i < parallax.length; i++) {
       var el = parallax[i], b = el.getBoundingClientRect();
       if (b.bottom < -200 || b.top > vh + 200) continue;
-      var off = (b.top + b.height / 2 - vh / 2) * -parseFloat(el.getAttribute("data-parallax"));
+      var off = clamp((b.top + b.height / 2 - vh / 2) * -parseFloat(el.getAttribute("data-parallax")), -24, 24);
       el.style.translate = "0 " + off.toFixed(1) + "px";
-    }
-    for (var j = 0; j < hscroll.length; j++) {
-      var box = hscroll[j], r = box.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > vh) continue;
-      var p = clamp((vh - r.top) / (vh + r.height), 0, 1) - 0.5;
-      $$(".wall-row", box).forEach(function (row) {
-        var span = Math.min(row.scrollWidth - box.clientWidth, box.clientWidth * 0.9);
-        row.style.transform = "translate3d(" + (-p * span * parseFloat(row.getAttribute("data-speed") || 1)).toFixed(1) + "px,0,0)";
-      });
     }
   }
   function requestFrame() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
@@ -313,8 +310,10 @@
     }, function () { bgCodec = ""; });
   })();
   var bgBlocked = false;
+  // No clip starts before the page's load event, so the posters (the home hero's is the LCP) and the page itself come first
+  var pageLoaded = document.readyState === "complete";
   var bgPlay = function (v) {
-    if (saveData || userPaused || !v._in || v._covered || !bgFits(v)) return;
+    if (saveData || userPaused || !pageLoaded || !v._in || v._covered || !bgFits(v)) return;
     if (bgCodec === null) { bgCodecReady.then(function () { bgPlay(v); }); return; }
     if (!v.getAttribute("src")) { v.muted = true; v.src = (bgCodec && v.getAttribute("data-bg-" + bgCodec)) || v.getAttribute("data-bg-src"); }
     var p = v.play(); if (p && p.catch) p.catch(function () { if (v.paused && v._in && !v._covered) bgBlocked = true; });
@@ -325,6 +324,7 @@
       if (cur && cur !== h264) { bgCodec = ""; v.src = h264; bgPlay(v); }
     });
   });
+  if (!pageLoaded) window.addEventListener("load", function () { pageLoaded = true; bgVids.forEach(function (v) { if (v.paused) bgPlay(v); }); });
   // Pause; for reels and step cards also drop a clip that hasn't fully downloaded (a fully loaded one is kept for its return)
   bgVids.forEach(function (v) { v._drop = !!v.closest(".reel, .scard"); });
   var bgStop = function (v) {
@@ -340,7 +340,7 @@
     bgVids.forEach(function (v) { if (v.paused) bgPlay(v); });
   };
   var vToggles = $$("[data-video-toggle]");
-  var heroToggle = $(".vhero [data-video-toggle]");
+  var heroToggle = $(".fhero [data-video-toggle], .vhero [data-video-toggle]");
   var headerToggle = $("[data-video-toggle-header]");
   var heroToggleOn = !!heroToggle; // until its observer reports
   var syncHeaderToggle = function () {
@@ -357,7 +357,7 @@
     if (heroToggle) {
       // Over half the hero button hidden (off screen or under the fixed header) counts as gone: the header's toggle takes
       // over, and the hero's own button and scroll cue hide, so the header never shows two toggles or a cue over one.
-      var heroBox = heroToggle.closest(".vhero"), headerH = header ? header.offsetHeight : 0;
+      var heroBox = heroToggle.closest(".fhero, .vhero"), headerH = header ? header.offsetHeight : 0;
       var setHeroOn = function (on) { heroToggleOn = on; heroBox.classList.toggle("vhero--under", !on); syncHeaderToggle(); };
       new IntersectionObserver(function (entries) { setHeroOn(entries[0].intersectionRatio > 0.5); },
         { rootMargin: "-" + headerH + "px 0px 0px 0px", threshold: [0, 0.5, 1] }).observe(heroToggle);
@@ -391,6 +391,92 @@
       });
     });
   }
+
+  /* ---------- Home hero: the "Meon" wordmark hops once (each letter 320 ms, 40 ms apart), after the page has loaded,
+     so the painted-at-rest wordmark and the poster stay the first frame. Transform only; never under reduced motion. */
+  var fhero = $(".fhero");
+  if (fhero && !reduceMotion) {
+    var hop = function () { requestAnimationFrame(function () { fhero.classList.add("is-hop"); }); };
+    if (document.readyState === "complete") hop(); else window.addEventListener("load", hop);
+  }
+
+  /* ---------- Opening hours in Perth time ----------
+     [data-today] (the home hero) holds the hours per weekday, Monday first: [opens, closes, "12pm–9:30pm"] or null. Its
+     line gets "Open today 12pm–9:30pm · " before the address, "Open till 2:30am · " after midnight when the day before
+     closes late, "Closed now · " after closing, "Closed today · " on a day without hours. Its box keeps the same size, so
+     nothing moves. The Visit table's row for today turns bold. Without JS: the address and the plain table. */
+  var perthNow = function () {
+    try {
+      var parts = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Perth", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+      var get = function (t) { for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value; return ""; };
+      var day = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(get("weekday").slice(0, 3));
+      return day < 0 ? null : { day: day, min: (parseInt(get("hour"), 10) % 24) * 60 + parseInt(get("minute"), 10) };
+    } catch (e) { return null; }
+  };
+  var hm = function (t) { var p = t.split(":"); return +p[0] * 60 + +p[1]; };
+  var todayText = function (rows, now) {
+    var today = rows[now.day], prev = rows[(now.day + 6) % 7];
+    if (prev && hm(prev[1]) < hm(prev[0]) && now.min < hm(prev[1])) return "Open till " + prev[2].split("–")[1];
+    if (!today) return "Closed today";
+    if (hm(today[1]) > hm(today[0]) && now.min >= hm(today[1])) return "Closed now";
+    return "Open today " + today[2];
+  };
+  var perth = ($("[data-today]") || $("[data-hours-today]")) ? perthNow() : null;
+  if (perth) {
+    $$("[data-today]").forEach(function (el) {
+      var rows = null, slot = $("[data-today-status]", el);
+      try { rows = JSON.parse(el.getAttribute("data-hours")); } catch (e) {}
+      if (slot && rows && rows.length === 7) slot.textContent = todayText(rows, perth) + " · ";
+    });
+    $$("[data-hours-today] tr[data-days]").forEach(function (tr) {
+      var d = tr.getAttribute("data-days").split("-"), th = $("th", tr);
+      if (perth.day < +d[0] || perth.day > +d[1]) return;
+      tr.classList.add("is-today");
+      if (th) th.insertAdjacentHTML("beforeend", '<span class="visually-hidden"> (today)</span>');
+    });
+  }
+
+  /* ---------- Home menu: ARIA tabs ----------
+     Without this script all three panels show, each under its own heading. With it: the tab list, one panel at a time
+     (a 160 ms crossfade), an indicator that slides to the chosen tab (transform only, 200 ms) and roving focus: arrow keys,
+     Home and End move between the tabs and open them. */
+  $$("[data-tabs]").forEach(function (box) {
+    var list = $("[role=tablist]", box), tabs = $$("[role=tab]", box), ind = $(".mtab-ind", box);
+    var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute("aria-controls")); });
+    if (!list || !tabs.length || panels.indexOf(null) !== -1) return;
+    list.hidden = false;
+    box.classList.add("is-tabbed");
+    panels.forEach(function (p, i) { p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", tabs[i].id); p.tabIndex = 0; });
+    var cur = 0;
+    var place = function () { if (ind) ind.style.transform = "translateX(" + tabs[cur].offsetLeft + "px) scaleX(" + tabs[cur].offsetWidth + ")"; };
+    var select = function (i, focus) {
+      cur = i;
+      tabs.forEach(function (t, k) { var on = k === i; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; panels[k].hidden = !on; });
+      place();
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { select(i, false); });
+      t.addEventListener("keydown", function (e) {
+        var n = tabs.length, j = e.key === "ArrowRight" ? (i + 1) % n : e.key === "ArrowLeft" ? (i + n - 1) % n : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : -1;
+        if (j < 0) return;
+        e.preventDefault();
+        select(j, true);
+      });
+    });
+    select(0, false);
+    requestAnimationFrame(function () { box.classList.add("is-ready"); });
+    window.addEventListener("resize", place, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  });
+
+  /* ---------- Instagram strip: a pause control for the moving reels (it also stops on hover and keyboard focus) ---------- */
+  var marqueeBtn = $("[data-marquee-toggle]"), marqueeTrack = $(".insta-track");
+  if (marqueeBtn && marqueeTrack) marqueeBtn.addEventListener("click", function () {
+    var paused = marqueeTrack.classList.toggle("is-paused");
+    marqueeBtn.classList.toggle("is-paused", paused);
+    $("[data-marquee-label]", marqueeBtn).textContent = paused ? "Play the reels" : "Pause the reels";
+  });
 
   /* ---------- Count-up numbers ---------- */
   $$("[data-count]").forEach(function (el) {
@@ -467,13 +553,14 @@
       if (i % 4 === 3) s.style.boxShadow = "0 0 0 1px rgba(18,16,16,.15)";
       s.style.setProperty("--x", ((Math.random() - 0.5) * 30) + "vw");
       s.style.setProperty("--r", ((Math.random() - 0.5) * 1080) + "deg");
-      s.style.setProperty("--t", (1.8 + Math.random() * 1.6) + "s");
-      s.style.animationDelay = (Math.random() * 0.4) + "s";
+      // The biggest moment, kept short (Design, 2 Nov 2026): every piece is gone within 1.2 s
+      s.style.setProperty("--t", (0.75 + Math.random() * 0.35) + "s");
+      s.style.animationDelay = (Math.random() * 0.1) + "s";
       if (i % 3 === 0) { s.style.width = "8px"; s.style.height = "8px"; s.style.borderRadius = "50%"; }
       box.appendChild(s);
     }
     document.body.appendChild(box);
-    setTimeout(function () { box.remove(); }, 4000);
+    setTimeout(function () { box.remove(); }, 1300);
   }
 
   /* ---------- Site-wide search (Cmd/Ctrl K or "/") ---------- */
@@ -739,7 +826,7 @@
       var img = n.img ? '<img src="' + root + esc(n.img) + '" alt="" width="160" height="160" loading="lazy">' : '<span class="roulette-ph">' + useIcon("bowl") + "</span>";
       var spice = n.spice > 0 ? "Spice " + n.spice + "/5" : n.spice < 0 ? "Spice rating soon" : "No heat";
       return '<a class="roulette-item" href="' + root + "noodles/" + esc(n.slug) + '/">' + img +
-        '<span><span class="nc-meta">' + flagImg(n.cc, 16) + "<span>" + esc(n.country) + " · " + esc(n.brand) + "</span></span><h3>" + esc(n.name) + "</h3>" +
+        '<span><span class="nc-meta">' + flagImg(n.cc, 16) + "<span>" + esc(n.country) + " · " + esc(n.brand) + '</span></span><span class="ri-name">' + esc(n.name) + "</span>" +
         '<span class="tags"><span>' + spice + "</span>" + (n.type ? "<span>" + esc(n.type) + "</span>" : "") + "</span></span></a>";
     };
     var spinning = false, current = null, recent = [];
@@ -779,7 +866,7 @@
         confetti();
         if (window.MeonMusic && window.MeonMusic.playing) window.MeonMusic.chime();
       };
-      if (reduceMotion) done(); else setTimeout(done, 2700);
+      if (reduceMotion) done(); else setTimeout(done, 1600);
     });
   }
 

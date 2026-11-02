@@ -1,64 +1,15 @@
-/* MEON play layer: build-your-bowl, heat check and the sound prompt.
+/* Meon play layer: the heat check and the sound prompt.
    Kept deliberately light: nothing runs until someone touches it, so scrolling and
    loading stay fast. Everything respects "reduce motion". */
 (function () {
   "use strict";
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var sfx = function (kind) { if (window.MeonMusic && window.MeonMusic.playing && window.MeonMusic[kind]) window.MeonMusic[kind](); };
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
-
-  /* ---------- Build your bowl ---------- */
-  var bowl = $("[data-bowl]");
-  if (bowl) {
-    var stage = $("[data-bowl-stage]", bowl), itemsBox = $("[data-bowl-items]", bowl), count = $("[data-bowl-count]", bowl);
-    var added = [];
-    var LINES = ["Your bowl is empty. Add something.", "Good start.", "Now we're talking.", "Now we're talking.", "That's a proper bowl.", "That's a proper bowl.", "Chef's kiss.", "Absolute unit of a bowl."];
-    var say = function () {
-      var names = added.map(function (a) { return a.name; });
-      var uniq = names.filter(function (n, i) { return names.indexOf(n) === i; });
-      var list = uniq.slice(0, 4).join(", ") + (uniq.length > 4 ? " and more" : "");
-      count.textContent = added.length ? LINES[Math.min(added.length, LINES.length - 1)].replace(/\.$/, "") + ": " + list + "." : LINES[0];
-    };
-    var drop = function (btn, quiet) {
-      var item = document.createElement("span");
-      item.className = "bb-item";
-      item.innerHTML = $(".bb-ic", btn).innerHTML;
-      var x = 8 + Math.random() * 84, y = 20 + Math.random() * 70;
-      item.style.left = x + "%"; item.style.top = y + "%";
-      item.style.setProperty("--rot", ((Math.random() * 70) - 35).toFixed(0) + "deg");
-      itemsBox.appendChild(item);
-      added.push({ el: item, name: btn.getAttribute("data-name").toLowerCase() });
-      if (added.length > 14) { var old = added.shift(); old.el.remove(); }
-      if (!reduceMotion && item.animate) {
-        item.animate([{ transform: "translate(-50%, -360%) rotate(0deg) scale(.7)", opacity: 0 }, { opacity: 1, offset: 0.25 }, { transform: "translate(-50%, -50%) rotate(var(--rot)) scale(1.12)", offset: 0.75 }, { transform: "translate(-50%, -50%) rotate(var(--rot)) scale(1)" }], { duration: 650, easing: "cubic-bezier(.3,.7,.3,1.2)" });
-        stage.classList.remove("is-wobble"); void stage.offsetWidth; stage.classList.add("is-wobble");
-      }
-      if (!quiet) sfx("blip");
-      say();
-    };
-    $$("[data-topping]", bowl).forEach(function (btn) { btn.addEventListener("click", function () { drop(btn); }); });
-    $("[data-bowl-reset]", bowl).addEventListener("click", function () {
-      added.forEach(function (a, i) {
-        if (!reduceMotion && a.el.animate) a.el.animate([{ opacity: 1 }, { transform: "translate(-50%, -420%) rotate(90deg)", opacity: 0 }], { duration: 450, delay: i * 25, easing: "ease-in", fill: "forwards" }).onfinish = function () { a.el.remove(); };
-        else a.el.remove();
-      });
-      added = []; say();
-    });
-    if ("IntersectionObserver" in window) {
-      var bio = new IntersectionObserver(function (en) {
-        if (!en[0].isIntersecting) return;
-        bio.disconnect();
-        var chips = $$("[data-topping]", bowl);
-        [0, 4].forEach(function (k, i) { setTimeout(function () { if (!added.length || i) drop(chips[k], true); }, 500 + i * 450); });
-      }, { threshold: 0.5 });
-      bio.observe(stage);
-    }
-  }
 
   /* ---------- Heat check ---------- */
   var heat = $("[data-heat]");
@@ -70,7 +21,8 @@
     var input = $("[data-heat-input]", heat), picks = $("[data-heat-picks]", heat);
     var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
     var offset = 0;
-    var update = function (lvl, bump) {
+    // `keep`: the first call keeps the three picks the page was built with (the same ones), so nothing re-renders on load
+    var update = function (lvl, bump, keep) {
       var row = ladder[lvl] || [lvl, "", ""];
       heat.setAttribute("data-level", lvl);
       heat.style.setProperty("--heat", (lvl / 5).toFixed(2));
@@ -84,26 +36,25 @@
       pool.sort(function (a, b) { return (b.img ? 1 : 0) - (a.img ? 1 : 0); });
       if (bump) offset += 3;
       var pick = pool.length ? [0, 1, 2].map(function (i) { return pool[(offset + i) % pool.length]; }).filter(function (n, i, arr) { return arr.indexOf(n) === i; }) : [];
-      picks.innerHTML = pick.map(function (n, i) {
+      if (!keep) picks.innerHTML = pick.map(function (n, i) {
         var media = n.img ? '<img src="' + root + esc(n.img) + '" alt="" width="64" height="64" loading="lazy">' : '<img class="hp-flag" src="' + root + "assets/img/flags/" + esc(n.cc) + '.svg" alt="" width="40" height="30">';
         return '<li style="--n:' + i + '"><a href="' + root + "noodles/" + esc(n.slug) + '/"><span class="hp-media' + (n.img ? "" : " hp-media--flag") + '">' + media + "</span><span><strong>" + esc(n.name) + "</strong><small>" + esc(n.brand) + " · " + esc(n.country) + "</small></span>" + '<span aria-hidden="true">→</span></a></li>';
       }).join("") || "<li><small>No noodles at this level right now.</small></li>";
     };
     input.addEventListener("input", function () { update(+input.value, false); sfx("blip"); });
-    update(+input.value, false);
+    update(+input.value, false, true);
   }
 
   /* ---------- Sound prompt: offer the soundtrack on the first visit to the home page ----------
-     It waits until the video hero has scrolled away, so it never covers the hero's buttons. Home only: the inner pages'
-     video heroes (.vhero--page) don't trigger it. */
+     It waits until the full-screen hero has scrolled away, so it never covers the hero's buttons. Home only. */
   var soundBtn = $("[data-sound]");
-  var vhero = $(".vhero:not(.vhero--page)");
+  var vhero = $(".fhero");
   if (soundBtn && vhero && store.get("meon-sound") === null) {
     var offerSound = function () {
       var vibe = document.createElement("div");
       vibe.className = "vibe";
       vibe.setAttribute("role", "dialog");
-      vibe.setAttribute("aria-label", "Turn on the MEON soundtrack");
+      vibe.setAttribute("aria-label", "Turn on the Meon soundtrack");
       vibe.innerHTML = '<span class="vibe-eq" aria-hidden="true"><i></i><i></i><i></i></span><p>Turn the vibes on?</p><button class="vibe-yes" type="button">Sound on</button><button class="vibe-no" type="button">Not now</button>';
       document.body.appendChild(vibe);
       var close = function () { vibe.classList.remove("is-on"); setTimeout(function () { vibe.remove(); }, 800); };
