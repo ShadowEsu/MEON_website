@@ -86,11 +86,13 @@ The site is built around Preston's clips of the shop and MEON's own @meonnoodles
 
 | File in `src/assets/video/` | Where | What it is |
 | --- | --- | --- |
-| `wall-07.mp4`, `step-cook.mp4`, `hero-col-a.mp4` | Home hero, desktop: three columns edge to edge, over one composite poster (`src/assets/img/hero/fhero-1440.*`) | The noodle wall from inside the doors; the cooking machine; a guest on Francis Street pointing up at the MEON sign |
-| `wall-07.mp4` | Home hero, phones, over `src/assets/img/hero/fhero-390.*` (its first frame) | The one hero clip with no burned-in captions, because on phones the wordmark sits over the middle of it |
+| `wall-07.mp4`, `wall-10.mp4`, `hero-col-a.mp4` | Home hero, desktop: three columns edge to edge, over one composite poster (`src/assets/img/hero/fhero-1440.*`) | The walk-in to the noodle wall; the packets on the wall; a guest on Francis Street pointing up at the MEON sign |
+| `wall-07.mp4` | Home hero, phones, over `src/assets/img/hero/fhero-390.*` (its first frame) | The walk-in to the noodle wall |
 | `step-pick.mp4`, `step-pairings.mp4`, `step-cook.mp4`, `step-enjoy.mp4` | The four "Do it yourself" cards | Picking a packet, the pairings fridge, the cooking machine, eating |
 | `ig-*.mp4` | Instagram cards at the end of the home page | 8-second previews of @meonnoodles reels. Each card opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
-| Inner-page heroes (`wall-10`, `wall-12` and files above) | Pairings and sides; Noodles; Countries; About; Visit | Desktop columns / phone clip: `step-pairings`, `ig-DeOXYn5hSUT` / `step-pairings`; `ig-DetKN4Bh0FW`, `ig-DewSjLLBLqQ` / `ig-DetKN4Bh0FW`; `wall-10`, `ig-DefupZzh1I7` / `wall-10`; `ig-store-tour`, `ig-DedzCYDhezV` / `ig-store-tour`; `ig-sign`, `wall-12` / `ig-sign` |
+| Inner-page heroes (`wall-12` and files above) | Pairings and sides; Noodles; Countries; About; Visit | Desktop columns / phone clip: `step-pairings`, `ig-DeOXYn5hSUT` / `step-pairings`; `ig-DetKN4Bh0FW`, `ig-DewSjLLBLqQ` / `ig-DetKN4Bh0FW`; `wall-10`, `ig-DefupZzh1I7` / `wall-10`; `ig-store-tour`, `ig-DedzCYDhezV` / `ig-store-tour`; `ig-sign`, `wall-12` / `ig-sign` |
+
+**Home hero clips** (Design, 2 Nov 2026): no burned-in text of any kind (captions behind the headline read as someone else's video; that is why `step-cook` stays in the step cards), and the cream text must keep 4.5:1 or more over the scrim: the 95th-percentile pixel of the text band on the clip's brightest frame, measured by `meon-work/fullscreen/contrast.py`. To change a hero clip, edit `HERO_CLIPS`/`HERO_PHONE` in `build.mjs`, re-run `meon-work/fullscreen/encode_posters.sh` (the posters are the clips' first frames) and `contrast.py`.
 
 The full-screen redesign (2 Nov 2026) removed the clips only the old home used (`hero-phone`, `street-front` and `wall-01`-`06`, `08`, `09`, `11`); they stay in git history and `meon-work/rebuild` can cut them again.
 
