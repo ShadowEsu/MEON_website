@@ -8,19 +8,6 @@
       "vmaf_p1": 90.11
     }
   },
-  "hero-phone": {
-    "h264_sha256": "422f583382fcaac418d2ac19238b764e24d566a5af5c2311a74d40d12e6fbef6",
-    "av1": {
-      "encode": "av1-hl3-crf32",
-      "vmaf_mean": 95.44,
-      "vmaf_p1": 90.46
-    },
-    "hevc": {
-      "encode": "hevc-crf23",
-      "vmaf_mean": 95.91,
-      "vmaf_p1": 90.17
-    }
-  },
   "ig-DeOXYn5hSUT": {
     "h264_sha256": "b7b2970d7651c67abf57c1bbf41da5c05af2068a3e31ca9668584f637bc571e1",
     "av1": {
