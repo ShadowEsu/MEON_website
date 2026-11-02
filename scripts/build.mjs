@@ -627,15 +627,16 @@ const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 
 // ---------- Home ----------
 // Design spec "Meon: a light restaurant site with a full-screen video front page" (2 Nov 2026). The visitor's problem first:
-// a full-screen hero (three of the shop's own portrait clips edge to edge on desktop: the noodle wall, the machine, the
-// street; on phones the noodle wall walk-in, which has no burned-in captions to run into the wordmark) with the "Meon"
-// wordmark, then "Which one do I pick?" and its three tools (search, heat check, roulette), how it works, the menu, real
+// a full-screen hero (three of the shop's own portrait clips edge to edge on desktop: the walk-in to the noodle wall, the
+// packets on the wall, the MEON sign on Francis Street; on phones the walk-in) with the "Meon" wordmark. No hero clip
+// carries burned-in text: captions behind the headline read as someone else's video (Design, 2 Nov 2026). Then
+// "Which one do I pick?" and its three tools (search, heat check, roulette), how it works, the menu, real
 // food, Visit and the Instagram strip. Light only. Lighthouse reports the wordmark (text in the preloaded core font) as
 // the LCP element, not the poster. So the poster (one composite AVIF of the three clips' first frames on desktop,
 // wall-07's first frame on phones; meon-work/fullscreen/encode_posters.sh) is not preloaded or high priority, which
 // would only take bandwidth from the font. The clips start after the page's load event (site.js), never
 // under reduced motion or Save-Data. Scroll choreography lives in site.js (one loop, --p/--q).
-const HERO_CLIPS = ["wall-07", "step-cook", "hero-col-a"];
+const HERO_CLIPS = ["wall-07", "wall-10", "hero-col-a"];
 const HERO_PHONE = "wall-07";
 const HERO_WIDE = "(min-width: 900px)", HERO_NARROW = "(max-width: 899.98px)";
 const HERO_POSTER = { wide: "img/hero/fhero-1440", phone: "img/hero/fhero-390" };
