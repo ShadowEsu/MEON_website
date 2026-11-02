@@ -163,20 +163,22 @@ const HOURS_SPEC = site.hours.length && schemaHoursFresh(site.hoursSource) ? sit
   if (a < 0 || b < a || times.length !== 2) throw new Error(`data/site.json hours: can't read "${h.days}: ${h.time}"`);
   return { "@type": "OpeningHoursSpecification", dayOfWeek: WEEK.slice(a, b + 1), opens: to24(times[0]), closes: to24(times[1]) };
 }) : undefined;
-if (site.hours.length && !HOURS_SPEC) console.log(`Note: opening hours left out of the Restaurant schema: hoursSource.checked (${site.hoursSource?.checked || "none"}) is more than ${SCHEMA_HOURS_MAX_DAYS} days old. Re-check them and update data/site.json.`);
+if (site.hours.length && !HOURS_SPEC) console.log(`Note: opening hours left out of the Restaurant schema and the home page's today line: hoursSource.checked (${site.hoursSource?.checked || "none"}) is more than ${SCHEMA_HOURS_MAX_DAYS} days old. Re-check them and update data/site.json.`);
 // Google Maps directions to the shop (Google listing "Meon", place ID checked 2 Nov 2026): every "Get directions" link.
 const DIRECTIONS = "https://www.google.com/maps/dir/?api=1&destination=Meon&destination_place_id=ChIJh2qhXwu7MioR2s-61S_A4HA";
 const SHORT_ADDRESS = site.streetAddress.replace(/\bStreet$/, "St");
 const addressLine = [site.streetAddress, `${site.suburb} ${site.state} ${site.postcode}`.trim()].filter(Boolean).join(", ");
-// The same rows per weekday (Monday first), only once they're sourced: [opens, closes (24 h), "12pm–9:30pm"], or null on a
-// closed day. site.js turns them into the home hero's "Open today …" line and bolds today's row of the Visit table, in
-// Perth time; a closing time before the opening time is after midnight ("Open till 2:30am" early on Saturday and Sunday).
+// The same rows per weekday (Monday first): [opens, closes (24 h), "12pm–9:30pm"], or null on a closed day. site.js turns
+// them into the home hero's "Open today …" line and bolds today's row of the Visit table, in Perth time; a closing time
+// before the opening time is after midnight ("Open till 2:30am" early on Saturday and Sunday). Only while the hours are
+// sourced and hoursSource.checked is at most 90 days old, the same rule as the schema hours (Security MUST-MF1, 2 Nov
+// 2026): a stale source must not tell someone on Francis St "Open today", so the hero shows only the address.
 const HOUR_ROWS = site.hours.map((h) => {
   const [a, b = a] = h.days.split(/\s*[–-]\s*/).map((d) => WEEK.indexOf(d.trim()));
   const [open, close] = h.time.split(/\s*[–-]\s*/);
   return { ...h, a, b, short: a === b ? WEEK[a].slice(0, 3) : `${WEEK[a].slice(0, 3)}–${WEEK[b].slice(0, 3)}`, open, close };
 });
-const DAY_HOURS = site.hoursSource ? WEEK.map((_, i) => { const h = HOUR_ROWS.find((x) => i >= x.a && i <= x.b); return h ? [to24(h.open), to24(h.close), `${h.open}–${h.close}`] : null; }) : null;
+const DAY_HOURS = schemaHoursFresh(site.hoursSource) ? WEEK.map((_, i) => { const h = HOUR_ROWS.find((x) => i >= x.a && i <= x.b); return h ? [to24(h.open), to24(h.close), `${h.open}–${h.close}`] : null; }) : null;
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
 const fitDesc = (head, body, extras = [], max = 160) => {
