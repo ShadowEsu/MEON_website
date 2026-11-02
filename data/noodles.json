@@ -9,8 +9,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -23,8 +23,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 4,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -79,7 +79,7 @@
   "funNote": null,
   "weightG": 112,
   "spice": 1,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Soup"
  },
@@ -93,8 +93,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 3,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -163,8 +163,8 @@
   "funNote": null,
   "weightG": 125,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -261,7 +261,7 @@
   "funNote": null,
   "weightG": 110,
   "spice": 0,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Soup"
  },
@@ -457,8 +457,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -471,8 +471,8 @@
   "funNote": null,
   "weightG": 120,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -555,7 +555,7 @@
   "funNote": null,
   "weightG": 115,
   "spice": 0,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Soup"
  },
@@ -583,8 +583,8 @@
   "funNote": null,
   "weightG": 74,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -807,8 +807,8 @@
   "funNote": null,
   "weightG": 102,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -975,8 +975,8 @@
   "funNote": null,
   "weightG": 79,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1199,8 +1199,8 @@
   "funNote": null,
   "weightG": 75,
   "spice": 0,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1535,8 +1535,8 @@
   "funNote": "Most popular in India",
   "weightG": 70,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1577,8 +1577,8 @@
   "funNote": "2nd Most popular",
   "weightG": 70,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Soup"
  },
  {
@@ -1591,8 +1591,8 @@
   "funNote": "2nd Most popular",
   "weightG": 70,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1605,7 +1605,7 @@
   "funNote": "3rd Most popular / Healthier option",
   "weightG": 70,
   "spice": 1,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Dry"
  },
@@ -1941,8 +1941,8 @@
   "funNote": "Known for no MSG flavour",
   "weightG": 85,
   "spice": 1,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -1997,7 +1997,7 @@
   "funNote": null,
   "weightG": 85,
   "spice": 0,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Soup"
  },
@@ -2039,8 +2039,8 @@
   "funNote": null,
   "weightG": 113,
   "spice": 2,
-  "diet": "Vegetarian-friendly",
-  "dietNote": true,
+  "diet": "Ask the crew",
+  "dietNote": false,
   "type": "Dry"
  },
  {
@@ -2179,7 +2179,7 @@
   "funNote": null,
   "weightG": 74,
   "spice": 0,
-  "diet": "Vegetarian/Vegan",
+  "diet": "Ask the crew",
   "dietNote": false,
   "type": "Soup"
  },

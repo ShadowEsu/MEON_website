@@ -105,6 +105,10 @@ const noodles = noodlesRaw.map((n) => {
   return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, imgAlt, thumb, more, moreAlts, moreSmall, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
 const withPhotos = noodles.filter((n) => n.img);
+// Vegetarian label only with the maker's word for it (BOSS + Security, 2 Nov 2026): a noodle says Vegetarian only once its
+// data has dietSource {url, checked}, the maker's ingredient list (check.mjs enforces it). Until one does, the site offers
+// no Vegetarian filter, links or "some are vegetarian" answer, because they would lead nowhere or say something untrue.
+const HAS_VEG = noodles.some((n) => n.dietTokens.includes("veg"));
 
 // Home "Worth a try" cards: packets with a photo whose fun note (from the owner's library doc) sounds notable, then any with a
 // photo. Not sales or till data, so the heading never claims what customers pick most (REG-82; check.mjs guards it). A true
@@ -274,7 +278,7 @@ ${body(r)}
           <li><a href="${r("noodles/")}">Noodle library</a></li>
           <li><a href="${r("noodles/?type=Soup")}">Soup noodles</a></li>
           <li><a href="${r("noodles/?type=Dry")}">Dry noodles</a></li>
-          <li><a href="${r("noodles/?diet=veg")}">Vegetarian</a></li>
+          ${HAS_VEG ? `<li><a href="${r("noodles/?diet=veg")}">Vegetarian</a></li>` : ""}
           <li><a href="${r("noodles/?spice=hot")}">Spicy (3+)</a></li>
         </ul>
       </div>
@@ -385,7 +389,7 @@ function noodleCard(n, r, i = 0) {
 function megaNoodles(r) {
   const quick = [
     ["noodles/", "bowl", "All noodles"], ["noodles/?type=Soup", "soup", "Soup noodles"], ["noodles/?type=Dry", "chopsticks", "Dry noodles"],
-    ["noodles/?diet=veg", "leaf", "Vegetarian"], ["noodles/?spice=hot", "flame", "Spicy (3+)"],
+    ...(HAS_VEG ? [["noodles/?diet=veg", "leaf", "Vegetarian"]] : []), ["noodles/?spice=hot", "flame", "Spicy (3+)"],
     ["noodles/?spice=mild", "drop", "No heat"], ["noodles/?sort=photo", "camera", "With photos first"],
   ];
   return `<div class="mega" id="mega-noodles">
@@ -580,7 +584,9 @@ const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
   ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
-  ["Do you have vegetarian noodles?", `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`],
+  ["Do you have vegetarian noodles?", HAS_VEG
+    ? `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`
+    : `None are labelled vegetarian yet: a noodle only gets the Vegetarian label once we've checked its maker's ingredient list. Ask the crew, and check the packet. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`],
   ["How spicy are the noodles?", "Every noodle has a spice rating from 0 (no heat) to 5 (extreme), measured against Shin Ramyun, which is a 3. Indomie Mi Goreng is a 1 and Mama Creamy Tom Yum is a 2. You can filter the library by spice level or let the roulette pick for you."],
   ["How long do the noodles take?", `Every noodle cooks for ${COOK_TIME}. Press 1, then 2 on the cooking machine to start it. Add egg and cheese on top of the noodles in the last 30 seconds.`],
 ];
@@ -865,7 +871,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`
         <label class="visually-hidden" for="f-spice">Spice</label>
         <select class="select" id="f-spice"><option value="all">Any spice</option><option value="mild">No heat</option><option value="medium">Medium</option><option value="hot">Hot</option></select>
         <label class="visually-hidden" for="f-diet">Diet</label>
-        <select class="select" id="f-diet"><option value="all">Any diet</option><option value="veg">Vegetarian</option><option value="chicken">Chicken</option><option value="beef">Beef</option><option value="pork">Pork</option><option value="seafood">Seafood</option></select>
+        <select class="select" id="f-diet"><option value="all">Any diet</option>${HAS_VEG ? `<option value="veg">Vegetarian</option>` : ""}<option value="chicken">Chicken</option><option value="beef">Beef</option><option value="pork">Pork</option><option value="seafood">Seafood</option></select>
       </div>
       <div class="filter-pills" aria-label="Quick country filters">
         ${countries.map((c) => `<button class="pill" type="button" data-pill="country" data-value="${c.code}" aria-pressed="false">${flag(c.code, r, { w: 16 })}${esc(c.name)}</button>`).join("")}
@@ -1318,7 +1324,7 @@ const searchIndex = [
   ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.small || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
-    ["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"],
+    ...(HAS_VEG ? [["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"]] : []),
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
     ["Dry noodles", "Filter: dry, mix-and-eat", "noodles/?type=Dry", "chopsticks"],
     ["Soup noodles", "Filter: soup", "noodles/?type=Soup", "soup"],
