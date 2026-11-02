@@ -65,7 +65,6 @@
   /* Scenes. [data-scene] gets --p, the scroll progress through it: by default while its sticky first child (the
      stage) is pinned, i.e. over (scene height - stage height); "through" runs from entering the screen to leaving it;
      "leave" (inner-page video heroes, which start on screen) runs from the top of the page until it has scrolled away.
-     .is-moving once it has started (rounded corners), .is-late past .58 (the faded hero words stop taking clicks).
      [data-stack] cards get --q (how far the card has slid in) and --p (how far the next card covers it), .is-sinking
      once covered at all. Only the active card (at least half slid in, not yet half covered) loads and plays its clip
      (Design, 31 Oct 2026); the others pause. All scene and card reads happen before any write. */
@@ -110,8 +109,6 @@
       if (sceneP[k] === null) continue;
       var sp = clamp(sceneP[k], 0, 1);
       scenes[k].style.setProperty("--p", sp.toFixed(4));
-      scenes[k].classList.toggle("is-moving", sp > 0.005);
-      scenes[k].classList.toggle("is-late", sp > 0.58);
     }
     if (stackOn) for (m = 0; m < stackCards.length; m++) {
       var card = stackCards[m], q = clamp(1 - cardTops[m] / vh, 0, 1);
