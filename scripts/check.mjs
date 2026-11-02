@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { indexNowKey } from "./lib/indexnow.mjs";
 
 const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "site");
 if (!fs.existsSync(OUT)) { console.error("Run `npm run build` first."); process.exit(1); }
@@ -142,11 +143,29 @@ for (const f of files) {
   if (/^assets\/img\/(noodles|toppings|photos|shoot)\/.+\.(webp|jpe?g|png|avif)$/.test(rel) && !siteText.includes(rel)) problems.push(`${rel}: photo nothing on the site uses, but still public at its URL; delete it`);
 }
 // Restaurant schema (BOSS, 1 Nov 2026): only facts the owner has given us. No price band, reservations policy, ratings or
-// reviews. The opening hours MEON posted on Instagram are shown on the site (hours check above), not in the schema yet.
+// reviews. Opening hours (SEO, 2 Nov 2026) only as the sourced rows the site shows: every day in data/site.json hours, with
+// the same opening and closing times, and nothing else.
 const homeLd = [...fs.readFileSync(path.join(OUT, "index.html"), "utf8").matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => [JSON.parse(m[1])].flat());
 const restaurant = homeLd.find((n) => n["@type"] === "Restaurant");
 if (!restaurant) problems.push("index.html: no Restaurant schema");
-else for (const k of ["priceRange", "acceptsReservations", "aggregateRating", "review", "openingHours", "openingHoursSpecification"]) if (k in restaurant) problems.push(`index.html: Restaurant schema claims ${k}, which the owner hasn't given us`);
+else {
+  for (const k of ["priceRange", "acceptsReservations", "aggregateRating", "review", "openingHours"]) if (k in restaurant) problems.push(`index.html: Restaurant schema claims ${k}, which the owner hasn't given us`);
+  const week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const hhmm = (t) => { const m = t.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])m$/i); return m ? `${String((+m[1] % 12) + (/p/i.test(m[3]) ? 12 : 0)).padStart(2, "0")}:${m[2] || "00"}` : `? ${t}`; };
+  const want = {}, got = {};
+  if (siteData.hoursSource) for (const h of siteData.hours || []) {
+    const [a, b = a] = h.days.split(/\s*[–-]\s*/).map((d) => week.indexOf(d.trim()));
+    const [o, c] = h.time.split(/\s*[–-]\s*/).map(hhmm);
+    for (let i = a; i >= 0 && i <= b; i++) want[week[i]] = `${o}-${c}`;
+  }
+  for (const s of restaurant.openingHoursSpecification || []) for (const d of [s.dayOfWeek].flat()) got[d] = `${s.opens}-${s.closes}`;
+  if (JSON.stringify(got, week) !== JSON.stringify(want, week)) problems.push(`index.html: Restaurant schema hours ${JSON.stringify(got)} don't match the sourced hours in data/site.json ${JSON.stringify(want)}`);
+}
+// IndexNow key file (SEO, 2 Nov 2026): /<key>.txt holds exactly the site's key, or search engines ignore our pings.
+if (siteData.indexNow) {
+  const key = indexNowKey(SITE_URL), kf = path.join(OUT, `${key}.txt`);
+  if (!fs.existsSync(kf) || fs.readFileSync(kf, "utf8") !== key) problems.push(`${key}.txt: the IndexNow key file is missing or doesn't hold the key`);
+}
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }
 console.log("All good ✔");

@@ -9,6 +9,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestPairings, badge, COUNTRY_ADJ, COOK_SECONDS, COOK_TIME } from "./lib/copy.mjs";
+import { indexNowKey } from "./lib/indexnow.mjs";
 import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoLockup, TOPPING_ART } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
@@ -139,6 +140,21 @@ const REGION = "from across Asia";
 // visit page links to Instagram instead.
 const HOURS_NOTE = (site.hoursNote || "").replace(/\s*Please [^.]*\./g, "").trim();
 const HOURS_LINE = site.hours.length ? `Open ${site.hours.map((h) => `${h.days} ${h.time}`).join(", ")}.` : HOURS_NOTE;
+// The same rows for search engines (Restaurant schema openingHoursSpecification, SEO 2 Nov 2026): "Monday – Thursday" /
+// "12pm – 9:30pm" become each day's opens/closes in 24-hour time. A closing time before the opening time means after
+// midnight (Fri–Sat 2:30am), which is how Google reads it. A row the parser can't read stops the build.
+const WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const to24 = (t) => {
+  const m = t.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+  if (!m || +m[1] < 1 || +m[1] > 12) throw new Error(`data/site.json hours: can't read the time "${t}"`);
+  return `${String((+m[1] % 12) + (m[3].toLowerCase() === "pm" ? 12 : 0)).padStart(2, "0")}:${m[2] || "00"}`;
+};
+const HOURS_SPEC = site.hours.length && site.hoursSource ? site.hours.map((h) => {
+  const [a, b = a] = h.days.split(/\s*[–-]\s*/).map((d) => WEEK.indexOf(d.trim()));
+  const times = h.time.split(/\s*[–-]\s*/);
+  if (a < 0 || b < a || times.length !== 2) throw new Error(`data/site.json hours: can't read "${h.days}: ${h.time}"`);
+  return { "@type": "OpeningHoursSpecification", dayOfWeek: WEEK.slice(a, b + 1), opens: to24(times[0]), closes: to24(times[1]) };
+}) : undefined;
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
 const fitDesc = (head, body, extras = [], max = 160) => {
@@ -178,12 +194,12 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     servesCuisine: ["Instant noodles", "Ramen", "Korean", "Japanese", "Indonesian", "Asian"],
     hasMenu: `${SITE_URL}/noodles/`,
     menu: `${SITE_URL}/noodles/`,
-    hasMap: site.mapsUrl,
+    hasMap: site.googleBusinessUrl || site.mapsUrl,
     telephone: site.phone || undefined,
     email: site.email || undefined,
     address: { "@type": "PostalAddress", streetAddress: site.streetAddress || undefined, addressLocality: site.suburb, addressRegion: site.state, postalCode: site.postcode || undefined, addressCountry: "AU" },
     geo: site.geo && site.geo.lat ? { "@type": "GeoCoordinates", latitude: site.geo.lat, longitude: site.geo.lng } : undefined,
-    openingHoursSpecification: (site.openingHours || []).length ? site.openingHours.map((h) => ({ "@type": "OpeningHoursSpecification", dayOfWeek: h.days, opens: h.opens, closes: h.closes })) : undefined,
+    openingHoursSpecification: HOURS_SPEC,
     sameAs: [site.instagram, site.tiktok, site.googleBusinessUrl].filter(Boolean),
   };
   const website = {
@@ -334,6 +350,8 @@ ${scripts.map((s) => `<script src="${r(s)}" defer></script>`).join("\n")}
 
 /* ---------------- components ---------------- */
 const crumbsNav = (r, items) => `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${r("")}">Home</a></li>${items.map(([label, href]) => href ? `<li><a href="${r(href)}">${label}</a></li>` : `<li aria-current="page">${label}</li>`).join("")}</ol></nav>`;
+// BreadcrumbList JSON-LD for a page one level below home (the same trail crumbsNav shows).
+const crumbLd = (name, urlPath) => ({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name, item: `${SITE_URL}/${urlPath}` }] });
 
 // Illustrated packet for noodles without a photo yet, coloured by flavour like real packets.
 const PACKET_COLOURS = [
@@ -1009,6 +1027,7 @@ addPage("countries/", layout({
   seoTitle: "Instant Noodles by Country: Korea, Japan & More · MEON Perth",
   active: "countries/",
   overlay: true,
+  jsonld: [crumbLd("Countries", "countries/")],
   description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
@@ -1068,6 +1087,7 @@ addPage("pairings-and-sides/", layout({
   seoTitle: "Noodle Pairings, Sides and Drinks · MEON Perth",
   active: "pairings-and-sides/",
   overlay: true,
+  jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
@@ -1092,6 +1112,7 @@ addPage("about/", layout({
   title: "About MEON",
   active: "about/",
   overlay: true,
+  jsonld: [crumbLd("About", "about/")],
   description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
   body: (r) => `
 ${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
@@ -1123,7 +1144,9 @@ ${ctaBand(r)}
 addPage("privacy/", layout({
   urlPath: "privacy/",
   title: "Privacy",
+  seoTitle: "Privacy · How MEON Noodles Handles Reviews and Data",
   active: "privacy/",
+  jsonld: [crumbLd("Privacy", "privacy/")],
   description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
   body: (r) => `
 ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
@@ -1168,7 +1191,7 @@ addPage("visit/", layout({
   seoTitle: `Visit MEON · Instant Noodle Bar in ${site.suburb}, Perth`,
   active: "visit/",
   overlay: true,
-  jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }],
+  jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }, crumbLd("Visit", "visit/")],
   description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
   body: (r) => `
 ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: `${esc(site.streetAddress)}, ${esc(site.suburb)}. Walk in, choose a packet and cook it your way.`, actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Get directions</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
@@ -1330,6 +1353,8 @@ const searchIndex = [
 ];
 write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+// IndexNow (Bing, Yandex, Seznam, Naver; SEO 2 Nov 2026): the key file proves the pings in scripts/indexnow.mjs come from us.
+if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
 const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
 write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
