@@ -112,7 +112,7 @@ for (const n of JSON.parse(fs.readFileSync(path.join(OUT, "noodles.json"), "utf8
 // name, flavour, blurb or search keywords ("vegan", "vegetarian", "plant-based", "meat-free"). Unsourced diets say "Ask the
 // crew", which is always true; flavours say what they taste of ("vegetable").
 const DIET_WORD = /\bvegan\b|vegetarian|plant[- ]based|meat[- ]?free|meatless/i;
-const DIET_OK = /MEON never counts these noodles as vegetarian|\* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring/g;
+const DIET_OK = /(?:MEON|Meon) never counts these noodles as vegetarian|\* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring/g;
 const DATA = path.join(OUT, "..", "data");
 const catalogueData = JSON.parse(fs.readFileSync(path.join(DATA, "catalogue.json"), "utf8"));
 const vegSourced = new Set();
