@@ -145,17 +145,24 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .has-vhero .site-header { position: fixed; left: 0; right: 0; top: 0; }
 .site-header--over { transition: background-color .2s ease-out, border-color .2s; }
 .site-header--over .logo-badge > rect, .site-header--over .logo-badge > g { transition: fill .2s, stroke .2s; }
+/* While it floats, each cream control sits on its own rgba(20,14,10,.40) fill (the logo box, one pill behind the nav
+   links, the buttons): the top shade alone left "About" at 2-3:1 over wall-10's pale wood. With the fills every control
+   keeps 4.5:1 or more on the brightest frame of every hero clip (Design, 2 Nov 2026; meon-work/fullscreen/contrast.py).
+   They fade with the header's 200 ms change to the white bar. */
+.site-header--over :is(.search-btn, .sound-btn, .nav-toggle, .vpause-hdr) { transition: background-color .2s ease-out, border-color .2s, color .2s; }
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) { background: transparent; border-color: transparent; }
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .logo-badge > rect:first-of-type { fill: transparent; }
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .logo-badge > rect:first-of-type { fill: rgba(20,14,10,.4); }
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .logo-badge > rect:nth-of-type(2) { stroke: var(--cream); }
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .logo-badge > g { fill: var(--cream); }
-.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.search-btn, .sound-btn, .nav-toggle, .vpause-hdr) { background: rgba(20,14,10,.34); border-color: rgba(255,250,242,.55); color: var(--cream); }
+.site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.search-btn, .sound-btn, .nav-toggle, .vpause-hdr) { background: rgba(20,14,10,.4); border-color: rgba(255,250,242,.55); color: var(--cream); }
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span,
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span::before,
 .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav-toggle span::after { background: var(--cream); }
 /* Focus over the footage: a cream ring with a dark halo, visible on the brightest frame and on the white bar */
 .site-header--over.is-over :focus-visible, .fhero :focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; box-shadow: 0 0 0 6px rgba(20,14,10,.62); }
 @media (min-width: 1025px) {
+  .site-header--over .nav { border-radius: 999px; transition: background-color .2s ease-out; }
+  .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) .nav { background: rgba(20,14,10,.4); }
   .site-header--over.is-over:not(:has(.nav.is-open, .has-mega:hover, .has-mega:focus-within, .has-mega.is-open)) :is(.nav > a, .nav-item > a, .mega-toggle) { color: var(--cream); text-shadow: 0 1px 12px rgba(20,14,10,.45); }
 }
 .bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; height: var(--header-h); }
@@ -370,13 +377,15 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .fhero .vbg { background: transparent; }
 .fhero .vbg-video { transition-duration: .3s; }
 .fhero-cols { display: none; }
-/* The legibility scrim and a light shade under the header's links: part of the footage, not a dark section. Stronger
-   than the spec's (bottom 45 % to .55): that left the cream text at 1.7:1 over the white bowl in step-cook; this one
-   keeps the brightest frame of every clip at 4.5:1 or more behind the text (meon-work/fullscreen/contrast.py). */
+/* The legibility scrim and a shade under the header: part of the footage, not a dark section. Stronger than the spec's
+   (bottom 45 % to .55), which left the cream text at 1.7:1 over the white bowl in step-cook. Both keep the brightest
+   frame of every hero clip at 4.5:1 or more (95th-percentile pixel) behind the cream text: the hero's words at the
+   bottom and the header's logo, nav and buttons at the top (wall-10's pale wood was 2-3:1 under "About" with a .34
+   shade). Measured by meon-work/fullscreen/contrast.py; Design, 2 Nov 2026. */
 .fhero-media::after { content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(20,14,10,.34) 0, rgba(20,14,10,0) 150px), linear-gradient(180deg, rgba(20,14,10,0) 40%, rgba(20,14,10,.55) 64%, rgba(20,14,10,.65) 100%); }
+  background: linear-gradient(180deg, rgba(20,14,10,.45) 0, rgba(20,14,10,0) 140px), linear-gradient(180deg, rgba(20,14,10,0) 40%, rgba(20,14,10,.55) 64%, rgba(20,14,10,.65) 100%); }
 @media (max-width: 899.98px) {
-  .fhero-media::after { background: linear-gradient(180deg, rgba(20,14,10,.34) 0, rgba(20,14,10,0) 130px), linear-gradient(180deg, rgba(20,14,10,0) 30%, rgba(20,14,10,.55) 56%, rgba(20,14,10,.66) 100%); }
+  .fhero-media::after { background: linear-gradient(180deg, rgba(20,14,10,.45) 0, rgba(20,14,10,0) 120px), linear-gradient(180deg, rgba(20,14,10,0) 30%, rgba(20,14,10,.55) 56%, rgba(20,14,10,.66) 100%); }
 }
 .fhero-copy { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px clamp(28px, 4vw, 64px);
   padding: 0 max(var(--gutter), (100% - var(--wrap)) / 2) 88px; transform: translate3d(0, calc(var(--p, 0) * -7vh), 0); }
