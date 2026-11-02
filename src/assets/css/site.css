@@ -855,6 +855,21 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .qr-card img { margin: 0 auto 8px; width: 150px; }
 .qr-scan { font-size: .8rem; font-weight: 600; }
 .qr-url { font-size: .62rem; color: var(--muted); word-break: break-all; margin-top: 6px; }
+/* Review cards (qr/review-card/): four A6 cards per A4 sheet; on screen a 2-up grid. */
+.note-list { margin: 12px 0 0; padding-left: 1.2em; color: var(--muted); font-size: .92rem; }
+.note-list li + li { margin-top: 4px; }
+.review-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.review-card { border: 1px dashed var(--line-2); border-radius: var(--radius-sm); padding: 22px 20px; text-align: center; break-inside: avoid; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.review-card h3 { font-size: 1.5rem; margin: 0; }
+.review-card img { width: 150px; height: 150px; }
+.rc-eyebrow { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.rc-ask { margin: 0; max-width: 30ch; }
+.rc-scan { font-size: .85rem; font-weight: 700; margin: 0; }
+.rc-private { font-size: .82rem; color: var(--muted); margin: 6px 0 0; max-width: 32ch; }
+/* Visit: "How was it?" offers Google and the private route as two equal buttons. */
+.feedback { display: grid; gap: 20px 48px; align-items: end; }
+.feedback-actions .btn { flex: 1 1 15rem; }
+@media (min-width: 900px) { .feedback { grid-template-columns: 1.2fr 1fr; } .feedback-actions { justify-content: flex-end; } .feedback-actions .btn { flex: 0 1 15rem; } }
 .chip { display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; font-size: .78rem; font-weight: 500; text-decoration: none; }
 .chip:hover { border-color: var(--ink); }
 .qrgen { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 64px); align-items: start; }
@@ -915,6 +930,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .section { padding: 0; }
   .qr-sheet { grid-template-columns: repeat(3, 1fr); gap: 8mm; }
   .qr-card { border: 1px solid #000; }
+  .review-cards { grid-template-columns: repeat(2, 1fr); gap: 0; }
+  .review-card { border: 1px dashed #000; border-radius: 0; height: 138mm; justify-content: center; }
   .reveal { opacity: 1 !important; transform: none !important; }
   .img-reveal::after { display: none !important; }
 }

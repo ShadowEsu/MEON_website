@@ -492,6 +492,11 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
 // Reviews: stored in Supabase (table meon_reviews). Visitors post a star rating and comment; published reviews load live.
 // Google reviews: the Business Profile link when it's set in data/site.json, otherwise MEON on Google Maps.
 const GOOGLE_REVIEWS = site.googleBusinessUrl || site.mapsUrl;
+// Asking for Google reviews (BOSS + Security, 2 Nov 2026; Google's review policy and the ACCC's guidance on fake and
+// incentivised reviews): every guest is asked the same way, nothing is offered in return, and wherever we ask for a
+// Google review the private route sits beside it ("Tell us privately"), never in front of it. check.mjs enforces this.
+const GOOGLE_WRITE_REVIEW = site.googleReviewUrl || GOOGLE_REVIEWS;
+const PRIVATE_FEEDBACK = site.privateFeedbackUrl || site.instagram;
 // Consent wording version for guest reviews (ledger 299). Each review row stores it in consent_version;
 // change it whenever the consent text or what the form collects changes, and update privacy/.
 const REVIEW_CONSENT = "reviews-2026-10-27";
@@ -510,7 +515,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
       <h2 data-split>${title}</h2>
       ${lead ? `<p class="lead">${lead}</p>` : ""}
       <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
-      <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a></div>
+      <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a>${PRIVATE_FEEDBACK ? `<a class="link-arrow" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>Tell us privately ${icon.arrow}</a>` : ""}</div>
       <form class="rv-form" data-rv-form data-consent="${REVIEW_CONSENT}" novalidate>
         <div class="rv-errors" data-rv-errors tabindex="-1" aria-labelledby="${id}-errors-h" hidden><h3 class="rv-errors-h" id="${id}-errors-h"></h3><ul></ul></div>
         <fieldset class="rv-rate" id="${id}-rating" role="radiogroup" aria-labelledby="${id}-rating-l"><legend id="${id}-rating-l">Your rating</legend><div class="rv-rate-stars">${stars}</div>${err("rating", "Choose a star rating")}</fieldset>
@@ -522,7 +527,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
           ${err("consent", "Tick the box so we can publish your review")}
           <p class="note" id="rv-consent-${slug || "all"}-detail">We keep your name, stars and review, the page, whether you scanned a shelf QR code, and the time, with Supabase, our database provider, until you ask us to remove them. <a href="${r("privacy/")}">How we handle reviews</a></p>
         </div>
-        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button><a class="link-arrow" data-rv-alt href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener" hidden>Post it on Google instead ${icon.arrow}</a></div>
+        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button><a class="link-arrow" data-rv-alt href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener" hidden>Post it on Google instead ${icon.arrow}</a></div>
         <p class="rv-status" data-rv-status aria-live="polite" tabindex="-1"></p>
       </form>
     </div>
@@ -1226,6 +1231,13 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
     <figure class="img-reveal" data-parallax="0.06">${shootImg(r, "tomyum-egg-prawn", { sizes: "(min-width: 900px) 24vw, 50vw" })}</figure>
   </div>
 </div></section>
+${PRIVATE_FEEDBACK ? `<section class="section section--tight" aria-labelledby="feedback-h"><div class="wrap feedback">
+  <div class="reveal"><p class="eyebrow">Been in?</p><h2 id="feedback-h" data-split>How was it?</h2><p class="lead">Good or bad, we'd like to hear it. Leave a Google review for everyone to read, or tell us privately on Instagram.</p></div>
+  <div class="actions feedback-actions reveal">
+    <a class="btn btn--line btn--lg" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">${svgIcon("star")} Review us on Google</a>
+    <a class="btn btn--line btn--lg" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>${icon.insta} Tell us privately</a>
+  </div>
+</div></section>` : ""}
 <section class="section"><div class="wrap split split--top">
   <div class="reveal"><p class="eyebrow">Questions</p><h2 data-split>Frequently asked.</h2></div>
   <div class="faq">${FAQ.map(([q, a]) => `<details class="reveal"><summary>${esc(q)}${icon.chevron}</summary><p>${esc(a)}</p></details>`).join("")}</div>
@@ -1264,6 +1276,7 @@ addPage("qr/", layout({
     <button class="btn btn--red btn--sm" type="button" data-print>${icon.print} Print all</button>
     <a class="btn btn--line btn--sm" href="${r("assets/qr/qr-codes.csv")}" download>${icon.download} Download CSV</a>
     <a class="btn btn--line btn--sm" href="${r("qr-generator/")}">${icon.qr} QR generator</a>
+    ${site.googleReviewUrl ? `<a class="btn btn--line btn--sm" href="${r("qr/review-card/")}">${svgIcon("star")} Review cards</a>` : ""}
     <label class="search" style="max-width:340px"><span class="visually-hidden">Filter QR codes</span>${icon.search}<input type="search" placeholder="Filter…" data-qr-filter></label>
   </div>
   <h2 class="visually-hidden">Codes</h2>
@@ -1275,6 +1288,43 @@ addPage("qr/", layout({
 </div></section>
 `,
 }));
+
+// ---------- Review cards (table or receipt; staff only, not in the sitemap) ----------
+// Four A6 cards per A4 page. The QR opens Google's "write a review" box. Every card asks every guest the same way and
+// shows the private route next to it; nothing is offered in return (see the note above GOOGLE_WRITE_REVIEW).
+if (site.googleReviewUrl) {
+  write("assets/qr/google-review.svg", await QRCode.toString(site.googleReviewUrl, { ...qrOpts, type: "svg" }));
+  const card = (r) => `<div class="review-card">
+      <p class="rc-eyebrow">Meon · ${esc(site.suburb)}</p>
+      <h3>How was your bowl?</h3>
+      <p class="rc-ask">Tell everyone on Google. Good or bad, every review helps other people choose.</p>
+      <img src="${r("assets/qr/google-review.svg")}" alt="QR code: review us on Google" width="150" height="150">
+      <p class="rc-scan">Scan to review us on Google</p>
+      <p class="rc-private">Something not right? Tell the crew now, or message us privately on Instagram, ${esc(site.instagramHandle)}.</p>
+    </div>`;
+  addPage("qr/review-card/", layout({
+    urlPath: "qr/review-card/",
+    title: "Review cards",
+    noindex: true,
+    description: "Printable table and receipt cards asking every guest for a Google review, with the private route beside it.",
+    body: (r) => `
+<div class="no-print">${pageHero(r, { crumbs: [["Shelf QR codes", "qr/"], ["Review cards"]], eyebrow: "Staff · print on A4", title: "Review cards.", seed: 8 })}</div>
+<section class="section section--tight"><div class="wrap">
+  <div class="no-print">
+    <p class="lead">Four cards per A4 page, for tables or to hand over with the bowl. The code opens Google's review box for us.</p>
+    <ul class="note-list">
+      <li>Ask every guest the same way, whether they look happy or not.</li>
+      <li>Never give anything in return: no discounts, free items or prize draws. And never ask staff, family or friends to post one.</li>
+      <li>If someone is unhappy, help them on the spot. Offer them the card like everyone else, and never ask them to wait, change or skip a review.</li>
+    </ul>
+    <div class="qr-tools"><button class="btn btn--red btn--sm" type="button" data-print>${icon.print} Print cards</button><a class="btn btn--line btn--sm" href="${r("assets/qr/google-review.svg")}" download>${icon.download} QR code (SVG)</a></div>
+  </div>
+  <h2 class="visually-hidden">Cards</h2>
+  <div class="review-cards">${[1, 2, 3, 4].map(() => card(r)).join("")}</div>
+</div></section>
+`,
+  }));
+}
 
 // ---------- QR generator (in-browser) ----------
 addPage("qr-generator/", layout({

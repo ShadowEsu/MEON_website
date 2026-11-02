@@ -173,6 +173,19 @@ if ((siteData.hours || []).length) {
   const home = text(fs.readFileSync(path.join(OUT, "index.html"), "utf8"));
   for (const h of siteData.hours) if (!home.includes(`${h.days} ${h.time}`)) problems.push(`index.html: doesn't show the hours "${h.days} ${h.time}"`);
 }
+// Asking for reviews (BOSS + Security, 2 Nov 2026; Google's review policy and the ACCC's guidance on fake and incentivised
+// reviews): ask every guest the same way and offer nothing for it. Wording that rewards a review or asks only happy guests
+// fails, and every page that asks for a Google review (googleReviewUrl) also shows the private route (privateFeedbackUrl).
+const REVIEW_GATE = /\b(?:free|discount|\d+% off|voucher|coupon|prize|giveaway|reward|in exchange)\b[^.!?]{0,60}\breviews?\b|\breviews?\b[^.!?]{0,60}\b(?:free (?:drink|bowl|noodles?|egg|topping|side)|discount|\d+% off|voucher|coupon|prize|giveaway|reward|in exchange)\b|\bif you (?:loved|enjoyed|liked) (?:it|us|your)\b|\b(?:leave|give) us (?:a )?(?:5|five)[- ]stars?\b|\bonly (?:happy|satisfied) (?:guests|customers)\b/i;
+const reviewAsk = siteData.googleReviewUrl ? siteData.googleReviewUrl.replace(/&/g, "&amp;") : "";
+for (const f of htmlFiles) {
+  const raw = fs.readFileSync(f, "utf8");
+  const body = raw.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, " ").replace(/<[^>]+>/g, " ").replace(/&#39;|&rsquo;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
+  const gate = body.match(REVIEW_GATE);
+  if (gate) problems.push(`${path.relative(OUT, f)}: asks for reviews with a reward or only from happy guests ("${gate[0]}")`);
+  if (reviewAsk && raw.includes(`href="${reviewAsk}"`) && !raw.includes(`href="${siteData.privateFeedbackUrl}"`))
+    problems.push(`${path.relative(OUT, f)}: asks for a Google review without the private route (privateFeedbackUrl) beside it`);
+}
 for (const f of files.filter((f) => f.endsWith(".css"))) {
   for (const m of fs.readFileSync(f, "utf8").matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)/g)) problems.push(`${path.relative(OUT, f)}: loads from another host: ${m[1].slice(0, 80)}`);
 }
