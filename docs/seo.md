@@ -13,7 +13,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
   - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
-- **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Northbridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
+- **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at Meon Perth", "Korean Instant Noodles in Perth (51) · Meon Noodles" and "Visit Meon · Instant Noodle Bar in Northbridge, Perth". Very long noodle names use a shorter "· Meon Perth" ending so the title fits in search results.
 - **199 unique noodle pages**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
 - **An FAQ on the Visit page**: questions people actually ask (location, online orders and delivery, how many noodles, vegetarian options, how spicy, how long the noodles take).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
@@ -63,7 +63,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 - Add the new domain as a property in Search Console too.
 
 ### 5. Same details everywhere (NAP: name, address, phone)
-Use the identical name ("MEON Noodles"), address and phone on:
+Use the identical name ("Meon Noodles"), address and phone on:
 - Google, Apple Maps (<https://businessconnect.apple.com>), Bing Places
 - Instagram, TikTok and Facebook
 - TripAdvisor and Yelp
