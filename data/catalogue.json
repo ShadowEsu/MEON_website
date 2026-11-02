@@ -112,7 +112,7 @@
    "funNote": null,
    "weightG": 120,
    "spice": 1,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Beef)",
    "dietNote": false,
    "type": "Dry"
   },
@@ -126,7 +126,7 @@
    "funNote": null,
    "weightG": 90,
    "spice": 2,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Beef)",
    "dietNote": false,
    "type": "Soup"
   },
@@ -140,7 +140,7 @@
    "funNote": null,
    "weightG": 79,
    "spice": 0,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Chicken)",
    "dietNote": false,
    "type": "Soup"
   },
@@ -154,7 +154,7 @@
    "funNote": null,
    "weightG": 90,
    "spice": 0,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Chicken)",
    "dietNote": false,
    "type": "Soup"
   },
@@ -168,7 +168,7 @@
    "funNote": null,
    "weightG": 90,
    "spice": 0,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Pork)",
    "dietNote": false,
    "type": "Soup"
   },
@@ -210,7 +210,7 @@
    "funNote": null,
    "weightG": 91,
    "spice": 0,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Beef)",
    "dietNote": false,
    "type": "Soup"
   },
@@ -224,7 +224,7 @@
    "funNote": null,
    "weightG": 90,
    "spice": 0,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Chicken)",
    "dietNote": false,
    "type": "Soup"
   },
@@ -336,7 +336,7 @@
    "funNote": null,
    "weightG": 100,
    "spice": 0,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Chicken)",
    "dietNote": false,
    "type": "Dry"
   },
@@ -406,7 +406,7 @@
    "funNote": null,
    "weightG": 75,
    "spice": 1,
-   "diet": "Ask the crew",
+   "diet": "Meat flavour (Chicken)",
    "dietNote": false,
    "type": null
   },

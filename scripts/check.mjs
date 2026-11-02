@@ -78,6 +78,21 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
+// Owner's ruling (2 Nov 2026): a noodle with chicken, beef or pork flavour is never vegetarian, even when the flavour is
+// artificial, and its diet is never "Ask the crew" either. A packet whose name or flavour names a meat must say Meat or
+// Meat flavour (or Seafood), and Meat flavour noodles never show the Vegetarian label, filter tag or schema diet.
+const MEAT_WORD = /\b(?:chicken|beef|pork|ayam|babi|daging|bulgogi|rendang|tonkotsu|bacon|ham|duck|lamb|mutton|gomtang|sarigomtang)\b/i;
+for (const n of JSON.parse(fs.readFileSync(path.join(OUT, "noodles.json"), "utf8"))) {
+  if (MEAT_WORD.test(`${n.name} ${n.flavour || ""}`) && !/^(Meat|Seafood)/.test(n.diet || "")) problems.push(`noodles/${n.slug}/: ${n.name} has a meat flavour but its diet says "${n.diet}"; meat-flavour noodles are never vegetarian (owner, 2 Nov 2026)`);
+  if (!/^Meat flavour/.test(n.diet || "")) continue;
+  const page = fs.readFileSync(path.join(OUT, "noodles", n.slug, "index.html"), "utf8");
+  const dd = (page.match(/<dt>Diet<\/dt><dd>([\s\S]*?)<\/dd>/) || ["", ""])[1];
+  if (/vegetarian/i.test(dd) || /VegetarianDiet|VeganDiet/.test(page)) problems.push(`noodles/${n.slug}/: Meat flavour noodle shown as vegetarian`);
+  for (const f of [path.join(OUT, "noodles", "index.html"), path.join(OUT, "index.html")]) {
+    const card = fs.readFileSync(f, "utf8").match(new RegExp(`<a class="noodle-card[^>]*href="[^"]*noodles/${n.slug}/"[^>]*>`));
+    if (card && /data-diet="[^"]*\bveg\b/.test(card[0])) problems.push(`${path.relative(OUT, f)}: ${n.slug} card is tagged vegetarian`);
+  }
+}
 // Claims about MEON's own customers (REG-82, BOSS 2 Nov 2026): "most picked", "our regulars", "best-sellers" and the like
 // need the till's numbers, which we don't have. The owner's library notes on packets (badges like "Brand bestseller") are
 // his words about the packet and are left out of this check.

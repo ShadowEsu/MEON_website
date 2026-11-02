@@ -91,7 +91,9 @@ const noodles = noodlesRaw.map((n) => {
   const moreSmall = galleryFiles.map((p) => smallCopy(`assets/${p}`, 192)); // the 96 px gallery thumbnails (2x)
   const imgAlt = img ? altFor(images[n.slug]) : null;
   const moreAlts = galleryFiles.map(altFor);
-  // Diet label (Preston, 29 Oct 2026): "Vegetarian", never "vegetarian-friendly" or "vegan".
+  // Diet label (Preston, 29 Oct 2026): "Vegetarian", never "vegetarian-friendly" or "vegan". "Meat flavour (…)" (owner's
+  // ruling, 2 Nov 2026): noodles flavoured with chicken, beef or pork flavour, artificial or not, are never vegetarian;
+  // check.mjs keeps them out of the Vegetarian label and filter.
   const diet = /Vegetarian/.test(n.diet) ? "Vegetarian" : n.diet;
   const dietTokens = [];
   if (diet === "Vegetarian") dietTokens.push("veg");
@@ -578,7 +580,7 @@ const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
   ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
-  ["Do you have vegetarian noodles?", `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Always check the packet if you have allergies.`],
+  ["Do you have vegetarian noodles?", `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`],
   ["How spicy are the noodles?", "Every noodle has a spice rating from 0 (no heat) to 5 (extreme), measured against Shin Ramyun, which is a 3. Indomie Mi Goreng is a 1 and Mama Creamy Tom Yum is a 2. You can filter the library by spice level or let the roulette pick for you."],
   ["How long do the noodles take?", `Every noodle cooks for ${COOK_TIME}. Press 1, then 2 on the cooking machine to start it. Add egg and cheese on top of the noodles in the last 30 seconds.`],
 ];
@@ -953,7 +955,7 @@ noodles.forEach((n, idx) => {
         <dl class="noodle-facts">
           <div><dt>Spice</dt><dd>${n.unrated ? `Rating soon<small>Ask the crew how hot it is</small>` : `${spiceMeter(n.spice, r, { large: true })}<small>${n.spice} of 5 · ${ladder[1]}</small>`}</dd></div>
           <div><dt>Style</dt><dd>${esc(n.type || "Ask the crew")}</dd></div>
-          <div><dt>Diet</dt><dd>${esc(n.diet)}${n.dietNote ? "*" : ""}</dd></div>
+          <div><dt>Diet</dt><dd>${esc(n.diet)}${n.dietNote || /^Meat flavour/.test(n.diet) ? "*" : ""}</dd></div>
           <div><dt>Packet</dt><dd>${n.weightG ? `${n.weightG} g` : "Ask the crew"}</dd></div>
         </dl>
 
@@ -973,7 +975,7 @@ noodles.forEach((n, idx) => {
           <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.small)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
         </section>` : ""}
 
-        <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
+        <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : /^Meat flavour/.test(n.diet) ? "* Meat flavour: the seasoning tastes of chicken, beef or pork. The flavour may be artificial, but MEON never counts these noodles as vegetarian. Check the packet for allergens and full ingredients." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
         <div class="noodle-actions">
           <button class="btn btn--line btn--sm" type="button" data-share data-url="${esc(`${SITE_URL}/${n.url}`)}" data-title="${esc(`${n.brand} ${n.name} at MEON`)}">${icon.share} Share</button>
           <button class="btn btn--line btn--sm" type="button" data-search-open>${icon.search} Search noodles</button>

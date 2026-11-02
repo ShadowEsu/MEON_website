@@ -73,4 +73,4 @@ python3 scripts/make_qr_pngs.py [outDir]                                # compac
 
 - Street address, phone, email and opening hours (placeholders on the old Wix site were template text, so they are hidden until set in `data/site.json`).
 - Final domain for QR codes (see above).
-- The 27 noodles added from the till (`extraNoodles` in `data/catalogue.json`) have no diet yet; their pages say "Ask the crew". Fill these in `data/catalogue.json` when the crew confirms them.
+- Diet for the noodles that still say "Ask the crew" (see "Still to confirm" in `docs/operations.md`). Packets with chicken, beef or pork flavour say "Meat flavour" and are never vegetarian, even when the flavour is artificial (owner's ruling, 2 Nov 2026).
