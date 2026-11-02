@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// MEON static site generator. Zero framework: reads data/*.json, writes ./site.
+// Meon static site generator. Zero framework: reads data/*.json, writes ./site.
 // Usage: node scripts/build.mjs            (uses siteUrl from data/site.json)
 //        SITE_URL=https://meon.au node scripts/build.mjs
 import crypto from "node:crypto";
@@ -11,7 +11,7 @@ import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestPairings, badge, COUNTRY_ADJ, COOK_SECONDS, COOK_TIME } from "./lib/copy.mjs";
 import { indexNowKey } from "./lib/indexnow.mjs";
 import { schemaHoursFresh, SCHEMA_HOURS_MAX_DAYS } from "./lib/hours.mjs";
-import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoLockup, TOPPING_ART } from "./lib/art.mjs";
+import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoLockup } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -129,11 +129,13 @@ const SPICE_LADDER = [
 ];
 
 /* ---------------- layout ---------------- */
+// Header nav (Design spec "Meon: a light restaurant site", 2 Nov 2026): Menu (the home page's menu section) · Noodle wall
+// (with the noodle mega menu) · Visit · About. Countries and Pairings and sides stay one click away in the mega menu, the
+// phone tab bar and the footer.
 const NAV = [
-  ["", "Home"],
-  ["noodles/", "Noodles"],
-  ["countries/", "Countries"],
-  ["pairings-and-sides/", "Pairings and sides"],
+  ["#menu", "Menu"],
+  ["noodles/", "Noodle wall"],
+  ["visit/", "Visit"],
   ["about/", "About"],
 ];
 // Public wording: the noodle count is built from the data (Design, 31 Oct 2026: no vague "100+" next to a list of 199), so
@@ -144,7 +146,7 @@ const REGION = "from across Asia";
 // shown). The note says changes go up on Instagram first; Design, 31 Oct 2026: no "please". With no hours in the file the
 // visit page links to Instagram instead.
 const HOURS_NOTE = (site.hoursNote || "").replace(/\s*Please [^.]*\./g, "").trim();
-const HOURS_LINE = site.hours.length ? `Open ${site.hours.map((h) => `${h.days} ${h.time}`).join(", ")}.` : HOURS_NOTE;
+// (HOURS_SPEC, HOUR_ROWS and DAY_HOURS below turn the same rows into the schema, the Visit table and the hero's today line.)
 // The same rows for search engines (Restaurant schema openingHoursSpecification, SEO 2 Nov 2026): "Monday – Thursday" /
 // "12pm – 9:30pm" become each day's opens/closes in 24-hour time. A closing time before the opening time means after
 // midnight (Fri–Sat 2:30am), which is how Google reads it. A row the parser can't read stops the build. Only while
@@ -162,6 +164,19 @@ const HOURS_SPEC = site.hours.length && schemaHoursFresh(site.hoursSource) ? sit
   return { "@type": "OpeningHoursSpecification", dayOfWeek: WEEK.slice(a, b + 1), opens: to24(times[0]), closes: to24(times[1]) };
 }) : undefined;
 if (site.hours.length && !HOURS_SPEC) console.log(`Note: opening hours left out of the Restaurant schema: hoursSource.checked (${site.hoursSource?.checked || "none"}) is more than ${SCHEMA_HOURS_MAX_DAYS} days old. Re-check them and update data/site.json.`);
+// Google Maps directions to the shop (Google listing "Meon", place ID checked 2 Nov 2026): every "Get directions" link.
+const DIRECTIONS = "https://www.google.com/maps/dir/?api=1&destination=Meon&destination_place_id=ChIJh2qhXwu7MioR2s-61S_A4HA";
+const SHORT_ADDRESS = site.streetAddress.replace(/\bStreet$/, "St");
+const addressLine = [site.streetAddress, `${site.suburb} ${site.state} ${site.postcode}`.trim()].filter(Boolean).join(", ");
+// The same rows per weekday (Monday first), only once they're sourced: [opens, closes (24 h), "12pm–9:30pm"], or null on a
+// closed day. site.js turns them into the home hero's "Open today …" line and bolds today's row of the Visit table, in
+// Perth time; a closing time before the opening time is after midnight ("Open till 2:30am" early on Saturday and Sunday).
+const HOUR_ROWS = site.hours.map((h) => {
+  const [a, b = a] = h.days.split(/\s*[–-]\s*/).map((d) => WEEK.indexOf(d.trim()));
+  const [open, close] = h.time.split(/\s*[–-]\s*/);
+  return { ...h, a, b, short: a === b ? WEEK[a].slice(0, 3) : `${WEEK[a].slice(0, 3)}–${WEEK[b].slice(0, 3)}`, open, close };
+});
+const DAY_HOURS = site.hoursSource ? WEEK.map((_, i) => { const h = HOUR_ROWS.find((x) => i >= x.a && i <= x.b); return h ? [to24(h.open), to24(h.close), `${h.open}–${h.close}`] : null; }) : null;
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
 const fitDesc = (head, body, extras = [], max = 160) => {
@@ -174,17 +189,18 @@ const fitDesc = (head, body, extras = [], max = 160) => {
   return d;
 };
 
-// `overlay`: the header sits transparent over a full-screen video hero (home) until the page scrolls.
-function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/shoot/og-meon.jpg", preload = "", noindex = false, overlay = false, jsonld = [], scripts = [] }) {
+// `overlay`: the header sits transparent over the home page's full-screen video hero until the page scrolls 80 px.
+// `head`: extra <head> markup, given the path helper r (the home hero's poster preloads).
+function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/shoot/og-meon.jpg", preload = "", head = "", noindex = false, overlay = false, jsonld = [], scripts = [] }) {
   const depth = urlPath.split("/").filter(Boolean).length - (urlPath.endsWith(".html") ? 1 : 0);
   const root = depth ? "../".repeat(depth) : "./";
   const r = (p) => root + p;
   const canonical = `${SITE_URL}/${urlPath}`;
-  const fullTitle = seoTitle || (title ? `${title} · MEON Noodles Perth` : `MEON · Instant Noodle Bar in ${site.suburb}, ${site.city}`);
+  const fullTitle = seoTitle || (title ? `${title} · Meon Noodles Perth` : `Meon · Instant noodle bar in ${site.suburb}`);
   const cur = (href) => (active === href ? ' aria-current="page"' : "");
   const navLinks = NAV.map(([href, label]) => href === "noodles/"
     ? `<div class="nav-item has-mega"><a href="${r(href)}"${cur(href)}>${label}</a><button class="mega-toggle" type="button" aria-expanded="false" aria-controls="mega-noodles" aria-label="Show the noodle menu">${icon.chevron}</button>${megaNoodles(r)}</div>`
-    : `<a href="${r(href)}"${cur(href)}>${label}</a>`).join("");
+    : `<a href="${href.startsWith("#") ? (urlPath === "" ? href : r("") + href) : r(href)}"${cur(href)}>${label}</a>`).join("");
   const analytics = site.analytics?.vercel
     ? `<script>(function(){var h=location.hostname;if(location.protocol.indexOf("http")!==0||/^(localhost|127\\.|0\\.0\\.0\\.0|\\[::1\\])/.test(h))return;window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};var s=document.createElement("script");s.defer=true;s.src="/_vercel/insights/script.js";document.head.appendChild(s);})();</script>`
     : "";
@@ -192,8 +208,8 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     "@context": "https://schema.org",
     "@type": "Restaurant",
     "@id": `${SITE_URL}/#restaurant`,
-    name: "MEON Noodles",
-    alternateName: "MEON",
+    name: "Meon Noodles",
+    alternateName: "Meon",
     description: `Instant noodle bar in ${site.suburb}, ${site.city} with ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Dine in or take it away.`,
     url: SITE_URL + "/",
     logo: `${SITE_URL}/assets/img/logo-512.png`,
@@ -213,7 +229,7 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": `${SITE_URL}/#website`,
-    name: "MEON Noodles",
+    name: "Meon Noodles",
     url: SITE_URL + "/",
     inLanguage: "en-AU",
     publisher: { "@id": `${SITE_URL}/#restaurant` },
@@ -235,13 +251,13 @@ ${noindex ? '<meta name="robots" content="noindex">' : '<meta name="robots" cont
 ${site.googleSiteVerification ? `<meta name="google-site-verification" content="${esc(site.googleSiteVerification)}">\n` : ""}${site.bingSiteVerification ? `<meta name="msvalidate.01" content="${esc(site.bingSiteVerification)}">\n` : ""}<meta name="theme-color" content="#ffffff">
 <meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="MEON Noodles">
+<meta property="og:site_name" content="Meon Noodles">
 <meta property="og:title" content="${esc(fullTitle)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(canonical)}">
 <meta property="og:image" content="${esc(`${SITE_URL}/${image}`)}">
 <meta property="og:locale" content="en_AU">
-<meta property="og:image:alt" content="${esc(title || "MEON Noodles")}">
+<meta property="og:image:alt" content="${esc(title || "Meon Noodles")}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(fullTitle)}">
 <meta name="twitter:description" content="${esc(description)}">
@@ -253,7 +269,7 @@ ${site.googleSiteVerification ? `<meta name="google-site-verification" content="
 <link rel="apple-touch-icon" href="${r("assets/img/apple-touch-icon.png")}">
 <link rel="manifest" href="${r("site.webmanifest")}">
 <link rel="preload" as="font" type="font/woff2" href="${r("assets/fonts/bricolage-grotesque-latin.woff2")}" crossorigin>
-${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}
+${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}${typeof head === "function" ? head(r) : head}
 <link rel="stylesheet" href="${r("assets/css/site.css")}?v=${BUILD_ID}">
 <script>(function(d){d.className=d.className.replace("no-js","js");})(document.documentElement)</script>
 ${ld.length ? `<script type="application/ld+json">${json(ld.length === 1 ? ld[0] : ld)}</script>` : ""}
@@ -262,19 +278,17 @@ ${analytics}
 <body data-root="${root}"${overlay ? ' class="has-vhero"' : ""}>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="scroll-progress" aria-hidden="true"><span></span></div>
-${overlay ? "" : `<aside class="announce" aria-label="Where to find us"><span>Cook-it-yourself instant noodles at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</span> <a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></aside>`}
-<header class="site-header${overlay ? " site-header--over" : ""}" data-header>
+${overlay ? "" : `<aside class="announce" aria-label="Where to find us"><span>Cook-it-yourself instant noodles at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</span> <a href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">Get directions</a></aside>`}
+<header class="site-header${overlay ? " site-header--over is-over" : ""}" data-header>
   <div class="wrap bar">
-    <a class="logo" href="${r("")}" aria-label="MEON home">${logoMark("logo-badge")}</a>
+    <a class="logo" href="${r("")}" aria-label="Meon">${logoMark("logo-badge")}</a>
     <nav class="nav" id="site-nav" aria-label="Main">
       ${navLinks}
-      <a class="nav-mobile-only" href="${r("visit/")}"${cur("visit/")}>Visit us</a>
     </nav>
     <div class="header-actions">
       ${overlay ? `<button class="vpause-hdr" type="button" data-video-toggle data-video-toggle-header aria-pressed="false" aria-label="Pause videos" hidden><span class="vpause-ic" aria-hidden="true"></span></button>` : ""}
       <button class="sound-btn" type="button" data-sound aria-pressed="false" aria-label="Sound (background music)"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="sound-label">Sound</span></button>
       <button class="search-btn" type="button" data-search-open>${icon.search}<span class="label" aria-hidden="true">Search</span><span class="visually-hidden">Search noodles</span><kbd aria-hidden="true">⌘K</kbd></button>
-      <a class="btn btn--red btn--sm header-visit" href="${r("visit/")}" data-magnetic>Visit</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
     </div>
   </div>
@@ -317,21 +331,21 @@ ${body(r)}
         <h2>Visit</h2>
         <ul>
           <li>${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</li>
-          <li><a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></li>
+          <li><a href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">Get directions</a></li>
           ${site.phone ? `<li><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></li>` : ""}
           ${site.email ? `<li><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></li>` : ""}
           <li>Dine in or take away</li>
         </ul>
       </div>
     </div>
-    <div class="footer-big" data-reveal-letters>${logoLockup("footer-word", "MEON")}</div>
+    <div class="footer-big" data-reveal-letters>${logoLockup("footer-word", "Meon")}</div>
     <div class="footer-bottom">
-      <span>© <span data-year>${new Date().getFullYear()}</span> MEON Noodles · ${esc(site.suburb)}, ${esc(site.city)} ${esc(site.state)}</span>
+      <span>© <span data-year>${new Date().getFullYear()}</span> Meon Noodles · ${esc(site.suburb)}, ${esc(site.city)} ${esc(site.state)}</span>
       <span>Brand names belong to their owners. Always check the packet for allergens.</span>
     </div>
   </div>
 </footer>
-<div class="search-overlay" id="search" role="dialog" aria-modal="true" aria-label="Search MEON">
+<div class="search-overlay" id="search" role="dialog" aria-modal="true" aria-label="Search Meon">
   <div class="search-backdrop" data-search-close></div>
   <div class="search-panel">
     <div class="search-field">${icon.search}<input type="search" id="site-search" placeholder="Search noodles, flavours, countries" autocomplete="off" spellcheck="false" aria-controls="search-results" enterkeyhint="go"><button class="btn btn--line btn--sm" type="button" data-search-close>Close</button></div>
@@ -413,7 +427,7 @@ function megaNoodles(r) {
   const quick = [
     ["noodles/", "bowl", "All noodles"], ["noodles/?type=Soup", "soup", "Soup noodles"], ["noodles/?type=Dry", "chopsticks", "Dry noodles"],
     ...(HAS_VEG ? [["noodles/?diet=veg", "leaf", "Vegetarian"]] : []), ["noodles/?spice=hot", "flame", "Spicy (3+)"],
-    ["noodles/?spice=mild", "drop", "No heat"], ["noodles/?sort=photo", "camera", "With photos first"],
+    ["noodles/?spice=mild", "drop", "No heat"], ["countries/", "globe", "All countries"], ["pairings-and-sides/", "egg", "Pairings and sides"],
   ];
   return `<div class="mega" id="mega-noodles">
   <div class="mega-col"><p class="mega-h">Browse</p>${quick.map(([h, ic, t]) => `<a href="${r(h)}">${svgIcon(ic)}${t}</a>`).join("")}</div>
@@ -441,16 +455,16 @@ function pageHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = ""
 </section>`;
 }
 
-// The hero's play/pause button: an icon while the videos play, a "Play videos" pill while they're paused. site.js swaps
-// the label; a copy in the header (layout) takes over once this one scrolls away.
+// The hero's play/pause button (home and inner-page video heroes): an icon while the videos play, a "Play videos" pill while
+// they're paused. site.js swaps the label; a copy in the header (layout) takes over once this one scrolls away.
 const heroVideoToggle = `<button class="vpause" type="button" data-video-toggle aria-pressed="false" aria-label="Pause videos"><span class="vpause-ic" aria-hidden="true"></span><span class="vpause-text">Play videos</span></button>`;
 
-// Inner-page video hero (Preston, 29 Oct 2026: the other pages get the home's look). Full-bleed footage: two portrait
-// clips side by side on desktop (two, not three, so each shows most of its frame: "zoom out"), one on phones (`phone`,
-// picked without big burned-in captions so nothing runs into the title), with the breadcrumbs, title, lead and actions
-// over it. Not pinned: as the page scrolls on, the footage shrinks into a rounded card and the words lift away
-// (data-scene="leave", site.js). Posters only for Save-Data; the play/pause button sits inside the clip frame. The page's
-// layout() needs `overlay: true`.
+// Inner-page video hero (Preston, 29 Oct 2026: the other pages get the home's look). Two portrait clips side by side on
+// desktop (two, not three, so each shows most of its frame: "zoom out"), one on phones (`phone`, picked without big
+// burned-in captions so nothing runs into the title). Light only (Design, 2 Nov 2026): the breadcrumbs, title, lead and
+// actions sit on the cream page beside the footage (desktop) or under it (phones), under the white header. Not pinned: as
+// the page scrolls on, the footage shrinks into a rounded card and the words lift away (data-scene="leave", site.js).
+// Posters only for Save-Data; the play/pause button sits inside the clip frame.
 function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "", clips, phone, logo = false }) {
   return `<section class="vhero vhero--page" aria-labelledby="page-h" data-scene="leave">
   <div class="vhero-stage">
@@ -461,7 +475,7 @@ function videoHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "
     </div>
     <div class="wrap vhero-inner">
       ${crumbs.length ? crumbsNav(r, crumbs) : ""}
-      ${logo ? logoMark("vhero-logo", "MEON") : ""}
+      ${logo ? logoMark("vhero-logo", "Meon") : ""}
       ${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}
       <h1 class="vhero-title" id="page-h" data-split>${title}</h1>
       ${lead ? `<p class="vhero-sub">${lead}</p>` : ""}
@@ -566,54 +580,25 @@ const bgVideo = (r, name, { cls = "", media = "", poster = true, eager = false, 
 const REEL_SIZES = "(min-width: 1429px) 300px, (min-width: 1096px) 21vw, 230px";
 const STEP_SIZES = "(min-width: 900px) 472px, 64vw";
 
-// Photos from MEON's booth shoot (src/assets/img/shoot, made by meon-work/rebuild/make_photos.py): 800/1600/2400 px wide.
-const SHOOT = {
-  "tomyum-egg-prawn": { w: 3, h: 2, alt: "Wai Wai Quick Zabb Tom Yum Shrimp with a halved soft egg, crumbed prawns, chilli and spring onion", slug: "wai-wai-quick-zabb-tom-yum-shrimp" },
-  "udon-tempura-close": { w: 2, h: 3, alt: "Nongshim Tempura Udon up close: crumbed prawns, a halved soft-boiled egg, a fishcake slice and spring onion", slug: "nongshim-tempura-udon" },
-  "tonkotsu-nori-close": { w: 2, h: 3, alt: "Nissin Tonkotsu with nori, a soft egg and dumplings", slug: "nissin-demae-ramen-tonkotsu" },
-  "tonkotsu-top": { w: 3, h: 2, alt: "A bowl of Nissin Tonkotsu from above, with nori, egg and dumplings", slug: "nissin-demae-ramen-tonkotsu" },
-  "white-curry-top": { w: 3, h: 2, alt: "Ibumie Penang White Curry Mee from above, with fishballs, a poached egg, chilli paste, sliced chilli and spring onion", slug: "ibumie-penang-white-curry-mee" },
-  "shin-black-top": { w: 3, h: 2, alt: "Shin Black from above with spam, a crumbed prawn, egg and spring onion", slug: "nongshim-shin-black-premium" },
-  "shin-black-lift": { w: 2, h: 3, alt: "Shin Black noodles lifted out of the bowl with chopsticks", slug: "nongshim-shin-black-premium" },
-};
-const shootImg = (r, name, { sizes = "100vw", cls = "", eager = false, alt } = {}) => {
-  const s = SHOOT[name], w = 1600, h = Math.round((1600 * s.h) / s.w);
-  return `<img${cls ? ` class="${cls}"` : ""} src="${r(asset(`img/shoot/${name}-1600.webp`))}" srcset="${[800, 1600, 2400].map((x) => `${r(asset(`img/shoot/${name}-${x}.webp`))} ${x}w`).join(", ")}" sizes="${sizes}" width="${w}" height="${h}" alt="${esc(alt ?? s.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
-};
-
 // @meonnoodles reels for the Instagram strip: 8-second muted previews (the reels' own captions, trimmed before any price),
 // shown as Instagram-style cards. Clips cut from Preston's WhatsApp videos have no post link, so they open the profile.
 const REELS = [
   ["DewSjLLBLqQ", "reel/DewSjLLBLqQ/", "Your bowl, your rules. Noodles from around the world, endless combinations."],
-  ["DefupZzh1I7", "reel/DefupZzh1I7/", "Baddest bosses ain't in LA. Come have some noodles at MEON, Northbridge."],
+  ["DefupZzh1I7", "reel/DefupZzh1I7/", "Baddest bosses ain't in LA. Come have some noodles at Meon, Northbridge."],
   ["store-tour", "", "Store tour: the noodle wall, the cooking stations and the tables."],
-  ["DedzCYDhezV", "reel/DedzCYDhezV/", "Come to MEON at Shop 8, 45 Francis Street, Northbridge."],
+  ["DedzCYDhezV", "reel/DedzCYDhezV/", "Come to Meon at Shop 8, 45 Francis Street, Northbridge."],
   ["DetKN4Bh0FW", "reel/DetKN4Bh0FW/", "How many of these have you tried?"],
   ["sign", "", "Look for the red sign on Francis Street."],
   ["DejHoDVhePt", "reel/DejHoDVhePt/", "Noodle night with the crew."],
   ["DeOXYn5hSUT", "reel/DeOXYn5hSUT/", "New cook-it-yourself noodles in Perth."],
   ["walk-in", "", "Walk in, pick a packet, cook it your way."],
 ].map(([file, post, cap]) => ({ file: `ig-${file}`, cap, url: post ? `${site.instagram.replace(/\/$/, "")}/${post}` : site.instagram }));
-
-// The video wall: shop clips that aren't in the hero or the steps, plus two booth-shoot photos. On desktop the four
-// columns drift at different speeds as you scroll; phones show columns 1 and 3, so those hold the portrait clips. The
-// landscape shop clips and the top-down photo keep their whole frame in wide 16:9 tiles (columns 2 and 4).
-const VWALL = [
-  ["wall-01", "wall-02", "photo:shin-black-lift", "wall-03"],
-  ["wall-04", "wall-10", "wall-05"],
-  ["wall-08", "wall-09", "wall-07", "wall-11"],
-  ["wall-06", "wall-12", "photo:shin-black-top"],
-];
-const WIDE_TILES = new Set(["wall-04", "wall-05", "wall-06", "photo:shin-black-top"]);
-const vwallTile = (r, t) => `<figure class="vtile${WIDE_TILES.has(t) ? " vtile--wide" : ""}">${t.startsWith("photo:") ? shootImg(r, t.slice(6), { sizes: "(min-width: 900px) 22vw, 46vw", alt: "" }) : bgVideo(r, t)}</figure>`;
-
-const TICKER = ["Buldak", "Tom yum", "Mi goreng", "Tonkotsu", "Jjajang", "Laksa", "Shin Black", "Pancit canton", "Kimchi", "Salted egg", "Hokkaido miso", "Chapagetti"];
 const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="section-head">
   <div>${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}<h2 data-split>${title}</h2>${lead ? `<p class="lead">${lead}</p>` : ""}</div>${extra}
 </div>`;
 
 const FAQ = [
-  ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
+  ["Where is Meon?", `Meon Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
   ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
   ["Do you have vegetarian noodles?", HAS_VEG
@@ -627,40 +612,230 @@ const FAQ = [
 const pages = [];
 const addPage = (urlPath, html) => { pages.push(urlPath); write(urlPath + "index.html", html); };
 const countFor = (fn) => noodles.filter(fn).length;
-const half = Math.ceil(withPhotos.length / 2);
-const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-1" title="${esc(`${n.brand} ${n.name}`)}"><img src="${r(n.thumb)}" alt="" width="200" height="200" loading="lazy" decoding="async"></a>`).join("");
+
+// Pairings cook in the bowl with the noodles; egg and cheese go on top in the last 30 seconds; sides are ready to eat.
+// (The home menu and /pairings-and-sides/ both group them.)
+const PAIRING_GROUPS = {
+  "Meat and seafood": "Pairings. Put them in the bowl with your noodles at the start, so they cook together.",
+  "Vegetables and more": "Pairings. In at the start with your noodles.",
+  "Egg and cheese": "Last 30 seconds. Crack the egg and add cheese on top of the noodles, not on the bowl, so it doesn't burn.",
+  Sides: "Ready to eat, so they don't go in the machine. Have them on the side.",
+};
+const groups = [...new Set(pairings.map((t) => t.group))];
+for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
+const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 
 // ---------- Home ----------
-// Video-first (Preston, 29 Oct 2026): every clip he sent. A pinned full-screen hero (three drifting columns on desktop),
-// the booth-shoot bowls, the four steps as stacked full-screen video cards, a drifting video wall, then Instagram-style
-// reel cards. Scroll choreography lives in site.js (one loop, --p/--q) and site.css. Same brand: the red, the mixed logo,
-// Bricolage Grotesque.
-const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "tonkotsu-top"];
-// Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
-const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
+// Design spec "Meon: a light restaurant site with a full-screen video front page" (2 Nov 2026). The visitor's problem first:
+// a full-screen hero (three of the shop's own portrait clips edge to edge on desktop: the noodle wall, the machine, the
+// street; the machine clip on phones) with the "Meon" wordmark, then "Which one do I pick?" and its three tools (search,
+// heat check, roulette), how it works, the menu, real food, Visit and the Instagram strip. Light only. The hero's poster
+// is the LCP: one composite AVIF of the three clips' first frames (desktop) and the machine clip's first frame (phones),
+// made by meon-work/fullscreen/encode_posters.sh and preloaded per breakpoint. The clips start after the page's load event
+// (site.js), never under reduced motion or Save-Data. Scroll choreography lives in site.js (one loop, --p/--q).
+const HERO_CLIPS = ["wall-07", "step-cook", "hero-col-a"];
+const HERO_PHONE = "step-cook";
+const HERO_WIDE = "(min-width: 900px)", HERO_NARROW = "(max-width: 899.98px)";
+const HERO_POSTER = { wide: ["img/hero/fhero-1440", 1440], phone: ["img/hero/fhero-390", 576] };
+const heroHead = (r) => Object.entries({ wide: HERO_WIDE, phone: HERO_NARROW }).map(([k, media]) => {
+  const [p, w] = HERO_POSTER[k], u = r(asset(`${p}.avif`));
+  return `<link rel="preload" as="image" type="image/avif" href="${u}" imagesrcset="${u} ${w}w" imagesizes="100vw" media="${media}" fetchpriority="high">`;
+}).join("\n");
+const heroPoster = (r) => `<picture class="fhero-poster">
+        <source type="image/avif" media="${HERO_WIDE}" srcset="${r(asset(`${HERO_POSTER.wide[0]}.avif`))}">
+        <source type="image/webp" media="${HERO_WIDE}" srcset="${r(asset(`${HERO_POSTER.wide[0]}.webp`))}">
+        <source type="image/avif" srcset="${r(asset(`${HERO_POSTER.phone[0]}.avif`))}">
+        <img src="${r(asset(`${HERO_POSTER.phone[0]}.webp`))}" alt="" width="576" height="1024" fetchpriority="high" decoding="async">
+      </picture>`;
+// "Which one do I pick?": the four countries with the most packets, and the library's own filter links (noodles/?country=,
+// ?spice=, ?diet=; site.js reads them).
+const TOP_COUNTRIES = countries.map((c) => ({ c, n: countFor((x) => x.country === c.name) })).sort((a, b) => b.n - a.n).slice(0, 4);
+const HEAT_START = 2;
+const heatPicks = (r) => noodles.filter((n) => n.spiceKey === HEAT_START).sort((a, b) => (b.img ? 1 : 0) - (a.img ? 1 : 0)).slice(0, 3).map((n, i) =>
+  `<li style="--n:${i}"><a href="${r(n.url)}"><span class="hp-media${n.img ? "" : " hp-media--flag"}">${n.img ? `<img src="${r(n.thumb)}" alt="" width="64" height="64" loading="lazy">` : `<img class="hp-flag" src="${r(`assets/img/flags/${n.countryCode}.svg`)}" alt="" width="40" height="30">`}</span><span><strong>${esc(n.name)}</strong><small>${esc(n.brand)} · ${esc(n.country)}</small></span><span aria-hidden="true">→</span></a></li>`).join("");
+// Real food: six of the January 2026 noodle photos, six countries, none of them in the menu's eight. No claim about what
+// customers pick (REG-82: "Worth a try").
+const FOOD = ["indomie-mi-goreng", "samyang-buldak-2x-spicy-chicken-ramen", "nissin-ramen-hokkaido-miso", "lucky-me-instant-pancit-canton-sweet-and-spicy", "ibumie-penang-white-curry-mee", "wai-wai-quick-zabb-tom-yum-shrimp"]
+  .map((slug) => { const n = noodles.find((x) => x.slug === slug); if (!n || !n.img) throw new Error(`Home "Worth a try": ${slug} has no photo`); return n; });
+const photoSet = (r, n, sizes) => `src="${r(n.img)}"${n.thumb !== n.img ? ` srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${sizes}"` : ""}`;
+// The street map on Visit: drawn from OpenStreetMap data (meon-work/fullscreen/map/make_map.py), inlined so it needs no
+// third party (ODbL: the caption credits the contributors).
+// preserveAspectRatio slice: phones show a squarer crop (site.css) instead of shrinking the street names.
+const VISIT_MAP = fs.readFileSync(path.join(ROOT, "data", "visit-map.svg"), "utf8").trim().replace(/^<svg /, '<svg preserveAspectRatio="xMidYMid slice" ');
+const openLink = (label, extra = "") => `${label}<span class="visually-hidden"> (opens ${extra || "in a new tab"})</span>`;
 addPage("", layout({
   urlPath: "",
   active: "",
   overlay: true,
-  description: `MEON: a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}, cooked your way.`,
+  head: heroHead,
+  description: `Meon: a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}, cooked your way.`,
   body: (r) => `
-<section class="vhero" aria-labelledby="vhero-h" data-scene>
-  <div class="vhero-stage">
-    <div class="vhero-media">
-      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
-      <div class="vhero-cols"><div class="vcol vcol--a">${bgVideo(r, "hero-col-a", { media: "(min-width: 900px)", eager: true })}</div></div>
+<section class="fhero" aria-labelledby="fhero-h" data-scene>
+  <div class="fhero-stage">
+    <div class="fhero-media">
+      ${heroPoster(r)}
+      <div class="fhero-cols">${HERO_CLIPS.map((c) => `<div class="fcol">${bgVideo(r, c, { poster: false, media: HERO_WIDE })}</div>`).join("")}</div>
+      ${bgVideo(r, HERO_PHONE, { cls: "vbg--phone", poster: false, media: HERO_NARROW })}
     </div>
-    <div class="wrap vhero-inner">
-      ${logoMark("vhero-logo", "MEON")}
-      <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
-      <p class="vhero-sub">Cook-it-yourself instant noodles from across Asia, at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</p>
-      <div class="actions">
-        <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
-        <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
+    <div class="fhero-copy">
+      <h1 class="fhero-word" id="fhero-h" aria-label="Meon">${[..."Meon"].map((ch, i) => `<span class="fw" style="--i:${i}">${ch}</span>`).join("")}</h1>
+      <div class="fhero-side">
+        <p class="fhero-line">${COUNT} instant noodles ${REGION}, in Northbridge. Pick one, cook it your way.</p>
+        <p class="fhero-today"${DAY_HOURS ? ` data-today data-hours="${esc(JSON.stringify(DAY_HOURS))}"` : ""}><span data-today-status></span>${esc(SHORT_ADDRESS)}</p>
+        <div class="fhero-actions">
+          <a class="btn fbtn fbtn--cream" href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">${icon.pin} ${openLink("Get directions", "Google Maps in a new tab")}</a>
+          <a class="btn fbtn fbtn--outline" href="#menu">See the menu</a>
+        </div>
       </div>
     </div>
     ${heroVideoToggle}
-    <a class="vhero-cue" href="#instagram"><span class="visually-hidden">See our Instagram videos</span><i aria-hidden="true"></i></a>
+  </div>
+</section>
+
+<section class="section pick" id="pick" aria-labelledby="pick-h">
+  <div class="wrap">
+    <div class="pick-head reveal">
+      <p class="eyebrow">${COUNT} packets on the wall</p>
+      <h2 id="pick-h">Which one do I <em>pick</em>?</h2>
+      <p class="lead">Search the wall, check the heat, or let the roulette choose for you.</p>
+    </div>
+    <div class="pick-grid">
+      <article class="pcard pcard--search reveal" aria-labelledby="pc-search-h">
+        <h3 class="pcard-h" id="pc-search-h">${svgIcon("search")}Search the wall</h3>
+        <form class="pc-form" action="${r("noodles/")}" method="get" role="search" aria-label="Search the noodle wall">
+          <label class="visually-hidden" for="pick-q">Search noodles</label>
+          <input id="pick-q" name="q" type="search" placeholder="Buldak, tom yum, kimchi" autocomplete="off" enterkeyhint="search">
+          <button class="btn btn--red" type="submit">Search</button>
+        </form>
+        <p class="pc-label">By country</p>
+        <ul class="pc-chips">${TOP_COUNTRIES.map(({ c, n }) => `<li><a class="pill" href="${r(`noodles/?country=${c.code}`)}">${flag(c.code, r, { w: 16 })}${esc(c.name)}<small>${n}</small></a></li>`).join("")}</ul>
+        <p class="pc-label">Heat and diet</p>
+        <ul class="pc-chips">
+          <li><a class="pill" href="${r("noodles/?spice=mild")}">${svgIcon("drop")}No heat<small>${countFor((n) => n.spiceKey === 0)}</small></a></li>
+          <li><a class="pill" href="${r("noodles/?spice=hot")}">${svgIcon("flame")}Hot (3+)<small>${countFor((n) => n.spiceKey >= 3)}</small></a></li>
+          <li><a class="pill" href="${r("noodles/?diet=veg")}">${svgIcon("leaf")}Vegetarian<small>${countFor((n) => n.dietTokens.includes("veg"))}</small></a></li>
+        </ul>
+        <a class="link-arrow pcard-more" href="${r("noodles/")}">See all ${COUNT} noodles ${icon.arrow}</a>
+      </article>
+      <article class="pcard pcard--heat heat reveal" id="spice" data-heat data-level="${HEAT_START}" aria-labelledby="pc-heat-h">
+        <h3 class="pcard-h" id="pc-heat-h">${svgIcon("flame")}Heat check</h3>
+        <p class="pcard-sub">Every packet is rated 0 to 5 against Shin Ramyun, which is a 3.</p>
+        <div class="heat-top">
+          <div class="heat-meo" data-heat-meo>${mascot({ acc: "chilli", color: "#ff5b5b" })}<span class="sweat s1"></span><span class="sweat s2"></span><span class="sweat s3"></span></div>
+          <div><p class="heat-level" data-heat-level>${HEAT_START} · ${SPICE_LADDER[HEAT_START][1]}</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[HEAT_START][2])}</p></div>
+        </div>
+        <label class="heat-slider"><span class="visually-hidden">Spice level</span><input type="range" min="0" max="5" step="1" value="${HEAT_START}" data-heat-input aria-valuetext="${HEAT_START}, ${SPICE_LADDER[HEAT_START][1]}"></label>
+        <div class="heat-scale" aria-hidden="true">${SPICE_LADDER.map(([lvl]) => `<span>${lvl}</span>`).join("")}</div>
+        <ul class="heat-picks" data-heat-picks>${heatPicks(r)}</ul>
+        <a class="link-arrow pcard-more" data-heat-link href="${r(`noodles/?spice=${HEAT_START}`)}"><span>See all level <span data-heat-n>${HEAT_START}</span> noodles</span> ${icon.arrow}</a>
+        <script type="application/json" id="heat-copy">${json(SPICE_LADDER)}</script>
+      </article>
+      <article class="pcard pcard--spin reveal" id="roulette" aria-labelledby="pc-spin-h">
+        <div class="roulette" data-roulette data-root="${r("")}">
+          <h3 class="pcard-h" id="pc-spin-h">${icon.dice}Can't decide? Spin</h3>
+          <p class="pcard-sub">Pick how hot you want it, press spin, then find the packet on the wall.</p>
+          <p class="visually-hidden" aria-live="polite" data-roulette-live></p>
+          <div class="roulette-window"><div class="roulette-reel">
+            <div class="roulette-item roulette-item--idle">${mascot({ acc: "party", color: "#ff8fb0", className: "roulette-meo" })}<span><span class="nc-meta">Ready when you are</span><span class="ri-name">Press spin to pick a noodle</span></span></div>
+          </div></div>
+          <div class="roulette-controls">
+            <label class="visually-hidden" for="roulette-heat">Heat level</label>
+            <select class="select" id="roulette-heat"><option value="any">Any heat</option><option value="mild">No heat</option><option value="some">A little kick</option><option value="fire">Hot (3+)</option></select>
+            <button class="btn btn--red" type="button" data-spin>${icon.dice} Spin</button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+  <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, country: n.country, spice: n.spiceKey, type: n.type, img: n.thumb })))}</script>
+</section>
+
+<section class="story" id="how" aria-labelledby="how-h">
+  <div class="wrap story-head reveal">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-h">From the wall to your bowl in four <em>steps</em>.</h2>
+    <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
+  </div>
+  <ol class="stack" data-stack>
+    <li class="scard scard--paper">
+      <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
+      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--red" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
+    </li>
+    <li class="scard scard--warm">
+      <div class="scard-media">${bgVideo(r, "step-pairings", { sizes: STEP_SIZES })}</div>
+      <div class="scard-copy"><span class="scard-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--line" href="${r("pairings-and-sides/")}">See the pairings and sides ${icon.arrow}</a></div>
+    </li>
+    <li class="scard scard--paper">
+      <div class="scard-media">${bgVideo(r, "step-cook", { sizes: STEP_SIZES })}</div>
+      <div class="scard-copy"><span class="scard-num">03</span><h3>Cook it your way</h3><p>Press 1, then 2 on the machine to start cooking.</p><p class="scard-tip">Egg or cheese? Add it on top of the noodles in the last 30 seconds.</p></div>
+    </li>
+    <li class="scard scard--warm">
+      <div class="scard-media">${bgVideo(r, "step-enjoy", { sizes: STEP_SIZES })}</div>
+      <div class="scard-copy"><span class="scard-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away.</p></div>
+    </li>
+  </ol>
+</section>
+
+<section class="section menu" id="menu" aria-labelledby="menu-h">
+  <div class="wrap">
+    <div class="menu-head reveal">
+      <p class="eyebrow">The menu</p>
+      <h2 id="menu-h">What's on the <em>menu</em>.</h2>
+      <p class="lead">${COUNT} instant noodles, ${pairings.length} pairings and sides and ${catalogue.drinks.length} drinks. Choose at the wall when you walk in.</p>
+    </div>
+    <div class="mtabs" data-tabs>
+      <div class="mtab-list" role="tablist" aria-label="Menu" hidden>
+        <button class="mtab" type="button" role="tab" id="mtab-noodles" aria-controls="mpanel-noodles" aria-selected="true">Noodles<small>${COUNT}</small></button>
+        <button class="mtab" type="button" role="tab" id="mtab-pairings" aria-controls="mpanel-pairings" aria-selected="false" tabindex="-1">Pairings and sides<small>${pairings.length}</small></button>
+        <button class="mtab" type="button" role="tab" id="mtab-drinks" aria-controls="mpanel-drinks" aria-selected="false" tabindex="-1">Drinks<small>${catalogue.drinks.length}</small></button>
+        <span class="mtab-ind" aria-hidden="true"></span>
+      </div>
+      <div class="mpanel" id="mpanel-noodles" data-tab-panel>
+        <h3 class="mpanel-h">Noodles</h3>
+        <ul class="mgrid">${featured.map((n) => `<li><a class="mitem" href="${r(n.url)}"><span class="mitem-media">${noodleMedia(n, r, { alt: "" })}</span><span class="mitem-name">${esc(n.name)}</span><span class="mitem-meta">${flag(n.countryCode, r, { w: 16 })}${esc(n.country)} · ${esc(n.brand)}</span></a></li>`).join("")}</ul>
+        <a class="btn btn--red mpanel-more" href="${r("noodles/")}">See all ${COUNT} ${icon.arrow}</a>
+      </div>
+      <div class="mpanel" id="mpanel-pairings" data-tab-panel>
+        <h3 class="mpanel-h">Pairings and sides</h3>
+        ${groups.map((g) => `<h4 class="mgroup-h">${esc(g)}</h4>
+        <ul class="mgrid mgrid--sm">${pairings.filter((t) => t.group === g).map((t) => `<li><a class="mitem mitem--sm" href="${r("pairings-and-sides/")}#${t.id}"><span class="mitem-media">${t.img ? `<img src="${r(t.mid || t.img)}" alt="" width="192" height="192" loading="lazy" decoding="async">` : `<span class="mitem-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><span class="mitem-name">${esc(t.name)}</span></a></li>`).join("")}</ul>`).join("")}
+        <a class="link-arrow mpanel-more" href="${r("pairings-and-sides/")}">How each one cooks ${icon.arrow}</a>
+      </div>
+      <div class="mpanel" id="mpanel-drinks" data-tab-panel>
+        <h3 class="mpanel-h">Drinks</h3>
+        <ul class="mdrinks">${catalogue.drinks.map((x) => `<li><span class="mitem-ic" aria-hidden="true">${svgIcon("cup")}</span><span><strong>${esc(x.name)}</strong>${x.size ? `<small>${esc(x.size)}</small>` : ""}</span></li>`).join("")}</ul>
+      </div>
+    </div>
+    <p class="note menu-note">What's in the fridge and at the pairings bar changes day to day. Ask the crew, and tell us about any allergies.</p>
+  </div>
+</section>
+
+<section class="section food" aria-labelledby="food-h">
+  <div class="wrap">
+    <div class="food-head reveal">
+      <p class="eyebrow">Real bowls, cooked in our shop</p>
+      <h2 id="food-h">Worth a <em>try</em>.</h2>
+      <p class="lead">Six packets from six countries, cooked at our machines. Pick one to see how it cooks.</p>
+    </div>
+    <ul class="food-grid">${FOOD.map((n) => `<li class="food-tile reveal"><a href="${r(n.url)}"><span class="food-media"><img ${photoSet(r, n, "(min-width: 900px) 30vw, 50vw")} alt="${esc(n.imgAlt)}" width="900" height="900" loading="lazy" decoding="async"></span><span class="food-tag">${flag(n.countryCode, r, { w: 16 })}${esc(n.brand)} ${esc(n.name)}</span></a></li>`).join("")}</ul>
+  </div>
+</section>
+
+<section class="section visit" id="visit" aria-labelledby="visit-h">
+  <div class="wrap visit-grid">
+    <div class="visit-info reveal">
+      <p class="eyebrow">Visit</p>
+      <h2 id="visit-h">Find us in <em>${esc(site.suburb)}</em>.</h2>
+      <p class="visit-addr"><strong>Meon Noodles</strong><br>${esc(addressLine)}</p>
+      ${site.hours.length ? `<table class="hours hours--home"${DAY_HOURS ? " data-hours-today" : ""}><caption class="visually-hidden">Opening hours</caption><tbody>${HOUR_ROWS.map((h) => `<tr data-days="${h.a}-${h.b}"><th scope="row"><span aria-hidden="true">${esc(h.short)}</span><span class="visually-hidden">${esc(h.days)}</span></th><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}
+      ${HOURS_NOTE ? `<p class="note">${esc(HOURS_NOTE)}</p>` : ""}
+      <div class="actions"><a class="btn btn--red btn--lg" href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">${icon.pin} ${openLink("Get directions", "Google Maps in a new tab")}</a></div>
+      <p class="visit-walk">Walk in: no bookings, no online orders.</p>
+    </div>
+    <figure class="visit-map reveal">
+      ${VISIT_MAP}
+      <figcaption>Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">${openLink("OpenStreetMap contributors")}</a></figcaption>
+    </figure>
   </div>
 </section>
 
@@ -668,12 +843,13 @@ addPage("", layout({
   <div class="wrap insta-head">
     <div class="reveal">
       <p class="eyebrow">${esc(site.instagramHandle)}</p>
-      <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
+      <h2 id="insta-h">Fresh on our <em>Instagram</em>.</h2>
       <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
     </div>
     <div class="actions">
       <a class="btn btn--red" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} Follow ${esc(site.instagramHandle)}</a>
       ${site.tiktok ? `<a class="btn btn--line" href="${esc(site.tiktok)}" target="_blank" rel="noopener">${icon.tiktok} TikTok</a>` : ""}
+      <button class="btn btn--line insta-pause" type="button" data-marquee-toggle><span class="vpause-ic" aria-hidden="true"></span><span data-marquee-label>Pause the reels</span></button>
     </div>
   </div>
   <div class="insta-track">
@@ -683,185 +859,9 @@ addPage("", layout({
         <span class="reel-top" aria-hidden="true"><span class="reel-av"><img src="${r("assets/img/logo-96.webp")}" alt="" width="32" height="32" loading="lazy" decoding="async"></span><span class="reel-user">${esc(site.instagramHandle.replace(/^@/, ""))}</span>${icon.insta}</span>
         <div class="reel-media">${bgVideo(r, v.file, { sizes: REEL_SIZES })}</div>
         <span class="reel-bottom"><span class="reel-acts" aria-hidden="true">${svgIcon("heart")}${svgIcon("chat")}${svgIcon("send")}</span><span class="reel-cap"><b aria-hidden="true">${esc(site.instagramHandle.replace(/^@/, ""))}</b> ${esc(v.cap)}</span></span>
-        <span class="visually-hidden"> ${v.url === site.instagram ? "See more MEON videos on Instagram" : "Watch this reel on Instagram"}</span>
+        <span class="visually-hidden"> ${v.url === site.instagram ? "See more Meon videos on Instagram" : "Watch this reel on Instagram"}</span>
       </a></li>`;
     }).join("")}</ul>
-  </div>
-</section>
-
-<section class="story" id="how" aria-labelledby="how-h">
-  <div class="wrap story-head reveal">
-    <p class="eyebrow">Do it yourself</p>
-    <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
-    <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
-  </div>
-  <ol class="stack" data-stack>
-    <li class="scard scard--red">
-      <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
-    </li>
-    <li class="scard scard--ink">
-      <div class="scard-media">${bgVideo(r, "step-pairings", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--white" href="${r("pairings-and-sides/")}">See the pairings and sides ${icon.arrow}</a></div>
-    </li>
-    <li class="scard scard--light">
-      <div class="scard-media">${bgVideo(r, "step-cook", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">03</span><h3>Cook it your way</h3><p>Press 1, then 2 on the machine to start cooking.</p><p class="scard-tip">Egg or cheese? Add it on top of the noodles in the last 30 seconds.</p></div>
-    </li>
-    <li class="scard scard--red">
-      <div class="scard-media">${bgVideo(r, "step-enjoy", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">04</span><h3>Enjoy your meal</h3><p>Eat in while it's hot, or take it away.</p></div>
-    </li>
-  </ol>
-</section>
-
-<section class="vwall" aria-labelledby="vwall-h" data-scene="through">
-  <div class="vwall-cols" aria-hidden="true">${VWALL.map((col, i) => `<div class="vwall-col vwall-col--${i + 1}">${col.map((t) => vwallTile(r, t)).join("")}</div>`).join("")}</div>
-  <div class="vwall-copy">
-    <p class="eyebrow">MEON time</p>
-    <h2 id="vwall-h" data-split>Bring your crew.</h2>
-    <p class="lead">We've got a wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
-    <a class="btn btn--white btn--lg" href="${r("visit/")}">Visit us ${icon.arrow}</a>
-  </div>
-</section>
-
-
-<div class="ticker" data-hscroll aria-hidden="true">
-  <div class="ticker-band ticker-band--red"><div class="wall-row" data-speed="1.4">${TICKER.concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("bowl")}`).join("")}</div></div>
-  <div class="ticker-band ticker-band--ink"><div class="wall-row" data-speed="-1.1">${TICKER.slice().reverse().concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("flame")}`).join("")}</div></div>
-</div>
-
-<section class="fresh" id="fresh" aria-labelledby="fresh-h">
-  <div class="wrap">
-    <div class="fresh-head reveal">
-      <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
-      <p class="lead">Real bowls from our noodle wall, shot in our shop. Pick one to see its packet.</p>
-    </div>
-    <div class="fresh-grid">
-      ${FRESH.map((name, i) => {
-        const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
-      }).join("")}
-    </div>
-  </div>
-</section>
-
-<section class="wall-sec" aria-label="On the noodle wall">
-  <div class="wrap">${sectionHead("On the wall now", "Pick a packet. Any packet.", `<a class="link-arrow" href="${r("noodles/")}">See them all ${icon.arrow}</a>`)}</div>
-  <div class="wall" data-hscroll aria-hidden="true">
-    <div class="wall-row" data-speed="1">${wallImgs(withPhotos.slice(0, half), r)}</div>
-    <div class="wall-row" data-speed="-1">${wallImgs(withPhotos.slice(half), r)}</div>
-  </div>
-</section>
-
-<section class="section section--soft">
-  <div class="wrap">
-    ${sectionHead("Worth a try", "Good places to start.", `<a class="link-arrow" href="${r("noodles/")}">All noodles ${icon.arrow}</a>`)}
-    <div class="card-grid">${featured.map((n, i) => noodleCard(n, r, i)).join("")}</div>
-  </div>
-</section>
-
-<section class="section" id="roulette">
-  <div class="wrap roulette" data-roulette data-root="${r("")}">
-    <div class="reveal">
-      <p class="eyebrow">Can't decide?</p>
-      <h2 data-split>Let the roulette choose.</h2>
-      <p class="lead">Pick how hot you want it, press spin, then find the packet on the wall.</p>
-      <p class="visually-hidden" aria-live="polite" data-roulette-live></p>
-    </div>
-    <div class="roulette-machine reveal">
-      <div class="roulette-window"><div class="roulette-reel">
-        <div class="roulette-item roulette-item--idle">${mascot({ acc: "party", color: "#ff8fb0", className: "roulette-meo" })}<span><span class="nc-meta">Ready when you are</span><h3>Press spin to pick a noodle</h3></span></div>
-      </div></div>
-      <div class="roulette-controls">
-        <label class="visually-hidden" for="roulette-heat">Heat level</label>
-        <select class="select" id="roulette-heat"><option value="any">Any heat</option><option value="mild">No heat</option><option value="some">A little kick</option><option value="fire">Hot (3+)</option></select>
-        <button class="btn btn--red" type="button" data-spin data-magnetic>${icon.dice} Spin</button>
-      </div>
-    </div>
-  </div>
-  <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, country: n.country, spice: n.spiceKey, type: n.type, img: n.thumb })))}</script>
-</section>
-
-<section class="section section--soft">
-  <div class="wrap">
-    ${sectionHead("From across Asia", "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries ${icon.arrow}</a>`)}
-    <div class="country-list">
-      ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}</span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
-    </div>
-  </div>
-</section>
-
-<section class="section heat" id="spice" data-heat>
-  <div class="wrap split">
-    <div class="reveal">
-      <p class="eyebrow">Heat check</p>
-      <h2 data-split>How brave are you feeling?</h2>
-      <p class="lead">Every noodle has a spice rating from 0 to 5. Drag the chilli to your level and we'll show you what to grab.</p>
-      <label class="heat-slider"><span class="visually-hidden">Spice level</span><input type="range" min="0" max="5" step="1" value="2" data-heat-input aria-valuetext="2, Medium"></label>
-      <div class="heat-scale" aria-hidden="true">${SPICE_LADDER.map(([lvl]) => `<span>${lvl}</span>`).join("")}</div>
-    </div>
-    <div class="heat-card reveal">
-      <div class="heat-top">
-        <div class="heat-meo" data-heat-meo>${mascot({ acc: "chilli", color: "#ff5b5b" })}<span class="sweat s1"></span><span class="sweat s2"></span><span class="sweat s3"></span></div>
-        <div><p class="heat-level" data-heat-level>2 · Medium</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[2][2])}</p></div>
-      </div>
-      <ul class="heat-picks" data-heat-picks></ul>
-      <a class="btn btn--red" data-heat-link href="${r("noodles/?spice=2")}" data-magnetic><span>See all level <span data-heat-n>2</span> noodles</span> ${icon.arrow}</a>
-      <script type="application/json" id="heat-copy">${json(SPICE_LADDER)}</script>
-    </div>
-  </div>
-</section>
-
-<section class="section section--soft bowl-builder" id="build" data-bowl>
-  <div class="wrap split split--rev">
-    <div class="bb-stage reveal">
-      <div class="bb-bowl" data-bowl-stage>
-        <svg class="bb-bowl-back" viewBox="0 0 400 260" aria-hidden="true"><ellipse cx="200" cy="70" rx="188" ry="52" fill="#f3d27a" stroke="#17110f" stroke-width="6"/><path d="M40 66c20-14 40 10 60-4s40 10 60-4 40 10 60-4 40 10 60-4 40 10 60-4" fill="none" stroke="#e6b54a" stroke-width="7" stroke-linecap="round"/><path d="M60 86c20-14 40 10 60-4s40 10 60-4 40 10 60-4 40 10 60-4" fill="none" stroke="#e6b54a" stroke-width="7" stroke-linecap="round"/></svg>
-        <div class="bb-toppings" data-bowl-items></div>
-        <svg class="bb-bowl-front" viewBox="0 0 400 260" aria-hidden="true"><path d="M12 70h376c0 104-84 182-188 182S12 174 12 70z" fill="#fff" stroke="#17110f" stroke-width="6" stroke-linejoin="round"/><path d="M40 120h320" stroke="#ec1b25" stroke-width="12"/><rect x="170" y="140" width="60" height="50" rx="4" fill="#ec1b25"/><text x="200" y="172" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="700" fill="#fff">meon</text></svg>
-        <div class="bb-steam" aria-hidden="true"><i></i><i></i><i></i></div>
-      </div>
-      <p class="bb-count" aria-live="polite" data-bowl-count>Your bowl is empty. Add something.</p>
-    </div>
-    <div class="reveal">
-      <p class="eyebrow">Pairings and sides</p>
-      <h2 data-split>Build your bowl.</h2>
-      <p class="lead">The packet is only the start. Tap a pairing to drop it in, then find it all at the pairings and sides bar.</p>
-      <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
-      <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side ${icon.arrow}</a></div>
-    </div>
-  </div>
-</section>
-
-${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a quick review. It helps other noodle lovers find us." })}
-
-<section class="visit-band" aria-labelledby="visit-h">
-  <div class="visit-band-media">${bgVideo(r, "street-front")}</div>
-  <div class="wrap visit-band-inner">
-    <div class="visit-band-copy reveal">
-      <p class="eyebrow">Come visit us</p>
-      <h2 id="visit-h" data-split>Find us in ${esc(site.suburb)}.</h2>
-      <p class="visit-band-addr">${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</p>
-      <p class="lead">Dine in or take it away. ${esc(HOURS_LINE)}</p>
-      <div class="actions">
-        <a class="btn btn--white btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Get directions</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="follow" aria-labelledby="follow-h">
-  <div class="wrap follow-inner">
-    <div class="follow-copy reveal">
-      <p class="eyebrow">${esc(site.instagramHandle)}</p>
-      <h2 id="follow-h" data-split>Follow us.</h2>
-      <p class="lead">We post our newest packets, store tours and late-night bowls. Come say hi.</p>
-    </div>
-    <div class="follow-links reveal">
-      <a class="follow-link" href="${esc(site.instagram)}" target="_blank" rel="noopener"><span class="follow-logo follow-logo--ig">${icon.insta}</span><span class="follow-name"><strong>Instagram</strong><small>${esc(site.instagramHandle)}</small></span>${icon.arrow}</a>
-      ${site.tiktok ? `<a class="follow-link" href="${esc(site.tiktok)}" target="_blank" rel="noopener"><span class="follow-logo follow-logo--tt">${icon.tiktok}</span><span class="follow-name"><strong>TikTok</strong><small>@${esc(site.tiktok.split("@")[1] || "")}</small></span>${icon.arrow}</a>` : ""}
-    </div>
   </div>
 </section>
 `,
@@ -871,14 +871,13 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
 addPage("noodles/", layout({
   urlPath: "noodles/",
   title: "Noodle library",
-  seoTitle: `${COUNT} Instant Noodles from Across Asia · MEON Noodles Perth`,
+  seoTitle: `${COUNT} Instant Noodles from Across Asia · Meon Noodles Perth`,
   active: "noodles/",
-  overlay: true,
   jsonld: [{
     "@context": "https://schema.org",
     "@type": "Menu",
     "@id": `${SITE_URL}/noodles/#menu`,
-    name: "MEON instant noodle menu",
+    name: "Meon instant noodle menu",
     url: `${SITE_URL}/noodles/`,
     inLanguage: "en-AU",
     hasMenuSection: countries.map((c) => ({
@@ -888,7 +887,7 @@ addPage("noodles/", layout({
       hasMenuItem: noodles.filter((n) => n.country === c.name).map((n) => ({ "@type": "MenuItem", name: `${n.brand} ${n.name}`, url: `${SITE_URL}/${n.url}`, image: n.img ? `${SITE_URL}/${n.img}` : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined })),
     })),
   }],
-  description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
+  description: `Browse ${COUNT} instant noodles at Meon. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
 ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
 <div data-library>
@@ -942,11 +941,11 @@ noodles.forEach((n, idx) => {
   addPage(n.url, layout({
     urlPath: n.url,
     title: `${n.name} – ${n.brand}`,
-    seoTitle: [`${n.brand} ${n.name} (${n.country}) · Instant Noodles at MEON Perth`, `${n.brand} ${n.name} (${n.country}) · MEON Perth`, `${n.brand} ${n.name} · MEON Perth`, `${n.brand} ${n.name} · MEON`, `${n.name} · MEON Perth`, `${n.name} · MEON`].find((t) => t.length <= 60) || `${n.name} · MEON`,
+    seoTitle: [`${n.brand} ${n.name} (${n.country}) · Instant Noodles at Meon Perth`, `${n.brand} ${n.name} (${n.country}) · Meon Perth`, `${n.brand} ${n.name} · Meon Perth`, `${n.brand} ${n.name} · Meon`, `${n.name} · Meon Perth`, `${n.name} · Meon`].find((t) => t.length <= 60) || `${n.name} · Meon`,
     active: "noodles/",
     image: n.img || "assets/img/shoot/og-meon.jpg",
     preload: n.img || "",
-    description: fitDesc(`${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}.`, shortBlurb(n), [n.unrated ? [] : `Spice ${n.spice}/5.`, n.type ? `${n.type} noodle.` : []]),
+    description: fitDesc(`${n.brand} ${n.name} (${n.country}) at Meon ${site.suburb}.`, shortBlurb(n), [n.unrated ? [] : `Spice ${n.spice}/5.`, n.type ? `${n.type} noodle.` : []]),
     jsonld: [
       { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}${n.weightG ? `, ${n.weightG} g packet` : ""}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
@@ -1003,7 +1002,7 @@ noodles.forEach((n, idx) => {
         </section>
 
         <section class="noodle-sec" aria-labelledby="steps-h">
-          <h2 id="steps-h">How to cook it at MEON</h2>
+          <h2 id="steps-h">How to cook it at Meon</h2>
           <ol class="steps-list">${cook.steps.map(([h, t]) => `<li><strong>${h}</strong><span>${t}</span></li>`).join("")}</ol>
           <p class="note">If the packet instructions differ, follow the packet. The crew is always happy to help.</p>
         </section>
@@ -1013,9 +1012,9 @@ noodles.forEach((n, idx) => {
           <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.small)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
         </section>` : ""}
 
-        <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : /^Meat flavour/.test(n.diet) ? "* Meat flavour: the seasoning tastes of chicken, beef or pork. The flavour may be artificial, but MEON never counts these noodles as vegetarian. Check the packet for allergens and full ingredients." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
+        <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : /^Meat flavour/.test(n.diet) ? "* Meat flavour: the seasoning tastes of chicken, beef or pork. The flavour may be artificial, but Meon never counts these noodles as vegetarian. Check the packet for allergens and full ingredients." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
         <div class="noodle-actions">
-          <button class="btn btn--line btn--sm" type="button" data-share data-url="${esc(`${SITE_URL}/${n.url}`)}" data-title="${esc(`${n.brand} ${n.name} at MEON`)}">${icon.share} Share</button>
+          <button class="btn btn--line btn--sm" type="button" data-share data-url="${esc(`${SITE_URL}/${n.url}`)}" data-title="${esc(`${n.brand} ${n.name} at Meon`)}">${icon.share} Share</button>
           <button class="btn btn--line btn--sm" type="button" data-search-open>${icon.search} Search noodles</button>
         </div>
         <nav class="prev-next" aria-label="More noodles">
@@ -1042,11 +1041,10 @@ ${ctaBand(r, { title: "Hungry for another?", text: "Take this packet off the wal
 addPage("countries/", layout({
   urlPath: "countries/",
   title: "Noodles by country",
-  seoTitle: "Instant Noodles by Country: Korea, Japan & More · MEON Perth",
+  seoTitle: "Instant Noodles by Country: Korea, Japan & More · Meon Perth",
   active: "countries/",
-  overlay: true,
   jsonld: [crumbLd("Countries", "countries/")],
-  description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
+  description: "Explore Meon's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Countries"]], eyebrow: "From across Asia", title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
 <section class="section section--tight"><div class="wrap">
@@ -1064,14 +1062,14 @@ for (const c of countries) {
   addPage(`countries/${c.slug}/`, layout({
     urlPath: `countries/${c.slug}/`,
     title: `${c.name} instant noodles`,
-    seoTitle: `${COUNTRY_ADJ[c.name] || c.name} Instant Noodles in Perth (${list.length}) · MEON Noodles`,
+    seoTitle: `${COUNTRY_ADJ[c.name] || c.name} Instant Noodles in Perth (${list.length}) · Meon Noodles`,
     active: "countries/",
     image: list.find((n) => n.img)?.img,
     jsonld: [
-      { "@context": "https://schema.org", "@type": "ItemList", name: `${c.name} instant noodles at MEON`, numberOfItems: list.length, itemListElement: list.map((n, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE_URL}/${n.url}`, name: `${n.brand} ${n.name}` })) },
+      { "@context": "https://schema.org", "@type": "ItemList", name: `${c.name} instant noodles at Meon`, numberOfItems: list.length, itemListElement: list.map((n, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE_URL}/${n.url}`, name: `${n.brand} ${n.name}` })) },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Countries", item: `${SITE_URL}/countries/` }, { "@type": "ListItem", position: 3, name: c.name, item: `${SITE_URL}/countries/${c.slug}/` }] },
     ],
-    description: fitDesc(`${list.length} instant noodles from ${c.name === "Philippines" ? "the Philippines" : c.name} at MEON ${site.suburb}, Perth.`, c.headline, [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
+    description: fitDesc(`${list.length} instant noodles from ${c.name === "Philippines" ? "the Philippines" : c.name} at Meon ${site.suburb}, Perth.`, c.headline, [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
     body: (r) => `
 ${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: plural(list.length, "noodle"), title: esc(c.name), lead: `<strong>${esc(c.headline)}</strong> ${esc(c.intro)}`, actions: `<a class="btn btn--red" href="${r(`noodles/?country=${c.code}`)}" data-magnetic>Filter in the library ${icon.arrow}</a>`, aside: `<div class="flag-hero" data-parallax="0.06">${flag(c.code, r, { cls: "flag flag--hero", w: 360 })}</div>`,
   after: facts([[list.length, "Noodles"], [list.filter((n) => n.type === "Soup").length, "Soup"], [list.filter((n) => n.type === "Dry").length, "Dry"], [list.filter((n) => n.spiceKey >= 3).length, "Spicy (3+)"]]) })}
@@ -1089,26 +1087,15 @@ ${ctaBand(r)}
 }
 
 // ---------- Pairings and sides (/pairings-and-sides/; the old /toppings/ URL redirects there, see vercel.json) ----------
-// Pairings cook in the bowl with the noodles; egg and cheese go on top in the last 30 seconds; sides are ready to eat.
-const PAIRING_GROUPS = {
-  "Meat and seafood": "Pairings. Put them in the bowl with your noodles at the start, so they cook together.",
-  "Vegetables and more": "Pairings. In at the start with your noodles.",
-  "Egg and cheese": "Last 30 seconds. Crack the egg and add cheese on top of the noodles, not on the bowl, so it doesn't burn.",
-  Sides: "Ready to eat, so they don't go in the machine. Have them on the side.",
-};
-const groups = [...new Set(pairings.map((t) => t.group))];
-for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
-const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
-  seoTitle: "Noodle Pairings, Sides and Drinks · MEON Perth",
+  seoTitle: "Noodle Pairings, Sides and Drinks · Meon Perth",
   active: "pairings-and-sides/",
-  overlay: true,
   jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
-  description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
+  description: "Pairings, sides and drinks at Meon: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
+${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--line btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--line btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
@@ -1127,13 +1114,12 @@ ${ctaBand(r)}
 // ---------- About ----------
 addPage("about/", layout({
   urlPath: "about/",
-  title: "About MEON",
+  title: "About Meon",
   active: "about/",
-  overlay: true,
   jsonld: [crumbLd("About", "about/")],
-  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
+  description: `Meon is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
+${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know Meon.", lead: "We opened Meon to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2 data-split>What we do.</h2>
@@ -1162,10 +1148,10 @@ ${ctaBand(r)}
 addPage("privacy/", layout({
   urlPath: "privacy/",
   title: "Privacy",
-  seoTitle: "Privacy · How MEON Noodles Handles Reviews and Data",
+  seoTitle: "Privacy · How Meon Noodles Handles Reviews and Data",
   active: "privacy/",
   jsonld: [crumbLd("Privacy", "privacy/")],
-  description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
+  description: "What the Meon Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
   body: (r) => `
 ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
 <section class="section section--tight"><div class="wrap split split--top">
@@ -1202,21 +1188,19 @@ ${ctaBand(r)}
 }));
 
 // ---------- Visit ----------
-const addressLine = [site.streetAddress, `${site.suburb} ${site.state} ${site.postcode}`.trim()].filter(Boolean).join(", ");
 addPage("visit/", layout({
   urlPath: "visit/",
   title: "Visit us",
-  seoTitle: `Visit MEON · Instant Noodle Bar in ${site.suburb}, Perth`,
+  seoTitle: `Visit Meon · Instant Noodle Bar in ${site.suburb}, Perth`,
   active: "visit/",
-  overlay: true,
   jsonld: [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }, crumbLd("Visit", "visit/")],
-  description: `Find MEON at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
+  description: `Find Meon at ${site.streetAddress}, ${site.suburb}, ${site.city} ${site.state}. Walk in, pick a packet from the noodle wall, add pairings and sides and cook it at the machine.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit MEON.", lead: `${esc(site.streetAddress)}, ${esc(site.suburb)}. Walk in, choose a packet and cook it your way.`, actions: `<a class="btn btn--red btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Get directions</a>${site.instagram ? `<a class="btn btn--glass btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
+${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.city)}`, title: "Visit Meon.", lead: `${esc(site.streetAddress)}, ${esc(site.suburb)}. Walk in, choose a packet and cook it your way.`, actions: `<a class="btn btn--red btn--lg" href="${esc(DIRECTIONS)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} ${openLink("Get directions", "Google Maps in a new tab")}</a>${site.instagram ? `<a class="btn btn--line btn--lg" href="${esc(site.instagram)}" target="_blank" rel="noopener">${icon.insta} ${esc(site.instagramHandle)}</a>` : ""}`, clips: ["ig-sign", "wall-12"], phone: "ig-sign" })}
 <section class="section section--tight"><div class="wrap">
   <h2 class="visually-hidden">Where, when and how to reach us</h2>
   <div class="info-cols">
-    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions ${icon.arrow}</a></div>
+    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>Meon Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">${openLink("Get directions", "Google Maps in a new tab")} ${icon.arrow}</a></div>
     <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}${site.instagram ? `<a class="${site.hours.length ? "link-arrow" : "btn btn--line btn--sm"}" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${site.hours.length ? `Latest hours on Instagram ${icon.arrow}` : `${icon.insta} Check our hours on Instagram`}</a>` : site.hours.length ? "" : `<p>${esc(HOURS_NOTE)}</p>`}</div>
     <div class="reveal" style="--rd:.12s">${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram ${icon.arrow}</a>` : ""}</div>
   </div>
@@ -1231,8 +1215,7 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
     </ul>
   </div>
   <div class="duo">
-    <figure class="img-reveal" data-parallax="-0.04">${shootImg(r, "shin-black-lift", { sizes: "(min-width: 900px) 24vw, 50vw" })}</figure>
-    <figure class="img-reveal" data-parallax="0.06">${shootImg(r, "tomyum-egg-prawn", { sizes: "(min-width: 900px) 24vw, 50vw" })}</figure>
+    ${["ottogi-jin-ramen-spicy", "nissin-demae-ramen-tonkotsu"].map((slug, i) => { const n = noodles.find((x) => x.slug === slug); return `<figure class="img-reveal" data-parallax="${i ? "0.05" : "-0.04"}"><img ${photoSet(r, n, "(min-width: 900px) 24vw, 50vw")} alt="${esc(n.imgAlt)}" width="900" height="900" loading="lazy" decoding="async"></figure>`; }).join("\n    ")}
   </div>
 </div></section>
 ${PRIVATE_FEEDBACK ? `<section class="section section--tight" aria-labelledby="feedback-h"><div class="wrap feedback">
@@ -1254,7 +1237,7 @@ ${ctaBand(r, { title: `See you at ${esc(site.suburb)}.` })}
 fs.mkdirSync(path.join(OUT, "assets", "qr"), { recursive: true });
 const qrOpts = { errorCorrectionLevel: "M", margin: 2, color: { dark: "#17110fff", light: "#ffffffff" } };
 const extraQR = [
-  { slug: "home", name: "MEON home", url: `${SITE_URL}/?src=qr` },
+  { slug: "home", name: "Meon home", url: `${SITE_URL}/?src=qr` },
   { slug: "noodle-library", name: "Noodle library", url: `${SITE_URL}/noodles/?src=qr` },
 ];
 for (const item of [...noodles.map((n) => ({ slug: n.slug, url: n.qrUrl })), ...extraQR]) {
@@ -1268,7 +1251,7 @@ addPage("qr/", layout({
   urlPath: "qr/",
   title: "Shelf QR codes",
   noindex: true,
-  description: "Printable QR codes for every noodle on the MEON wall.",
+  description: "Printable QR codes for every noodle on the Meon wall.",
   body: (r) => `
 <div class="no-print">${pageHero(r, { crumbs: [["Shelf QR codes"]], eyebrow: `Staff · ${noodles.length + 3} printable codes`, title: "Shelf QR codes.", seed: 8 })}</div>
 <section class="section section--tight"><div class="wrap">
@@ -1285,7 +1268,7 @@ addPage("qr/", layout({
   </div>
   <h2 class="visually-hidden">Codes</h2>
   <div class="qr-sheet">
-    ${[...extraQR.map((x) => ({ slug: x.slug, name: x.name, brand: "MEON", cc: "", url: x.url })), ...noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, url: n.qrUrl }))]
+    ${[...extraQR.map((x) => ({ slug: x.slug, name: x.name, brand: "Meon", cc: "", url: x.url })), ...noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, url: n.qrUrl }))]
       .map((q) => `<div class="qr-card"><span class="qr-brand">${q.cc ? flag(q.cc, r, { w: 16 }) : ""}${esc(q.brand)}</span><h3>${esc(q.name)}</h3><img src="${r(`assets/qr/${q.slug}.svg`)}" alt="QR code for ${esc(q.name)}" width="160" height="160" loading="lazy"><div class="qr-scan">Scan for info + cook timer</div><div class="qr-url">${esc(q.url)}</div><div class="no-print" style="margin-top:8px;display:flex;gap:6px;justify-content:center"><a class="chip" href="${r(`assets/qr/${q.slug}.svg`)}" download>SVG</a>${process.env.QR_PNG !== "0" ? `<a class="chip" href="${r(`assets/qr/${q.slug}.png`)}" download>PNG</a>` : ""}</div></div>`)
       .join("")}
   </div>
@@ -1335,7 +1318,7 @@ addPage("qr-generator/", layout({
   urlPath: "qr-generator/",
   title: "QR code generator",
   noindex: true,
-  description: "Make branded MEON QR codes for any noodle page, promotion or link — download as PNG or SVG.",
+  description: "Make branded Meon QR codes for any noodle page, promotion or link — download as PNG or SVG.",
   scripts: ["assets/vendor/qrcode.js"],
   body: (r) => `
 <div class="no-print">${pageHero(r, { crumbs: [["QR generator"]], eyebrow: "Staff · runs in your browser", title: "QR code generator.", lead: "Make a branded QR code for any noodle, page, deal or link. Download a PNG for print or an SVG for signage.", seed: 9 })}</div>
@@ -1356,7 +1339,7 @@ addPage("qr-generator/", layout({
         <div class="field"><label for="qg-bg">Background</label><input id="qg-bg" type="color" value="#ffffff"></div>
       </div>
       <div class="field"><label for="qg-size">Size: <span data-qg-size>1024</span> px</label><input id="qg-size" type="range" min="256" max="2048" step="128" value="1024"></div>
-      <label class="toggle"><input id="qg-logo" type="checkbox" checked> Put the MEON logo in the middle</label>
+      <label class="toggle"><input id="qg-logo" type="checkbox" checked> Put the Meon logo in the middle</label>
       <label class="toggle"><input id="qg-round" type="checkbox"> Rounded dots</label>
     </form>
     <div class="qrgen-preview">
@@ -1411,17 +1394,18 @@ const searchIndex = [
     ["Dry noodles", "Filter: dry, mix-and-eat", "noodles/?type=Dry", "chopsticks"],
     ["Soup noodles", "Filter: soup", "noodles/?type=Soup", "soup"],
     ["Visit us", `${site.suburb}, ${site.city} · dine in or take away`, "visit/", "pin"],
-    ["About MEON", "Our story", "about/", "heart"],
+    ["About Meon", "Our story", "about/", "heart"],
   ].map(([t, s, u, ic]) => ({ g: "Pages", t, s, u, ic, k: "page" })),
 ];
 write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 // IndexNow (Bing, Yandex, Seznam, Naver; SEO 2 Nov 2026): the key file proves the pings in scripts/indexnow.mjs come from us.
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
-const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
+// Sitemap images: the home page's hero poster and its "Worth a try" photos; each noodle page's photos.
+const pageImages = new Map([["", [`assets/${HERO_POSTER.wide[0]}.webp`, ...FOOD.map((n) => n.img.split("?")[0])]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
-write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
+write("llms.txt", `# Meon Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location, opening hours and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
+write("site.webmanifest", JSON.stringify({ name: "Meon Noodles", short_name: "Meon", start_url: "/", display: "standalone", background_color: "#fffaf2", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
 console.log(`Built ${pages.length + 1} pages → ${path.relative(ROOT, OUT)}/  (${noodles.length} noodles, ${withPhotos.length} with photos, QR base ${SITE_URL})`);
