@@ -187,29 +187,34 @@ export { COUNTRY_ADJ };
 
 // Customer-facing badge for the Drive doc's "fun note". Staff notes (market share, rival brands,
 // "rural variant") are hidden; everything else gets tidy wording. Unknown notes show as written.
+// Rank claims (Security MUST-M1, 2 Nov 2026) show only when they are true of that one packet and sourced: the brand-level
+// "most popular in India" (on 4 Maggi packets) and the "2nd/3rd most popular" notes are hidden, "No.1 ramen" names who
+// said it, and "Top seller" stays hidden until the owner confirms it means MEON's own sales. check.mjs guards them.
 const BADGES = {
-  "2nd Most popular": "Crowd favourite",
+  "2nd Most popular": null,
   "2nd most popular brands in Vietnam": "A Vietnam favourite",
   "3 Mien represents North, Central & South": "North, Central & South",
-  "3rd Most popular / Healthier option": "A lighter pick",
+  "3rd Most popular / Healthier option": null,
   "Affordable, more rural": null,
   "Big competitor to Kangsifu": null,
   "Collab Noodle, Popular online": "Collab noodle",
   "Collab with Famous Chef / Bangkok Michelin starred restaurant": "Michelin-star collab",
   "Featured": "Featured",
-  "Hand pulled - Top Seller": "Hand-pulled · Top seller",
+  "Hand pulled - Top Seller": "Hand-pulled",
   "High Rating + More Premium": "Premium pick",
   "Increasing market share": "Rising star",
   "Known for no MSG flavour": "No added MSG",
   "Many other flavours.": null,
   "Most popular flavour": "Most popular flavour",
-  "Most popular in India": "India's favourite",
+  "Most popular in India": null,
   "Most popular in Vietnam": "Vietnam's favourite",
   "Most popular in the brand": "Brand bestseller",
   "New range": "New",
   "New": "New",
   "Niche flavour": "Something different",
-  "No.1 Ramen in the World": "No.1 ramen in the world",
+  // Wirecutter (The New York Times), "The Best Instant Noodles", 17 June 2020: Shin Ramyun Black was its top pick
+  // (reported by Korea.net, https://www.korea.net/NewsFocus/Society/view?articleId=187408).
+  "No.1 Ramen in the World": "Wirecutter's top pick 2020",
   "Popular in US / Canada / Everywhere": "Loved worldwide",
   "Premium Quality, Restaurant Style": "Restaurant style",
   "Rural variant": null,
@@ -217,11 +222,11 @@ const BADGES = {
   "Super Premium": "Super premium",
   "Superior Taste Award; hard to get": "Award winner · Hard to find",
   "Thailand Top 1 Product 2014": "Thailand's top product 2014",
-  "Third most popular": "Crowd favourite",
+  "Third most popular": null,
   "Top 10 Noodle 2021": "Top 10 noodle 2021",
   "Top 10 rated noodle 2021": "Top 10 noodle 2021",
   "Top Rated in Malaysia": "Top rated in Malaysia",
-  "Top Seller": "Top seller",
+  "Top Seller": null,
   "Was hyped like Buldak": "Internet famous",
   "Was viral on tik tok before": "Viral on TikTok",
 };

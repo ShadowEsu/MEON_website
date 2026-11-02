@@ -78,6 +78,15 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
+// Packet badges from the owner's notes (Security MUST-M1, 2 Nov 2026): a rank claim has to be true of that packet and
+// sourced. These were not: "India's favourite" (brand-level, on 4 Maggi packets), "Crowd favourite" (2nd/3rd most
+// popular), "A lighter pick" (unsourced health claim), an unattributed "No.1 ramen in the world", and "Top seller"
+// (until the owner confirms it means MEON's sales).
+const RANK_BADGE = /India(?:'|&#39;|&rsquo;|’)s favourite|Crowd favourite|A lighter pick|No\.\s?1 ramen in the world|Top seller/i;
+for (const f of [...htmlFiles, ...["llms.txt", "noodles.json", "search-index.json"].map((n) => path.join(OUT, n))]) {
+  const hit = fs.readFileSync(f, "utf8").match(RANK_BADGE);
+  if (hit) problems.push(`${path.relative(OUT, f)}: shows the unsourced packet claim "${hit[0]}"`);
+}
 // Owner's ruling (2 Nov 2026): a noodle with chicken, beef or pork flavour is never vegetarian, even when the flavour is
 // artificial, and its diet is never "Ask the crew" either. A packet whose name or flavour names a meat must say Meat or
 // Meat flavour (or Seafood), and Meat flavour noodles never show the Vegetarian label, filter tag or schema diet.
