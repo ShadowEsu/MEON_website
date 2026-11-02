@@ -92,7 +92,7 @@ The site is built around Preston's clips of the shop and MEON's own @meonnoodles
 | `ig-*.mp4` | Instagram cards at the end of the home page | 8-second previews of @meonnoodles reels. Each card opens its reel on Instagram; the three cut from Preston's WhatsApp clips (`ig-store-tour`, `ig-sign`, `ig-walk-in`) open the profile |
 | Inner-page heroes (`wall-12` and files above) | Pairings and sides; Noodles; Countries; About; Visit | Desktop columns / phone clip: `step-pairings`, `ig-DeOXYn5hSUT` / `step-pairings`; `ig-DetKN4Bh0FW`, `ig-DewSjLLBLqQ` / `ig-DetKN4Bh0FW`; `wall-10`, `ig-DefupZzh1I7` / `wall-10`; `ig-store-tour`, `ig-DedzCYDhezV` / `ig-store-tour`; `ig-sign`, `wall-12` / `ig-sign` |
 
-**Home hero clips** (Design, 2 Nov 2026): no burned-in text of any kind (captions behind the headline read as someone else's video; that is why `step-cook` stays in the step cards), and the cream text must keep 4.5:1 or more over the scrim: the 95th-percentile pixel of the text band on the clip's brightest frame, measured by `meon-work/fullscreen/contrast.py`. To change a hero clip, edit `HERO_CLIPS`/`HERO_PHONE` in `build.mjs`, re-run `meon-work/fullscreen/encode_posters.sh` (the posters are the clips' first frames) and `contrast.py`.
+**Home hero clips** (Design, 2 Nov 2026): no burned-in text of any kind (captions behind the headline read as someone else's video; that is why `step-cook` stays in the step cards), and every piece of cream text over the footage must keep 4.5:1 or more: the hero's words (the text band) and each control of the floating header (its own DOM box, over the scrim and its rgba(20,14,10,.40) fill), at the 95th-percentile pixel on the clip's brightest frame. To change a hero clip, edit `HERO_CLIPS`/`HERO_PHONE` in `build.mjs`, re-run `meon-work/fullscreen/encode_posters.sh` (the posters are the clips' first frames), then `meon-work/fullscreen/header_boxes.mjs` and `contrast.py`.
 
 The full-screen redesign (2 Nov 2026) removed the clips only the old home used (`hero-phone`, `street-front` and `wall-01`-`06`, `08`, `09`, `11`); they stay in git history and `meon-work/rebuild` can cut them again.
 
@@ -112,7 +112,7 @@ All the music is original and generated for MEON, so there are no licensing issu
 
 ## Guest reviews
 
-Guests can leave a 1–5 star rating, their first name and a comment at the bottom of the home page (general reviews) and of every noodle page (reviews for that noodle). Reviews appear on the site straight away. The form only posts after the guest ticks "Publish my first name and review on this site" (unticked by default). `/privacy/` explains what is kept and how to have a review removed.
+Guests can leave a 1–5 star rating, their first name and a comment at the bottom of every noodle page (reviews for that noodle). The home page's general review form came off with the full-screen redesign (2 Nov 2026); general reviews already posted stay in the table. Reviews appear on the site straight away. The form only posts after the guest ticks "Publish my first name and review on this site" (unticked by default). `/privacy/` explains what is kept and how to have a review removed.
 
 **Where they are stored:** Supabase, table `meon_reviews` in the project **jaymini-prod** (`wzgfjuxcprignwdlopvl`). The free Supabase plan allows only two projects, and both were already in use, so MEON shares that project. The table is kept separate and locked down, so it cannot read or change anything else in the project. Settings live in `data/site.json` under `reviews`.
 
