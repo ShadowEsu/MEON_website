@@ -134,9 +134,11 @@ const NAV = [
 // it stays true as packets come and go; the region stays "from across Asia".
 const COUNT = String(noodles.length);
 const REGION = "from across Asia";
-// data/site.json's hoursNote ends "Please check before you visit."; the site drops that sentence (Design, 31 Oct 2026: no
-// "please") and, until real hours are in site.json, the visit page links to them on Instagram. The data file stays as is.
+// Opening hours: data/site.json `hours`, as MEON published them (hoursSource; check.mjs makes sure they're sourced and
+// shown). The note says changes go up on Instagram first; Design, 31 Oct 2026: no "please". With no hours in the file the
+// visit page links to Instagram instead.
 const HOURS_NOTE = (site.hoursNote || "").replace(/\s*Please [^.]*\./g, "").trim();
+const HOURS_LINE = site.hours.length ? `Open ${site.hours.map((h) => `${h.days} ${h.time}`).join(", ")}.` : HOURS_NOTE;
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
 const fitDesc = (head, body, extras = [], max = 160) => {
@@ -805,7 +807,7 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
       <p class="eyebrow">Come visit us</p>
       <h2 id="visit-h" data-split>Find us in ${esc(site.suburb)}.</h2>
       <p class="visit-band-addr">${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</p>
-      <p class="lead">Dine in or take it away. ${esc(HOURS_NOTE)}</p>
+      <p class="lead">Dine in or take it away. ${esc(HOURS_LINE)}</p>
       <div class="actions">
         <a class="btn btn--white btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener" data-magnetic>${icon.pin} Get directions</a>
       </div>
@@ -1174,7 +1176,7 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
   <h2 class="visually-hidden">Where, when and how to reach us</h2>
   <div class="info-cols">
     <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions ${icon.arrow}</a></div>
-    <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : site.instagram ? `<a class="btn btn--line btn--sm" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${icon.insta} Check our hours on Instagram</a>` : `<p>${esc(HOURS_NOTE)}</p>`}</div>
+    <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}${site.instagram ? `<a class="${site.hours.length ? "link-arrow" : "btn btn--line btn--sm"}" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${site.hours.length ? `Latest hours on Instagram ${icon.arrow}` : `${icon.insta} Check our hours on Instagram`}</a>` : site.hours.length ? "" : `<p>${esc(HOURS_NOTE)}</p>`}</div>
     <div class="reveal" style="--rd:.12s">${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram ${icon.arrow}</a>` : ""}</div>
   </div>
 </div></section>
