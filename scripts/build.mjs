@@ -711,7 +711,7 @@ addPage("", layout({
       </article>
       <article class="pcard pcard--heat heat reveal" id="spice" data-heat data-level="${HEAT_START}" aria-labelledby="pc-heat-h">
         <h3 class="pcard-h" id="pc-heat-h">${svgIcon("flame")}Heat check</h3>
-        <p class="pcard-sub">Every packet is rated 0 to 5 against Shin Ramyun, which is a 3.</p>
+        <p class="pcard-sub">${noodles.some((n) => n.unrated) ? "Packets are" : "Every packet is"} rated 0 to 5 against Shin Ramyun, which is a 3.</p>
         <div class="heat-top">
           <div class="heat-meo" data-heat-meo>${mascot({ acc: "chilli", color: "#ff5b5b" })}<span class="sweat s1"></span><span class="sweat s2"></span><span class="sweat s3"></span></div>
           <div><p class="heat-level" data-heat-level>${HEAT_START} · ${SPICE_LADDER[HEAT_START][1]}</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[HEAT_START][2])}</p></div>
@@ -805,9 +805,9 @@ addPage("", layout({
 <section class="section food" aria-labelledby="food-h">
   <div class="wrap">
     <div class="food-head reveal">
-      <p class="eyebrow">Real bowls, cooked in our shop</p>
+      <p class="eyebrow">Real bowls, shot in our shop</p>
       <h2 id="food-h">Worth a <em>try</em>.</h2>
-      <p class="lead">Six packets from six countries, cooked at our machines. Pick one to see how it cooks.</p>
+      <p class="lead">Six packets from six countries, from our own photo shoot. Pick one to see how it cooks.</p>
     </div>
     <ul class="food-grid">${FOOD.map((n) => `<li class="food-tile reveal"><a href="${r(n.url)}"><span class="food-media"><img ${photoSet(r, n, "(min-width: 900px) 30vw, 50vw")} alt="${esc(n.imgAlt)}" width="900" height="900" loading="lazy" decoding="async"></span><span class="food-tag">${flag(n.countryCode, r, { w: 16 })}${esc(n.brand)} ${esc(n.name)}</span></a></li>`).join("")}</ul>
   </div>
