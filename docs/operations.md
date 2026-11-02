@@ -147,7 +147,21 @@ Read and manage reviews only in the Supabase dashboard. Don't paste them into, o
 
 **Moving to MEON's own project later:** create a new Supabase project, apply the same table, then update `supabaseUrl` and `publishableKey` in `data/site.json` and rebuild.
 
-Reviews on the website do not count towards Google rankings. For that, use the Google review QR code in `docs/seo.md`.
+Reviews on the website do not count towards Google rankings. Google reviews do; see the next section.
+
+## Asking for Google reviews
+
+**Review cards:** open `/qr/review-card/` (also linked from `/qr/` as **Review cards**), press **Print cards** and cut the A4 sheet into four. Put them on tables or hand one over with the bowl. The QR code opens Google's "write a review" box for MEON (`googleReviewUrl` in `data/site.json`). Each card also tells unhappy guests they can tell the crew or message us privately on Instagram.
+
+**On the website:** the Visit page's "How was it?" section, and the reviews block on the home page and every noodle page, show **Review us on Google** and **Tell us privately** side by side. "Tell us privately" opens an Instagram message to @meonnoodles (`privateFeedbackUrl`).
+
+**The rules** (Google's review policy and the ACCC's rules on fake and incentivised reviews; `npm run check` fails on wording that breaks them):
+- Ask every guest the same way, happy or not. Never ask only the guests who loved it, and never word it as "Enjoyed it? Leave us a review."
+- Never give anything for a review: no discounts, free items, prize draws or "review us and get…".
+- Never ask staff, family or friends to post one, and never post one yourself.
+- "Tell us privately" sits beside the Google link, never in front of it as a step guests must pass first.
+
+**If the owner gets the Business Profile's own review link** (Google Business Profile → **Ask for reviews**), paste it into `googleReviewUrl` and rebuild; the cards and links switch to it. Reprint the cards afterwards.
 
 ## Updating the Views Log (only when asked)
 

@@ -1,5 +1,5 @@
 {
-  "_readme": "Edit this file to update business details. Empty strings are hidden on the site. After changing siteUrl, run `npm run build` so every QR code points at the new domain. Opening hours shown on the site go in hours, with hoursSource saying where MEON published them and when (npm run check fails without it, and notes when they're over 6 months old); the same rows go into the Restaurant schema for search engines. SEO: paste the Search Console code into googleSiteVerification (and Bing's into bingSiteVerification), your Google Business Profile link into googleBusinessUrl and exact map coordinates into geo. indexNow: true publishes the site's IndexNow key file (the key comes from the domain, scripts/lib/indexnow.mjs) so `npm run indexnow` can ping search engines after a deploy. See docs/seo.md.",
+  "_readme": "Edit this file to update business details. Empty strings are hidden on the site. After changing siteUrl, run `npm run build` so every QR code points at the new domain. Opening hours shown on the site go in hours, with hoursSource saying where MEON published them and when (npm run check fails without it, and notes when they're over 6 months old); the same rows go into the Restaurant schema for search engines. SEO: paste the Search Console code into googleSiteVerification (and Bing's into bingSiteVerification), your Google Business Profile link into googleBusinessUrl and exact map coordinates into geo. indexNow: true publishes the site's IndexNow key file (the key comes from the domain, scripts/lib/indexnow.mjs) so `npm run indexnow` can ping search engines after a deploy. googleReviewUrl opens Google's 'write a review' box for MEON (the review card QR uses it); privateFeedbackUrl is where 'Tell us privately' goes, shown beside every Google review link (see docs/operations.md, Asking for Google reviews). See docs/seo.md.",
   "name": "MEON",
   "tagline": "Instant noodles from across Asia, cooked your way.",
   "siteUrl": "https://meon-noodles.vercel.app",
@@ -34,6 +34,8 @@
   "googleSiteVerification": "yAWLKCAh0cClV1B2YihYCaivUctHfrPJhs9aEJvf0-I",
   "bingSiteVerification": "",
   "googleBusinessUrl": "https://www.google.com/maps?cid=8133712238712901594",
+  "googleReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJh2qhXwu7MioR2s-61S_A4HA",
+  "privateFeedbackUrl": "https://ig.me/m/meonnoodles",
   "geo": {
     "lat": "-31.9480563",
     "lng": "115.8590535"

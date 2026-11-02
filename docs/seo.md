@@ -52,6 +52,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 6. For Bing (and ChatGPT search, which uses Bing): go to <https://www.bing.com/webmasters> and choose **Import from Google Search Console**.
 
 ### 3. Reviews (the second-biggest local ranking factor)
+- Use the review cards: print `/qr/review-card/` (four per A4). Their QR code opens Google's review box for MEON. Rules and setup are in `docs/operations.md`, under "Asking for Google reviews".
 - Ask for Google reviews the same way with every guest: never only the happy ones (asking "Enjoyed your bowl?" first is review gating, which Google doesn't allow), and never for anything in return.
 - Reply to every review, good or bad, within a few days.
 - Never buy or swap reviews. Google removes them and can penalise the profile.
