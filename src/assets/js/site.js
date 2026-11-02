@@ -399,9 +399,9 @@
 
   /* ---------- Opening hours in Perth time ----------
      [data-today] (the home hero) holds the hours per weekday, Monday first: [opens, closes, "12pm–9:30pm"] or null. Its
-     line gets "Open today 12pm–9:30pm · " before the address, "Open till 2:30am · " after midnight when the day before
-     closes late, "Closed now · " after closing, "Closed today · " on a day without hours. Its box keeps the same size, so
-     nothing moves. The Visit table's row for today turns bold. Without JS: the address and the plain table. */
+     status line, reserved above the address (site.css), gets "Open today 12pm–9:30pm", "Open till 2:30am" after
+     midnight when the day before closes late, "Closed now" after closing, "Closed today" on a day without hours. Nothing
+     moves when it arrives. The Visit table's row for today turns bold. Without JS: the address and the plain table. */
   var perthNow = function () {
     try {
       var parts = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Perth", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
@@ -423,7 +423,7 @@
     $$("[data-today]").forEach(function (el) {
       var rows = null, slot = $("[data-today-status]", el);
       try { rows = JSON.parse(el.getAttribute("data-hours")); } catch (e) {}
-      if (slot && rows && rows.length === 7) slot.textContent = todayText(rows, perth) + " · ";
+      if (slot && rows && rows.length === 7) slot.textContent = todayText(rows, perth);
     });
     $$("[data-hours-today] tr[data-days]").forEach(function (tr) {
       var d = tr.getAttribute("data-days").split("-"), th = $("th", tr);

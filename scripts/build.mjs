@@ -268,7 +268,7 @@ ${site.googleSiteVerification ? `<meta name="google-site-verification" content="
 <link rel="icon" type="image/png" sizes="48x48" href="${r("assets/img/favicon-48.png")}">
 <link rel="apple-touch-icon" href="${r("assets/img/apple-touch-icon.png")}">
 <link rel="manifest" href="${r("site.webmanifest")}">
-<link rel="preload" as="font" type="font/woff2" href="${r("assets/fonts/bricolage-grotesque-latin.woff2")}" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="${r("assets/fonts/bricolage-grotesque-latin-core.woff2")}" crossorigin>
 ${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}${typeof head === "function" ? head(r) : head}
 <link rel="stylesheet" href="${r("assets/css/site.css")}?v=${BUILD_ID}">
 <script>(function(d){d.className=d.className.replace("no-js","js");})(document.documentElement)</script>
@@ -628,24 +628,22 @@ const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 // ---------- Home ----------
 // Design spec "Meon: a light restaurant site with a full-screen video front page" (2 Nov 2026). The visitor's problem first:
 // a full-screen hero (three of the shop's own portrait clips edge to edge on desktop: the noodle wall, the machine, the
-// street; the machine clip on phones) with the "Meon" wordmark, then "Which one do I pick?" and its three tools (search,
-// heat check, roulette), how it works, the menu, real food, Visit and the Instagram strip. Light only. The hero's poster
-// is the LCP: one composite AVIF of the three clips' first frames (desktop) and the machine clip's first frame (phones),
-// made by meon-work/fullscreen/encode_posters.sh and preloaded per breakpoint. The clips start after the page's load event
-// (site.js), never under reduced motion or Save-Data. Scroll choreography lives in site.js (one loop, --p/--q).
+// street; on phones the noodle wall walk-in, which has no burned-in captions to run into the wordmark) with the "Meon"
+// wordmark, then "Which one do I pick?" and its three tools (search, heat check, roulette), how it works, the menu, real
+// food, Visit and the Instagram strip. Light only. Lighthouse reports the wordmark (text in the preloaded core font) as
+// the LCP element, not the poster. So the poster (one composite AVIF of the three clips' first frames on desktop,
+// wall-07's first frame on phones; meon-work/fullscreen/encode_posters.sh) is not preloaded or high priority, which
+// would only take bandwidth from the font. The clips start after the page's load event (site.js), never
+// under reduced motion or Save-Data. Scroll choreography lives in site.js (one loop, --p/--q).
 const HERO_CLIPS = ["wall-07", "step-cook", "hero-col-a"];
-const HERO_PHONE = "step-cook";
+const HERO_PHONE = "wall-07";
 const HERO_WIDE = "(min-width: 900px)", HERO_NARROW = "(max-width: 899.98px)";
-const HERO_POSTER = { wide: ["img/hero/fhero-1440", 1440], phone: ["img/hero/fhero-390", 576] };
-const heroHead = (r) => Object.entries({ wide: HERO_WIDE, phone: HERO_NARROW }).map(([k, media]) => {
-  const [p, w] = HERO_POSTER[k], u = r(asset(`${p}.avif`));
-  return `<link rel="preload" as="image" type="image/avif" href="${u}" imagesrcset="${u} ${w}w" imagesizes="100vw" media="${media}" fetchpriority="high">`;
-}).join("\n");
+const HERO_POSTER = { wide: "img/hero/fhero-1440", phone: "img/hero/fhero-390" };
 const heroPoster = (r) => `<picture class="fhero-poster">
-        <source type="image/avif" media="${HERO_WIDE}" srcset="${r(asset(`${HERO_POSTER.wide[0]}.avif`))}">
-        <source type="image/webp" media="${HERO_WIDE}" srcset="${r(asset(`${HERO_POSTER.wide[0]}.webp`))}">
-        <source type="image/avif" srcset="${r(asset(`${HERO_POSTER.phone[0]}.avif`))}">
-        <img src="${r(asset(`${HERO_POSTER.phone[0]}.webp`))}" alt="" width="576" height="1024" fetchpriority="high" decoding="async">
+        <source type="image/avif" media="${HERO_WIDE}" srcset="${r(asset(`${HERO_POSTER.wide}.avif`))}">
+        <source type="image/webp" media="${HERO_WIDE}" srcset="${r(asset(`${HERO_POSTER.wide}.webp`))}">
+        <source type="image/avif" srcset="${r(asset(`${HERO_POSTER.phone}.avif`))}">
+        <img src="${r(asset(`${HERO_POSTER.phone}.webp`))}" alt="" width="576" height="1024" decoding="async">
       </picture>`;
 // "Which one do I pick?": the four countries with the most packets, and the library's own filter links (noodles/?country=,
 // ?spice=, ?diet=; site.js reads them).
@@ -667,7 +665,6 @@ addPage("", layout({
   urlPath: "",
   active: "",
   overlay: true,
-  head: heroHead,
   description: `Meon: a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}, cooked your way.`,
   body: (r) => `
 <section class="fhero" aria-labelledby="fhero-h" data-scene>
@@ -1402,7 +1399,7 @@ write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-gene
 // IndexNow (Bing, Yandex, Seznam, Naver; SEO 2 Nov 2026): the key file proves the pings in scripts/indexnow.mjs come from us.
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
 // Sitemap images: the home page's hero poster and its "Worth a try" photos; each noodle page's photos.
-const pageImages = new Map([["", [`assets/${HERO_POSTER.wide[0]}.webp`, ...FOOD.map((n) => n.img.split("?")[0])]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
+const pageImages = new Map([["", [`assets/${HERO_POSTER.wide}.webp`, ...FOOD.map((n) => n.img.split("?")[0])]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
 write("llms.txt", `# Meon Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location, opening hours and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "Meon Noodles", short_name: "Meon", start_url: "/", display: "standalone", background_color: "#fffaf2", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
