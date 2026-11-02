@@ -8,3 +8,11 @@ export const schemaHoursFresh = (hoursSource, now = Date.now()) => {
   const checked = Date.parse(hoursSource?.checked || "");
   return Number.isFinite(checked) && (now - checked) / 864e5 <= SCHEMA_HOURS_MAX_DAYS;
 };
+
+// The moment the same 90 days run out, as an ISO time, or null without a readable `checked`. The home page's today line
+// carries it (data-hours-until) so site.js drops "Open today …" in the visitor's browser once it passes, even if nobody
+// rebuilds (Security SHOULD-MF5, 2 Nov 2026). Same rule as schemaHoursFresh: fresh while now <= checked + 90 days.
+export const hoursFreshUntil = (hoursSource) => {
+  const checked = Date.parse(hoursSource?.checked || "");
+  return Number.isFinite(checked) ? new Date(checked + SCHEMA_HOURS_MAX_DAYS * 864e5).toISOString() : null;
+};
