@@ -6,6 +6,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { indexNowKey } from "./lib/indexnow.mjs";
+import { schemaHoursFresh } from "./lib/hours.mjs";
 
 const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "site");
 if (!fs.existsSync(OUT)) { console.error("Run `npm run build` first."); process.exit(1); }
@@ -184,7 +185,7 @@ for (const f of files) {
 }
 // Restaurant schema (BOSS, 1 Nov 2026): only facts the owner has given us. No price band, reservations policy, ratings or
 // reviews. Opening hours (SEO, 2 Nov 2026) only as the sourced rows the site shows: every day in data/site.json hours, with
-// the same opening and closing times, and nothing else.
+// the same opening and closing times, and nothing else; and none once hoursSource.checked is over 90 days old (MS1).
 const homeLd = [...fs.readFileSync(path.join(OUT, "index.html"), "utf8").matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => [JSON.parse(m[1])].flat());
 const restaurant = homeLd.find((n) => n["@type"] === "Restaurant");
 if (!restaurant) problems.push("index.html: no Restaurant schema");
@@ -193,7 +194,7 @@ else {
   const week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const hhmm = (t) => { const m = t.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])m$/i); return m ? `${String((+m[1] % 12) + (/p/i.test(m[3]) ? 12 : 0)).padStart(2, "0")}:${m[2] || "00"}` : `? ${t}`; };
   const want = {}, got = {};
-  if (siteData.hoursSource) for (const h of siteData.hours || []) {
+  if (schemaHoursFresh(siteData.hoursSource)) for (const h of siteData.hours || []) {
     const [a, b = a] = h.days.split(/\s*[–-]\s*/).map((d) => week.indexOf(d.trim()));
     const [o, c] = h.time.split(/\s*[–-]\s*/).map(hhmm);
     for (let i = a; i >= 0 && i <= b; i++) want[week[i]] = `${o}-${c}`;

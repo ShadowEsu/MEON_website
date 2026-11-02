@@ -5,7 +5,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 ## Already done in the website
 
 - **Structured data (schema.org)** that Google reads directly:
-  - `Restaurant` on the home page: name, logo, photos, cuisine, menu link, the Google listing as the map link, the street address (Shop 8, 45 Francis Street, Northbridge WA 6003), map coordinates and opening hours. The hours are the same sourced rows the Visit page shows (`hours` in `data/site.json`), and `npm run check` fails if the two ever differ. No price range, ratings or reviews: those need the owner's facts first. It still needs a phone number, if MEON gets one.
+  - `Restaurant` on the home page: name, logo, photos, cuisine, menu link, the Google listing as the map link, the street address (Shop 8, 45 Francis Street, Northbridge WA 6003), map coordinates and opening hours. The hours are the same sourced rows the Visit page shows (`hours` in `data/site.json`), and `npm run check` fails if the two ever differ. Once `hoursSource.checked` is more than 90 days old, the build leaves the hours out of the schema until someone re-checks them and updates `checked`, so search engines never keep stale hours for long. No price range, ratings or reviews: those need the owner's facts first. It still needs a phone number, if MEON gets one.
   - `WebSite`
   - a full `Menu` of all 199 noodles, grouped by country
   - a `MenuItem` for every noodle (description with country and packet size, and diet; no price, because prices stay off the site)
