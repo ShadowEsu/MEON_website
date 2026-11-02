@@ -66,7 +66,9 @@ const FLAVOUR_NOTES = [
   { re: /rib|pork|suon/, note: "A rich, rounded pork-and-rib style broth." },
   { re: /mushroom/, note: "Earthy, savoury mushroom notes in a comforting broth." },
   { re: /chicken|\bga\b/, note: "A comforting, savoury chicken broth, the ultimate classic." },
-  { re: /veg|vegan|veggie|vegetasty/, note: "A plant-based broth full of vegetable sweetness and savoury depth." },
+  // Describes the taste only: "plant-based", "vegan" or "vegetarian" are diet claims, which need the maker's ingredient list
+  // (dietSource; check.mjs guards it).
+  { re: /veg|vegan|veggie|vegetasty/, note: "A vegetable-flavoured broth, sweet and savoury." },
   { re: /oriental/, note: "The classic savoury 'oriental' seasoning so many Aussies grew up on." },
   { re: /cheese/, note: "Melty, savoury cheese flavour makes it rich and moreish." },
   { re: /pepper/, note: "A punchy, peppery broth with plenty of warmth." },

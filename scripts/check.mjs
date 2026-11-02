@@ -96,23 +96,42 @@ for (const n of JSON.parse(fs.readFileSync(path.join(OUT, "noodles.json"), "utf8
 // Vegetarian only with the maker's word for it (BOSS + Security, 2 Nov 2026): a guest reads "Vegetarian" as a promise, and
 // the owner's spreadsheet alone isn't enough to make it. In data/, a diet that says Vegetarian or Vegan needs
 // dietSource: { "url": "https://…" (the maker's ingredient list for this packet), "checked": "YYYY-MM-DD" }, and no built page
-// may label, tag or mark up as vegetarian a noodle without one. Unsourced diets say "Ask the crew", which is always true.
+// may label, tag, describe or mark up as vegetarian a noodle without one: not its Diet row, library card tag, schema diet,
+// name, flavour, blurb or search keywords ("vegan", "vegetarian", "plant-based", "meat-free"). Unsourced diets say "Ask the
+// crew", which is always true; flavours say what they taste of ("vegetable").
+const DIET_WORD = /\bvegan\b|vegetarian|plant[- ]based|meat[- ]?free|meatless/i;
+const DIET_OK = /MEON never counts these noodles as vegetarian|\* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring/g;
 const DATA = path.join(OUT, "..", "data");
 const catalogueData = JSON.parse(fs.readFileSync(path.join(DATA, "catalogue.json"), "utf8"));
 const vegSourced = new Set();
 for (const n of [...JSON.parse(fs.readFileSync(path.join(DATA, "noodles.json"), "utf8")), ...catalogueData.extraNoodles].map((x) => ({ ...x, ...catalogueData.noodles[x.slug] }))) {
-  if (!/vegetarian|vegan/i.test(n.diet || "")) continue;
-  if (/^https:\/\/\S+$/.test(n.dietSource?.url || "") && /^\d{4}-\d{2}-\d{2}$/.test(n.dietSource?.checked || "")) vegSourced.add(n.slug);
-  else problems.push(`data: ${n.slug} says "${n.diet}" without dietSource {url, checked} (the maker's ingredient list); say "Ask the crew" until it has one`);
+  const sourced = /^https:\/\/\S+$/.test(n.dietSource?.url || "") && /^\d{4}-\d{2}-\d{2}$/.test(n.dietSource?.checked || "");
+  if (sourced && /vegetarian|vegan/i.test(n.diet || "")) { vegSourced.add(n.slug); continue; }
+  if (/vegetarian|vegan/i.test(n.diet || "")) problems.push(`data: ${n.slug} says "${n.diet}" without dietSource {url, checked} (the maker's ingredient list); say "Ask the crew" until it has one`);
+  for (const k of ["name", "flavour", "funNote"]) if (DIET_WORD.test(n[k] || "")) problems.push(`data: ${n.slug} ${k} "${n[k]}" makes a diet claim without dietSource; describe the taste instead`);
 }
 const libraryHtml = fs.readFileSync(path.join(OUT, "noodles", "index.html"), "utf8");
+const searchIndex = JSON.parse(fs.readFileSync(path.join(OUT, "search-index.json"), "utf8"));
 for (const n of JSON.parse(fs.readFileSync(path.join(OUT, "noodles.json"), "utf8"))) {
   if (vegSourced.has(n.slug)) continue;
   const page = fs.readFileSync(path.join(OUT, "noodles", n.slug, "index.html"), "utf8");
   const dd = (page.match(/<dt>Diet<\/dt><dd>([\s\S]*?)<\/dd>/) || ["", ""])[1];
   if (/vegetarian|vegan/i.test(dd) || /VegetarianDiet|VeganDiet/.test(page)) problems.push(`noodles/${n.slug}/: shown as vegetarian without a recorded maker source`);
+  // What the page says about this noodle: title, meta description, JSON-LD, and the main content without other noodles' cards
+  const main = (page.match(/<main\b[\s\S]*?<\/main>/) || [""])[0].replace(/<a class="noodle-card[\s\S]*?<\/a>/g, " ");
+  const said = [
+    (page.match(/<title>([\s\S]*?)<\/title>/) || ["", ""])[1],
+    (page.match(/<meta name="description" content="([^"]*)"/) || ["", ""])[1],
+    ...[...page.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]),
+    ...[...main.matchAll(/\s(?:alt|aria-label|title)="([^"]*)"/g)].map((m) => m[1]),
+    main.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, " ").replace(/<[^>]+>/g, " "),
+  ].join(" ").replace(/noodles\/[a-z0-9-]+\//g, " ").replace(/\s+/g, " ").replace(DIET_OK, " "); // page addresses (slugs) aren't claims
+  const word = said.match(DIET_WORD);
+  if (word) problems.push(`noodles/${n.slug}/: says "${word[0]}" without a recorded maker source`);
   const card = libraryHtml.match(new RegExp(`<a class="noodle-card[^>]*href="[^"]*noodles/${n.slug}/"[^>]*>`));
-  if (card && /data-diet="[^"]*\bveg\b/.test(card[0])) problems.push(`noodles/index.html: ${n.slug} card is tagged vegetarian without a recorded maker source`);
+  if (card && (/data-diet="[^"]*\bveg\b/.test(card[0]) || DIET_WORD.test((card[0].match(/data-search="([^"]*)"/) || ["", ""])[1]))) problems.push(`noodles/index.html: ${n.slug} card is tagged or searchable as vegetarian without a recorded maker source`);
+  const entry = searchIndex.find((x) => x.u === `noodles/${n.slug}/`);
+  if (entry && DIET_WORD.test(`${entry.t} ${entry.s} ${entry.k || ""}`)) problems.push(`search-index.json: ${n.slug} is searchable as vegetarian without a recorded maker source`);
 }
 // Claims about MEON's own customers (REG-82, BOSS 2 Nov 2026): "most picked", "our regulars", "best-sellers" and the like
 // need the till's numbers, which we don't have. The owner's library notes on packets (badges like "Brand bestseller") are

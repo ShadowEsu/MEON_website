@@ -467,8 +467,13 @@
     }).catch(function () { indexFailed = true; loading = null; return null; });
     return loading;
   }
+  // A popular search shows only while it finds something (e.g. "Vegetarian" waits until a noodle's vegetarian label has the
+  // maker's ingredient list behind it), so no pill leads to "No noodles match".
   var POPULAR = ["Buldak", "Tom yum", "Vegetarian", "Japan", "Mi goreng", "Carbonara", "Curry", "Spicy"];
-  function popularPills(cls) { return '<div class="search-suggest' + (cls || "") + '">' + POPULAR.map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>"; }
+  function popularPills(cls) {
+    var live = POPULAR.filter(function (s) { var terms = queryTerms(s); return !index || index.some(function (x) { return matchesAll(x._h, terms, false); }); });
+    return '<div class="search-suggest' + (cls || "") + '">' + live.map(function (s) { return '<button class="pill" type="button" data-suggest="' + s + '">' + s + "</button>"; }).join("") + "</div>";
+  }
   function thumb(x) {
     if (x.i) return '<span class="thumb"><img src="' + ROOT + esc(x.i) + '" alt="" width="44" height="44" loading="lazy"></span>';
     if (x.f) return '<span class="thumb">' + flagImg(x.f, 28) + "</span>";

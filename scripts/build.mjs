@@ -886,7 +886,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`
     <h2 class="visually-hidden">Noodles</h2>
     <div class="card-grid card-grid--long">${noodles.map((n, i) => noodleCard(n, r, i)).join("")}</div>
     <div class="empty-state">${emptyBowl}<h2>Nothing matches yet.</h2><p class="lead">Try a different filter, or ask the crew. New packets arrive all the time.</p><button class="btn btn--red" type="button" data-reset>Clear filters</button></div>
-    <p class="note">* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary by batch and country: check the packet, and ask the crew if unsure.</p>
+    ${HAS_VEG ? `<p class="note">* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary by batch and country: check the packet, and ask the crew if unsure.</p>` : ""}
   </div>
 </div>
 ${ctaBand(r)}
