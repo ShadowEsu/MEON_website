@@ -174,9 +174,11 @@ if ((siteData.hours || []).length) {
   for (const h of siteData.hours) if (!home.includes(`${h.days} ${h.time}`)) problems.push(`index.html: doesn't show the hours "${h.days} ${h.time}"`);
 }
 // Asking for reviews (BOSS + Security, 2 Nov 2026; Google's review policy and the ACCC's guidance on fake and incentivised
-// reviews): ask every guest the same way and offer nothing for it. Wording that rewards a review or asks only happy guests
-// fails, and every page that asks for a Google review (googleReviewUrl) also shows the private route (privateFeedbackUrl).
-const REVIEW_GATE = /\b(?:free|discount|\d+% off|voucher|coupon|prize|giveaway|reward|in exchange)\b[^.!?]{0,60}\breviews?\b|\breviews?\b[^.!?]{0,60}\b(?:free (?:drink|bowl|noodles?|egg|topping|side)|discount|\d+% off|voucher|coupon|prize|giveaway|reward|in exchange)\b|\bif you (?:loved|enjoyed|liked) (?:it|us|your)\b|\b(?:leave|give) us (?:a )?(?:5|five)[- ]stars?\b|\bonly (?:happy|satisfied) (?:guests|customers)\b/i;
+// reviews): ask every guest the same way and offer nothing for it. Wording that rewards a review, asks only happy guests,
+// or puts the private route in front of the review ("instead of a review", "before you review", "talk to us first",
+// Security SHOULD-R5) fails, and every page that asks for a Google review (googleReviewUrl) also shows the private route
+// (privateFeedbackUrl) beside it.
+const REVIEW_GATE = /\b(?:free|discount|\d+% off|voucher|coupon|prize|giveaway|reward|in exchange)\b[^.!?]{0,60}\breviews?\b|\breviews?\b[^.!?]{0,60}\b(?:free (?:drink|bowl|noodles?|egg|topping|side)|discount|\d+% off|voucher|coupon|prize|giveaway|reward|in exchange)\b|\bif you (?:loved|enjoyed|liked) (?:it|us|your)\b|\b(?:leave|give) us (?:a )?(?:5|five)[- ]stars?\b|\bonly (?:happy|satisfied) (?:guests|customers)\b|\binstead of (?:a |leaving a |posting a )?(?:google )?review|\bbefore (?:you )?(?:leave a |write a |post a )?(?:google )?review|\btalk to us first\b/i;
 const reviewAsk = siteData.googleReviewUrl ? siteData.googleReviewUrl.replace(/&/g, "&amp;") : "";
 for (const f of htmlFiles) {
   const raw = fs.readFileSync(f, "utf8");

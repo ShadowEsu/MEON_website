@@ -135,6 +135,7 @@ If you change the checkbox wording or what the form collects:
 **To read or hide reviews:**
 1. Open <https://supabase.com/dashboard>, choose **jaymini-prod**, then **Table Editor**, then `meon_reviews`.
 2. To hide a review, untick `approved` on its row. It disappears from the site on the next page load.
+   Hide a review only if it is spam, abusive, shares someone's personal details, or isn't about MEON. Never hide a review because it is negative or gives few stars (Australian Consumer Law; ACCC guidance on online reviews).
 3. To export them, click **Export**, then **CSV**.
 4. When a guest asks for their review to be removed (the privacy page tells them to message Instagram), delete the row. Hiding it isn't enough, because the privacy page promises removal.
 
