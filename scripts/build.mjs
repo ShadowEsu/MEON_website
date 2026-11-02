@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { describe, shortBlurb, cookSteps, suggestPairings, badge, COUNTRY_ADJ, COOK_SECONDS, COOK_TIME } from "./lib/copy.mjs";
 import { indexNowKey } from "./lib/indexnow.mjs";
-import { schemaHoursFresh, SCHEMA_HOURS_MAX_DAYS } from "./lib/hours.mjs";
+import { schemaHoursFresh, hoursFreshUntil, SCHEMA_HOURS_MAX_DAYS } from "./lib/hours.mjs";
 import { icon, svgIcon, iconSprite, flag, spiceMeter, mascot, peeker, steamOverlay, emptyBowl, logoMark, logoLockup } from "./lib/art.mjs";
 
 const require = createRequire(import.meta.url);
@@ -179,6 +179,8 @@ const HOUR_ROWS = site.hours.map((h) => {
   return { ...h, a, b, short: a === b ? WEEK[a].slice(0, 3) : `${WEEK[a].slice(0, 3)}–${WEEK[b].slice(0, 3)}`, open, close };
 });
 const DAY_HOURS = schemaHoursFresh(site.hoursSource) ? WEEK.map((_, i) => { const h = HOUR_ROWS.find((x) => i >= x.a && i <= x.b); return h ? [to24(h.open), to24(h.close), `${h.open}–${h.close}`] : null; }) : null;
+// When those 90 days run out; site.js stops showing the today line and today's row after it, without a rebuild (SHOULD-MF5).
+const HOURS_UNTIL = DAY_HOURS ? hoursFreshUntil(site.hoursSource) : null;
 // Search snippets show about 160 characters. fitDesc keeps `head` whole, trims `body` (last sentences first, then at a word
 // with "…") only if head + body is too long, then adds each optional extra (or the first of its alternatives) that still fits.
 const fitDesc = (head, body, extras = [], max = 160) => {
@@ -681,7 +683,7 @@ addPage("", layout({
       <h1 class="fhero-word" id="fhero-h" aria-label="Meon">${[..."Meon"].map((ch, i) => `<span class="fw" style="--i:${i}">${ch}</span>`).join("")}</h1>
       <div class="fhero-side">
         <p class="fhero-line">${COUNT} instant noodles ${REGION}, in Northbridge. Pick one, cook it your way.</p>
-        <p class="fhero-today"${DAY_HOURS ? ` data-today data-hours="${esc(JSON.stringify(DAY_HOURS))}"` : ""}><span data-today-status></span>${esc(SHORT_ADDRESS)}</p>
+        <p class="fhero-today"${DAY_HOURS ? ` data-today data-hours="${esc(JSON.stringify(DAY_HOURS))}" data-hours-until="${HOURS_UNTIL}"` : ""}><span data-today-status></span>${esc(SHORT_ADDRESS)}</p>
         <div class="fhero-actions">
           <a class="btn fbtn fbtn--cream" href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">${icon.pin} ${openLink("Get directions", "Google Maps in a new tab")}</a>
           <a class="btn fbtn fbtn--outline" href="#menu">See the menu</a>
@@ -827,7 +829,7 @@ addPage("", layout({
       <p class="eyebrow">Visit</p>
       <h2 id="visit-h">Find us in <em>${esc(site.suburb)}</em>.</h2>
       <p class="visit-addr"><strong>Meon Noodles</strong><br>${esc(addressLine)}</p>
-      ${site.hours.length ? `<table class="hours hours--home"${DAY_HOURS ? " data-hours-today" : ""}><caption class="visually-hidden">Opening hours</caption><tbody>${HOUR_ROWS.map((h) => `<tr data-days="${h.a}-${h.b}"><th scope="row"><span aria-hidden="true">${esc(h.short)}</span><span class="visually-hidden">${esc(h.days)}</span></th><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}
+      ${site.hours.length ? `<table class="hours hours--home"${DAY_HOURS ? ` data-hours-today data-hours-until="${HOURS_UNTIL}"` : ""}><caption class="visually-hidden">Opening hours</caption><tbody>${HOUR_ROWS.map((h) => `<tr data-days="${h.a}-${h.b}"><th scope="row"><span aria-hidden="true">${esc(h.short)}</span><span class="visually-hidden">${esc(h.days)}</span></th><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}
       ${HOURS_NOTE ? `<p class="note">${esc(HOURS_NOTE)}</p>` : ""}
       <div class="actions"><a class="btn btn--red btn--lg" href="${esc(DIRECTIONS)}" target="_blank" rel="noopener">${icon.pin} ${openLink("Get directions", "Google Maps in a new tab")}</a></div>
       <p class="visit-walk">Walk in: no bookings, no online orders.</p>

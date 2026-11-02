@@ -402,7 +402,10 @@
      status line, reserved above the address (site.css), gets "Open today 12pm–9:30pm", "Open till 2:30am" after
      midnight when the day before closes late, "Closed now · opens 12pm" after closing (the day is named when the next
      opening isn't tomorrow), "Closed today · opens Tue 12pm" on a day without hours (Security via Design, 2 Nov 2026).
-     Nothing moves when it arrives. The Visit table's row for today turns bold. Without JS: the address and the plain table. */
+     Nothing moves when it arrives. The Visit table's row for today turns bold. Without JS: the address and the plain table.
+     Both carry data-hours-until (the source's 90-day check runs out then): after it, neither changes, even if nobody has
+     rebuilt the site, so a stale source never says "Open today" (Security SHOULD-MF5, 2 Nov 2026). */
+  var hoursFresh = function (el) { var u = Date.parse((el && el.getAttribute("data-hours-until")) || ""); return u === u && Date.now() <= u; };
   var DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   var perthNow = function () {
     try {
@@ -432,14 +435,18 @@
   if (perth) {
     $$("[data-today]").forEach(function (el) {
       var rows = null, slot = $("[data-today-status]", el);
+      if (!hoursFresh(el)) return;
       try { rows = JSON.parse(el.getAttribute("data-hours")); } catch (e) {}
       if (slot && rows && rows.length === 7) slot.textContent = todayText(rows, perth);
     });
-    $$("[data-hours-today] tr[data-days]").forEach(function (tr) {
-      var d = tr.getAttribute("data-days").split("-"), th = $("th", tr);
-      if (perth.day < +d[0] || perth.day > +d[1]) return;
-      tr.classList.add("is-today");
-      if (th) th.insertAdjacentHTML("beforeend", '<span class="visually-hidden"> (today)</span>');
+    $$("[data-hours-today]").forEach(function (table) {
+      if (!hoursFresh(table)) return;
+      $$("tr[data-days]", table).forEach(function (tr) {
+        var d = tr.getAttribute("data-days").split("-"), th = $("th", tr);
+        if (perth.day < +d[0] || perth.day > +d[1]) return;
+        tr.classList.add("is-today");
+        if (th) th.insertAdjacentHTML("beforeend", '<span class="visually-hidden"> (today)</span>');
+      });
     });
   }
 
