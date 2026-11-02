@@ -400,22 +400,32 @@
   /* ---------- Opening hours in Perth time ----------
      [data-today] (the home hero) holds the hours per weekday, Monday first: [opens, closes, "12pm–9:30pm"] or null. Its
      status line, reserved above the address (site.css), gets "Open today 12pm–9:30pm", "Open till 2:30am" after
-     midnight when the day before closes late, "Closed now" after closing, "Closed today" on a day without hours. Nothing
-     moves when it arrives. The Visit table's row for today turns bold. Without JS: the address and the plain table. */
+     midnight when the day before closes late, "Closed now · opens 12pm" after closing (the day is named when the next
+     opening isn't tomorrow), "Closed today · opens Tue 12pm" on a day without hours (Security via Design, 2 Nov 2026).
+     Nothing moves when it arrives. The Visit table's row for today turns bold. Without JS: the address and the plain table. */
+  var DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   var perthNow = function () {
     try {
       var parts = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Perth", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
       var get = function (t) { for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value; return ""; };
-      var day = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(get("weekday").slice(0, 3));
+      var day = DAYS.indexOf(get("weekday").slice(0, 3));
       return day < 0 ? null : { day: day, min: (parseInt(get("hour"), 10) % 24) * 60 + parseInt(get("minute"), 10) };
     } catch (e) { return null; }
   };
   var hm = function (t) { var p = t.split(":"); return +p[0] * 60 + +p[1]; };
+  // The next opening after today: " · opens 12pm" (tomorrow, unless namedDay) or " · opens Wed 12pm"; "" if none
+  var opensNext = function (rows, day, namedDay) {
+    for (var k = 1; k <= 7; k++) {
+      var d = (day + k) % 7;
+      if (rows[d]) return " · opens " + (k > 1 || namedDay ? DAYS[d] + " " : "") + rows[d][2].split("–")[0];
+    }
+    return "";
+  };
   var todayText = function (rows, now) {
     var today = rows[now.day], prev = rows[(now.day + 6) % 7];
     if (prev && hm(prev[1]) < hm(prev[0]) && now.min < hm(prev[1])) return "Open till " + prev[2].split("–")[1];
-    if (!today) return "Closed today";
-    if (hm(today[1]) > hm(today[0]) && now.min >= hm(today[1])) return "Closed now";
+    if (!today) return "Closed today" + opensNext(rows, now.day, true);
+    if (hm(today[1]) > hm(today[0]) && now.min >= hm(today[1])) return "Closed now" + opensNext(rows, now.day, false);
     return "Open today " + today[2];
   };
   var perth = ($("[data-today]") || $("[data-hours-today]")) ? perthNow() : null;
