@@ -254,7 +254,7 @@
   });
 
   /* ---------- Reveal on scroll (photo wipes, split headings, footer letters) ---------- */
-  var heroTitle = $(".page-title, .noodle h1");
+  var heroTitle = $(".page-title[data-split]");
   var reveals = $$(".img-reveal, [data-split], [data-reveal-letters]").filter(function (el) { return el !== heroTitle; });
   if ("IntersectionObserver" in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {

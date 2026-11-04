@@ -58,7 +58,7 @@ The page is built for someone standing at the shelf with their phone. The order 
 ## Motion (smooth by design)
 All motion uses transform and opacity only, runs from one scroll loop, pauses when off-screen and switches off for reduced motion. The background videos follow the same rule: they start by themselves on every phone (Preston wants that), but for reduced motion they start paused behind a "Play videos" pill and play only after a tap (BOSS, 30 Oct 2026).
 
-Sections don't fade or rise in as you scroll, and section headings (h2) don't animate: their content is already there when you reach it. The page title's word reveal is the page's entrance moment (Design, 4 Nov 2026, no-AI-slop item 16: one orchestrated moment per page at most).
+Sections don't fade or rise in as you scroll, and section headings (h2) don't animate: their content is already there when you reach it. A page title's word reveal is the page's one entrance moment, and only on pages a visitor sees once or twice (About, Visit, Countries, country pages, Pairings and sides, Noodles, Privacy). Pages people open back to back show their title at once: every noodle page, /spiciest-noodles/ and /buldak/ (`pageHero(…, { split: false })`). Screen readers get the title once, from the h1's aria-label; the word spans are aria-hidden (Design, 4 Nov 2026, no-AI-slop item 16: one orchestrated moment per page at most; animate by frequency).
 
 | Effect | Where |
 | --- | --- |
@@ -68,7 +68,7 @@ Sections don't fade or rise in as you scroll, and section headings (h2) don't an
 | Video wall: four columns of clips and photos drift at different speeds through the section | Home "Bring your crew." (`[data-scene="through"]`) |
 | Glyphs in the big logo rise in one after another, then take turns to hop (they never disappear) | Home hero logo |
 | Auto-scrolling reel strip (Preston asked for it, 29 Oct 2026): one transform animation, paused on hover, focus, the pause button and off-screen; a still, swipeable row for reduce motion | Home (`#instagram`) |
-| Masked word reveal | The page title (`h1` with `data-split`) |
+| Masked word reveal | Page titles (`h1` with `data-split`), except noodle pages and the SEO lists |
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |
