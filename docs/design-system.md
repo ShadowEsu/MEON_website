@@ -58,6 +58,8 @@ The page is built for someone standing at the shelf with their phone. The order 
 ## Motion (smooth by design)
 All motion uses transform and opacity only, runs from one scroll loop, pauses when off-screen and switches off for reduced motion. The background videos follow the same rule: they start by themselves on every phone (Preston wants that), but for reduced motion they start paused behind a "Play videos" pill and play only after a tap (BOSS, 30 Oct 2026).
 
+Sections don't fade or rise in as you scroll: their content is already there when you reach it (Design, 4 Nov 2026, no-AI-slop item 16: one orchestrated moment per page at most).
+
 | Effect | Where |
 | --- | --- |
 | Background videos: muted loops that start by themselves on every device (Preston, 29 Oct 2026: "nobody has to press play"); for reduced motion they start paused and the hero shows a "Play videos" pill, one tap plays them all (BOSS, 30 Oct 2026); loaded only near the screen, playing only while on screen (only the active step card loads and plays its clip, and a reel or step card that leaves drops a file still downloading: Design, 31 Oct 2026); if the browser refuses to start them (iPhone Low Power Mode), the next tap starts the ones on screen; never loaded for Save-Data; no play badges. One play/pause for all of them: a 44 px button in the hero (inside the clip frame on inner pages), an icon while they play and a "Play videos" pill while paused; once it scrolls away or under the see-through header, the same button appears in the header, left of Sound, while a video is in view, and the hero's own button and scroll cue hide (never two at once, nothing on top of it, no transition). The choice lasts until the tab closes | Home (hero, step cards, video wall, closing band, reel cards), inner-page heroes, header |
@@ -67,7 +69,6 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 | Glyphs in the big logo rise in one after another, then take turns to hop (they never disappear) | Home hero logo |
 | Auto-scrolling reel strip (Preston asked for it, 29 Oct 2026): one transform animation, paused on hover, focus, the pause button and off-screen; a still, swipeable row for reduce motion | Home (`#instagram`) |
 | Masked word reveal | Every heading with `data-split` |
-| Fade and rise | `.reveal` elements, staggered with `--rd` |
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |

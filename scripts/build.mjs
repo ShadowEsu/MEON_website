@@ -409,9 +409,9 @@ function noodleMedia(n, r, { size = 400, eager = false, large = false, alt = n.i
 const spiceWord = (s) => (s === 0 ? "No heat" : s <= 2 ? "Medium" : "Hot");
 const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice rating soon</span>` : `<span class="nc-spice">${spiceMeter(n.spice, r)}<span class="nc-spice-word">${spiceWord(n.spice)}</span></span>`;
 
-function noodleCard(n, r, i = 0) {
+function noodleCard(n, r) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note].filter(Boolean).join(" ");
-  return `<a class="noodle-card reveal" style="--rd:${(i % 4) * 0.05}s" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
+  return `<a class="noodle-card" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
   <span class="nc-media">${noodleMedia(n, r, { alt: "" })}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}</span>
   <span class="nc-meta">${flag(n.countryCode, r, { w: 16 })}<span>${esc(n.country)}${n.type ? ` · ${esc(n.type)}` : ""}</span></span>
   <h3 class="nc-name">${esc(n.name)}</h3>
@@ -546,7 +546,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
 }
 
 // Numbers count up (country pages).
-const facts = (items) => `<dl class="facts reveal">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd>${typeof n === "number" ? `<span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span>` : esc(n)}</dd></div>`).join("")}</dl>`;
+const facts = (items) => `<dl class="facts">${items.map(([n, label, suffix = ""]) => `<div><dt>${label}</dt><dd>${typeof n === "number" ? `<span data-count="${n}" data-suffix="${suffix}">${n}${suffix}</span>` : esc(n)}</dd></div>`).join("")}</dl>`;
 
 // Background clips (src/assets/video), cut from MEON's own footage by meon-work/rebuild/make_videos_v3.sh (29 Oct 2026):
 // muted loops at their sources' own size with no captions or prices in frame, sped up or slowed down as part of the edit.
@@ -675,7 +675,7 @@ addPage("", layout({
 
 <section class="insta" id="instagram" aria-labelledby="insta-h">
   <div class="wrap insta-head">
-    <div class="reveal">
+    <div>
       <p class="eyebrow">${esc(site.instagramHandle)}</p>
       <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
       <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
@@ -699,7 +699,7 @@ addPage("", layout({
 </section>
 
 <section class="story" id="how" aria-labelledby="how-h">
-  <div class="wrap story-head reveal">
+  <div class="wrap story-head">
     <h2 id="how-h" data-split>From the wall to your bowl in 4 steps.</h2>
     <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
   </div>
@@ -741,7 +741,7 @@ addPage("", layout({
 
 <section class="fresh" id="fresh" aria-labelledby="fresh-h">
   <div class="wrap">
-    <div class="fresh-head reveal">
+    <div class="fresh-head">
       <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
       <p class="lead">Real bowls from our noodle wall, shot in our shop. Pick one to see its packet.</p>
     </div>
@@ -765,19 +765,19 @@ addPage("", layout({
 <section class="section section--soft">
   <div class="wrap">
     ${sectionHead("Worth a try", "Good places to start.", `<a class="link-arrow" href="${r("noodles/")}">All noodles</a>`)}
-    <div class="card-grid">${featured.map((n, i) => noodleCard(n, r, i)).join("")}</div>
+    <div class="card-grid">${featured.map((n) => noodleCard(n, r)).join("")}</div>
   </div>
 </section>
 
 <section class="section" id="roulette">
   <div class="wrap roulette" data-roulette data-root="${r("")}">
-    <div class="reveal">
+    <div>
       <p class="eyebrow">Can't decide?</p>
       <h2 data-split>Let the roulette choose.</h2>
       <p class="lead">Pick how hot you want it, press spin, then find the packet on the wall.</p>
       <p class="visually-hidden" aria-live="polite" data-roulette-live></p>
     </div>
-    <div class="roulette-machine reveal">
+    <div class="roulette-machine">
       <div class="roulette-window"><div class="roulette-reel">
         <div class="roulette-item roulette-item--idle">${mascot({ acc: "party", color: "#ff8fb0", className: "roulette-meo" })}<span><span class="nc-meta">Ready when you are</span><h3>Press spin to pick a noodle</h3></span></div>
       </div></div>
@@ -795,21 +795,21 @@ addPage("", layout({
   <div class="wrap">
     ${sectionHead(`From ${stockedCountries.length}\u00A0countries`, "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries</a>`)}
     <div class="country-list">
-      ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}</span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
+      ${countries.map((c) => `<a class="country-row" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}</span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
     </div>
   </div>
 </section>
 
 <section class="section heat" id="spice" data-heat>
   <div class="wrap split">
-    <div class="reveal">
+    <div>
       <p class="eyebrow">Heat check</p>
       <h2 data-split>How brave are you feeling?</h2>
       <p class="lead">Every noodle has a spice rating from 0 to 5. Drag the chilli to your level and we'll show you what to grab.</p>
       <label class="heat-slider"><span class="visually-hidden">Spice level</span><input type="range" min="0" max="5" step="1" value="2" data-heat-input aria-valuetext="2, Medium"></label>
       <div class="heat-scale" aria-hidden="true">${SPICE_LADDER.map(([lvl]) => `<span>${lvl}</span>`).join("")}</div>
     </div>
-    <div class="heat-card reveal">
+    <div class="heat-card">
       <div class="heat-top">
         <div class="heat-meo" data-heat-meo>${mascot({ acc: "chilli", color: "#ff5b5b" })}<span class="sweat s1"></span><span class="sweat s2"></span><span class="sweat s3"></span></div>
         <div><p class="heat-level" data-heat-level>2 · Medium</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[2][2])}</p></div>
@@ -823,7 +823,7 @@ addPage("", layout({
 
 <section class="section section--soft bowl-builder" id="build" data-bowl>
   <div class="wrap split split--rev">
-    <div class="bb-stage reveal">
+    <div class="bb-stage">
       <div class="bb-bowl" data-bowl-stage>
         <svg class="bb-bowl-back" viewBox="0 0 400 260" aria-hidden="true"><ellipse cx="200" cy="70" rx="188" ry="52" fill="#f3d27a" stroke="#17110f" stroke-width="6"/><path d="M40 66c20-14 40 10 60-4s40 10 60-4 40 10 60-4 40 10 60-4 40 10 60-4" fill="none" stroke="#e6b54a" stroke-width="7" stroke-linecap="round"/><path d="M60 86c20-14 40 10 60-4s40 10 60-4 40 10 60-4 40 10 60-4" fill="none" stroke="#e6b54a" stroke-width="7" stroke-linecap="round"/></svg>
         <div class="bb-toppings" data-bowl-items></div>
@@ -832,7 +832,7 @@ addPage("", layout({
       </div>
       <p class="bb-count" aria-live="polite" data-bowl-count>Your bowl is empty. Add something.</p>
     </div>
-    <div class="reveal">
+    <div>
       <h2 data-split>Build your bowl with pairings and sides.</h2>
       <p class="lead">The packet is only the start. Tap a pairing to drop it in, then find it all at the pairings and sides bar.</p>
       <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
@@ -846,7 +846,7 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
 <section class="visit-band" aria-labelledby="visit-h">
   <div class="visit-band-media">${bgVideo(r, "street-front")}</div>
   <div class="wrap visit-band-inner">
-    <div class="visit-band-copy reveal">
+    <div class="visit-band-copy">
       <p class="eyebrow">Come visit us</p>
       <h2 id="visit-h" data-split>Find us in ${esc(site.suburb)}.</h2>
       <p class="visit-band-addr">${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</p>
@@ -860,12 +860,12 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
 
 <section class="follow" aria-labelledby="follow-h">
   <div class="wrap follow-inner">
-    <div class="follow-copy reveal">
+    <div class="follow-copy">
       <p class="eyebrow">${esc(site.instagramHandle)}</p>
       <h2 id="follow-h" data-split>Follow us.</h2>
       <p class="lead">We post our newest packets, store tours and late-night bowls. Come say hi.</p>
     </div>
-    <div class="follow-links reveal">
+    <div class="follow-links">
       <a class="follow-link" href="${esc(site.instagram)}" target="_blank" rel="noopener"><span class="follow-logo follow-logo--ig">${icon.insta}</span><span class="follow-name"><strong>Instagram</strong><small>${esc(site.instagramHandle)}</small></span>${icon.arrow}</a>
       ${site.tiktok ? `<a class="follow-link" href="${esc(site.tiktok)}" target="_blank" rel="noopener"><span class="follow-logo follow-logo--tt">${icon.tiktok}</span><span class="follow-name"><strong>TikTok</strong><small>@${esc(site.tiktok.split("@")[1] || "")}</small></span>${icon.arrow}</a>` : ""}
     </div>
@@ -923,7 +923,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT}\u00A0noodles ${REGION
       <button class="btn btn--line btn--sm" type="button" data-reset>Clear filters</button></span>
     </div>
     <h2 class="visually-hidden">Noodles</h2>
-    <div class="card-grid card-grid--long">${noodles.map((n, i) => noodleCard(n, r, i)).join("")}</div>
+    <div class="card-grid card-grid--long">${noodles.map((n) => noodleCard(n, r)).join("")}</div>
     <div class="empty-state">${emptyBowl}<h2>Nothing matches yet.</h2><p class="lead">Try a different filter, or ask the crew. New packets arrive all the time.</p><button class="btn btn--red" type="button" data-reset>Clear filters</button></div>
     ${HAS_VEG ? `<p class="note">* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary by batch and country: check the packet, and ask the crew if unsure.</p>` : ""}
   </div>
@@ -1037,7 +1037,7 @@ ${reviewsBlock(r, { slug: n.slug, title: `Rate ${esc(n.name)}.`, lead: "Tried it
 <section class="section section--soft section--tight">
   <div class="wrap">
     ${sectionHead("Keep exploring", "You might also like", `<a class="link-arrow" href="${r(`countries/${n.c.slug}/`)}">More from ${esc(n.country)}</a>`)}
-    <div class="card-grid">${similar.map((o, i) => noodleCard(o, r, i)).join("")}</div>
+    <div class="card-grid">${similar.map((o) => noodleCard(o, r)).join("")}</div>
   </div>
 </section>
 ${ctaBand(r, { title: "Hungry for another?", text: "Take this packet off the wall, or try one from another country while your noodles cook." })}
@@ -1058,7 +1058,7 @@ addPage("countries/", layout({
 ${videoHero(r, { crumbs: [["Countries"]], eyebrow: `From ${stockedCountries.length}\u00A0countries`, title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
 <section class="section section--tight"><div class="wrap">
   <div class="country-list country-list--full">
-    ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
+    ${countries.map((c) => `<a class="country-row" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
   </div>
 </div></section>
 ${ctaBand(r)}
@@ -1084,7 +1084,7 @@ ${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: p
   after: facts([[list.length, "Noodles"], [list.filter((n) => n.type === "Soup").length, "Soup"], [list.filter((n) => n.type === "Dry").length, "Dry"], [list.filter((n) => n.spiceKey >= 3).length, "Spicy (3+)"]]) })}
 <section class="section section--tight"><div class="wrap">
   <h2 class="visually-hidden">Every ${esc(c.name)} noodle we stock</h2>
-  <div class="card-grid">${list.map((n, i) => noodleCard(n, r, i)).join("")}</div>
+  <div class="card-grid">${list.map((n) => noodleCard(n, r)).join("")}</div>
 </div></section>
 <section class="section section--soft section--tight"><div class="wrap">
   <h2 data-split>Other countries</h2>
@@ -1130,7 +1130,7 @@ ${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at 
 ${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section section--tight" id="rated-${l}"><div class="wrap">
   <h2 data-split>Rated ${l} out of 5</h2>
   <p class="lead pairing-note">${esc(HEAT_NOTES[l])}</p>
-  <div class="card-grid">${atLevel(l).map((n, i) => noodleCard(n, r, i)).join("")}</div>
+  <div class="card-grid">${atLevel(l).map((n) => noodleCard(n, r)).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--soft section--tight"><div class="wrap">
   <h2 data-split>How we rate spice</h2>
@@ -1155,7 +1155,7 @@ ${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", lead: `Bu
 <section class="section section--tight"><div class="wrap">
   <h2 data-split>Hottest to mildest</h2>
   <p class="lead pairing-note">The mildest is ${esc(buldakMildest.name)}, rated ${buldakMildest.spice}.${buldakSoup.length ? ` ${buldakSoup.length === 1 ? "One comes" : `${buldakSoup.length} come`} as soup: ${new Intl.ListFormat("en-AU").format(buldakSoup.map((n) => esc(n.name)))}. The rest are dry.` : ""}</p>
-  <div class="card-grid">${buldak.map((n, i) => noodleCard(n, r, i)).join("")}</div>
+  <div class="card-grid">${buldak.map((n) => noodleCard(n, r)).join("")}</div>
 </div></section>
 <section class="section section--soft section--tight"><div class="wrap">
   <h2 data-split>Keep exploring</h2>
@@ -1190,11 +1190,11 @@ ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and si
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
-  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
+  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t) => `<div class="topping" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2 data-split>Drinks</h2>
-  <ul class="drink-list reveal">${catalogue.drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
+  <ul class="drink-list">${catalogue.drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
 ${ctaBand(r)}
@@ -1212,13 +1212,13 @@ addPage("about/", layout({
   body: (r) => `
 ${videoHero(r, { crumbs: [["About"]], title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
-  <div class="reveal">
+  <div>
     <h2 data-split>What we do.</h2>
     <p class="lead">${COUNT}\u00A0instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add pairings and sides, and cook it at the machine.</p>
     <p>Every packet on our wall has a page on this site with what it tastes like, how hot it is, how to cook it and what pairs well with it.</p>
     <blockquote class="pull">“Meon is a versatile instant noodle celebrating cultural diversity, inviting creativity and fun with every bowl. Enjoy it as is or customise with pairings and sides to make each meal uniquely yours.”</blockquote>
   </div>
-  <div class="reveal">
+  <div>
     <h2 data-split>Our name.</h2>
     <p class="lead">Under “meon” in our logo are letters from Japanese, Thai, Chinese and Korean. They're a nod to the noodle cultures behind every bowl we serve.</p>
     <a class="btn btn--line" href="${r("countries/")}">Meet the countries</a>
@@ -1226,9 +1226,9 @@ ${videoHero(r, { crumbs: [["About"]], title: "Get to know MEON.", lead: "We open
 </div></section>
 <section class="section section--soft"><div class="wrap">
   <ul class="values">
-    <li class="reveal">${svgIcon("globe")}<h3>From ${stockedCountries.length}\u00A0countries</h3><p>Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></li>
-    <li class="reveal" style="--rd:.06s">${svgIcon("chef")}<h3>Your way</h3><p>Choose the packet, the pairings and the sides, then press 1 and 2 to cook it.</p></li>
-    <li class="reveal" style="--rd:.12s">${svgIcon("chair")}<h3>Dine in or take it away</h3><p>Walk in, choose a packet and cook it your way.</p></li>
+    <li>${svgIcon("globe")}<h3>From ${stockedCountries.length}\u00A0countries</h3><p>Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></li>
+    <li>${svgIcon("chef")}<h3>Your way</h3><p>Choose the packet, the pairings and the sides, then press 1 and 2 to cook it.</p></li>
+    <li>${svgIcon("chair")}<h3>Dine in or take it away</h3><p>Walk in, choose a packet and cook it your way.</p></li>
   </ul>
 </div></section>
 ${ctaBand(r)}
@@ -1246,13 +1246,13 @@ addPage("privacy/", layout({
   body: (r) => `
 ${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
 <section class="section section--tight"><div class="wrap split split--top">
-  <div class="reveal">
+  <div>
     <h2 data-split>Reviews.</h2>
     <p>Posting a review is optional. We only send it after you tick “Publish my first name and review on this site”.</p>
     <p>We keep the first name, star rating and words you typed, the page you posted from, whether you arrived by scanning a shelf QR code, the time, and which version of that agreement you ticked. They are stored with Supabase, our database provider, and shown on this site.</p>
     <p>To have a review removed, message us on Instagram${site.instagram ? ` at <a href="${esc(site.instagram)}" target="_blank" rel="noopener">${esc(site.instagramHandle)}</a>` : ""}${site.email ? ` or email <a href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ""} and we'll take it down.</p>
   </div>
-  <div class="reveal">
+  <div>
     <h2 data-split>On your device.</h2>
     <p>The site keeps a few small notes in your browser. They are not cookies and they never leave your device:</p>
     <ul>
@@ -1264,11 +1264,11 @@ ${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has n
   </div>
 </div></section>
 <section class="section section--tight"><div class="wrap split split--top">
-  <div class="reveal">
+  <div>
     <h2 data-split>Services we use.</h2>
     <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
   </div>
-  <div class="reveal">
+  <div>
     <h2 data-split>No tracking.</h2>
     <p>We don't use analytics, advertising or tracking cookies. If that changes, we'll update this page first, and anything that needs your agreement will ask for it.</p>
     <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>
@@ -1293,13 +1293,13 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
 <section class="section section--tight"><div class="wrap">
   <h2 class="visually-hidden">Where, when and how to reach us</h2>
   <div class="info-cols">
-    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></div>
-    <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}${site.instagram ? `<a class="${site.hours.length ? "link-arrow" : "btn btn--line btn--sm"}" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${site.hours.length ? "Latest hours on Instagram" : `${icon.insta} Check our hours on Instagram`}</a>` : site.hours.length ? "" : `<p>${esc(HOURS_NOTE)}</p>`}</div>
-    <div class="reveal" style="--rd:.12s">${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram</a>` : ""}</div>
+    <div>${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></div>
+    <div>${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}${site.instagram ? `<a class="${site.hours.length ? "link-arrow" : "btn btn--line btn--sm"}" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${site.hours.length ? "Latest hours on Instagram" : `${icon.insta} Check our hours on Instagram`}</a>` : site.hours.length ? "" : `<p>${esc(HOURS_NOTE)}</p>`}</div>
+    <div>${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram</a>` : ""}</div>
   </div>
 </div></section>
 <section class="section section--soft"><div class="wrap split">
-  <div class="reveal">
+  <div>
     <h2 data-split>Good to know.</h2>
     <ul class="perk-list">
       <li>${svgIcon("chair")}<span><strong>Dine in or take it away.</strong>Order in person at the noodle wall. Choosing the packet is half the fun.</span></li>
@@ -1313,15 +1313,15 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
   </div>
 </div></section>
 ${PRIVATE_FEEDBACK ? `<section class="section section--tight" aria-labelledby="feedback-h"><div class="wrap feedback">
-  <div class="reveal"><p class="eyebrow">Been in?</p><h2 id="feedback-h" data-split>How was it?</h2><p class="lead">Good or bad, we'd like to hear it. Leave a Google review for everyone to read, or tell us privately on Instagram.</p></div>
-  <div class="actions feedback-actions reveal">
+  <div><p class="eyebrow">Been in?</p><h2 id="feedback-h" data-split>How was it?</h2><p class="lead">Good or bad, we'd like to hear it. Leave a Google review for everyone to read, or tell us privately on Instagram.</p></div>
+  <div class="actions feedback-actions">
     <a class="btn btn--line btn--lg" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">${svgIcon("star")} Review us on Google</a>
     <a class="btn btn--line btn--lg" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>${icon.insta} Tell us privately</a>
   </div>
 </div></section>` : ""}
 <section class="section"><div class="wrap split split--top">
-  <div class="reveal"><h2 data-split>Frequently asked questions.</h2></div>
-  <div class="faq">${FAQ.map(([q, a]) => `<details class="reveal"><summary>${esc(q)}${icon.chevron}</summary><p>${esc(a)}</p></details>`).join("")}</div>
+  <div><h2 data-split>Frequently asked questions.</h2></div>
+  <div class="faq">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}${icon.chevron}</summary><p>${esc(a)}</p></details>`).join("")}</div>
 </div></section>
 ${ctaBand(r, { title: `See you at ${esc(site.suburb)}.` })}
 `,
