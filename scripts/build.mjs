@@ -974,7 +974,7 @@ noodles.forEach((n, idx) => {
     ${crumbsNav(r, [["Noodles", "noodles/"], [esc(n.country), `countries/${n.c.slug}/`], [esc(n.name)]])}
     <div class="noodle-grid">
       <div class="noodle-media">
-        <figure class="noodle-photo img-reveal" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
+        <figure class="noodle-photo" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
         ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" data-gallery-alt="${esc(i === 0 ? n.imgAlt : n.moreAlts[i - 1])}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : n.moreSmall[i - 1])}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
         ${n.note ? `<p class="noodle-note">${esc(n.note)}</p>` : ""}
       </div>
