@@ -159,10 +159,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .logo-badge { display: block; width: var(--logo-h, 64px); height: var(--logo-h, 64px); border-radius: 3px; transition: transform .5s var(--ease); }
 @media (max-width: 760px) { .logo-badge { --logo-h: 54px; } }
 .logo:hover .logo-badge { transform: rotate(-3deg) scale(1.05); }
-.logo-badge .lw, .vhero-logo .lw { transform-box: fill-box; }
-.logo-badge .lw { transform-origin: 50% 100%; animation: glyph-in .7s var(--ease) both, logo-wave 6s var(--ease) infinite; animation-delay: calc(.15s + var(--i) * .06s), calc(1.6s + var(--i) * .12s); }
-@keyframes logo-wave { 0%, 16%, 100% { transform: none; } 5% { transform: translateY(-22%) scale(1.12); } 10% { transform: translateY(4%) scale(.96, 1.04); } }
-.videos-paused .logo-badge .lw { animation-play-state: paused; }
+/* The header logo is on every page, so its letters are there at once and stay still (Design, 4 Nov 2026, item 16); the
+   home hero logo (.vhero-logo) keeps its letter entrance as that page's one moment. */
+.vhero-logo .lw { transform-box: fill-box; }
 .nav { display: flex; align-items: center; justify-content: center; gap: 4px; }
 .nav > a, .nav-item > a { position: relative; text-decoration: none; font-weight: 500; font-size: .96rem; padding: 10px 12px; color: var(--ink-2); transition: color .25s; }
 .nav > a::after, .nav-item > a::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 1.5px; background: currentColor; transform: scaleX(0); transform-origin: 100% 50%; transition: transform .45s var(--ease); }
@@ -933,7 +932,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; transition-delay: 0s !important; }
   [data-split] .w > span, .js .img-reveal img, .js .footer-big .lw { opacity: 1; transform: none; }
   .js .img-reveal::after { transform: scaleY(0); }
-  .vhero-logo .lw, .logo-badge .lw { animation: none !important; opacity: 1; transform: none; }
+  .vhero-logo .lw { animation: none !important; opacity: 1; transform: none; }
   /* The home scenes become plain sections: no pinned hero, no stacked cards, no drifting columns */
   .js .vhero { height: auto; }
   .js .scard { position: relative; }
