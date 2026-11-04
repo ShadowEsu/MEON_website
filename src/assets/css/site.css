@@ -530,6 +530,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .bowls-note { grid-column: span var(--k, 2); align-self: center; }
 .bowls-note .lead { margin: 8px 0 0; max-width: 30ch; }
 .bowls-band .bowls-row { grid-column: span var(--n, 3); }
+/* In the library: hidden while a search or filter is on (results first); the head script marks a filtered URL before paint */
+.bowls[hidden], .lib-filtered .bowls--lib { display: none; }
 /* The bowl in a page hero's aside (spiciest-noodles/): the page's LCP, so it loads eager */
 .ph-bowl { display: block; width: min(360px, 100%); aspect-ratio: 1; overflow: hidden; border-radius: var(--radius); background: #1a1412; }
 .ph-bowl img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--m-normal) var(--m-ease-smooth); }
@@ -541,6 +543,14 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .bowls-row { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 70%; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding-inline: var(--gutter); margin-inline: calc(-1 * var(--gutter)); scrollbar-width: none; }
   .bowls-row::-webkit-scrollbar { display: none; }
   .bowls-row > li { scroll-snap-align: start; }
+  /* Library: one row of small cards, 200 px tall, so the first noodle cards still show above the fold (Design, 4 Nov 2026) */
+  .bowls--lib { padding: 14px 0; }
+  .bowls--lib .bowls-note { display: none; }
+  .bowls--lib .bowls-row { grid-auto-columns: 150px; }
+  .bowls--lib .bowl-chip { left: 8px; top: 8px; padding: 4px 8px; font-size: .72rem; }
+  .bowls--lib .bowl-copy { left: 10px; right: 10px; bottom: 10px; gap: 2px; }
+  .bowls--lib .bowl-name { font-size: .86rem; }
+  .bowls--lib .bowl-cta { margin-top: 2px; font-size: .74rem; }
 }
 
 /* ---------- Home: the four steps as stacked full-screen cards ----------

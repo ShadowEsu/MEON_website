@@ -264,7 +264,7 @@ ${site.googleSiteVerification ? `<meta name="google-site-verification" content="
 <link rel="preload" as="font" type="font/woff2" href="${r("assets/fonts/bricolage-grotesque-latin.woff2")}" crossorigin>
 ${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}
 <link rel="stylesheet" href="${r("assets/css/site.css")}?v=${BUILD_ID}">
-<script>(function(d){d.className=d.className.replace("no-js","js");})(document.documentElement)</script>
+<script>(function(d){d.className=d.className.replace("no-js","js")+(/[?&](q|country|type|spice|diet)=/.test(location.search)?" lib-filtered":"");})(document.documentElement)</script>
 ${ld.length ? `<script type="application/ld+json">${json(ld.length === 1 ? ld[0] : ld)}</script>` : ""}
 ${analytics}
 </head>
@@ -662,8 +662,10 @@ const bowlCard = (r, name, nameTag = "span") => {
   return `<li><a class="bowl" href="${r(n.url)}">${shootImg(r, name, { sizes: BOWL_SIZES, alt: "" })}${chip}<span class="bowl-copy"><span class="bowl-country">${esc(n.country)}</span><${nameTag} class="bowl-name">${esc(`${n.brand} ${n.name}`)}</${nameTag}><span class="bowl-cta">See the packet ${icon.arrow}</span></span></a></li>`;
 };
 // The band under an inner video hero (noodles/, countries/, pairings-and-sides/; BOSS + Design, 4 Nov 2026: the video heroes
-// stay). The hero poster stays the LCP, so the bowls load lazy; the cards reserve their box.
-const bowlBand = (r, names) => `<section class="bowls bowls--band" aria-labelledby="bowls-band-h">
+// stay). The hero poster stays the LCP, so the bowls load lazy; the cards reserve their box. In the library (`lib`) it sits
+// under the sticky search, is one short row on phones, and hides while a search or filter is on, so results come first
+// (Design, 4 Nov 2026): the head script marks a filtered URL before the first paint, then site.js keeps it in step.
+const bowlBand = (r, names, { lib = false } = {}) => `<section class="bowls bowls--band${lib ? " bowls--lib" : ""}" aria-labelledby="bowls-band-h"${lib ? " data-lib-bowls" : ""}>
   <div class="wrap bowls-band" style="--n:${names.length};--k:${5 - names.length}">
     <div class="bowls-note"><p class="eyebrow" id="bowls-band-h">Real bowls, real packets.</p><p class="lead">Each photographed next to its packet. Pick one to see how to cook it.</p></div>
     <ul class="bowls-row" data-arrive>${names.map((name) => bowlCard(r, name)).join("")}</ul>
@@ -938,7 +940,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT}\u00A0noodles ${REGION
       </div>
     </div>
   </div>
-  ${bowlBand(r, ["udon-tempura-close", "tomyum-egg-prawn", "white-curry-top"])}
+  ${bowlBand(r, ["udon-tempura-close", "tomyum-egg-prawn", "white-curry-top"], { lib: true })}
   <div class="wrap">
     <div class="results-bar"><span data-result-count aria-live="polite">All ${COUNT} noodles</span>
       <span class="results-tools"><label class="visually-hidden" for="f-sort">Sort</label><select class="select" id="f-sort"><option value="featured">By country</option><option value="photo">Photos first</option><option value="az">A to Z</option><option value="hot">Hottest first</option><option value="mild">Mildest first</option></select>

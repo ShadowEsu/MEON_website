@@ -695,6 +695,7 @@
     var search = $("#q");
     var selCountry = $("#f-country"), selType = $("#f-type"), selSpice = $("#f-spice"), selDiet = $("#f-diet"), selSort = $("#f-sort");
     var countEl = $("[data-result-count]");
+    var libBowls = $("[data-lib-bowls]", library);
     var empty = $(".empty-state", library);
     // A typed search gets its own empty copy (Design, 31 Oct 2026); filters alone keep the built copy
     var emptyParts = empty ? [$("h2", empty), $(".lead", empty), $("[data-reset]", empty)] : [];
@@ -764,6 +765,10 @@
         });
       }
       applied = true;
+      // The real-bowls band steps aside while a search or filter is on, so results come first (Design, 4 Nov 2026). The head
+      // script's pre-paint mark for a filtered URL is handed over to this from the first run on.
+      if (libBowls) libBowls.hidden = terms.length > 0 || c !== "all" || t !== "all" || s !== "all" || d !== "all";
+      document.documentElement.classList.remove("lib-filtered");
       if (countEl) countEl.textContent = (shown === cards.length ? "All " + cards.length + " noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
       if (empty) {
         empty.classList.toggle("is-visible", shown === 0);
