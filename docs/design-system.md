@@ -75,7 +75,7 @@ Sections don't fade or rise in as you scroll, and section headings (h2) don't an
 | Count-up numbers | `.facts` (country pages) |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
 | Mascots: blink, eyes follow the cursor; wave and squish on hover; tap to talk | Page heroes, red band, timer, back-to-top |
-| Header logo: letters and glyphs rise in on every page load, then wave one after another every few seconds (pauses with the video pause button; still for reduce motion) | Header, every page |
+| Header logo: still, letters there on load (every page, so no entrance and no idle wave: Design, 4 Nov 2026); the badge tilts on hover | Header, every page |
 | Logo: letters and glyphs hop when you hover | About logo, footer |
 | Paper confetti | Roulette win, timer finished |
 | Crossing flavour banners (red and ink) that move with your scroll | Home, after the reel cards (`.ticker`) |
@@ -84,7 +84,7 @@ Sections don't fade or rise in as you scroll, and section headings (h2) don't an
 | Illustrated packets, coloured by flavour, for noodles without a photo | Cards, noodle pages |
 
 Speed rules (tested with the CPU slowed 4x, like an average phone):
-- Nothing animates forever except cheap things (blinks, floats, the header logo's transform-only wave). Waves, squishes and the other logo hops only play on hover or tap.
+- Nothing animates forever except cheap things (blinks, floats, the home hero logo's glyph hop). Waves, squishes and the other logo hops only play on hover or tap.
 - Sections below the first one use `content-visibility: auto`, so the browser skips drawing them until you scroll near.
 - `play.js` does nothing until someone touches Build your bowl, Heat check or a mascot.
 
