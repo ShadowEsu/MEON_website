@@ -7,7 +7,7 @@ const FLAVOUR_NOTES = [
   { re: /tangle/, note: "Samyang's Tangle range: wide, chewy pasta-style noodles tossed through a rich, Western-style sauce." },
   { re: /buldak.*(carbonara)|carbonara.*buldak/, note: "Buldak's sweet, smoky fire sauce is softened by a creamy carbonara-style finish, rich, cheesy and still packing heat." },
   { re: /buldak.*cheese|cheese.*buldak/, note: "Buldak's smoky fire sauce meets a melty, savoury cheese powder for a rich, spicy, gooey bowl." },
-  { re: /buldak.*(jjajang)/, note: "Two Korean icons in one: roasty black-bean jjajang sauce with Buldak's signature chilli kick." },
+  { re: /buldak.*(jjajang)/, note: "Jjajang meets Buldak: roasty black-bean jjajang sauce with Buldak's signature chilli kick." },
   { re: /buldak.*tomato|tomato.*pasta/, note: "A tangy tomato-pasta style sauce with Buldak's fiery chilli, like spicy spaghetti, Korean style." },
   { re: /buldak.*yakisoba|yakisoba/, note: "Sweet-savoury yakisoba-style sauce with a punchy chilli edge, Japanese street-festival vibes." },
   { re: /buldak.*mala|mala/, note: "Numbing Sichuan peppercorn plus chilli heat, that famous tingly mala buzz." },
