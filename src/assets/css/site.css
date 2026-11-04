@@ -211,7 +211,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .25s, transform .4s var(--ease), visibility .25s; z-index: 5;
 }
 .mega::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; height: 12px; }
-.mega-h { margin: 0 0 10px; font-size: .74rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.mega-h { margin: 0 0 10px; font-size: .84rem; font-weight: 600; color: var(--muted); }
 .mega-col > a, .mega-grid a { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-weight: 500; font-size: .96rem; color: var(--ink-2); text-decoration: none; transition: color .2s, transform .35s var(--ease); }
 .mega-col > a:hover, .mega-grid a:hover { color: var(--ink); transform: translateX(4px); }
 .mega-col > a svg.i { color: var(--muted); }
@@ -254,7 +254,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 40px; }
 .footer-lead { color: #fff; font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; max-width: 18ch; }
 .footer-social { display: inline-flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; font-weight: 500; }
-.site-footer h2 { color: #fff; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; margin-bottom: 16px; }
+.site-footer h2 { color: #fff; font-size: .9rem; font-weight: 600; margin-bottom: 16px; }
 .site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: .95rem; }
 .site-footer a { text-decoration: none; transition: color .2s; }
 .site-footer a:hover { color: #fff; }
@@ -278,7 +278,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .search-field input { flex: 1; border: 0; outline: 0; font-size: 1.15rem; height: 44px; background: transparent; min-width: 0; }
 .search-field input::-webkit-search-cancel-button { display: none; }
 .search-results { overflow-y: auto; padding: 8px; overscroll-behavior: contain; }
-.search-group { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--muted); padding: 14px 10px 6px; }
+.search-group { font-size: .84rem; font-weight: 600; color: var(--muted); padding: 14px 10px 6px; }
 .search-suggest { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 10px 8px; }
 .search-item { display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; align-items: center; padding: 8px 10px; border-radius: var(--radius-sm); text-decoration: none; }
 .search-item[aria-selected="true"], .search-item:hover { background: var(--soft); }
@@ -723,7 +723,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .noodle-lede { font-size: clamp(1.1rem, 1.6vw, 1.3rem); color: var(--ink-2); line-height: 1.5; margin-bottom: 32px; max-width: 46ch; }
 .cook { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; padding: 26px 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line-2); }
 .cook-machine { display: grid; gap: 2px; padding-right: 28px; border-right: 1px solid var(--line-2); }
-.cook-label { font-size: .76rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.cook-label { font-size: .86rem; font-weight: 600; color: var(--muted); }
 .cook-code { font-size: clamp(3.4rem, 7vw, 5rem); line-height: 1; font-weight: 600; letter-spacing: -.05em; color: var(--red); }
 .cook-hint { font-size: .86rem; color: var(--ink-2); max-width: 18ch; }
 .cook-then { font-size: .26em; letter-spacing: .02em; color: var(--muted); margin: 0 .5em; vertical-align: .9em; font-weight: 600; }
@@ -745,7 +745,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .noodle-facts { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; border-bottom: 1px solid var(--line-2); }
 .noodle-facts > div { padding: 20px 16px 20px 0; }
 .noodle-facts > div + div { padding-left: 16px; border-left: 1px solid var(--line); }
-.noodle-facts dt { font-size: .76rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.noodle-facts dt { font-size: .86rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
 .noodle-facts dd { margin: 0; font-weight: 600; font-size: 1.02rem; line-height: 1.3; }
 .noodle-facts small { display: block; font-weight: 400; font-size: .82rem; color: var(--muted); margin-top: 6px; }
 .noodle-sec { padding: 40px 0 8px; }
@@ -765,7 +765,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .prev-next { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line-2); }
 .prev-next a { padding: 18px 0; text-decoration: none; min-width: 0; }
 .prev-next a + a { text-align: right; padding-left: 16px; border-left: 1px solid var(--line); }
-.prev-next small { display: block; font-size: .78rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+.prev-next small { display: block; font-size: .86rem; color: var(--muted); font-weight: 600; }
 /* Names wrap to two lines (Design, 31 Oct 2026: "Shin Red - Super Spicy" was clipped at 390), never cut on one line */
 .prev-next strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; text-wrap: balance; overflow-wrap: anywhere; transition: color .2s; }
 .prev-next a:hover strong { color: var(--red); }
@@ -857,7 +857,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .review-card { border: 1px dashed var(--line-2); border-radius: var(--radius-sm); padding: 22px 20px; text-align: center; break-inside: avoid; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .review-card h3 { font-size: 1.5rem; margin: 0; }
 .review-card img { width: 150px; height: 150px; }
-.rc-eyebrow { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.rc-eyebrow { font-size: .84rem; color: var(--muted); font-weight: 600; margin: 0; }
 .rc-ask { margin: 0; max-width: 30ch; }
 .rc-scan { font-size: .85rem; font-weight: 700; margin: 0; }
 .rc-private { font-size: .82rem; color: var(--muted); margin: 6px 0 0; max-width: 32ch; }
