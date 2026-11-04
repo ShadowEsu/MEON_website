@@ -31,6 +31,16 @@
   --radius-sm: 8px;
   --ease: cubic-bezier(.22, 1, .36, 1);
   --ease-io: cubic-bezier(.65, 0, .35, 1);
+  /* Shared motion tokens (Design's spec for every product, agents/design/motion-system-2026-11-04/MOTION-SPEC.md §1).
+     The motion moments below use only these; --ease above is the same curve as --m-ease-smooth. */
+  --m-instant: 80ms;   --m-fast: 180ms;  --m-exit: 150ms;
+  --m-normal: 350ms;   --m-slow: 600ms;  --m-crawl: 1000ms;
+  --m-stagger: 70ms;
+  --m-ease-smooth: cubic-bezier(.22,1,.36,1);
+  --m-ease-sharp:  cubic-bezier(.4,0,.2,1);
+  --m-ease-pop:    cubic-bezier(.34,1.56,.64,1);
+  --m-dist-sm: 8px; --m-dist-md: 16px;
+  --m-scale-press: .95; --m-scale-pop: 1.04;
 }
 @media (max-width: 760px) { :root { --header-h: 64px; } }
 
@@ -457,7 +467,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .facts > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; padding: 22px 20px 0 0; }
 .facts > div + div { padding-left: 20px; border-left: 1px solid var(--line); }
 .facts dt { font-size: .86rem; color: var(--muted); }
-.facts dd { margin: 0 0 4px; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+.facts dd { margin: 0 0 4px; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 600; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 @media (max-width: 860px) {
   .facts { grid-template-columns: 1fr 1fr; }
   .facts > div:nth-child(3) { border-left: 0; padding-left: 0; }
@@ -897,9 +907,38 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .lost-suggest ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; justify-items: center; }
 .lost-suggest a { font-weight: 600; color: var(--red); }
 
-/* ---------- Confetti (paper shapes) ---------- */
-.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 160; overflow: hidden; }
-.confetti i { position: absolute; top: -20px; width: 9px; height: 14px; border-radius: 2px; animation: fall var(--t, 2.4s) var(--ease-io) forwards; }
+/* ---------- Motion moments (Design's shared spec §2: skeleton shimmer, staggered arrival, celebration) ---------- */
+/* Skeleton block: surface tone, one highlight sweep at 100°, looping only while it is on the page (JS removes it the
+   moment data lands). Reduced motion: the sweep stops, the blocks stay (static skeleton). */
+.m-skel-b { display: block; position: relative; overflow: hidden; height: 12px; border-radius: 6px; background: var(--line); }
+.m-skel-b::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, var(--soft) 50%, transparent 80%); transform: translateX(-100%); animation: m-sweep 1.4s linear infinite; }
+@keyframes m-sweep { to { transform: translateX(100%); } }
+.m-skel-w30 { width: 30%; } .m-skel-w40 { width: 40%; } .m-skel-w60 { width: 60%; }
+/* Search: 4 result-shaped rows (thumb, title, line) at the real rows' size */
+.m-skel-row { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: center; padding: 8px 10px; }
+.m-skel-row .m-skel-b + .m-skel-b { margin-top: 8px; }
+.m-skel-b.m-skel-thumb { width: 44px; height: 44px; }
+/* Reviews: 2 review-shaped blocks, cut to the height of the box they stand in for (JS sets it), so nothing shifts */
+.rv-skel { display: grid; align-content: start; overflow: hidden; }
+.rv-skel-i { display: grid; gap: 10px; padding: 22px 0; border-top: 1px solid var(--line); }
+.m-skel-b.rv-skel-stars { width: 96px; height: 14px; }
+/* Data landed after a skeleton: the content fades in */
+.m-fade-in { animation: m-fade-in var(--m-fast) var(--m-ease-sharp); }
+@keyframes m-fade-in { from { opacity: 0; } }
+/* Staggered arrival: library cards that come into view on a filter change (first 8 only; JS sets --m-i) */
+.m-arrive { animation: m-arrive var(--m-normal) var(--m-ease-smooth) both; animation-delay: calc(var(--m-i, 0) * var(--m-stagger)); }
+@keyframes m-arrive { from { opacity: 0; transform: translateY(var(--m-dist-sm)); } }
+/* Celebration: 8 small shapes burst up to 48 px out from the edge of the thing that won, then fade; it pops to
+   --m-scale-pop and back. 600 ms in all (the spec allows 900). Fixed to the screen, so a shape near the edge never
+   adds a scrollbar. */
+.m-burst { position: fixed; width: 0; height: 0; pointer-events: none; z-index: 160; }
+.m-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 2px; animation: m-burst var(--m-slow) var(--m-ease-smooth) both; }
+@keyframes m-burst { from { transform: translate(var(--x0), var(--y0)) scale(.6); } to { transform: translate(var(--x1), var(--y1)) rotate(var(--r)); opacity: 0; } }
+.m-pop { animation: m-pop var(--m-normal) var(--m-ease-pop); }
+@keyframes m-pop { 50% { transform: scale(var(--m-scale-pop)); } }
+/* Reduced motion: no shapes, a still outline in brand red for the same 900 ms */
+.m-won { outline: 3px solid var(--brand); outline-offset: 6px; }
+.timer-dial.m-won { border-radius: 50%; }
 
 /* ---------- Split words ---------- */
 [data-split] .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; margin-bottom: -.08em; }
@@ -918,8 +957,6 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 @keyframes lw-in { to { transform: none; opacity: 1; } }
 @keyframes eq { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
 @keyframes flag-sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg) translateY(-6px); } }
-
-@keyframes fall { to { transform: translate(var(--x, 0), 110vh) rotate(var(--r, 360deg)); } }
 
 /* ---------- Print ---------- */
 @media print {
@@ -1010,7 +1047,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .rv-list { display: grid; }
 .rv-item { padding: 22px 0; border-top: 1px solid var(--line); }
 .rv-item:last-child { border-bottom: 1px solid var(--line); }
-.rv-item.is-new { animation: rv-in .8s var(--ease); }
+.rv-item.is-new { animation: m-arrive var(--m-normal) var(--m-ease-smooth); }
 .rv-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
 .rv-name { font-weight: 600; }
 .rv-date { font-size: .82rem; color: var(--muted); }
@@ -1023,7 +1060,6 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .rv-more { margin-top: 18px; justify-self: start; }
 .rv-down { display: grid; justify-items: center; gap: 12px; text-align: center; padding: clamp(32px, 5vw, 56px) 24px; border: 1px dashed var(--line-2); border-radius: var(--radius); background: var(--soft); }
 .rv-down p { margin: 0; color: var(--ink); font-weight: 600; font-size: 1.15rem; }
-@keyframes rv-in { from { opacity: 0; transform: translateY(14px); } }
 @media (max-width: 860px) { .reviews-grid { grid-template-columns: 1fr; } }
 
 /* ---------- Background videos (poster first; the video fades in once it plays, see site.js) ---------- */
