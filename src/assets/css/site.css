@@ -12,17 +12,25 @@
 
 :root {
   --brand: #ec1b25;          /* logo red, used for large fills */
-  --red: #d7141d;            /* accessible red for text and buttons */
+  --red: #c6121b;            /* accessible red for text and buttons: 5.4:1 on cream, 4.9:1 on --soft, 4.5:1 at the ground's glow; white on it 6.0:1 */
   --red-deep: #b70f17;
   --ink: #121010;
   --ink-2: #3b3735;
-  --muted: #6e6863;          /* 5:1 on --soft, 5.5:1 on white (WCAG AA for small text) */
+  --muted: #67625d;          /* 6.0:1 on white, 5.5:1 on cream, 5.0:1 on --soft, 4.5:1 at the ground's glow (WCAG AA for small text) */
   --line: #ebe7e2;
   --line-2: #d9d3cc;
-  /* Borders of controls (inputs, selects, textareas, empty stars): 3.70:1 on white (WCAG 1.4.11); --line-2 stays for hairlines */
+  /* Borders of controls (inputs, selects, textareas, empty stars): 3.70:1 on white, 3.36:1 on cream, 3.05:1 on --soft (WCAG 1.4.11); --line-2 stays for hairlines */
   --line-strong: #8a847e;
-  --soft: #f6f4f1;
-  --paper: #ffffff;
+  --soft: #f3e8d6;           /* the deeper cream band (.section--soft, the reel strip) */
+  --paper: #ffffff;          /* plates: cards, forms, the header, the "Follow us" band */
+  --cream: #fbf3e6;          /* the page's base colour */
+  /* The page ground (Preston, ledger 458: cream plus gradients; Design's grounds, agents/design/backgrounds-458/BACKGROUNDS.md).
+     One variable, so another pick is one line. Option M1 "Broth": two warm glows over the cream, both sized to the first
+     screen and scrolling with the page (Design, 4 Nov 2026: the glow stays at the top, never fixed behind text). With no
+     gradient (forced colours, print) the page is the plain cream. */
+  --ground: radial-gradient(70% 55% at 80% 0%, #ffd2a6cc, transparent 70%) 0 0 / 100% 100vh no-repeat,
+            radial-gradient(50% 45% at 0% 100%, #ffe1d6, transparent 70%) 0 0 / 100% 100vh no-repeat,
+            var(--cream);
   --font: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --wrap: 1240px;
   --gutter: clamp(18px, 4vw, 44px);
@@ -48,7 +56,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 20px); }
 body {
-  margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); font-optical-sizing: auto;
+  margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font); font-optical-sizing: auto;
   font-size: 17px; line-height: 1.6; font-weight: 400; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-x: hidden;
 }
 body.is-locked { overflow: hidden; }
@@ -610,7 +618,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .roulette { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(36px, 6vw, 90px); align-items: center; }
 .roulette-machine { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 26px 0; }
 .roulette-window { height: 160px; overflow: hidden; position: relative; }
-.roulette-window::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#fff, transparent 22%, transparent 78%, #fff); }
+.roulette-window::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(var(--cream), transparent 22%, transparent 78%, var(--cream)); }
 .roulette-reel { transition: transform 2.6s cubic-bezier(.12, .8, .14, 1); will-change: transform; }
 .roulette-item { display: grid; grid-template-columns: 160px 1fr; gap: 22px; align-items: center; height: 160px; text-decoration: none; color: var(--ink); }
 .roulette-item > img, .roulette-item > .roulette-ph { width: 160px; height: 160px; object-fit: cover; border-radius: var(--radius-sm); background: var(--soft); }

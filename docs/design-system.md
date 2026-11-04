@@ -5,10 +5,13 @@ The site is professional and calm, and lets the food lead. It uses one typeface 
 ## Rules
 - **One font:** Bricolage Grotesque (variable, with automatic optical size). It is used for headings and body text alike, set apart only by weight and size.
 - **One colour:**
-  - ink `#121010` on white, with MEON red as the only accent
-  - `--brand #ec1b25` (the logo red) for the logo and red with only large type on it (the flavour ticker band): white on it is 4.4:1, enough for large text only
-  - `--red #d7141d` for text, buttons and any red block with normal-size white text (step card 1, its numbers, the mega-menu feature): white on it is 5.2:1 (Design, 1 Nov 2026)
-  - `--soft #f6f4f1` is the only tint, used for alternating sections
+  - ink `#121010` on cream, with MEON red as the only accent
+  - the page ground (Preston, ledger 458: "cream base plus gradients"; Design, 4 Nov 2026, option M1 "Broth"): `--cream #fbf3e6` with two warm glows sized to the first screen, set once as `--ground` on `body`, so another pick is one line. The glows scroll with the page (never `fixed` behind text), and with no gradient (forced colours, print) the page is the plain cream. `theme-color` and the manifest background are the cream too
+  - `--paper #fff` is for plates only: cards, forms, the header and the "Follow us" band
+  - `--brand #ec1b25` (the logo red) for the logo and red with only large type on it (the flavour ticker band): white on it is 4.4:1, enough for large text only (18.66 px bold and up); labels over a red band sit on a plate
+  - `--red #c6121b` for text, buttons and any red block with normal-size white text (step card 1, its numbers, the mega-menu feature): white on it is 6.0:1, and it is 5.4:1 on cream, 4.9:1 on `--soft` and 4.5:1 at the brightest point of the glow (Design, 4 Nov 2026; it was `#d7141d` before the cream ground)
+  - `--muted #67625d`: 6.0:1 on white, 5.5:1 on cream, 5.0:1 on `--soft`, 4.5:1 at the glow (it was `#6e6863`)
+  - `--soft #f3e8d6` is the deeper cream band, used for alternating sections and the reel strip
 - **No emojis anywhere.** Icons are a custom line set (`svgIcon()` in `art.mjs`, also published as `assets/img/icons.svg` for JavaScript). Flags are real artwork from flag-icons (MIT), copied to `assets/img/flags/`.
 - **The logo is drawn, not typed, and always complete.** It is the full mixed logo: "meon" with み อี 哦 ㄴ underneath, never the word alone (Preston, 29 Oct 2026). `scripts/trace_logo.py` traces it from the official artwork into `scripts/lib/logo-mixed.json`, so no second font is loaded. `logoMark()` in `art.mjs` is the red square, used everywhere it appears as a badge: the header on every page (Preston, 29 Oct 2026: "square please", never the wide crop, and always animated), the home hero and About. In the square the glyphs are about 6% of its height, so in the header they read as small marks; the big hero square is where they read clearly. `logoLockup()` is the lettering alone in the current colour (footer, red on ink).
 - **No boxes:**
