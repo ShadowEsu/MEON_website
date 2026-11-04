@@ -527,7 +527,6 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
   return `<section class="section reviews" id="reviews" data-reviews data-slug="${esc(slug)}" data-endpoint="${esc(cfg.supabaseUrl)}" data-key="${esc(cfg.publishableKey)}" data-table="${esc(cfg.table || "meon_reviews")}">
   <div class="wrap reviews-grid">
     <div class="reviews-head">
-      <p class="eyebrow">Reviews</p>
       <h2 data-split>${title}</h2>
       ${lead ? `<p class="lead">${lead}</p>` : ""}
       <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
@@ -724,7 +723,6 @@ addPage("", layout({
 
 <section class="story" id="how" aria-labelledby="how-h">
   <div class="wrap story-head reveal">
-    <p class="eyebrow">Do it yourself</p>
     <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
     <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
   </div>
@@ -858,8 +856,7 @@ addPage("", layout({
       <p class="bb-count" aria-live="polite" data-bowl-count>Your bowl is empty. Add something.</p>
     </div>
     <div class="reveal">
-      <p class="eyebrow">Pairings and sides</p>
-      <h2 data-split>Build your bowl.</h2>
+      <h2 data-split>Build your bowl with pairings and sides.</h2>
       <p class="lead">The packet is only the start. Tap a pairing to drop it in, then find it all at the pairings and sides bar.</p>
       <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
       <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side</a></div>
@@ -1239,7 +1236,7 @@ addPage("about/", layout({
   jsonld: [crumbLd("About", "about/")],
   description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
+${videoHero(r, { crumbs: [["About"]], title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2 data-split>What we do.</h2>
@@ -1273,7 +1270,7 @@ addPage("privacy/", layout({
   jsonld: [crumbLd("Privacy", "privacy/")],
   description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
+${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
 <section class="section section--tight"><div class="wrap split split--top">
   <div class="reveal">
     <h2 data-split>Reviews.</h2>
@@ -1349,7 +1346,7 @@ ${PRIVATE_FEEDBACK ? `<section class="section section--tight" aria-labelledby="f
   </div>
 </div></section>` : ""}
 <section class="section"><div class="wrap split split--top">
-  <div class="reveal"><p class="eyebrow">Questions</p><h2 data-split>Frequently asked.</h2></div>
+  <div class="reveal"><h2 data-split>Frequently asked questions.</h2></div>
   <div class="faq">${FAQ.map(([q, a]) => `<details class="reveal"><summary>${esc(q)}${icon.chevron}</summary><p>${esc(a)}</p></details>`).join("")}</div>
 </div></section>
 ${ctaBand(r, { title: `See you at ${esc(site.suburb)}.` })}
