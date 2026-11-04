@@ -75,7 +75,7 @@ Loading and winning moments follow the fleet's shared motion spec (Design, 4 Nov
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |
 | Count-up: a number below the fold shows 0 and counts up once when it scrolls into view (700 ms under 100, 1000 ms under 10,000), with tabular numerals; one already on screen when the page opens just stays. Screen readers get the final value | `.facts` (library, spiciest, Buldak, country pages) |
-| Skeleton shimmer: only if loading takes over 200 ms, blocks shaped like the real content hold its space and one highlight sweeps across; the content fades in when it lands. Reduced motion: still blocks | Reviews (Visit, home, every noodle page): "No reviews yet" shows only once the answer says there are none. Search, the first time it opens |
+| Skeleton shimmer: only if loading takes over 200 ms, blocks shaped like the real content hold its space and one highlight sweeps across; the content fades in when it lands. Reduced motion: still blocks | Reviews (home and every noodle page): "No reviews yet" shows only once the answer says there are none. Search, the first time it opens |
 | Staggered arrival: after a filter change, the cards that just came into view (the first 8) fade and rise 8 px, 70 ms apart; cards already showing don't move, and a sort or the first load doesn't animate | Noodle library |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
 | Mascots: blink, eyes follow the cursor; wave and squish on hover; tap to talk | Page heroes, red band, timer, back-to-top |
