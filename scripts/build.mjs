@@ -496,7 +496,7 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
       <h2 data-split>${title}</h2>
       <p class="lead">${esc(text)}</p>
       <div class="actions">
-        <a class="btn btn--white" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
+        <a class="btn btn--white" href="${r("noodles/")}" data-magnetic>Browse the noodle wall</a>
         <a class="btn btn--ghost-white" href="${r("visit/")}">${icon.pin} Visit us</a>
       </div>
     </div>
@@ -531,7 +531,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
       <h2 data-split>${title}</h2>
       ${lead ? `<p class="lead">${lead}</p>` : ""}
       <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
-      <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a>${PRIVATE_FEEDBACK ? `<a class="link-arrow" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>Tell us privately ${icon.arrow}</a>` : ""}</div>
+      <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">Review us on Google</a>${PRIVATE_FEEDBACK ? `<a class="link-arrow" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>Tell us privately</a>` : ""}</div>
       <form class="rv-form" data-rv-form data-consent="${REVIEW_CONSENT}" novalidate>
         <div class="rv-errors" data-rv-errors tabindex="-1" aria-labelledby="${id}-errors-h" hidden><h3 class="rv-errors-h" id="${id}-errors-h"></h3><ul></ul></div>
         <fieldset class="rv-rate" id="${id}-rating" role="radiogroup" aria-labelledby="${id}-rating-l"><legend id="${id}-rating-l">Your rating</legend><div class="rv-rate-stars">${stars}</div>${err("rating", "Choose a star rating")}</fieldset>
@@ -543,7 +543,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
           ${err("consent", "Tick the box so we can publish your review")}
           <p class="note" id="rv-consent-${slug || "all"}-detail">We keep your name, stars and review, the page, whether you scanned a shelf QR code, and the time, with Supabase, our database provider, until you ask us to remove them. <a href="${r("privacy/")}">How we handle reviews</a></p>
         </div>
-        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button><a class="link-arrow" data-rv-alt href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener" hidden>Post it on Google instead ${icon.arrow}</a></div>
+        <div class="rv-actions"><button class="btn btn--red" type="submit">Post review</button><a class="link-arrow" data-rv-alt href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener" hidden>Post it on Google instead</a></div>
         <p class="rv-status" data-rv-status aria-live="polite" tabindex="-1"></p>
       </form>
     </div>
@@ -690,7 +690,7 @@ addPage("", layout({
       }).join("")}</div>
       <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
       <div class="actions">
-        <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
+        <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
       </div>
     </div>
@@ -731,11 +731,11 @@ addPage("", layout({
   <ol class="stack">
     <li class="scard scard--red">
       <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT}\u00A0noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
+      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT}\u00A0noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall</a></div>
     </li>
     <li class="scard scard--ink">
       <div class="scard-media">${bgVideo(r, "step-pairings", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--white" href="${r("pairings-and-sides/")}">See the pairings and sides ${icon.arrow}</a></div>
+      <div class="scard-copy"><span class="scard-num">02</span><h3>Add pairings and sides</h3><p>Beef roll, fishcake, egg, lettuce and more from the pairings and sides bar.</p><a class="btn btn--white" href="${r("pairings-and-sides/")}">See the pairings and sides</a></div>
     </li>
     <li class="scard scard--light">
       <div class="scard-media">${bgVideo(r, "step-cook", { sizes: STEP_SIZES })}</div>
@@ -754,7 +754,7 @@ addPage("", layout({
     <p class="eyebrow">MEON time</p>
     <h2 id="vwall-h" data-split>Bring your crew.</h2>
     <p class="lead">We've got a wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
-    <a class="btn btn--white btn--lg" href="${r("visit/")}">Visit us ${icon.arrow}</a>
+    <a class="btn btn--white btn--lg" href="${r("visit/")}">Visit us</a>
   </div>
 </section>
 
@@ -773,14 +773,14 @@ addPage("", layout({
     <div class="fresh-grid">
       ${FRESH.map((name, i) => {
         const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
+        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)}</span></a>`;
       }).join("")}
     </div>
   </div>
 </section>
 
 <section class="wall-sec" aria-label="On the noodle wall">
-  <div class="wrap">${sectionHead("On the wall now", "Pick a packet. Any packet.", `<a class="link-arrow" href="${r("noodles/")}">See them all ${icon.arrow}</a>`)}</div>
+  <div class="wrap">${sectionHead("On the wall now", "Pick a packet. Any packet.", `<a class="link-arrow" href="${r("noodles/")}">See them all</a>`)}</div>
   <div class="wall" data-hscroll aria-hidden="true">
     <div class="wall-row" data-speed="1">${wallImgs(withPhotos.slice(0, half), r)}</div>
     <div class="wall-row" data-speed="-1">${wallImgs(withPhotos.slice(half), r)}</div>
@@ -789,7 +789,7 @@ addPage("", layout({
 
 <section class="section section--soft">
   <div class="wrap">
-    ${sectionHead("Worth a try", "Good places to start.", `<a class="link-arrow" href="${r("noodles/")}">All noodles ${icon.arrow}</a>`)}
+    ${sectionHead("Worth a try", "Good places to start.", `<a class="link-arrow" href="${r("noodles/")}">All noodles</a>`)}
     <div class="card-grid">${featured.map((n, i) => noodleCard(n, r, i)).join("")}</div>
   </div>
 </section>
@@ -818,7 +818,7 @@ addPage("", layout({
 
 <section class="section section--soft">
   <div class="wrap">
-    ${sectionHead(`From ${stockedCountries.length}\u00A0countries`, "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries ${icon.arrow}</a>`)}
+    ${sectionHead(`From ${stockedCountries.length}\u00A0countries`, "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries</a>`)}
     <div class="country-list">
       ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}</span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
     </div>
@@ -840,7 +840,7 @@ addPage("", layout({
         <div><p class="heat-level" data-heat-level>2 · Medium</p><p class="heat-desc" data-heat-desc>${esc(SPICE_LADDER[2][2])}</p></div>
       </div>
       <ul class="heat-picks" data-heat-picks></ul>
-      <a class="btn btn--red" data-heat-link href="${r("noodles/?spice=2")}" data-magnetic><span>See all level <span data-heat-n>2</span> noodles</span> ${icon.arrow}</a>
+      <a class="btn btn--red" data-heat-link href="${r("noodles/?spice=2")}" data-magnetic><span>See all level <span data-heat-n>2</span> noodles</span></a>
       <script type="application/json" id="heat-copy">${json(SPICE_LADDER)}</script>
     </div>
   </div>
@@ -862,7 +862,7 @@ addPage("", layout({
       <h2 data-split>Build your bowl.</h2>
       <p class="lead">The packet is only the start. Tap a pairing to drop it in, then find it all at the pairings and sides bar.</p>
       <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
-      <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side ${icon.arrow}</a></div>
+      <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side</a></div>
     </div>
   </div>
 </section>
@@ -1062,7 +1062,7 @@ noodles.forEach((n, idx) => {
 ${reviewsBlock(r, { slug: n.slug, title: `Rate ${esc(n.name)}.`, lead: "Tried it? Tell everyone how it was." })}
 <section class="section section--soft section--tight">
   <div class="wrap">
-    ${sectionHead("Keep exploring", "You might also like", `<a class="link-arrow" href="${r(`countries/${n.c.slug}/`)}">More from ${esc(n.country)} ${icon.arrow}</a>`)}
+    ${sectionHead("Keep exploring", "You might also like", `<a class="link-arrow" href="${r(`countries/${n.c.slug}/`)}">More from ${esc(n.country)}</a>`)}
     <div class="card-grid">${similar.map((o, i) => noodleCard(o, r, i)).join("")}</div>
   </div>
 </section>
@@ -1106,7 +1106,7 @@ for (const c of countries) {
     ],
     description: fitDesc(`${list.length} instant noodles from ${c.name === "Philippines" ? "the Philippines" : c.name} at MEON ${site.suburb}, Perth.`, c.headline, [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
     body: (r) => `
-${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: plural(list.length, "noodle"), title: esc(c.name), lead: `<strong>${esc(c.headline)}</strong> ${esc(c.intro)}`, actions: `<a class="btn btn--red" href="${r(`noodles/?country=${c.code}`)}" data-magnetic>Filter in the library ${icon.arrow}</a>`, aside: `<div class="flag-hero" data-parallax="0.06">${flag(c.code, r, { cls: "flag flag--hero", w: 360 })}</div>`,
+${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: plural(list.length, "noodle"), title: esc(c.name), lead: `<strong>${esc(c.headline)}</strong> ${esc(c.intro)}`, actions: `<a class="btn btn--red" href="${r(`noodles/?country=${c.code}`)}" data-magnetic>Filter in the library</a>`, aside: `<div class="flag-hero" data-parallax="0.06">${flag(c.code, r, { cls: "flag flag--hero", w: 360 })}</div>`,
   after: facts([[list.length, "Noodles"], [list.filter((n) => n.type === "Soup").length, "Soup"], [list.filter((n) => n.type === "Dry").length, "Dry"], [list.filter((n) => n.spiceKey >= 3).length, "Spicy (3+)"]]) })}
 <section class="section section--tight"><div class="wrap">
   <h2 class="visually-hidden">Every ${esc(c.name)} noodle we stock</h2>
@@ -1250,7 +1250,7 @@ ${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know 
   <div class="reveal">
     <h2 data-split>Our name.</h2>
     <p class="lead">Under “meon” in our logo are letters from Japanese, Thai, Chinese and Korean. They're a nod to the noodle cultures behind every bowl we serve.</p>
-    <a class="btn btn--line" href="${r("countries/")}">Meet the countries ${icon.arrow}</a>
+    <a class="btn btn--line" href="${r("countries/")}">Meet the countries</a>
   </div>
 </div></section>
 <section class="section section--soft"><div class="wrap">
@@ -1322,9 +1322,9 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
 <section class="section section--tight"><div class="wrap">
   <h2 class="visually-hidden">Where, when and how to reach us</h2>
   <div class="info-cols">
-    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions ${icon.arrow}</a></div>
-    <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}${site.instagram ? `<a class="${site.hours.length ? "link-arrow" : "btn btn--line btn--sm"}" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${site.hours.length ? `Latest hours on Instagram ${icon.arrow}` : `${icon.insta} Check our hours on Instagram`}</a>` : site.hours.length ? "" : `<p>${esc(HOURS_NOTE)}</p>`}</div>
-    <div class="reveal" style="--rd:.12s">${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram ${icon.arrow}</a>` : ""}</div>
+    <div class="reveal">${svgIcon("pin")}<h3>Where</h3><p><strong>MEON Noodles</strong><br>${esc(addressLine)}<br>${esc(site.city)}, Western Australia</p><a class="link-arrow" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></div>
+    <div class="reveal" style="--rd:.06s">${svgIcon("clock")}<h3>When</h3>${site.hours.length ? `<table class="hours"><tbody>${site.hours.map((h) => `<tr><td>${esc(h.days)}</td><td>${esc(h.time)}</td></tr>`).join("")}</tbody></table>` : ""}${site.instagram ? `<a class="${site.hours.length ? "link-arrow" : "btn btn--line btn--sm"}" href="${esc(site.instagram)}" target="_blank" rel="noopener" data-hours-link>${site.hours.length ? "Latest hours on Instagram" : `${icon.insta} Check our hours on Instagram`}</a>` : site.hours.length ? "" : `<p>${esc(HOURS_NOTE)}</p>`}</div>
+    <div class="reveal" style="--rd:.12s">${svgIcon("chat")}<h3>Contact</h3><p>Questions, feedback, or a noodle you'd like us to stock? We'd like to hear it.</p>${site.email ? `<p><a href="mailto:${esc(site.email)}">${esc(site.email)}</a></p>` : ""}${site.phone ? `<p><a href="tel:${esc(site.phone.replace(/\s+/g, ""))}">${esc(site.phone)}</a></p>` : ""}${site.instagram ? `<a class="link-arrow" href="${esc(site.instagram)}" target="_blank" rel="noopener">Message us on Instagram</a>` : ""}</div>
   </div>
 </div></section>
 <section class="section section--soft"><div class="wrap split">
