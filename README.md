@@ -7,6 +7,7 @@ MEON is a cook-it-yourself instant-noodle bar at Shop 8, 45 Francis Street, Nort
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download. Both are staff pages hidden from Google; no codes are printed yet, so the public pages don't mention QR codes
 - Country pages, Pairings and sides (`/pairings-and-sides/`: pairings, egg and cheese, ready-to-eat sides, then a drinks list; the old `/toppings/` address redirects there), About, Visit
+- Two list pages built only from our own spice ratings: `/spiciest-noodles/` (every noodle rated 3 to 5, grouped by rating, hottest first) and `/buldak/` (every Samyang Buldak we stock, hottest to mildest). Counts, names and the mildest Buldak are computed at build time, so they follow `data/noodles.json` and `data/catalogue.json`; the build stops if Shin Noodle Soup Original (the 3 the scale is set against) goes missing or changes rating
 - No prices anywhere: prices change, so they stay off the site
 - Professional, calm design: one typeface (Bricolage Grotesque), ink and white with MEON red as the only colour, hairlines instead of boxes, no emojis (custom line icons and real flag artwork)
 - Noodle pages built for someone at the shelf: photo, "press 1, then 2" and the cook timer first, then facts, cooking steps and pairings
