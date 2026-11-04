@@ -432,15 +432,17 @@ function megaNoodles(r) {
 </div>`;
 }
 
-// Inner-page hero: breadcrumbs, a split-word title and lead on the left, one visual (or a peeking mascot) on the right.
-function pageHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "", after = "", seed = 0, aside = "" }) {
+// Inner-page hero: breadcrumbs, a title and lead on the left, one visual (or a peeking mascot) on the right. The title
+// reveals word by word (the page's one entrance moment) unless split is false: pages people open back to back, like the
+// SEO lists, show it at once (Design, 4 Nov 2026: animate by frequency).
+function pageHero(r, { crumbs = [], eyebrow = "", title, lead = "", actions = "", after = "", seed = 0, aside = "", split = true }) {
   return `<section class="page-hero">
   <div class="wrap">
     ${crumbs.length ? crumbsNav(r, crumbs) : ""}
     <div class="ph-grid">
       <div class="ph-copy">
         ${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}
-        <h1 class="page-title" data-split>${title}</h1>
+        <h1 class="page-title"${split ? " data-split" : ""}>${title}</h1>
         ${lead ? `<p class="lead">${lead}</p>` : ""}
         ${actions ? `<div class="actions">${actions}</div>` : ""}
       </div>
@@ -976,7 +978,7 @@ noodles.forEach((n, idx) => {
       <div class="noodle-body">
         <p class="qr-banner" data-qr-banner hidden>${icon.qr}<span>Scanned from the shelf. Here's how to cook this one.</span></p>
         <p class="noodle-kicker"><a href="${r(`countries/${n.c.slug}/`)}">${flag(n.countryCode, r, { w: 18 })}${esc(n.country)}</a><span>${esc(n.brand)}</span></p>
-        <h1 data-split>${esc(n.name)}</h1>
+        <h1>${esc(n.name)}</h1>
         <p class="noodle-lede">${shortBlurb(n)}</p>
 
         <section class="cook" aria-labelledby="cook-h">
@@ -1125,7 +1127,7 @@ addPage("spiciest-noodles/", layout({
   jsonld: [listLd("The spiciest instant noodles at MEON", hot), crumbLd("Spiciest noodles", "spiciest-noodles/")],
   description: fitDesc(`${hot.length} instant noodles rated 3 to 5 on MEON's spice scale, where Shin Ramyun is a 3.`, "Hottest first.", [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
   body: (r) => `
-${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 2,
+${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", split: false, lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 2,
   after: facts([5, 4, 3].map((l) => [atLevel(l).length, `Rated ${l}`])) })}
 ${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section section--tight" id="rated-${l}"><div class="wrap">
   <h2>Rated ${l} out of 5</h2>
@@ -1150,7 +1152,7 @@ addPage("buldak/", layout({
   jsonld: [listLd("Buldak noodles at MEON", buldak), crumbLd("Buldak", "buldak/")],
   description: fitDesc(`${buldak.length} Samyang Buldak noodles at MEON in ${site.suburb}, Perth.`, "From hottest to mildest on our 0 to 5 spice scale, where Shin Ramyun is a 3.", [["Every packet has its own page."]]),
   body: (r) => `
-${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", lead: `Buldak is Samyang's range from ${esc(buldak[0].country)}. We stock ${buldak.length} of them. Here they are from hottest to mildest on our spice scale, where <a href="${r(SHIN.url)}">Shin Ramyun</a> is a 3.`, actions: `<a class="btn btn--red" href="${r("noodles/?q=Buldak&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 3,
+${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", split: false, lead: `Buldak is Samyang's range from ${esc(buldak[0].country)}. We stock ${buldak.length} of them. Here they are from hottest to mildest on our spice scale, where <a href="${r(SHIN.url)}">Shin Ramyun</a> is a 3.`, actions: `<a class="btn btn--red" href="${r("noodles/?q=Buldak&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 3,
   after: facts([[buldak.length, "Flavours"], [buldak.filter((n) => n.spiceKey === 5).length, "Rated 5"], [buldak.filter((n) => n.type === "Dry").length, "Dry"], [buldakSoup.length, "Soup"]]) })}
 <section class="section section--tight"><div class="wrap">
   <h2>Hottest to mildest</h2>
