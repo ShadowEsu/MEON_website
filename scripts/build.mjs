@@ -700,7 +700,7 @@ addPage("", layout({
 
 <section class="story" id="how" aria-labelledby="how-h">
   <div class="wrap story-head reveal">
-    <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
+    <h2 id="how-h" data-split>From the wall to your bowl in 4 steps.</h2>
     <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
   </div>
   <ol class="stack" data-stack>
