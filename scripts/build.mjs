@@ -654,7 +654,7 @@ addPage("", layout({
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
       <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
-      <p class="vhero-sub">Cook-it-yourself instant noodles from across Asia, at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</p>
+      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
