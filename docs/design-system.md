@@ -58,7 +58,7 @@ The page is built for someone standing at the shelf with their phone. The order 
 ## Motion (smooth by design)
 All motion uses transform and opacity only, runs from one scroll loop, pauses when off-screen and switches off for reduced motion. The background videos follow the same rule: they start by themselves on every phone (Preston wants that), but for reduced motion they start paused behind a "Play videos" pill and play only after a tap (BOSS, 30 Oct 2026).
 
-Sections don't fade or rise in as you scroll: their content is already there when you reach it (Design, 4 Nov 2026, no-AI-slop item 16: one orchestrated moment per page at most).
+Sections don't fade or rise in as you scroll, and section headings (h2) don't animate: their content is already there when you reach it. The page title's word reveal is the page's entrance moment (Design, 4 Nov 2026, no-AI-slop item 16: one orchestrated moment per page at most).
 
 | Effect | Where |
 | --- | --- |
@@ -68,7 +68,7 @@ Sections don't fade or rise in as you scroll: their content is already there whe
 | Video wall: four columns of clips and photos drift at different speeds through the section | Home "Bring your crew." (`[data-scene="through"]`) |
 | Glyphs in the big logo rise in one after another, then take turns to hop (they never disappear) | Home hero logo |
 | Auto-scrolling reel strip (Preston asked for it, 29 Oct 2026): one transform animation, paused on hover, focus, the pause button and off-screen; a still, swipeable row for reduce motion | Home (`#instagram`) |
-| Masked word reveal | Every heading with `data-split` |
+| Masked word reveal | The page title (`h1` with `data-split`) |
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |

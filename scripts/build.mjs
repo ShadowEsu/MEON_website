@@ -487,7 +487,7 @@ function ctaBand(r, { title = "Come in hungry.", text = site.orderingNote } = {}
   <div class="wrap cta-inner">
     <div class="cta-copy">
       <p class="eyebrow">Come visit us</p>
-      <h2 data-split>${title}</h2>
+      <h2>${title}</h2>
       <p class="lead">${esc(text)}</p>
       <div class="actions">
         <a class="btn btn--white" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
@@ -522,7 +522,7 @@ function reviewsBlock(r, { slug = "", title = "What people are saying.", lead = 
   <div class="wrap reviews-grid">
     <div class="reviews-head">
       <p class="eyebrow">Reviews</p>
-      <h2 data-split>${title}</h2>
+      <h2>${title}</h2>
       ${lead ? `<p class="lead">${lead}</p>` : ""}
       <div class="rv-summary" data-rv-summary hidden><span class="rv-avg">–</span><span class="rv-stars" aria-hidden="true"></span><span class="rv-count">No reviews yet</span></div>
       <div class="rv-google"><a class="btn btn--line btn--sm" href="${esc(GOOGLE_REVIEWS)}" target="_blank" rel="noopener">${svgIcon("star")} Read our Google reviews</a><a class="link-arrow" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">Review us on Google ${icon.arrow}</a>${PRIVATE_FEEDBACK ? `<a class="link-arrow" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>Tell us privately ${icon.arrow}</a>` : ""}</div>
@@ -619,7 +619,7 @@ const vwallTile = (r, t) => `<figure class="vtile${WIDE_TILES.has(t) ? " vtile--
 
 const TICKER = ["Buldak", "Tom yum", "Mi goreng", "Tonkotsu", "Jjajang", "Laksa", "Shin Black", "Pancit canton", "Kimchi", "Salted egg", "Hokkaido miso", "Chapagetti"];
 const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="section-head">
-  <div>${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}<h2 data-split>${title}</h2>${lead ? `<p class="lead">${lead}</p>` : ""}</div>${extra}
+  <div>${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ""}<h2>${title}</h2>${lead ? `<p class="lead">${lead}</p>` : ""}</div>${extra}
 </div>`;
 
 const FAQ = [
@@ -678,7 +678,7 @@ addPage("", layout({
   <div class="wrap insta-head">
     <div>
       <p class="eyebrow">${esc(site.instagramHandle)}</p>
-      <h2 id="insta-h" data-split>Fresh on our Instagram.</h2>
+      <h2 id="insta-h">Fresh on our Instagram.</h2>
       <p class="lead">Store tours, noodle hauls and late-night bowls. Follow along to see what's new on the wall.</p>
     </div>
     <div class="actions">
@@ -702,7 +702,7 @@ addPage("", layout({
 <section class="story" id="how" aria-labelledby="how-h">
   <div class="wrap story-head">
     <p class="eyebrow">Do it yourself</p>
-    <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
+    <h2 id="how-h">From the wall to your bowl in four steps.</h2>
     <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
   </div>
   <ol class="stack" data-stack>
@@ -729,7 +729,7 @@ addPage("", layout({
   <div class="vwall-cols" aria-hidden="true">${VWALL.map((col, i) => `<div class="vwall-col vwall-col--${i + 1}">${col.map((t) => vwallTile(r, t)).join("")}</div>`).join("")}</div>
   <div class="vwall-copy">
     <p class="eyebrow">MEON time</p>
-    <h2 id="vwall-h" data-split>Bring your crew.</h2>
+    <h2 id="vwall-h">Bring your crew.</h2>
     <p class="lead">We've got a wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
     <a class="btn btn--white btn--lg" href="${r("visit/")}">Visit us ${icon.arrow}</a>
   </div>
@@ -744,7 +744,7 @@ addPage("", layout({
 <section class="fresh" id="fresh" aria-labelledby="fresh-h">
   <div class="wrap">
     <div class="fresh-head">
-      <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
+      <h2 id="fresh-h">Straight out of the machine.</h2>
       <p class="lead">Real bowls from our noodle wall, shot in our shop. Pick one to see its packet.</p>
     </div>
     <div class="fresh-grid">
@@ -775,7 +775,7 @@ addPage("", layout({
   <div class="wrap roulette" data-roulette data-root="${r("")}">
     <div>
       <p class="eyebrow">Can't decide?</p>
-      <h2 data-split>Let the roulette choose.</h2>
+      <h2>Let the roulette choose.</h2>
       <p class="lead">Pick how hot you want it, press spin, then find the packet on the wall.</p>
       <p class="visually-hidden" aria-live="polite" data-roulette-live></p>
     </div>
@@ -806,7 +806,7 @@ addPage("", layout({
   <div class="wrap split">
     <div>
       <p class="eyebrow">Heat check</p>
-      <h2 data-split>How brave are you feeling?</h2>
+      <h2>How brave are you feeling?</h2>
       <p class="lead">Every noodle has a spice rating from 0 to 5. Drag the chilli to your level and we'll show you what to grab.</p>
       <label class="heat-slider"><span class="visually-hidden">Spice level</span><input type="range" min="0" max="5" step="1" value="2" data-heat-input aria-valuetext="2, Medium"></label>
       <div class="heat-scale" aria-hidden="true">${SPICE_LADDER.map(([lvl]) => `<span>${lvl}</span>`).join("")}</div>
@@ -836,7 +836,7 @@ addPage("", layout({
     </div>
     <div>
       <p class="eyebrow">Pairings and sides</p>
-      <h2 data-split>Build your bowl.</h2>
+      <h2>Build your bowl.</h2>
       <p class="lead">The packet is only the start. Tap a pairing to drop it in, then find it all at the pairings and sides bar.</p>
       <div class="bb-chips" role="group" aria-label="Add a pairing">${Object.entries(TOPPING_ART).map(([id, t]) => `<button class="bb-chip" type="button" data-topping="${id}" data-name="${esc(t.name)}"><span class="bb-ic">${t.svg}</span>${esc(t.name)}</button>`).join("")}</div>
       <div class="bb-actions"><button class="btn btn--line btn--sm" type="button" data-bowl-reset>Empty the bowl</button><a class="link-arrow" href="${r("pairings-and-sides/")}">See every pairing and side ${icon.arrow}</a></div>
@@ -851,7 +851,7 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
   <div class="wrap visit-band-inner">
     <div class="visit-band-copy">
       <p class="eyebrow">Come visit us</p>
-      <h2 id="visit-h" data-split>Find us in ${esc(site.suburb)}.</h2>
+      <h2 id="visit-h">Find us in ${esc(site.suburb)}.</h2>
       <p class="visit-band-addr">${esc(site.streetAddress)}<br>${esc(site.suburb)} ${esc(site.state)} ${esc(site.postcode)}</p>
       <p class="lead">Dine in or take it away. ${esc(HOURS_LINE)}</p>
       <div class="actions">
@@ -865,7 +865,7 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
   <div class="wrap follow-inner">
     <div class="follow-copy">
       <p class="eyebrow">${esc(site.instagramHandle)}</p>
-      <h2 id="follow-h" data-split>Follow us.</h2>
+      <h2 id="follow-h">Follow us.</h2>
       <p class="lead">We post our newest packets, store tours and late-night bowls. Come say hi.</p>
     </div>
     <div class="follow-links">
@@ -1090,7 +1090,7 @@ ${pageHero(r, { crumbs: [["Countries", "countries/"], [esc(c.name)]], eyebrow: p
   <div class="card-grid">${list.map((n) => noodleCard(n, r)).join("")}</div>
 </div></section>
 <section class="section section--soft section--tight"><div class="wrap">
-  <h2 data-split>Other countries</h2>
+  <h2>Other countries</h2>
   <div class="flag-links">${others.map((o) => `<a href="${r(`countries/${o.slug}/`)}">${flag(o.code, r, { w: 22 })}${esc(o.name)}</a>`).join("")}</div>
 </div></section>
 ${ctaBand(r)}
@@ -1131,12 +1131,12 @@ addPage("spiciest-noodles/", layout({
 ${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 2,
   after: facts([5, 4, 3].map((l) => [atLevel(l).length, `Rated ${l}`])) })}
 ${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section section--tight" id="rated-${l}"><div class="wrap">
-  <h2 data-split>Rated ${l} out of 5</h2>
+  <h2>Rated ${l} out of 5</h2>
   <p class="lead pairing-note">${esc(HEAT_NOTES[l])}</p>
   <div class="card-grid">${atLevel(l).map((n) => noodleCard(n, r)).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--soft section--tight"><div class="wrap">
-  <h2 data-split>How we rate spice</h2>
+  <h2>How we rate spice</h2>
   <p class="lead">Each packet gets one number from 0 to 5. Shin Ramyun is our 3, and every other noodle is rated against it. A 0 means no chilli heat: ${noHeat} of our ${COUNT} noodles are a 0.</p>
   ${linkRow(r, [["buldak/", `Every Buldak we stock (${buldak.length})`], ["noodles/?spice=mild", `Noodles with no heat (${noHeat})`], ["countries/", "Noodles by country"]])}
 </div></section>
@@ -1156,12 +1156,12 @@ addPage("buldak/", layout({
 ${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", lead: `Buldak is Samyang's range from ${esc(buldak[0].country)}. We stock ${buldak.length} of them. Here they are from hottest to mildest on our spice scale, where <a href="${r(SHIN.url)}">Shin Ramyun</a> is a 3.`, actions: `<a class="btn btn--red" href="${r("noodles/?q=Buldak&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 3,
   after: facts([[buldak.length, "Flavours"], [buldak.filter((n) => n.spiceKey === 5).length, "Rated 5"], [buldak.filter((n) => n.type === "Dry").length, "Dry"], [buldakSoup.length, "Soup"]]) })}
 <section class="section section--tight"><div class="wrap">
-  <h2 data-split>Hottest to mildest</h2>
+  <h2>Hottest to mildest</h2>
   <p class="lead pairing-note">The mildest is ${esc(buldakMildest.name)}, rated ${buldakMildest.spice}.${buldakSoup.length ? ` ${buldakSoup.length === 1 ? "One comes" : `${buldakSoup.length} come`} as soup: ${new Intl.ListFormat("en-AU").format(buldakSoup.map((n) => esc(n.name)))}. The rest are dry.` : ""}</p>
   <div class="card-grid">${buldak.map((n) => noodleCard(n, r)).join("")}</div>
 </div></section>
 <section class="section section--soft section--tight"><div class="wrap">
-  <h2 data-split>Keep exploring</h2>
+  <h2>Keep exploring</h2>
   ${linkRow(r, [["spiciest-noodles/", `The spiciest noodles at MEON (${hot.length})`], ...countries.filter((c) => c.name === buldak[0].country).map((c) => [`countries/${c.slug}/`, `${c.name} noodles`]), ["noodles/", "Noodle library"]])}
 </div></section>
 ${ctaBand(r)}
@@ -1191,12 +1191,12 @@ addPage("pairings-and-sides/", layout({
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
-  <h2 data-split>${esc(g)}</h2>
+  <h2>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
   <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t) => `<div class="topping" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
-  <h2 data-split>Drinks</h2>
+  <h2>Drinks</h2>
   <ul class="drink-list">${catalogue.drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
@@ -1216,13 +1216,13 @@ addPage("about/", layout({
 ${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
   <div>
-    <h2 data-split>What we do.</h2>
+    <h2>What we do.</h2>
     <p class="lead">${COUNT}\u00A0instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add pairings and sides, and cook it at the machine.</p>
     <p>Every packet on our wall has a page on this site with what it tastes like, how hot it is, how to cook it and what pairs well with it.</p>
     <blockquote class="pull">“Meon is a versatile instant noodle celebrating cultural diversity, inviting creativity and fun with every bowl. Enjoy it as is or customise with pairings and sides to make each meal uniquely yours.”</blockquote>
   </div>
   <div>
-    <h2 data-split>Our name.</h2>
+    <h2>Our name.</h2>
     <p class="lead">Under “meon” in our logo are letters from Japanese, Thai, Chinese and Korean. They're a nod to the noodle cultures behind every bowl we serve.</p>
     <a class="btn btn--line" href="${r("countries/")}">Meet the countries ${icon.arrow}</a>
   </div>
@@ -1250,13 +1250,13 @@ addPage("privacy/", layout({
 ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
 <section class="section section--tight"><div class="wrap split split--top">
   <div>
-    <h2 data-split>Reviews.</h2>
+    <h2>Reviews.</h2>
     <p>Posting a review is optional. We only send it after you tick “Publish my first name and review on this site”.</p>
     <p>We keep the first name, star rating and words you typed, the page you posted from, whether you arrived by scanning a shelf QR code, the time, and which version of that agreement you ticked. They are stored with Supabase, our database provider, and shown on this site.</p>
     <p>To have a review removed, message us on Instagram${site.instagram ? ` at <a href="${esc(site.instagram)}" target="_blank" rel="noopener">${esc(site.instagramHandle)}</a>` : ""}${site.email ? ` or email <a href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ""} and we'll take it down.</p>
   </div>
   <div>
-    <h2 data-split>On your device.</h2>
+    <h2>On your device.</h2>
     <p>The site keeps a few small notes in your browser. They are not cookies and they never leave your device:</p>
     <ul>
       <li>which pages you've already reviewed, so the form doesn't ask twice;</li>
@@ -1268,11 +1268,11 @@ ${pageHero(r, { crumbs: [["Privacy"]], eyebrow: "Your information", title: "Priv
 </div></section>
 <section class="section section--tight"><div class="wrap split split--top">
   <div>
-    <h2 data-split>Services we use.</h2>
+    <h2>Services we use.</h2>
     <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
   </div>
   <div>
-    <h2 data-split>No tracking.</h2>
+    <h2>No tracking.</h2>
     <p>We don't use analytics, advertising or tracking cookies. If that changes, we'll update this page first, and anything that needs your agreement will ask for it.</p>
     <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>
   </div>
@@ -1303,7 +1303,7 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
 </div></section>
 <section class="section section--soft"><div class="wrap split">
   <div>
-    <h2 data-split>Good to know.</h2>
+    <h2>Good to know.</h2>
     <ul class="perk-list">
       <li>${svgIcon("chair")}<span><strong>Dine in or take it away.</strong>Order in person at the noodle wall. Choosing the packet is half the fun.</span></li>
       <li>${svgIcon("clock")}<span><strong>Press 1, then 2.</strong>Every noodle cooks for ${COOK_TIME} on the machine. Add egg and cheese on top in the last 30 seconds.</span></li>
@@ -1316,14 +1316,14 @@ ${videoHero(r, { crumbs: [["Visit"]], eyebrow: `${esc(site.suburb)}, ${esc(site.
   </div>
 </div></section>
 ${PRIVATE_FEEDBACK ? `<section class="section section--tight" aria-labelledby="feedback-h"><div class="wrap feedback">
-  <div><p class="eyebrow">Been in?</p><h2 id="feedback-h" data-split>How was it?</h2><p class="lead">Good or bad, we'd like to hear it. Leave a Google review for everyone to read, or tell us privately on Instagram.</p></div>
+  <div><p class="eyebrow">Been in?</p><h2 id="feedback-h">How was it?</h2><p class="lead">Good or bad, we'd like to hear it. Leave a Google review for everyone to read, or tell us privately on Instagram.</p></div>
   <div class="actions feedback-actions">
     <a class="btn btn--line btn--lg" href="${esc(GOOGLE_WRITE_REVIEW)}" target="_blank" rel="noopener">${svgIcon("star")} Review us on Google</a>
     <a class="btn btn--line btn--lg" href="${esc(PRIVATE_FEEDBACK)}" target="_blank" rel="noopener" data-private-feedback>${icon.insta} Tell us privately</a>
   </div>
 </div></section>` : ""}
 <section class="section"><div class="wrap split split--top">
-  <div><p class="eyebrow">Questions</p><h2 data-split>Frequently asked.</h2></div>
+  <div><p class="eyebrow">Questions</p><h2>Frequently asked.</h2></div>
   <div class="faq">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}${icon.chevron}</summary><p>${esc(a)}</p></details>`).join("")}</div>
 </div></section>
 ${ctaBand(r, { title: `See you at ${esc(site.suburb)}.` })}
