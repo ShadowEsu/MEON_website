@@ -253,9 +253,9 @@
     walk(el);
   });
 
-  /* ---------- Reveal on scroll ---------- */
+  /* ---------- Reveal on scroll (photo wipes, split headings, footer letters) ---------- */
   var heroTitle = $(".page-title, .noodle h1");
-  var reveals = $$(".reveal, .img-reveal, [data-split], [data-reveal-letters]").filter(function (el) { return el !== heroTitle; });
+  var reveals = $$(".img-reveal, [data-split], [data-reveal-letters]").filter(function (el) { return el !== heroTitle; });
   if ("IntersectionObserver" in window && !reduceMotion) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
@@ -663,7 +663,7 @@
           }
           if (ok && d !== "all") ok = (" " + ds.diet + " ").indexOf(" " + d + " ") !== -1;
           card.hidden = !ok;
-          if (ok) { n++; card.classList.add("is-in"); }
+          if (ok) n++;
         });
         return n;
       };
