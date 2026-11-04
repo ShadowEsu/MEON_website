@@ -1104,6 +1104,9 @@ const atLevel = (l) => hot.filter((n) => n.spiceKey === l);
 const HEAT_NOTES = { 5: "The top of our scale. Nothing we stock is rated hotter.", 4: "One step hotter than Shin Ramyun.", 3: "The same rating as Shin Ramyun." };
 const buldak = noodles.filter((n) => n.brand === "Samyang" && /^Buldak\b/.test(n.name)).sort(byHeat);
 if (buldak.length < 2) throw new Error("Buldak page: fewer than 2 Buldak noodles in the library");
+// The lead says "Samyang's range from <country>" for all of them (Security SHOULD, 4 Nov 2026)
+const buldakCountries = [...new Set(buldak.map((n) => n.country))];
+if (buldakCountries.length !== 1) throw new Error(`Buldak page: the lead names one country, but the Buldak rows say ${buldakCountries.join(", ")}`);
 const buldakSoup = buldak.filter((n) => n.type === "Soup");
 const buldakMildest = buldak[buldak.length - 1];
 
