@@ -745,7 +745,7 @@ addPage("", layout({
 <section class="fresh" id="fresh" aria-labelledby="fresh-h">
   <div class="wrap">
     <div class="fresh-head reveal">
-      <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
+      <h2 id="fresh-h" data-split>Real bowls, real packets.</h2>
       <p class="lead">Real bowls of noodles from our wall, each photographed next to its packet. Pick one to see how to cook it.</p>
     </div>
     <div class="fresh-grid">
