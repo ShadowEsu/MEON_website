@@ -69,7 +69,7 @@ Sections don't fade or rise in as you scroll, and section headings (h2) don't an
 | Glyphs in the big logo rise in one after another, then take turns to hop (they never disappear) | Home hero logo |
 | Auto-scrolling reel strip (Preston asked for it, 29 Oct 2026): one transform animation, paused on hover, focus, the pause button and off-screen; a still, swipeable row for reduce motion | Home (`#instagram`) |
 | Masked word reveal | Page titles (`h1` with `data-split`), except noodle pages and the SEO lists |
-| Image reveal: a cover panel slides away and the photo settles | `.img-reveal` |
+| Image reveal: a cover panel slides away and the photo settles | `.img-reveal`: home "Straight out of the machine." tiles, Visit photos. Not the noodle-page photo, which shows at once like its title |
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |
 | Count-up numbers | `.facts` (country pages) |
