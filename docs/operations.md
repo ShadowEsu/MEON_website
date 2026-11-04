@@ -48,7 +48,7 @@ Some shoot folders are named differently from the packet in the photo. The site 
 
 ## Wording that changes often
 
-The site says how many noodles it has, built from the data: `COUNT` at the top of `scripts/build.mjs` is the number of noodles in `data/noodles.json` plus `extraNoodles` in `data/catalogue.json` (199 on 31 Oct 2026), and the library's "All N noodles" counts the cards on the page, so both stay true as packets come and go (Design, 31 Oct 2026: no "100+" next to a list of 199). The region is still **"from across Asia"** (`REGION`).
+The site says how many noodles it has, built from the data: `COUNT` at the top of `scripts/build.mjs` is the number of noodles in `data/noodles.json` plus `extraNoodles` in `data/catalogue.json` (199 on 31 Oct 2026), and the library's "All N noodles" counts the cards on the page, so both stay true as packets come and go (Design, 31 Oct 2026: no "100+" next to a list of 199). Where they come from is counted the same way: `REGION` says "from 12 countries across Asia and Australia" and `REGION_SHORT` "from 12 countries" where space is tight, with the number of countries the noodles come from (Security, 4 Nov 2026: 3 packets are Australian, so not "from across Asia"). The build stops if a noodle's country is outside Asia and isn't Australia, because the wording would no longer be true; add the new region to `REGION` when that happens.
 
 Every noodle cooks for **3 minutes 50 seconds** (230 seconds): guests press 1, then 2 on the machine, and the timer on each noodle page shows 3:50. The time is set once as `COOK_SECONDS` in `scripts/lib/copy.mjs`, with the cook steps next to it. Spice is rated 0 to 5 against Shin Ramyun = 3; the ladder copy is `SPICE_LADDER` in `scripts/build.mjs`.
 

@@ -137,9 +137,16 @@ const NAV = [
   ["about/", "About"],
 ];
 // Public wording: the noodle count is built from the data (Design, 31 Oct 2026: no vague "100+" next to a list of 199), so
-// it stays true as packets come and go; the region stays "from across Asia".
+// it stays true as packets come and go.
 const COUNT = String(noodles.length);
-const REGION = "from across Asia";
+// Where the noodles come from, counted from the data. 3 packets are from Australia, so the wording isn't "from across Asia"
+// (Security, 4 Nov 2026). The build stops if a stocked country outside Asia isn't Australia, so the wording stays true.
+const ASIAN_COUNTRIES = new Set(["China", "India", "Indonesia", "Japan", "Malaysia", "Philippines", "Singapore", "South Korea", "Taiwan", "Thailand", "Vietnam"]);
+const stockedCountries = [...new Set(noodles.map((n) => n.country))];
+const outsideAsia = stockedCountries.filter((c) => !ASIAN_COUNTRIES.has(c));
+if (outsideAsia.join() !== "Australia") throw new Error(`The site says "across Asia and Australia", but the stocked countries outside Asia are: ${outsideAsia.join(", ") || "none"}`);
+const REGION = `from ${stockedCountries.length} countries across Asia and Australia`;
+const REGION_SHORT = `from ${stockedCountries.length} countries`; // where space is tight: the library eyebrow
 // Opening hours: data/site.json `hours`, as MEON published them (hoursSource; check.mjs makes sure they're sourced and
 // shown). The note says changes go up on Instagram first; Design, 31 Oct 2026: no "please". With no hours in the file the
 // visit page links to Instagram instead.
@@ -616,7 +623,7 @@ const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="sect
 const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
-  ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}, including South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
+  ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
   ["Do you have vegetarian noodles?", HAS_VEG
     ? `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`
     : `None are labelled vegetarian yet: a noodle only gets the Vegetarian label once we've checked its maker's ingredient list. Ask the crew, and check the packet. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`],
@@ -643,7 +650,7 @@ addPage("", layout({
   urlPath: "",
   active: "",
   overlay: true,
-  description: `MEON: a cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}, cooked your way.`,
+  description: `MEON: cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}.`,
   body: (r) => `
 <section class="vhero" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
@@ -654,7 +661,7 @@ addPage("", layout({
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
       <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
-      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with noodles ${REGION}.</p>
+      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT} noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
@@ -872,7 +879,7 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
 addPage("noodles/", layout({
   urlPath: "noodles/",
   title: "Noodle library",
-  seoTitle: `${COUNT} Instant Noodles from Across Asia · MEON Noodles Perth`,
+  seoTitle: `${COUNT} Instant Noodles from ${stockedCountries.length} Countries · MEON Noodles Perth`,
   active: "noodles/",
   overlay: true,
   jsonld: [{
@@ -891,7 +898,7 @@ addPage("noodles/", layout({
   }],
   description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles · ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
+${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles ${REGION_SHORT}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
 <div data-library>
   <div class="filters">
     <div class="wrap">
