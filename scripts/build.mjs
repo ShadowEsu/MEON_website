@@ -300,7 +300,8 @@ ${body(r)}
           <li><a href="${r("noodles/?type=Soup")}">Soup noodles</a></li>
           <li><a href="${r("noodles/?type=Dry")}">Dry noodles</a></li>
           ${HAS_VEG ? `<li><a href="${r("noodles/?diet=veg")}">Vegetarian</a></li>` : ""}
-          <li><a href="${r("noodles/?spice=hot")}">Spicy (3+)</a></li>
+          <li><a href="${r("spiciest-noodles/")}">Spicy (3+)</a></li>
+          <li><a href="${r("buldak/")}">Buldak</a></li>
         </ul>
       </div>
       <div>
@@ -1088,6 +1089,73 @@ ${ctaBand(r)}
   }));
 }
 
+// ---------- Spiciest noodles and Buldak (SEO, 4 Nov 2026) ----------
+// Two list pages people search for ("spiciest instant noodles", "Buldak Perth"). Every number and name on them comes
+// from MEON's own 0-5 spice ratings in data/noodles.json + data/catalogue.json (Shin Ramyun = 3), so the copy stays
+// true as packets and ratings change. Hottest first, then A to Z.
+const SHIN = noodles.find((n) => n.slug === "nongshim-shin-noodle-soup-original");
+if (!SHIN || SHIN.spice !== 3) throw new Error("Spice scale: Shin Noodle Soup Original must be in the library and rated 3");
+const byHeat = (a, b) => b.spiceKey - a.spiceKey || `${a.brand} ${a.name}`.localeCompare(`${b.brand} ${b.name}`);
+const listLd = (name, list) => ({ "@context": "https://schema.org", "@type": "ItemList", name, numberOfItems: list.length, itemListElement: list.map((n, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE_URL}/${n.url}`, name: `${n.brand} ${n.name}` })) });
+const linkRow = (r, links) => `<div class="flag-links">${links.map(([href, label]) => `<a href="${r(href)}">${esc(label)}</a>`).join("")}</div>`;
+const hot = noodles.filter((n) => n.spiceKey >= 3).sort(byHeat);
+const noHeat = countFor((n) => n.spiceKey === 0);
+const atLevel = (l) => hot.filter((n) => n.spiceKey === l);
+const HEAT_NOTES = { 5: "The top of our scale. Nothing we stock is rated hotter.", 4: "One step hotter than Shin Ramyun.", 3: "The same rating as Shin Ramyun." };
+const buldak = noodles.filter((n) => n.brand === "Samyang" && /^Buldak\b/.test(n.name)).sort(byHeat);
+if (buldak.length < 2) throw new Error("Buldak page: fewer than 2 Buldak noodles in the library");
+const buldakSoup = buldak.filter((n) => n.type === "Soup");
+const buldakMildest = buldak[buldak.length - 1];
+
+addPage("spiciest-noodles/", layout({
+  urlPath: "spiciest-noodles/",
+  title: "The spiciest noodles at MEON",
+  seoTitle: `The ${hot.length} Spiciest Instant Noodles at MEON Perth`,
+  active: "noodles/",
+  image: hot.find((n) => n.img)?.img,
+  jsonld: [listLd("The spiciest instant noodles at MEON", hot), crumbLd("Spiciest noodles", "spiciest-noodles/")],
+  description: fitDesc(`${hot.length} instant noodles rated 3 to 5 on MEON's spice scale, where Shin Ramyun is a 3.`, "Hottest first. Every packet has its own page with cooking steps and a cook timer."),
+  body: (r) => `
+${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library ${icon.arrow}</a>`, seed: 2,
+  after: facts([5, 4, 3].map((l) => [atLevel(l).length, `Rated ${l}`])) })}
+${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section section--tight" id="rated-${l}"><div class="wrap">
+  <h2 data-split>Rated ${l} out of 5</h2>
+  <p class="lead pairing-note">${esc(HEAT_NOTES[l])}</p>
+  <div class="card-grid">${atLevel(l).map((n, i) => noodleCard(n, r, i)).join("")}</div>
+</div></section>`).join("")}
+<section class="section section--soft section--tight"><div class="wrap">
+  <h2 data-split>How we rate spice</h2>
+  <p class="lead">Each packet gets one number from 0 to 5. Shin Ramyun is our 3, and every other noodle is rated against it. A 0 means no chilli heat: ${noHeat} of our ${COUNT} noodles are a 0.</p>
+  ${linkRow(r, [["buldak/", `Every Buldak we stock (${buldak.length})`], ["noodles/?spice=mild", `Noodles with no heat (${noHeat})`], ["countries/", "Noodles by country"]])}
+</div></section>
+${ctaBand(r)}
+`,
+}));
+
+addPage("buldak/", layout({
+  urlPath: "buldak/",
+  title: "Buldak at MEON",
+  seoTitle: `Buldak in Perth: ${buldak.length} Flavours to Cook at MEON`,
+  active: "noodles/",
+  image: buldak.find((n) => n.img)?.img,
+  jsonld: [listLd("Buldak noodles at MEON", buldak), crumbLd("Buldak", "buldak/")],
+  description: fitDesc(`${buldak.length} Samyang Buldak noodles at MEON in ${site.suburb}, Perth, from hottest to mildest on our 0 to 5 spice scale.`, "Every packet has its own page with cooking steps and a cook timer."),
+  body: (r) => `
+${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", lead: `Buldak is Samyang's range from ${esc(buldak[0].country)}. We stock ${buldak.length} of them. Here they are from hottest to mildest on our spice scale, where <a href="${r(SHIN.url)}">Shin Ramyun</a> is a 3.`, actions: `<a class="btn btn--red" href="${r("noodles/?q=Buldak&amp;sort=hot")}" data-magnetic>Filter in the library ${icon.arrow}</a>`, seed: 3,
+  after: facts([[buldak.length, "Flavours"], [buldak.filter((n) => n.spiceKey === 5).length, "Rated 5"], [buldak.filter((n) => n.type === "Dry").length, "Dry"], [buldakSoup.length, "Soup"]]) })}
+<section class="section section--tight"><div class="wrap">
+  <h2 data-split>Hottest to mildest</h2>
+  <p class="lead pairing-note">The mildest is ${esc(buldakMildest.name)}, rated ${buldakMildest.spice}.${buldakSoup.length ? ` ${buldakSoup.length === 1 ? "One comes" : `${buldakSoup.length} come`} as soup: ${buldakSoup.map((n) => esc(n.name)).join(" and ")}. The rest are dry.` : ""}</p>
+  <div class="card-grid">${buldak.map((n, i) => noodleCard(n, r, i)).join("")}</div>
+</div></section>
+<section class="section section--soft section--tight"><div class="wrap">
+  <h2 data-split>Keep exploring</h2>
+  ${linkRow(r, [["spiciest-noodles/", `The spiciest noodles at MEON (${hot.length})`], ...countries.filter((c) => c.name === buldak[0].country).map((c) => [`countries/${c.slug}/`, `${c.name} noodles`]), ["noodles/", "Noodle library"]])}
+</div></section>
+${ctaBand(r)}
+`,
+}));
+
 // ---------- Pairings and sides (/pairings-and-sides/; the old /toppings/ URL redirects there, see vercel.json) ----------
 // Pairings cook in the bowl with the noodles; egg and cheese go on top in the last 30 seconds; sides are ready to eat.
 const PAIRING_GROUPS = {
@@ -1408,6 +1476,8 @@ const searchIndex = [
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
     ...(HAS_VEG ? [["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"]] : []),
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
+    ["Spiciest noodles", `${hot.length} rated 3 to 5, hottest first`, "spiciest-noodles/", "flame"],
+    ["Buldak", `${buldak.length} Samyang Buldak flavours`, "buldak/", "flame"],
     ["Dry noodles", "Filter: dry, mix-and-eat", "noodles/?type=Dry", "chopsticks"],
     ["Soup noodles", "Filter: soup", "noodles/?type=Soup", "soup"],
     ["Visit us", `${site.suburb}, ${site.city} · dine in or take away`, "visit/", "pin"],
@@ -1420,7 +1490,7 @@ write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-gene
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
 const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
+write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
