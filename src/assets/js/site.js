@@ -392,20 +392,55 @@
     });
   }
 
-  /* ---------- Count-up numbers ---------- */
-  $$("[data-count]").forEach(function (el) {
+  /* ---------- Motion spec helpers (Design, 4 Nov 2026: agents/design/motion-system-2026-11-04/MOTION-SPEC.md) ---------- */
+  // Any click, key, wheel or touch ends a running count-up or celebration at its final state (§3.3).
+  function onSkip(fn) {
+    var evs = ["pointerdown", "keydown", "wheel", "touchstart"];
+    var h = function () { off(); fn(); };
+    var off = function () { evs.forEach(function (e) { window.removeEventListener(e, h, true); }); };
+    evs.forEach(function (e) { window.addEventListener(e, h, { capture: true, passive: true }); });
+    return off;
+  }
+  // --m-ease-smooth, cubic-bezier(.22, 1, .36, 1), for animations driven from JS
+  var easeSmooth = (function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    return function (x) {
+      var t = x;
+      for (var i = 0; i < 6; i++) {
+        var fx = ((ax * t + bx) * t + cx) * t - x, d = (3 * ax * t + 2 * bx) * t + cx;
+        if (Math.abs(fx) < 1e-5 || !d) break;
+        t -= fx / d;
+      }
+      t = Math.max(0, Math.min(1, t));
+      return ((ay * t + by) * t + cy) * t;
+    };
+  })(0.22, 1, 0.36, 1);
+
+  /* ---------- Count-up numbers (spec §2): once per page view, only numbers below the fold ---------- */
+  // The final value is in the HTML, so a number on screen when the page opens just stays. One further down shows 0 and
+  // counts up when it scrolls into view: 700 ms under 100, 1000 ms under 10,000, 1200 ms above. Screen readers get the
+  // final value throughout (the counting digits are aria-hidden).
+  if (!reduceMotion && "IntersectionObserver" in window) $$("[data-count]").forEach(function (el) {
     var target = parseInt(el.getAttribute("data-count"), 10);
-    if (!target || reduceMotion || !("IntersectionObserver" in window)) return;
-    var suffix = el.getAttribute("data-suffix") || "";
+    if (!target) return;
+    var b = el.getBoundingClientRect();
+    if (b.top < window.innerHeight && b.bottom > 0) return;
+    var suffix = el.getAttribute("data-suffix") || "", final = target + suffix;
+    var sr = document.createElement("span");
+    sr.className = "visually-hidden"; sr.textContent = final;
+    el.parentNode.insertBefore(sr, el);
+    el.setAttribute("aria-hidden", "true");
     el.textContent = "0" + suffix;
     var cio = new IntersectionObserver(function (entries) {
       if (!entries[0].isIntersecting) return;
       cio.disconnect();
-      var t0 = performance.now(), dur = 1400;
+      var dur = target < 100 ? 700 : target < 10000 ? 1000 : 1200, t0 = performance.now(), raf = 0;
+      var finish = function () { cancelAnimationFrame(raf); el.textContent = final; el.removeAttribute("aria-hidden"); sr.remove(); };
+      var off = onSkip(finish);
       (function tick(now) {
         var k = Math.min(1, (now - t0) / dur);
-        el.textContent = Math.round(target * (1 - Math.pow(1 - k, 4))) + suffix;
-        if (k < 1) requestAnimationFrame(tick);
+        el.textContent = Math.round(target * easeSmooth(k)) + suffix;
+        if (k < 1) raf = requestAnimationFrame(tick); else { off(); finish(); }
       })(t0);
     });
     cio.observe(el);
@@ -454,26 +489,35 @@
     });
   }
 
-  /* ---------- Confetti (paper shapes in brand colours) ---------- */
-  function confetti() {
-    if (reduceMotion) return;
+  /* ---------- Celebration (spec §2): a small burst at the thing that won, once per win per visit ---------- */
+  // Timer done, roulette pick, review posted. 8 paper shapes in MEON's colours fly up to 48 px out from its edge and fade
+  // (600 ms) while it pops to 1.04 and back. Reduced motion: a still red outline for the same 900 ms instead.
+  function celebrate(el, key) {
+    if (!el) return;
+    try { if (sessionStorage.getItem("meon-won-" + key)) return; sessionStorage.setItem("meon-won-" + key, "1"); } catch (e) {}
+    if (reduceMotion) { el.classList.add("m-won"); setTimeout(function () { el.classList.remove("m-won"); }, 900); return; }
+    var r = el.getBoundingClientRect(), edge = Math.min(r.width, r.height) / 2;
     var colors = ["#ec1b25", "#121010", "#ffc83d", "#ffffff"];
     var box = document.createElement("div");
-    box.className = "confetti"; box.setAttribute("aria-hidden", "true");
-    for (var i = 0; i < 44; i++) {
+    box.className = "m-burst"; box.setAttribute("aria-hidden", "true");
+    box.style.left = (r.left + r.width / 2) + "px"; box.style.top = (r.top + r.height / 2) + "px";
+    for (var i = 0; i < 8; i++) {
+      var a = (i / 8) * Math.PI * 2 + Math.random() * 0.5, out = edge + 24 + Math.random() * 24;
       var s = document.createElement("i");
-      s.style.left = (Math.random() * 100) + "vw";
       s.style.background = colors[i % colors.length];
       if (i % 4 === 3) s.style.boxShadow = "0 0 0 1px rgba(18,16,16,.15)";
-      s.style.setProperty("--x", ((Math.random() - 0.5) * 30) + "vw");
-      s.style.setProperty("--r", ((Math.random() - 0.5) * 1080) + "deg");
-      s.style.setProperty("--t", (1.8 + Math.random() * 1.6) + "s");
-      s.style.animationDelay = (Math.random() * 0.4) + "s";
-      if (i % 3 === 0) { s.style.width = "8px"; s.style.height = "8px"; s.style.borderRadius = "50%"; }
+      if (i % 3 === 0) s.style.borderRadius = "50%";
+      s.style.setProperty("--x0", (Math.cos(a) * edge).toFixed(1) + "px"); s.style.setProperty("--y0", (Math.sin(a) * edge).toFixed(1) + "px");
+      s.style.setProperty("--x1", (Math.cos(a) * out).toFixed(1) + "px"); s.style.setProperty("--y1", (Math.sin(a) * out).toFixed(1) + "px");
+      s.style.setProperty("--r", Math.round((Math.random() - 0.5) * 360) + "deg");
       box.appendChild(s);
     }
     document.body.appendChild(box);
-    setTimeout(function () { box.remove(); }, 4000);
+    el.classList.remove("m-pop"); void el.offsetWidth; el.classList.add("m-pop");
+    var t = 0, off = function () {};
+    var end = function () { clearTimeout(t); off(); box.remove(); el.classList.remove("m-pop"); };
+    off = onSkip(end);
+    t = setTimeout(end, 900);
   }
 
   /* ---------- Site-wide search (Cmd/Ctrl K or "/") ---------- */
@@ -557,7 +601,20 @@
     overlay.classList.add("is-open");
     document.body.classList.add("is-locked");
     inertOutside(overlay, true);
-    loadIndex().then(function () { renderResults(sInput.value); });
+    // First open: the index is still on its way. Past 200 ms a skeleton of 4 results holds the panel (spec §2), and the
+    // results fade in when it lands. Later opens have it in memory, so nothing animates.
+    var skelT = index ? 0 : setTimeout(function () {
+      if (index || indexFailed) return;
+      sResults.setAttribute("aria-busy", "true");
+      sResults.innerHTML = '<span class="visually-hidden">Loading search</span>' + new Array(5).join('<div class="m-skel-row" aria-hidden="true"><span class="m-skel-b m-skel-thumb"></span><span><span class="m-skel-b m-skel-w60"></span><span class="m-skel-b m-skel-w40"></span></span></div>');
+    }, 200);
+    loadIndex().then(function () {
+      clearTimeout(skelT);
+      var was = sResults.getAttribute("aria-busy") === "true";
+      sResults.removeAttribute("aria-busy");
+      renderResults(sInput.value);
+      if (was) { sResults.classList.remove("m-fade-in"); void sResults.offsetWidth; sResults.classList.add("m-fade-in"); }
+    });
     setTimeout(function () { sInput.focus(); sInput.select(); }, 40);
   }
   function closeSearch() {
@@ -643,7 +700,12 @@
       var qs = p.toString();
       history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
     };
+    // Staggered arrival (spec §2): after a filter change, the cards that just came into view (the first 8 in grid order)
+    // fade and rise in, 70 ms apart. Cards already showing don't move; a sort alone or the first load animates nothing.
+    var applied = false;
+    grid.addEventListener("animationend", function (e) { if (e.animationName === "m-arrive") e.target.classList.remove("m-arrive"); });
     var apply = function () {
+      cards.forEach(function (card) { card._wasHidden = card.hidden; });
       var terms = queryTerms(search ? search.value : "");
       var c = selCountry.value, t = selType.value, s = selSpice.value, d = selDiet.value;
       var run = function (typo) {
@@ -675,6 +737,15 @@
       else if (v === "mild") sorted.sort(function (a, b) { return a.dataset.spice - b.dataset.spice; });
       else if (v === "photo") sorted.sort(function (a, b) { return b.dataset.photo - a.dataset.photo; });
       sorted.forEach(function (el) { grid.appendChild(el); });
+      if (applied && !reduceMotion) {
+        var k = 0;
+        sorted.forEach(function (el) {
+          if (k >= 8 || el.hidden || !el._wasHidden) return;
+          el.style.setProperty("--m-i", k++);
+          el.classList.remove("m-arrive"); void el.offsetWidth; el.classList.add("m-arrive");
+        });
+      }
+      applied = true;
       if (countEl) countEl.textContent = (shown === cards.length ? "All " + cards.length + " noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
       if (empty) {
         empty.classList.toggle("is-visible", shown === 0);
@@ -781,7 +852,7 @@
         reel.style.transform = "translateY(0)";
         var live = $("[data-roulette-live]", roulette);
         if (live) live.textContent = "You got " + winner.brand + " " + winner.name;
-        confetti();
+        celebrate($(".roulette-window", roulette), "roulette");
         if (window.MeonMusic && window.MeonMusic.playing) window.MeonMusic.chime();
       };
       if (reduceMotion) done(); else setTimeout(done, 2700);
@@ -833,7 +904,7 @@
         timer.classList.remove("is-running"); timer.classList.add("is-done"); startBtn.textContent = "Start timer";
         if (status) status.textContent = "Ready. Time to eat.";
         setTitle("Ready · " + baseTitle);
-        beep(); releaseWake(); confetti();
+        beep(); releaseWake(); celebrate($(".timer-dial", timer), "timer");
         if (buddy) talk(buddy, "Noodles ready");
         return;
       }
@@ -1000,18 +1071,42 @@
         .then(function (rows) { total = 0; sum = 0; rows.forEach(function (x) { total += x.reviews; sum += x.reviews * Number(x.average); }); drawSummary(); });
     };
     // The list can't load (Supabase down or offline): say so with a retry instead of the false "No reviews yet". The form stays usable.
+    // While the first load is on its way, "No reviews yet" stays hidden, because it isn't known yet (Design, 4 Nov 2026). Past
+    // 200 ms a skeleton of 2 reviews holds the same space (spec §2), and the list or the empty state fades in when it lands.
     var started = false;
     var start = function () {
       if (started) return;
       started = true;
+      var first = !$(".rv-down", list), empty0 = $(".rv-empty", list), skel = null, skelT = 0;
+      if (first) {
+        list.style.minHeight = list.offsetHeight + "px";
+        if (empty0) empty0.hidden = true;
+        list.setAttribute("aria-busy", "true");
+        skelT = setTimeout(function () {
+          skel = document.createElement("div");
+          skel.className = "rv-skel"; skel.style.height = list.style.minHeight;
+          skel.innerHTML = '<span class="visually-hidden">Loading reviews</span>' + new Array(3).join('<div class="rv-skel-i" aria-hidden="true"><span class="m-skel-b m-skel-w30"></span><span class="m-skel-b rv-skel-stars"></span><span class="m-skel-b"></span><span class="m-skel-b m-skel-w60"></span></div>');
+          list.insertBefore(skel, list.firstChild);
+        }, 200);
+      }
+      var settle = function () {
+        clearTimeout(skelT); list.removeAttribute("aria-busy"); list.style.minHeight = "";
+        var shown = !!skel;
+        if (skel) skel.remove();
+        skel = null;
+        return shown;
+      };
       Promise.all([loadStats(), loadMore()]).then(function () {
+        var faded = settle();
+        var empty = $(".rv-empty", list); if (empty) empty.hidden = false; // still in the list only when there are no reviews
+        if (faded) $$(".rv-item, .rv-empty, .rv-more", list).forEach(function (el) { el.classList.add("m-fade-in"); });
         var down = $(".rv-down", list);
         if (!down) return;
         var had = down.contains(document.activeElement);
         down.remove();
-        var empty = $(".rv-empty", list); if (empty) empty.hidden = false;
         if (had) { list.setAttribute("tabindex", "-1"); list.focus(); list.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" }); } // start: the list can be taller than the screen
       }).catch(function () {
+        settle();
         started = false; offset = 0;
         $$(".rv-item, .rv-more", list).forEach(function (el) { el.remove(); });
         var empty = $(".rv-empty", list); if (empty) empty.hidden = true;
@@ -1089,7 +1184,7 @@
           total += 1; sum += rating; drawSummary();
           try { localStorage.setItem(doneKey, "1"); } catch (e2) {}
           markDone("Thank you. Your review is live.");
-          confetti();
+          celebrate($(".rv-item.is-new", list), "review");
         })
         .catch(function (err) {
           // The typed words stay; focus moves to the message, and Google is offered as another way to post

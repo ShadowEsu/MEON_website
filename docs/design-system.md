@@ -60,6 +60,8 @@ All motion uses transform and opacity only, runs from one scroll loop, pauses wh
 
 Sections don't fade or rise in as you scroll, and section headings (h2) don't animate: their content is already there when you reach it. A page title's word reveal is the page's one entrance moment, and only on pages a visitor sees once or twice (About, Visit, Countries, country pages, Pairings and sides, Noodles, Privacy). Pages people open back to back show their title at once: every noodle page, /spiciest-noodles/ and /buldak/ (`pageHero(…, { split: false })`). Screen readers get the title once, from the h1's aria-label; the word spans are aria-hidden (Design, 4 Nov 2026, no-AI-slop item 16: one orchestrated moment per page at most; animate by frequency).
 
+Loading and winning moments follow the fleet's shared motion spec (Design, 4 Nov 2026: `agents/design/motion-system-2026-11-04/MOTION-SPEC.md` in the BOSS repo; Preston asked for animation while things load, numbers counting up and small celebrations). Its tokens are the `--m-*` custom properties at the top of `site.css`; the moments below use only those. Each one runs only while something real is loading or after it has arrived, never as a delay, and any click, key, wheel or touch ends a count-up or a celebration at its final state.
+
 | Effect | Where |
 | --- | --- |
 | Background videos: muted loops that start by themselves on every device (Preston, 29 Oct 2026: "nobody has to press play"); for reduced motion they start paused and the hero shows a "Play videos" pill, one tap plays them all (BOSS, 30 Oct 2026); loaded only near the screen, playing only while on screen (a reel or step card that leaves drops a file still downloading: Design, 31 Oct 2026); if the browser refuses to start them (iPhone Low Power Mode), the next tap starts the ones on screen; never loaded for Save-Data; no play badges. One play/pause for all of them: a 44 px white round button on the hero's clip card, an icon while they play and a "Play videos" pill while paused; once it scrolls away (or on phones, where the home hero has no clip), the same button appears in the header, left of Sound, while a video is in view (never two at once, nothing on top of it, no transition). The choice lasts until the tab closes | Home (hero, step cards, video wall, closing band, reel cards), inner-page heroes, header |
@@ -71,12 +73,14 @@ Sections don't fade or rise in as you scroll, and section headings (h2) don't an
 | Image reveal: a cover panel slides away and the photo settles | `.img-reveal`: home "Straight out of the machine." tiles, Visit photos. Not the noodle-page photo, which shows at once like its title |
 | Parallax using the `translate` property | `[data-parallax="0.05"]` (hero photos, flags) |
 | Scroll-linked rows (move with your scroll, not on their own) | Noodle wall, flavour banners (`[data-hscroll]`) |
-| Count-up numbers | `.facts` (country pages) |
+| Count-up: a number below the fold shows 0 and counts up once when it scrolls into view (700 ms under 100, 1000 ms under 10,000), with tabular numerals; one already on screen when the page opens just stays. Screen readers get the final value | `.facts` (library, spiciest, Buldak, country pages) |
+| Skeleton shimmer: only if loading takes over 200 ms, blocks shaped like the real content hold its space and one highlight sweeps across; the content fades in when it lands. Reduced motion: still blocks | Reviews (Visit, home, every noodle page): "No reviews yet" shows only once the answer says there are none. Search, the first time it opens |
+| Staggered arrival: after a filter change, the cards that just came into view (the first 8) fade and rise 8 px, 70 ms apart; cards already showing don't move, and a sort or the first load doesn't animate | Noodle library |
 | Magnetic buttons | `[data-magnetic]` (mouse only) |
 | Mascots: blink, eyes follow the cursor; wave and squish on hover; tap to talk | Page heroes, red band, timer, back-to-top |
 | Header logo: still, letters there on load (every page, so no entrance and no idle wave: Design, 4 Nov 2026); the badge tilts on hover | Header, every page |
 | Logo: letters and glyphs hop when you hover | About logo, footer |
-| Paper confetti | Roulette win, timer finished |
+| Celebration: 8 paper shapes in MEON's colours burst up to 48 px from the edge of what won and fade, while it pops to 1.04 and back (600 ms; once per win per visit). Reduced motion: a still red outline for 900 ms | Timer finished (the dial), roulette pick (the reel window), review posted (the new review) |
 | Flavour banners (white, ink words, small red dots) that move with your scroll | Home, after the reel cards (`.ticker`) |
 | Build your bowl: pairings and sides drop into the bowl with a bounce, the bowl wobbles | Home (`#build`) |
 | Heat check: chilli slider warms the section, the mascot sweats, matching noodles appear | Home (`#spice`) |
