@@ -644,13 +644,33 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 
 // ---------- Home ----------
 // Video-first (Preston, 29 Oct 2026): every clip he sent. A pinned full-screen hero (three drifting columns on desktop),
-// the booth-shoot bowls, the four steps as stacked full-screen video cards, a drifting video wall, then Instagram-style
-// reel cards. Scroll choreography lives in site.js (one loop, --p/--q) and site.css. Same brand: the red, the mixed logo,
-// Bricolage Grotesque.
+// the 5 booth-shoot bowls right under it (Preston via BOSS, 4 Nov 2026), the Instagram-style reel cards, the four steps as
+// stacked full-screen video cards and a drifting video wall. Scroll choreography lives in site.js (one loop, --p/--q) and
+// site.css. Same brand: the red, the mixed logo, Bricolage Grotesque.
 // 5 different packets, one photo each: tonkotsu-top and tonkotsu-nori-close are the same bowl, so only one is here (4 Nov).
 const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "shin-black-top"];
-// Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
-const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
+// Real bowls (Preston via BOSS, 4 Nov 2026: bowl photos at the start of home and the other pages; Design's cards in
+// agents/design/meon-upgrade/): one 3:4 card per shoot photo with a heat chip (the catalogue's spice number and word), the
+// country, the noodle's name and "See the packet", linking to its noodle page. The link text names the noodle, so the photo's
+// alt is empty, like the library cards. Each photo is on a page once.
+const BOWL_SIZES = "(min-width: 900px) 18vw, 70vw";
+const HEAT_CHIP = { "No heat": "none", Medium: "medium", Hot: "hot" };
+const shootNoodle = (name) => noodles.find((x) => x.slug === SHOOT[name].slug);
+const bowlCard = (r, name, nameTag = "span") => {
+  const n = shootNoodle(name), word = spiceWord(n.spice);
+  const chip = n.unrated ? "" : `<span class="bowl-chip bowl-chip--${HEAT_CHIP[word]}"><span class="visually-hidden">Spice </span>${n.spice} · ${word}</span>`;
+  return `<li><a class="bowl" href="${r(n.url)}">${shootImg(r, name, { sizes: BOWL_SIZES, alt: "" })}${chip}<span class="bowl-copy"><span class="bowl-country">${esc(n.country)}</span><${nameTag} class="bowl-name">${esc(`${n.brand} ${n.name}`)}</${nameTag}><span class="bowl-cta">See the packet ${icon.arrow}</span></span></a></li>`;
+};
+// The band under an inner video hero (noodles/, countries/, pairings-and-sides/; BOSS + Design, 4 Nov 2026: the video heroes
+// stay). The hero poster stays the LCP, so the bowls load lazy; the cards reserve their box.
+const bowlBand = (r, names) => `<section class="bowls bowls--band" aria-labelledby="bowls-band-h">
+  <div class="wrap bowls-band" style="--n:${names.length};--k:${5 - names.length}">
+    <div class="bowls-note"><p class="eyebrow" id="bowls-band-h">Real bowls, real packets.</p><p class="lead">Each photographed next to its packet. Pick one to see how to cook it.</p></div>
+    <ul class="bowls-row" data-arrive>${names.map((name) => bowlCard(r, name)).join("")}</ul>
+  </div>
+</section>`;
+// A bowl in a page hero's aside (spiciest-noodles/). It is that page's LCP, so it loads eager at high priority.
+const phBowl = (r, name) => `<a class="ph-bowl" href="${r(shootNoodle(name).url)}">${shootImg(r, name, { sizes: "360px", eager: true })}</a>`;
 addPage("", layout({
   urlPath: "",
   active: "",
@@ -673,7 +693,17 @@ addPage("", layout({
       </div>
     </div>
     ${heroVideoToggle}
-    <a class="vhero-cue" href="#instagram"><span class="visually-hidden">See our Instagram videos</span><i aria-hidden="true"></i></a>
+    <a class="vhero-cue" href="#bowls"><span class="visually-hidden">See the bowls</span><i aria-hidden="true"></i></a>
+  </div>
+</section>
+
+<section class="bowls" id="bowls" aria-labelledby="bowls-h">
+  <div class="wrap">
+    <div class="section-head">
+      <div><p class="eyebrow">Real bowls, real packets.</p><h2 id="bowls-h">${FRESH.length} from our wall.</h2><p class="lead">Each photographed next to its packet. Pick one to see how to cook it.</p></div>
+      <a class="link-arrow" href="${r("noodles/")}">See them all ${icon.arrow}</a>
+    </div>
+    <ul class="bowls-row" data-arrive>${FRESH.map((name) => bowlCard(r, name, "h3")).join("")}</ul>
   </div>
 </section>
 
@@ -743,21 +773,6 @@ addPage("", layout({
   <div class="ticker-band ticker-band--red"><div class="wall-row" data-speed="1.4">${TICKER.concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("bowl")}`).join("")}</div></div>
   <div class="ticker-band ticker-band--ink"><div class="wall-row" data-speed="-1.1">${TICKER.slice().reverse().concat(TICKER).map((w) => `<span>${w}</span>${svgIcon("flame")}`).join("")}</div></div>
 </div>
-
-<section class="fresh" id="fresh" aria-labelledby="fresh-h">
-  <div class="wrap">
-    <div class="fresh-head">
-      <h2 id="fresh-h">Real bowls, real packets.</h2>
-      <p class="lead">Real bowls of noodles from our wall, each photographed next to its packet. Pick one to see how to cook it.</p>
-    </div>
-    <div class="fresh-grid">
-      ${FRESH.map((name, i) => {
-        const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="fresh-tile fresh-tile--${i + 1} img-reveal" href="${r(n.url)}">${shootImg(r, name, { sizes: FRESH_SIZES[i] })}<span class="fresh-tag">${esc(`${n.brand} ${n.name}`)} ${icon.arrow}</span></a>`;
-      }).join("")}
-    </div>
-  </div>
-</section>
 
 <section class="wall-sec" aria-label="On the noodle wall">
   <div class="wrap">${sectionHead("On the wall now", "Pick a packet. Any packet.", `<a class="link-arrow" href="${r("noodles/")}">See them all ${icon.arrow}</a>`)}</div>
@@ -923,6 +938,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT}\u00A0noodles ${REGION
       </div>
     </div>
   </div>
+  ${bowlBand(r, ["udon-tempura-close", "tomyum-egg-prawn", "white-curry-top"])}
   <div class="wrap">
     <div class="results-bar"><span data-result-count aria-live="polite">All ${COUNT} noodles</span>
       <span class="results-tools"><label class="visually-hidden" for="f-sort">Sort</label><select class="select" id="f-sort"><option value="featured">By country</option><option value="photo">Photos first</option><option value="az">A to Z</option><option value="hot">Hottest first</option><option value="mild">Mildest first</option></select>
@@ -1062,6 +1078,7 @@ addPage("countries/", layout({
   description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Countries"]], eyebrow: `From ${stockedCountries.length}\u00A0countries`, title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
+${bowlBand(r, ["tonkotsu-nori-close", "white-curry-top", "shin-black-top"])}
 <section class="section section--tight"><div class="wrap">
   <div class="country-list country-list--full">
     ${countries.map((c) => `<a class="country-row" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
@@ -1132,7 +1149,7 @@ addPage("spiciest-noodles/", layout({
   description: fitDesc(`${hot.length} instant noodles rated 3 to 5 on MEON's spice scale, where Shin Ramyun is a 3.`, "Hottest first.", [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
   body: (r) => `
 ${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", split: false, lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 2,
-  after: facts([5, 4, 3].map((l) => [atLevel(l).length, `Rated ${l}`])) })}
+  after: facts([5, 4, 3].map((l) => [atLevel(l).length, `Rated ${l}`])), aside: phBowl(r, "tomyum-egg-prawn") })}
 ${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section section--tight" id="rated-${l}"><div class="wrap">
   <h2>Rated ${l} out of 5</h2>
   <p class="lead pairing-note">${esc(HEAT_NOTES[l])}</p>
@@ -1193,6 +1210,7 @@ addPage("pairings-and-sides/", layout({
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
+${bowlBand(r, ["udon-tempura-close", "tomyum-egg-prawn"])}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>

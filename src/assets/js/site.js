@@ -446,6 +446,24 @@
     cio.observe(el);
   });
 
+  /* ---------- Real bowls arrive (Design, 4 Nov 2026): the first time a bowl row scrolls into view, its cards fade and rise
+     16 px, 70 ms apart (630 ms in all, nothing waits on it). A row already on screen when the page opens just shows, and
+     reduced motion shows them still. No skip on scroll: the row only arrives because someone is scrolling. ---------- */
+  if (!reduceMotion && "IntersectionObserver" in window) $$("[data-arrive]").forEach(function (row) {
+    var b = row.getBoundingClientRect();
+    if (b.top < window.innerHeight && b.bottom > 0) return;
+    var aio = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      aio.disconnect();
+      var cards = $$(".bowl", row);
+      cards.forEach(function (c, i) { c.style.setProperty("--m-i", i); c.classList.add("m-arrive"); });
+      row.addEventListener("animationend", function (e) {
+        if (e.target === cards[cards.length - 1]) cards.forEach(function (c) { c.classList.remove("m-arrive"); });
+      });
+    });
+    aio.observe(row);
+  });
+
   /* ---------- Mascots: eyes follow the cursor, gentle drift, tap to hop & talk ---------- */
   if (finePointer && !reduceMotion) {
     var pupils = $$(".meo-pupils");
