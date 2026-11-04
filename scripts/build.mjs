@@ -612,9 +612,9 @@ const VWALL = [
   ["wall-01", "wall-02", "photo:shin-black-lift", "wall-03"],
   ["wall-04", "wall-10", "wall-05"],
   ["wall-08", "wall-09", "wall-07", "wall-11"],
-  ["wall-06", "wall-12", "photo:shin-black-top"],
+  ["wall-06", "wall-12", "photo:tonkotsu-top"],
 ];
-const WIDE_TILES = new Set(["wall-04", "wall-05", "wall-06", "photo:shin-black-top"]);
+const WIDE_TILES = new Set(["wall-04", "wall-05", "wall-06", "photo:tonkotsu-top"]);
 const vwallTile = (r, t) => `<figure class="vtile${WIDE_TILES.has(t) ? " vtile--wide" : ""}">${t.startsWith("photo:") ? shootImg(r, t.slice(6), { sizes: "(min-width: 900px) 22vw, 46vw", alt: "" }) : bgVideo(r, t)}</figure>`;
 
 const TICKER = ["Buldak", "Tom yum", "Mi goreng", "Tonkotsu", "Jjajang", "Laksa", "Shin Black", "Pancit canton", "Kimchi", "Salted egg", "Hokkaido miso", "Chapagetti"];
@@ -645,7 +645,8 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 // the booth-shoot bowls, the four steps as stacked full-screen video cards, a drifting video wall, then Instagram-style
 // reel cards. Scroll choreography lives in site.js (one loop, --p/--q) and site.css. Same brand: the red, the mixed logo,
 // Bricolage Grotesque.
-const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "tonkotsu-top"];
+// 5 different packets, one photo each: tonkotsu-top and tonkotsu-nori-close are the same bowl, so only one is here (4 Nov).
+const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "shin-black-top"];
 // Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
 addPage("", layout({
@@ -745,7 +746,7 @@ addPage("", layout({
   <div class="wrap">
     <div class="fresh-head reveal">
       <h2 id="fresh-h" data-split>Straight out of the machine.</h2>
-      <p class="lead">Real bowls from our noodle wall, shot in our shop. Pick one to see its packet.</p>
+      <p class="lead">Real bowls of noodles from our wall, each photographed next to its packet. Pick one to see how to cook it.</p>
     </div>
     <div class="fresh-grid">
       ${FRESH.map((name, i) => {
