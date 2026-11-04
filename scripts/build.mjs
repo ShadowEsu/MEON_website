@@ -1114,9 +1114,9 @@ addPage("spiciest-noodles/", layout({
   active: "noodles/",
   image: hot.find((n) => n.img)?.img,
   jsonld: [listLd("The spiciest instant noodles at MEON", hot), crumbLd("Spiciest noodles", "spiciest-noodles/")],
-  description: fitDesc(`${hot.length} instant noodles rated 3 to 5 on MEON's spice scale, where Shin Ramyun is a 3.`, "Hottest first. Every packet has its own page with cooking steps and a cook timer."),
+  description: fitDesc(`${hot.length} instant noodles rated 3 to 5 on MEON's spice scale, where Shin Ramyun is a 3.`, "Hottest first.", [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
   body: (r) => `
-${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library ${icon.arrow}</a>`, seed: 2,
+${pageHero(r, { crumbs: [["Spiciest noodles"]], title: "The spiciest noodles at MEON.", lead: `Every noodle we stock has a spice rating from 0 to 5, set against <a href="${r(SHIN.url)}">Shin Ramyun</a>, which is a 3. These are the ${hot.length} rated 3 or more, hottest first.`, actions: `<a class="btn btn--red" href="${r("noodles/?spice=hot&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 2,
   after: facts([5, 4, 3].map((l) => [atLevel(l).length, `Rated ${l}`])) })}
 ${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section section--tight" id="rated-${l}"><div class="wrap">
   <h2 data-split>Rated ${l} out of 5</h2>
@@ -1139,13 +1139,13 @@ addPage("buldak/", layout({
   active: "noodles/",
   image: buldak.find((n) => n.img)?.img,
   jsonld: [listLd("Buldak noodles at MEON", buldak), crumbLd("Buldak", "buldak/")],
-  description: fitDesc(`${buldak.length} Samyang Buldak noodles at MEON in ${site.suburb}, Perth, from hottest to mildest on our 0 to 5 spice scale.`, "Every packet has its own page with cooking steps and a cook timer."),
+  description: fitDesc(`${buldak.length} Samyang Buldak noodles at MEON in ${site.suburb}, Perth.`, "From hottest to mildest on our 0 to 5 spice scale, where Shin Ramyun is a 3.", [["Every packet has its own page."]]),
   body: (r) => `
-${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", lead: `Buldak is Samyang's range from ${esc(buldak[0].country)}. We stock ${buldak.length} of them. Here they are from hottest to mildest on our spice scale, where <a href="${r(SHIN.url)}">Shin Ramyun</a> is a 3.`, actions: `<a class="btn btn--red" href="${r("noodles/?q=Buldak&amp;sort=hot")}" data-magnetic>Filter in the library ${icon.arrow}</a>`, seed: 3,
+${pageHero(r, { crumbs: [["Buldak"]], title: "Every Buldak we stock.", lead: `Buldak is Samyang's range from ${esc(buldak[0].country)}. We stock ${buldak.length} of them. Here they are from hottest to mildest on our spice scale, where <a href="${r(SHIN.url)}">Shin Ramyun</a> is a 3.`, actions: `<a class="btn btn--red" href="${r("noodles/?q=Buldak&amp;sort=hot")}" data-magnetic>Filter in the library</a>`, seed: 3,
   after: facts([[buldak.length, "Flavours"], [buldak.filter((n) => n.spiceKey === 5).length, "Rated 5"], [buldak.filter((n) => n.type === "Dry").length, "Dry"], [buldakSoup.length, "Soup"]]) })}
 <section class="section section--tight"><div class="wrap">
   <h2 data-split>Hottest to mildest</h2>
-  <p class="lead pairing-note">The mildest is ${esc(buldakMildest.name)}, rated ${buldakMildest.spice}.${buldakSoup.length ? ` ${buldakSoup.length === 1 ? "One comes" : `${buldakSoup.length} come`} as soup: ${buldakSoup.map((n) => esc(n.name)).join(" and ")}. The rest are dry.` : ""}</p>
+  <p class="lead pairing-note">The mildest is ${esc(buldakMildest.name)}, rated ${buldakMildest.spice}.${buldakSoup.length ? ` ${buldakSoup.length === 1 ? "One comes" : `${buldakSoup.length} come`} as soup: ${new Intl.ListFormat("en-AU").format(buldakSoup.map((n) => esc(n.name)))}. The rest are dry.` : ""}</p>
   <div class="card-grid">${buldak.map((n, i) => noodleCard(n, r, i)).join("")}</div>
 </div></section>
 <section class="section section--soft section--tight"><div class="wrap">
