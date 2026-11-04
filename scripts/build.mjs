@@ -145,8 +145,10 @@ const ASIAN_COUNTRIES = new Set(["China", "India", "Indonesia", "Japan", "Malays
 const stockedCountries = [...new Set(noodles.map((n) => n.country))];
 const outsideAsia = stockedCountries.filter((c) => !ASIAN_COUNTRIES.has(c));
 if (outsideAsia.join() !== "Australia") throw new Error(`The site says "across Asia and Australia", but the stocked countries outside Asia are: ${outsideAsia.join(", ") || "none"}`);
-const REGION = `from ${stockedCountries.length} countries across Asia and Australia`;
-const REGION_SHORT = `from ${stockedCountries.length} countries`; // where space is tight: the library eyebrow
+// \u00A0 keeps each number on the same line as its noun (Design, 4 Nov 2026: "12 / countries" broke on desktop). It's the
+// character, not &nbsp;, because REGION also goes into meta descriptions, JSON-LD and llms.txt.
+const REGION = `from ${stockedCountries.length}\u00A0countries across Asia and Australia`;
+const REGION_SHORT = `from ${stockedCountries.length}\u00A0countries`; // where space is tight: the library eyebrow
 // Opening hours: data/site.json `hours`, as MEON published them (hoursSource; check.mjs makes sure they're sourced and
 // shown). The note says changes go up on Instagram first; Design, 31 Oct 2026: no "please". With no hours in the file the
 // visit page links to Instagram instead.
@@ -623,7 +625,7 @@ const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="sect
 const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
-  ["How many instant noodles do you have?", `We stock ${COUNT} instant noodles ${REGION}: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
+  ["How many instant noodles do you have?", `We stock ${COUNT}\u00A0instant noodles ${REGION}: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
   ["Do you have vegetarian noodles?", HAS_VEG
     ? `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`
     : `None are labelled vegetarian yet: a noodle only gets the Vegetarian label once we've checked its maker's ingredient list. Ask the crew, and check the packet. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`],
@@ -661,7 +663,7 @@ addPage("", layout({
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
       <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
-      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT} noodles ${REGION}.</p>
+      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
@@ -706,7 +708,7 @@ addPage("", layout({
   <ol class="stack" data-stack>
     <li class="scard scard--red">
       <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT} noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
+      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT}\u00A0noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
     </li>
     <li class="scard scard--ink">
       <div class="scard-media">${bgVideo(r, "step-pairings", { sizes: STEP_SIZES })}</div>
@@ -793,7 +795,7 @@ addPage("", layout({
 
 <section class="section section--soft">
   <div class="wrap">
-    ${sectionHead(`From ${stockedCountries.length} countries`, "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries ${icon.arrow}</a>`)}
+    ${sectionHead(`From ${stockedCountries.length}\u00A0countries`, "Every country cooks noodles differently.", `<a class="link-arrow" href="${r("countries/")}">All countries ${icon.arrow}</a>`)}
     <div class="country-list">
       ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}</span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
     </div>
@@ -898,7 +900,7 @@ addPage("noodles/", layout({
   }],
   description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT} noodles ${REGION_SHORT}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
+${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT}\u00A0noodles ${REGION_SHORT}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
 <div data-library>
   <div class="filters">
     <div class="wrap">
@@ -1056,7 +1058,7 @@ addPage("countries/", layout({
   jsonld: [crumbLd("Countries", "countries/")],
   description: "Explore MEON's instant noodles country by country: Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand and more, each packet with its own page.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Countries"]], eyebrow: `From ${stockedCountries.length} countries`, title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
+${videoHero(r, { crumbs: [["Countries"]], eyebrow: `From ${stockedCountries.length}\u00A0countries`, title: "Noodles by country.", lead: "Each country has its own style of instant noodle. Choose a flag to see every packet we stock from there.", clips: ["wall-10", "ig-DefupZzh1I7"], phone: "wall-10" })}
 <section class="section section--tight"><div class="wrap">
   <div class="country-list country-list--full">
     ${countries.map((c, i) => `<a class="country-row reveal" style="--rd:${(i % 4) * 0.04}s" href="${r(`countries/${c.slug}/`)}">${flag(c.code, r, { cls: "flag flag--lg", w: 44 })}<span class="cr-name">${esc(c.name)}<small>${esc(c.headline)}</small></span><span class="cr-count">${plural(countFor((n) => n.country === c.name), "noodle")}</span>${icon.arrow}</a>`).join("")}
@@ -1215,7 +1217,7 @@ ${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know 
 <section class="section section--tight"><div class="wrap split">
   <div class="reveal">
     <h2 data-split>What we do.</h2>
-    <p class="lead">${COUNT} instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add pairings and sides, and cook it at the machine.</p>
+    <p class="lead">${COUNT}\u00A0instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add pairings and sides, and cook it at the machine.</p>
     <p>Every packet on our wall has a page on this site with what it tastes like, how hot it is, how to cook it and what pairs well with it.</p>
     <blockquote class="pull">“Meon is a versatile instant noodle celebrating cultural diversity, inviting creativity and fun with every bowl. Enjoy it as is or customise with pairings and sides to make each meal uniquely yours.”</blockquote>
   </div>
@@ -1227,7 +1229,7 @@ ${videoHero(r, { crumbs: [["About"]], eyebrow: "Our story", title: "Get to know 
 </div></section>
 <section class="section section--soft"><div class="wrap">
   <ul class="values">
-    <li class="reveal">${svgIcon("globe")}<h3>From ${stockedCountries.length} countries</h3><p>Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></li>
+    <li class="reveal">${svgIcon("globe")}<h3>From ${stockedCountries.length}\u00A0countries</h3><p>Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.</p></li>
     <li class="reveal" style="--rd:.06s">${svgIcon("chef")}<h3>Your way</h3><p>Choose the packet, the pairings and the sides, then press 1 and 2 to cook it.</p></li>
     <li class="reveal" style="--rd:.12s">${svgIcon("chair")}<h3>Dine in or take it away</h3><p>Walk in, choose a packet and cook it your way.</p></li>
   </ul>
