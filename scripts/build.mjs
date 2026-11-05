@@ -188,7 +188,8 @@ const fitDesc = (head, body, extras = [], max = 160) => {
   return d;
 };
 
-// `overlay`: the header sits transparent over a full-screen video hero (home) until the page scrolls.
+// `overlay`: the page opens on a video hero: no announcement line above it, and the header gets the video pause button
+// that takes over once the hero's own button scrolls under the header.
 function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/shoot/og-meon.jpg", preload = "", noindex = false, overlay = false, jsonld = [], scripts = [] }) {
   const depth = urlPath.split("/").filter(Boolean).length - (urlPath.endsWith(".html") ? 1 : 0);
   const root = depth ? "../".repeat(depth) : "./";
@@ -671,7 +672,6 @@ addPage("", layout({
       ${heroVideoToggle}
     </div>
     <div class="wrap vhero-inner">
-      ${logoMark("vhero-logo", "MEON")}
       <h1 class="vhero-title" id="vhero-h">Your bowl, <span class="vhero-hl">your rules.</span></h1>
       <div class="hero-bowls">${HERO_BOWLS.map((name, i) => {
         const n = noodles.find((x) => x.slug === SHOOT[name].slug);
