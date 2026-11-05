@@ -273,11 +273,11 @@ ${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="
 ${ld.length ? `<script type="application/ld+json">${json(ld.length === 1 ? ld[0] : ld)}</script>` : ""}
 ${analytics}
 </head>
-<body data-root="${root}"${overlay ? ' class="has-vhero"' : ""}>
+<body data-root="${root}">
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="scroll-progress" aria-hidden="true"><span></span></div>
 ${overlay ? "" : `<aside class="announce" aria-label="Where to find us"><span>Cook-it-yourself instant noodles at ${esc(site.streetAddress)}, ${esc(site.suburb)}.</span> <a href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">Get directions</a></aside>`}
-<header class="site-header${overlay ? " site-header--over" : ""}" data-header>
+<header class="site-header" data-header>
   <div class="wrap bar">
     <a class="logo" href="${r("")}" aria-label="MEON home">${logoMark("logo-badge")}</a>
     <nav class="nav" id="site-nav" aria-label="Main">
@@ -665,18 +665,17 @@ addPage("", layout({
     <div class="vhero-media">
       ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
       <div class="vhero-cols"><div class="vcol vcol--a">${bgVideo(r, "hero-col-a", { media: "(min-width: 900px)", eager: true })}</div></div>
+      ${heroVideoToggle}
     </div>
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
-      <h1 class="vhero-title" id="vhero-h">Your bowl, your rules.</h1>
+      <h1 class="vhero-title" id="vhero-h">Your bowl, <span class="vhero-hl">your rules.</span></h1>
       <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
       </div>
     </div>
-    ${heroVideoToggle}
-    <a class="vhero-cue" href="#instagram"><span class="visually-hidden">See our Instagram videos</span><i aria-hidden="true"></i></a>
   </div>
 </section>
 
@@ -1196,8 +1195,9 @@ addPage("pairings-and-sides/", layout({
   jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: `${Math.floor(pairings.length / 10) * 10}+ pairings and sides`, title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
+${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: `${Math.floor(pairings.length / 10) * 10}+ pairings and sides`, title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.",
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
+<nav class="subtabs" aria-label="On this page"><div class="wrap subtabs-row">${groups.map((g) => `<a class="subtab" href="#${groupId(g)}">${esc(g)} <small>${pairings.filter((t) => t.group === g).length}</small></a>`).join("")}<a class="subtab" href="#drinks">Drinks <small>${drinks.length}</small></a></div></nav>
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
