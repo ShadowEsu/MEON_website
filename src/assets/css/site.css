@@ -1314,7 +1314,9 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 @media (max-width: 899.98px) {
   .vhero .vhero-stage { grid-template-columns: minmax(0, 1fr); }
   .vhero .vhero-inner { order: -1; }
-  .vhero:not(.vhero--page) .vhero-media { height: min(64vh, 600px); height: min(64svh, 600px); }
+  /* Phones: no clip card in the home hero (Design, 5 Nov 01:2x, option A): its top peeked into the first screen and became
+     the LCP image (Lighthouse mobile 4877 ms vs 3902 ms on production). The same footage is in the reels right below. */
+  .vhero:not(.vhero--page) .vhero-media { display: none; }
   .vhero--page .vhero-media { justify-self: center; margin: 0; height: min(56vh, (100vw - 24px) * 16 / 9); height: min(56svh, (100vw - 24px) * 16 / 9); }
 }
 

@@ -656,9 +656,8 @@ const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", 
 // Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
 // 2 real bowls in the home hero (Design, 4 Nov 22:2x: a bowl and the primary button in a phone's first screen). Their
-// 800 px copies are 46 and 56 KB; the first loads eagerly at high priority. The clip card's top still shows at the foot of
-// a phone's first screen and can be the larger paint there, so the phone poster stays eager too (its <picture> serves a
-// blank GIF on desktop).
+// 800 px copies are 46 and 56 KB; the first loads eagerly at high priority. Phones show no clip in the home hero (Design,
+// 5 Nov 01:2x): its top peeked into the first screen and became the LCP image, so the hero has only the desktop clip.
 const HERO_BOWLS = ["shin-black-top", "tomyum-egg-prawn"];
 addPage("", layout({
   urlPath: "",
@@ -669,7 +668,6 @@ addPage("", layout({
 <section class="vhero" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
     <div class="vhero-media">
-      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
       <div class="vhero-cols"><div class="vcol vcol--a">${bgVideo(r, "hero-col-a", { media: "(min-width: 900px)", eager: true })}</div></div>
       ${heroVideoToggle}
     </div>
