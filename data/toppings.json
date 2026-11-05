@@ -291,7 +291,7 @@
     "name": "Seasoned seaweed",
     "group": "Sides",
     "desc": "Crispy seasoned seaweed sheets, plain or green tea, to crumble over or snack on.",
-    "img": "assets/img/toppings/seasoned-seaweed.webp"
+    "icon": "leaf"
   },
   {
     "id": "kimchi",

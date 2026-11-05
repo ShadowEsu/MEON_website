@@ -84,8 +84,9 @@ const withPhoto = (t) => {
 };
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
-// Drinks from MEON's Square catalogue. A drink without a photo shows a line icon of its pack (can, bottle, pouch, carton, cup).
-const drinks = catalogue.drinks.map(withPhoto);
+// Drinks from MEON's Square catalogue, listed as text: no drink photos (Preston via BOSS, 4 Nov 2026: branded cans and
+// bottles are other companies' packaging).
+const drinks = catalogue.drinks;
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -1184,7 +1185,7 @@ const PAIRING_GROUPS = {
 const groups = [...new Set(pairings.map((t) => t.group))];
 for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
 const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
-// One card in the pairings and drinks grids: the square photo, or a line icon when there's none; the name; one line under it.
+// One card in the pairings grids: the square photo, or a line icon when there's none; the name; one line under it.
 const itemCard = (r, t, i, line, iconName) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}</div>`;
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
@@ -1204,7 +1205,7 @@ ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}">
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2 data-split>Drinks</h2>
-  <div class="topping-grid">${drinks.map((x, i) => itemCard(r, x, i, x.size, x.pack)).join("")}</div>
+  <ul class="drink-list reveal">${drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
 ${ctaBand(r)}

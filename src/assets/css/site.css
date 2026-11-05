@@ -797,6 +797,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 /* ---------- Pairings and sides page ---------- */
 .topping-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 32px 22px; margin-top: 28px; }
 .pairing-note { margin: 10px 0 0; }
+.drink-list { list-style: none; margin: 22px 0 0; padding: 0; columns: 3 220px; column-gap: 32px; }
+.drink-list li { break-inside: avoid; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.drink-list small { color: var(--muted); }
 .topping { display: flex; flex-direction: column; gap: 4px; scroll-margin-top: calc(var(--header-h) + 24px); }
 .topping-media { display: block; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: var(--soft); margin-bottom: 10px; }
 .topping-media img { width: 100%; height: 100%; object-fit: cover; }
