@@ -720,7 +720,7 @@ addPage("", layout({
     <h2 id="how-h" data-split>From the wall to your bowl in four steps.</h2>
     <p class="lead">You choose, you cook, and our crew is here if you need a hand.</p>
   </div>
-  <ol class="stack" data-stack>
+  <ol class="stack">
     <li class="scard scard--red">
       <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
       <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT}\u00A0noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall ${icon.arrow}</a></div>
