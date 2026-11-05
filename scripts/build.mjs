@@ -1195,7 +1195,7 @@ addPage("pairings-and-sides/", layout({
   jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
+${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: `${Math.floor(pairings.length / 10) * 10}+ pairings and sides`, title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>

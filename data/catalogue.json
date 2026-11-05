@@ -439,7 +439,8 @@
   {
    "name": "Aussie Natural Water",
    "size": "600 ml",
-   "pack": "bottle"
+   "pack": "bottle",
+   "img": "assets/img/drinks/aussie-natural-water.webp"
   },
   {
    "name": "Australian Natural Spring Water",
@@ -449,51 +450,83 @@
   {
    "name": "Caffe Bene Americano",
    "size": "190 ml",
-   "pack": "pouch"
+   "pack": "pouch",
+   "img": "assets/img/drinks/caffe-bene-americano.webp"
   },
   {
    "name": "Caffe Bene Black Iced Drink",
    "size": "190 ml",
-   "pack": "pouch"
+   "pack": "pouch",
+   "img": "assets/img/drinks/caffe-bene-black-iced-drink.webp"
   },
   {
    "name": "Caffe Bene Caramel Macchiato",
    "size": "190 ml",
-   "pack": "pouch"
+   "pack": "pouch",
+   "img": "assets/img/drinks/caffe-bene-caramel-macchiato.webp"
   },
   {
    "name": "Caffe Bene Hazelnut",
    "size": "190 ml",
-   "pack": "pouch"
+   "pack": "pouch",
+   "img": "assets/img/drinks/caffe-bene-hazelnut.webp"
   },
   {
    "name": "Caffe Bene Vanilla Americano",
    "size": "190 ml",
-   "pack": "pouch"
+   "pack": "pouch",
+   "img": "assets/img/drinks/caffe-bene-vanilla-americano.webp"
   },
   {
    "name": "Coca-Cola Classic",
    "size": "375 ml",
-   "pack": "can"
+   "pack": "can",
+   "img": "assets/img/drinks/coca-cola-classic.webp"
   },
   {
    "name": "Coca-Cola Zero Sugar",
    "size": "375 ml",
-   "pack": "can"
+   "pack": "can",
+   "img": "assets/img/drinks/coca-cola-zero-sugar.webp"
+  },
+  {
+   "name": "Milkis Banana",
+   "pack": "can",
+   "img": "assets/img/drinks/milkis-banana.webp"
+  },
+  {
+   "name": "Milkis Melon",
+   "pack": "can",
+   "img": "assets/img/drinks/milkis-melon.webp"
+  },
+  {
+   "name": "Milkis Original",
+   "size": "250 ml",
+   "pack": "can",
+   "img": "assets/img/drinks/milkis-original.webp"
   },
   {
    "name": "Milkis Peach",
-   "pack": "can"
+   "pack": "can",
+   "img": "assets/img/drinks/milkis-peach.webp"
+  },
+  {
+   "name": "Red Bull",
+   "size": "250 ml",
+   "pack": "can",
+   "img": "assets/img/drinks/red-bull.webp"
   },
   {
    "name": "Sosro Teh Botol",
    "size": "250 ml",
-   "pack": "carton"
+   "pack": "carton",
+   "img": "assets/img/drinks/sosro-teh-botol.webp"
   },
   {
    "name": "Yeo's Chrysanthemum Tea",
    "size": "300 ml",
-   "pack": "can"
+   "pack": "can",
+   "img": "assets/img/drinks/yeos-chrysanthemum-tea.webp"
   },
   {
    "name": "Ice in a cup",
