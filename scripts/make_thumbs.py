@@ -1,7 +1,7 @@
 """Small copies of photos that the site only ever shows small, saved next to each original:
 
   <name>-t192.webp  extra noodle photos (data/gallery.json), shown as 96 px gallery thumbnails
-  <name>-t128.webp  pairing and side photos (data/toppings.json), shown as 64 px icons and 44 px search results
+  <name>-t128.webp  pairing and side photos (data/toppings.json), 64 px icons and 44 px search results
   <name>-t384.webp  the same photos for the Pairings and sides grid (about 177-230 px), offered in a srcset
   <name>-t480.webp  posters of the card-sized clips (src/assets/video/ig-*.webp and step-*.webp), 480 px wide, offered in
                     a srcset next to the original so 1-2x screens skip the 720 px poster

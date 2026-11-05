@@ -75,13 +75,18 @@ const webpWidth = (file) => {
 // Small copies of photos the site shows small (made by scripts/make_thumbs.py): "<name>-t<px>.webp" next to the original.
 // Falls back to the original when the copy hasn't been made yet.
 const smallCopy = (p, px) => { const t = p.replace(/\.webp$/, `-t${px}.webp`); return fingerprint(fs.existsSync(path.join(SRC, t)) ? t : p); };
-// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json. `small` is the 64 px icon (2x);
-// `mid` (384 px) and `w` (the original's width) give the Pairings grid a srcset when the 384 px copy exists.
-const pairings = readJSON("toppings.json").map((t) => {
+// A photo named in data/*.json (`img`) with what the grids need: `small` is the 64 px icon (2x); `mid` (384 px) and `w` (the original's
+// width) give the grid a srcset when the 384 px copy exists.
+const withPhoto = (t) => {
   if (!t.img) return t;
   const mid = t.img.replace(/\.webp$/, "-t384.webp");
   return { ...t, img: fingerprint(t.img), alt: altFor(t.img.replace(/^assets\//, "")), small: smallCopy(t.img, 128), ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, t.img)) } : {}) };
-});
+};
+// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
+const pairings = readJSON("toppings.json").map(withPhoto);
+// Drinks from MEON's Square catalogue, listed as text: no drink photos (Preston via BOSS, 4 Nov 2026: branded cans and
+// bottles are other companies' packaging).
+const drinks = catalogue.drinks;
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -1201,6 +1206,9 @@ const PAIRING_GROUPS = {
 const groups = [...new Set(pairings.map((t) => t.group))];
 for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
 const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
+// One card in the pairings grids: the square photo, or a line icon when there's none; the name; one line under it. No
+// .reveal (Design item 16: sections don't fade in as you scroll).
+const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}</div>`;
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
@@ -1210,17 +1218,17 @@ addPage("pairings-and-sides/", layout({
   jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
   description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
-${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and sides", title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
+${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: `${Math.floor(pairings.length / 10) * 10}+ pairings and sides`, title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.", actions: groups.map((g) => `<a class="btn btn--glass btn--sm" href="#${groupId(g)}">${esc(g)}</a>`).join("") + `<a class="btn btn--glass btn--sm" href="#drinks">Drinks</a>`,
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
 ${bowlBand(r, ["udon-tempura-close", "tomyum-egg-prawn"])}
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
-  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t) => `<div class="topping" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
+  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t) => itemCard(r, t, t.desc, t.icon || "bowl")).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2>Drinks</h2>
-  <ul class="drink-list">${catalogue.drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
+  <ul class="drink-list">${drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
 ${ctaBand(r)}

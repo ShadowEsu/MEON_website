@@ -11,7 +11,7 @@
     "name": "Pork",
     "group": "Meat and seafood",
     "desc": "Juicy pork adds richness, making every spoonful extra satisfying.",
-    "icon": "pork"
+    "img": "assets/img/toppings/pork.webp"
   },
   {
     "id": "meatballs",
@@ -21,11 +21,74 @@
     "icon": "pork"
   },
   {
+    "id": "chicken-sausage",
+    "name": "Chicken sausage",
+    "group": "Meat and seafood",
+    "desc": "Chicken sausages that heat through in the broth.",
+    "img": "assets/img/toppings/chicken-sausage.webp"
+  },
+  {
+    "id": "mini-frankfurts",
+    "name": "Mini frankfurts",
+    "group": "Meat and seafood",
+    "desc": "Little frankfurts that plump up in the hot broth.",
+    "img": "assets/img/toppings/mini-frankfurts.webp"
+  },
+  {
     "id": "fishcake",
     "name": "Fishcake",
     "group": "Meat and seafood",
     "desc": "Bouncy fishcake adds savoury chew, cute shapes and instant joy.",
-    "icon": "bowl"
+    "img": "assets/img/toppings/fishcake.webp"
+  },
+  {
+    "id": "sliced-fish-cake",
+    "name": "Sliced fish cake",
+    "group": "Meat and seafood",
+    "desc": "Thin slices of fish cake that soften in the broth.",
+    "img": "assets/img/toppings/sliced-fish-cake.webp"
+  },
+  {
+    "id": "penguin-fish-cake",
+    "name": "Penguin fish cake",
+    "group": "Meat and seafood",
+    "desc": "Fish cakes shaped like little penguins.",
+    "img": "assets/img/toppings/penguin-fish-cake.webp"
+  },
+  {
+    "id": "pandy-fish-cake",
+    "name": "Pandy fish cake",
+    "group": "Meat and seafood",
+    "desc": "Cute pink and white fish cakes.",
+    "img": "assets/img/toppings/pandy-fish-cake.webp"
+  },
+  {
+    "id": "thai-fish-pancake",
+    "name": "Thai fish pancake",
+    "group": "Meat and seafood",
+    "desc": "Flat, golden Thai-style fish cakes.",
+    "img": "assets/img/toppings/thai-fish-pancake.webp"
+  },
+  {
+    "id": "fish-balls",
+    "name": "Fish balls",
+    "group": "Meat and seafood",
+    "desc": "Bouncy fish balls that cook in the broth with your noodles.",
+    "img": "assets/img/toppings/fish-balls.webp"
+  },
+  {
+    "id": "fish-balls-roe",
+    "name": "Fish balls with roe",
+    "group": "Meat and seafood",
+    "desc": "Fish balls with a roe filling.",
+    "img": "assets/img/toppings/fish-balls-roe.webp"
+  },
+  {
+    "id": "lobster-balls",
+    "name": "Lobster balls",
+    "group": "Meat and seafood",
+    "desc": "Bouncy lobster balls that cook in the broth.",
+    "img": "assets/img/toppings/lobster-balls.webp"
   },
   {
     "id": "crab-sticks",
@@ -35,6 +98,20 @@
     "img": "assets/img/toppings/crab-sticks.webp"
   },
   {
+    "id": "crab-nuggets",
+    "name": "Crab nuggets",
+    "group": "Meat and seafood",
+    "desc": "Golden crab nuggets with a crumbed coat.",
+    "img": "assets/img/toppings/crab-nuggets.webp"
+  },
+  {
+    "id": "prawn-wontons",
+    "name": "Prawn wontons",
+    "group": "Meat and seafood",
+    "desc": "Wontons filled with prawn that cook in the broth.",
+    "img": "assets/img/toppings/prawn-wontons.webp"
+  },
+  {
     "id": "tofu",
     "name": "Tofu",
     "group": "Meat and seafood",
@@ -42,11 +119,18 @@
     "img": "assets/img/toppings/tofu.webp"
   },
   {
+    "id": "cheese-tofu",
+    "name": "Cheese tofu",
+    "group": "Meat and seafood",
+    "desc": "Soft tofu bites with cheese inside.",
+    "img": "assets/img/toppings/cheese-tofu.webp"
+  },
+  {
     "id": "spring-onion",
     "name": "Spring onion",
     "group": "Vegetables and more",
     "desc": "Bright aroma, mild bite and that fresh finishing touch.",
-    "icon": "sprout"
+    "img": "assets/img/toppings/spring-onion.webp"
   },
   {
     "id": "onion",
@@ -67,14 +151,14 @@
     "name": "Shiitake",
     "group": "Vegetables and more",
     "desc": "Smoky umami, tender caps and bold fragrance.",
-    "icon": "mushroom"
+    "img": "assets/img/toppings/shiitake.webp"
   },
   {
     "id": "enoki",
     "name": "Enoki",
     "group": "Vegetables and more",
     "desc": "Delicate, slurpable mushroom strands that soak up the soup.",
-    "icon": "mushroom"
+    "img": "assets/img/toppings/enoki.webp"
   },
   {
     "id": "corn",
@@ -88,21 +172,42 @@
     "name": "Lettuce",
     "group": "Vegetables and more",
     "desc": "Crisp lettuce softens fast, adding freshness and light crunch.",
-    "icon": "leaf"
+    "img": "assets/img/toppings/lettuce.webp"
+  },
+  {
+    "id": "bean-sprouts",
+    "name": "Bean sprouts",
+    "group": "Vegetables and more",
+    "desc": "Fresh bean sprouts for a light, clean crunch.",
+    "img": "assets/img/toppings/bean-sprouts.webp"
   },
   {
     "id": "cabbage",
     "name": "Cabbage",
     "group": "Vegetables and more",
     "desc": "Stays crunchy, adding volume and gentle sweetness.",
-    "icon": "cabbage"
+    "img": "assets/img/toppings/cabbage.webp"
+  },
+  {
+    "id": "bok-choy",
+    "name": "Bok choy",
+    "group": "Vegetables and more",
+    "desc": "Crisp bok choy stalks with tender green leaves.",
+    "img": "assets/img/toppings/bok-choy.webp"
+  },
+  {
+    "id": "spinach",
+    "name": "Spinach",
+    "group": "Vegetables and more",
+    "desc": "Fresh spinach leaves that wilt into the broth in seconds.",
+    "img": "assets/img/toppings/spinach.webp"
   },
   {
     "id": "seaweed",
     "name": "Seaweed",
     "group": "Vegetables and more",
     "desc": "Umami seaweed melts in the heat, boosting ocean flavour and aroma.",
-    "icon": "leaf"
+    "img": "assets/img/toppings/seaweed.webp"
   },
   {
     "id": "extra-noodles",
@@ -119,25 +224,46 @@
     "img": "assets/img/toppings/egg.webp"
   },
   {
+    "id": "quail-eggs",
+    "name": "Quail eggs",
+    "group": "Egg and cheese",
+    "desc": "Peeled quail eggs, small enough for one bite.",
+    "img": "assets/img/toppings/quail-eggs.webp"
+  },
+  {
     "id": "cheese",
     "name": "Cheese",
     "group": "Egg and cheese",
     "desc": "Lay it on top of the noodles in the last 30 seconds and let it melt into the broth.",
-    "icon": "cheese"
+    "img": "assets/img/toppings/cheese.webp"
+  },
+  {
+    "id": "cheese-slice",
+    "name": "Cheese slice",
+    "group": "Egg and cheese",
+    "desc": "A single slice that melts over hot noodles.",
+    "img": "assets/img/toppings/cheese-slice.webp"
   },
   {
     "id": "chicken",
     "name": "Chicken wings",
     "group": "Sides",
     "desc": "Chicken wings on the side, ready to eat.",
-    "icon": "drumstick"
+    "img": "assets/img/toppings/chicken.webp"
+  },
+  {
+    "id": "gabo-nuggets",
+    "name": "Gabo nuggets",
+    "group": "Sides",
+    "desc": "Crispy fried nuggets on the side, ready to eat.",
+    "img": "assets/img/toppings/gabo-nuggets.webp"
   },
   {
     "id": "spam",
     "name": "Fried Spam",
     "group": "Sides",
     "desc": "Salty, savoury fried Spam slices, the classic Korean army-stew upgrade.",
-    "icon": "pork"
+    "img": "assets/img/toppings/spam.webp"
   },
   {
     "id": "shrimp-katsu",
@@ -151,14 +277,14 @@
     "name": "Tempura prawn",
     "group": "Sides",
     "desc": "A crunchy battered prawn to eat on the side or lay on top at the end.",
-    "icon": "spark"
+    "img": "assets/img/toppings/tempura-prawn.webp"
   },
   {
     "id": "soft-boiled-egg",
     "name": "Soft-boiled egg",
     "group": "Sides",
     "desc": "Already cooked, with a soft jammy yolk. Halve it over your bowl.",
-    "icon": "egg"
+    "img": "assets/img/toppings/soft-boiled-egg.webp"
   },
   {
     "id": "seasoned-seaweed",
@@ -166,5 +292,12 @@
     "group": "Sides",
     "desc": "Crispy seasoned seaweed sheets, plain or green tea, to crumble over or snack on.",
     "icon": "leaf"
+  },
+  {
+    "id": "kimchi",
+    "name": "Kimchi",
+    "group": "Sides",
+    "desc": "Spicy, tangy kimchi to eat on the side or stir in.",
+    "img": "assets/img/toppings/kimchi.webp"
   }
 ]
