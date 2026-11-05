@@ -1399,9 +1399,11 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
   .vhero .vhero-stage { padding-top: 16px; }
 }
 /* Touch screens: 44 px tap targets for the text links with an arrow and the filter pills (Design SHOULD, 5 Nov 2026).
-   The arrow links keep their look: an invisible strip above and below makes the 30 px link 44 px to a finger. */
+   The arrow links keep their look: an invisible strip above and below makes the 30 px link 44 px to a finger. Where two
+   of them wrap onto rows (the review links), the rows are 14 px apart so the strips meet without overlapping. */
 @media (pointer: coarse) {
   .link-arrow { position: relative; }
   .link-arrow::after { content: ""; position: absolute; inset: -7px 0; }
+  .rv-google { row-gap: 14px; }
   .pill { min-height: 44px; }
 }
