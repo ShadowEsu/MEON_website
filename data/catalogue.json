@@ -428,58 +428,76 @@
  "drinks": [
   {
    "name": "100 Plus",
-   "size": "325 ml"
+   "size": "325 ml",
+   "pack": "can"
   },
   {
    "name": "Aiko Matcha",
-   "size": "can"
+   "size": "can",
+   "pack": "can"
   },
   {
    "name": "Aussie Natural Water",
-   "size": "600 ml"
+   "size": "600 ml",
+   "pack": "bottle"
   },
   {
    "name": "Australian Natural Spring Water",
-   "size": "600 ml"
+   "size": "600 ml",
+   "pack": "bottle"
   },
   {
    "name": "Caffe Bene Americano",
-   "size": "190 ml"
+   "size": "190 ml",
+   "pack": "pouch"
   },
   {
    "name": "Caffe Bene Black Iced Drink",
-   "size": "190 ml"
+   "size": "190 ml",
+   "pack": "pouch"
   },
   {
    "name": "Caffe Bene Caramel Macchiato",
-   "size": "190 ml"
+   "size": "190 ml",
+   "pack": "pouch"
   },
   {
    "name": "Caffe Bene Hazelnut",
-   "size": "190 ml"
+   "size": "190 ml",
+   "pack": "pouch"
   },
   {
    "name": "Caffe Bene Vanilla Americano",
-   "size": "190 ml"
+   "size": "190 ml",
+   "pack": "pouch"
   },
   {
    "name": "Coca-Cola Classic",
-   "size": "375 ml"
+   "size": "375 ml",
+   "pack": "can"
   },
   {
    "name": "Coca-Cola Zero Sugar",
-   "size": "375 ml"
+   "size": "375 ml",
+   "pack": "can"
+  },
+  {
+   "name": "Milkis Peach",
+   "pack": "can"
   },
   {
    "name": "Sosro Teh Botol",
-   "size": "250 ml"
+   "size": "250 ml",
+   "pack": "carton"
   },
   {
    "name": "Yeo's Chrysanthemum Tea",
-   "size": "300 ml"
+   "size": "300 ml",
+   "pack": "can"
   },
   {
-   "name": "Ice in a cup"
+   "name": "Ice in a cup",
+   "pack": "cup"
   }
  ]
 }

@@ -75,13 +75,17 @@ const webpWidth = (file) => {
 // Small copies of photos the site shows small (made by scripts/make_thumbs.py): "<name>-t<px>.webp" next to the original.
 // Falls back to the original when the copy hasn't been made yet.
 const smallCopy = (p, px) => { const t = p.replace(/\.webp$/, `-t${px}.webp`); return fingerprint(fs.existsSync(path.join(SRC, t)) ? t : p); };
-// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json. `small` is the 64 px icon (2x);
-// `mid` (384 px) and `w` (the original's width) give the Pairings grid a srcset when the 384 px copy exists.
-const pairings = readJSON("toppings.json").map((t) => {
+// A photo named in data/*.json (`img`) with what the grids need: `small` is the 64 px icon (2x); `mid` (384 px) and `w` (the original's
+// width) give the grid a srcset when the 384 px copy exists.
+const withPhoto = (t) => {
   if (!t.img) return t;
   const mid = t.img.replace(/\.webp$/, "-t384.webp");
   return { ...t, img: fingerprint(t.img), alt: altFor(t.img.replace(/^assets\//, "")), small: smallCopy(t.img, 128), ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, t.img)) } : {}) };
-});
+};
+// Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
+const pairings = readJSON("toppings.json").map(withPhoto);
+// Drinks from MEON's Square catalogue. A drink without a photo shows a line icon of its pack (can, bottle, pouch, carton, cup).
+const drinks = catalogue.drinks.map(withPhoto);
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -1180,6 +1184,8 @@ const PAIRING_GROUPS = {
 const groups = [...new Set(pairings.map((t) => t.group))];
 for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
 const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
+// One card in the pairings and drinks grids: the square photo, or a line icon when there's none; the name; one line under it.
+const itemCard = (r, t, i, line, iconName) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}</div>`;
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
@@ -1194,11 +1200,11 @@ ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: "20+ pairings and si
 ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}"><div class="wrap">
   <h2 data-split>${esc(g)}</h2>
   <p class="lead pairing-note">${esc(PAIRING_GROUPS[g])}</p>
-  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => `<div class="topping reveal" style="--rd:${(i % 5) * 0.04}s" id="${t.id}"><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(t.icon || "bowl")}</span>`}</span><strong>${esc(t.name)}</strong><span>${esc(t.desc)}</span></div>`).join("")}</div>
+  <div class="topping-grid">${pairings.filter((t) => t.group === g).map((t, i) => itemCard(r, t, i, t.desc, t.icon || "bowl")).join("")}</div>
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2 data-split>Drinks</h2>
-  <ul class="drink-list reveal">${catalogue.drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
+  <div class="topping-grid">${drinks.map((x, i) => itemCard(r, x, i, x.size, x.pack)).join("")}</div>
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
 ${ctaBand(r)}

@@ -1,8 +1,8 @@
 """Small copies of photos that the site only ever shows small, saved next to each original:
 
   <name>-t192.webp  extra noodle photos (data/gallery.json), shown as 96 px gallery thumbnails
-  <name>-t128.webp  pairing and side photos (data/toppings.json), shown as 64 px icons and 44 px search results
-  <name>-t384.webp  the same photos for the Pairings and sides grid (about 177-230 px), offered in a srcset
+  <name>-t128.webp  pairing, side and drink photos (data/toppings.json, data/catalogue.json drinks), 64 px icons and 44 px search results
+  <name>-t384.webp  the same photos for the Pairings and sides grid and the Drinks grid (about 177-230 px), offered in a srcset
   <name>-t480.webp  posters of the card-sized clips (src/assets/video/ig-*.webp and step-*.webp), 480 px wide, offered in
                     a srcset next to the original so 1-2x screens skip the 720 px poster
 
@@ -39,7 +39,8 @@ for files in gallery.values():
     for p in files:
         if (SRC / "assets" / p).exists():
             small_copy(SRC / "assets" / p, 192)
-for t in json.loads((ROOT / "data" / "toppings.json").read_text()):
+drinks = json.loads((ROOT / "data" / "catalogue.json").read_text())["drinks"]
+for t in json.loads((ROOT / "data" / "toppings.json").read_text()) + drinks:
     if t.get("img") and (SRC / t["img"]).exists():
         small_copy(SRC / t["img"], 128)
         small_copy(SRC / t["img"], 384)
