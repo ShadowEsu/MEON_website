@@ -290,6 +290,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 /* ---------- Mobile tab bar ---------- */
 .tabbar { display: none; }
 @media (max-width: 760px) {
+  /* The bar's height above the safe area, from the rules below: 1 px border, 6 + 6 px padding, and an item of 6 + 6 px
+     padding, a 22 px icon, a 3 px gap and one .75rem label line at the body's 1.6 line height. Keep it in step with them. */
+  :root { --tabbar-h: calc(50px + .75rem * 1.6); }
   .tabbar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
     background: rgba(255,255,255,.97); border-top: 1px solid var(--line);
@@ -1238,7 +1241,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
    tabs. The back-to-top mascot shares that corner, so it steps aside while the prompt shows (the prompt closes itself
    after 14 s); a keyboard-focused one stays. */
 @media (max-width: 760px) {
-  .vibe { bottom: calc(78px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, calc(100% + 90px + env(safe-area-inset-bottom, 0px))); gap: 8px; padding: 8px; z-index: 85; }
+  .vibe { bottom: calc(var(--tabbar-h) + 12px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, calc(100% + var(--tabbar-h) + 24px + env(safe-area-inset-bottom, 0px))); gap: 8px; padding: 8px; z-index: 85; }
   .vibe p { font-size: .86rem; } .vibe .vibe-eq { display: none; } .vibe button { padding: 8px 12px; font-size: .84rem; } .vibe .vibe-no { padding: 8px 6px; }
   body:has(.vibe.is-on) .back-top:not(:focus-visible) { opacity: 0; pointer-events: none; }
 }
