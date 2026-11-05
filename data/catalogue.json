@@ -490,30 +490,9 @@
    "img": "assets/img/drinks/coca-cola-zero-sugar.webp"
   },
   {
-   "name": "Milkis Banana",
-   "pack": "can",
-   "img": "assets/img/drinks/milkis-banana.webp"
-  },
-  {
-   "name": "Milkis Melon",
-   "pack": "can",
-   "img": "assets/img/drinks/milkis-melon.webp"
-  },
-  {
-   "name": "Milkis Original",
-   "pack": "can",
-   "img": "assets/img/drinks/milkis-original.webp"
-  },
-  {
    "name": "Milkis Peach",
    "pack": "can",
    "img": "assets/img/drinks/milkis-peach.webp"
-  },
-  {
-   "name": "Red Bull",
-   "size": "250 ml",
-   "pack": "can",
-   "img": "assets/img/drinks/red-bull.webp"
   },
   {
    "name": "Sosro Teh Botol",
