@@ -31,7 +31,6 @@ ok(/\/noodles\/samyang-buldak/.test(page.url()), `Enter opens first result (${pa
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(2500);
 ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 1 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the one desktop hero clip loads and plays");
-ok(await page.$eval(".vhero .vbg--phone video", (v) => !v.getAttribute("src")), "phone hero video is not fetched on desktop");
 // Smaller AV1/HEVC copies (REG-54): the hero plays one of its own files, and if the copy this device picked fails, the H.264 file.
 const heroFiles = () => page.$eval(".vhero .vcol video", (v) => ({ src: v.getAttribute("src") || "", files: ["data-bg-src", "data-bg-av1", "data-bg-hevc"].map((a) => v.getAttribute(a)).filter(Boolean), h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
 const picked = await heroFiles();
@@ -143,8 +142,11 @@ ok(soundPressed === "true" && soundOff.startsWith(soundSeen) && soundOn.startsWi
 await page.click(".sound-btn");
 
 const phone = watch(await phoneCtx.newPage());
+const phoneVideos = [];
+phone.on("request", (r) => { if (/\.mp4(\?|$)/.test(r.url())) phoneVideos.push(r.url().split("/").pop().replace(/\?.*/, "")); });
 await phone.goto(BASE + "/", { waitUntil: "domcontentloaded" });
-await phone.waitForTimeout(800);
+await phone.waitForTimeout(2000);
+ok(phoneVideos.length === 0, `at 390 px the home page loads no video before scrolling (no hero clip on phones, Design 5 Nov 2026)${phoneVideos.length ? `: ${phoneVideos.join(", ")}` : ""}`);
 await phone.focus(".nav-toggle");
 await phone.keyboard.press("Enter");
 await phone.waitForTimeout(400);
@@ -157,9 +159,9 @@ ok(await phone.evaluate(() => document.activeElement.classList.contains("nav-tog
 await phone.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await phone.waitForTimeout(1000);
 let stepBtn = false;
-for (let k = 0; k < 80 && !stepBtn; k++) { await phone.keyboard.press("Tab"); stepBtn = await phone.evaluate(() => !!document.activeElement.closest("[data-stack] > li:nth-child(2)") && /pairings and sides/i.test(document.activeElement.textContent)); }
+for (let k = 0; k < 80 && !stepBtn; k++) { await phone.keyboard.press("Tab"); stepBtn = await phone.evaluate(() => !!document.activeElement.closest(".stack > li:nth-child(2)") && /pairings and sides/i.test(document.activeElement.textContent)); }
 await phone.waitForTimeout(1200);
-ok(stepBtn && await phone.evaluate(() => { const a = document.activeElement, r = a.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!hit && a.contains(hit); }), "at 390 px, Tab to step card 2's button brings the card out from under the next one");
+ok(stepBtn && await phone.evaluate(() => { const a = document.activeElement, r = a.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return r.top >= 0 && r.bottom <= innerHeight && !!hit && a.contains(hit); }), "at 390 px, Tab to step card 2's button scrolls it on screen, uncovered");
 
 for (const p of ["/countries/", "/countries/japan/", "/pairings-and-sides/", "/about/", "/visit/", "/qr/", "/404.html"]) {
   await page.goto(BASE + p, { waitUntil: "networkidle" });
