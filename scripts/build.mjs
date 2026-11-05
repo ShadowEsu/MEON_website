@@ -654,6 +654,9 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "shin-black-top"];
 // Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
+// 2 real bowls in the home hero (Design, 4 Nov 22:2x: a bowl and the primary button in a phone's first screen). Their
+// 800 px copies are 46 and 56 KB; the first is the phone LCP image, so it loads eagerly at high priority.
+const HERO_BOWLS = ["shin-black-top", "tomyum-egg-prawn"];
 addPage("", layout({
   urlPath: "",
   active: "",
@@ -663,13 +666,17 @@ addPage("", layout({
 <section class="vhero" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
     <div class="vhero-media">
-      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)", eager: true })}
+      ${bgVideo(r, "hero-phone", { cls: "vbg--phone", media: "(max-width: 899.98px)" })}
       <div class="vhero-cols"><div class="vcol vcol--a">${bgVideo(r, "hero-col-a", { media: "(min-width: 900px)", eager: true })}</div></div>
       ${heroVideoToggle}
     </div>
     <div class="wrap vhero-inner">
       ${logoMark("vhero-logo", "MEON")}
       <h1 class="vhero-title" id="vhero-h">Your bowl, <span class="vhero-hl">your rules.</span></h1>
+      <div class="hero-bowls">${HERO_BOWLS.map((name, i) => {
+        const n = noodles.find((x) => x.slug === SHOOT[name].slug);
+        return `<a class="hero-bowl" href="${r(n.url)}">${shootImg(r, name, { sizes: "(min-width: 900px) 200px, 46vw", eager: i === 0 })}<span>${esc(`${n.brand} ${n.name}`)}</span></a>`;
+      }).join("")}</div>
       <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall ${icon.arrow}</a>

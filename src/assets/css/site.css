@@ -1366,3 +1366,30 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
   .visit-band-media::after { display: none; }
   .visit-band-inner { min-height: 0; padding-block: 28px clamp(56px, 9vh, 110px); }
 }
+
+/* Home hero: 2 real bowls. Phones: headline, the bowls side by side, the 2 buttons, then the paragraph, so a bowl and the
+   primary button sit in the first screen above the tab bar (Design, 4 Nov 22:2x); the clip card follows. Desktop: the
+   bowls under the buttons, beside the clip. */
+.vhero.is-moving .vhero-media { border-radius: 20px; }
+.vhero:not(.vhero--page) .vhero-inner { display: flex; flex-direction: column; align-items: flex-start; }
+.vhero-title { margin-bottom: 0; }
+.hero-bowls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 420px; margin-top: 22px; }
+.hero-bowl { display: flex; flex-direction: column; gap: 8px; color: var(--ink); text-decoration: none; }
+.hero-bowl img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 16px; border: 1px solid var(--line); background: var(--soft); transition: transform .45s var(--ease); }
+.hero-bowl:hover img { transform: translateY(-3px); }
+.hero-bowl span { font-size: .9rem; font-weight: 600; line-height: 1.25; }
+.vhero:not(.vhero--page) .vhero-sub { margin: 18px 0 0; }
+.vhero:not(.vhero--page) .actions { margin-top: 22px; }
+@media (min-width: 900px) {
+  .vhero-logo { width: clamp(96px, 8vw, 120px); }
+  .vhero:not(.vhero--page) .vhero-title { font-size: clamp(3rem, 6.6vw, 6.2rem); }
+  .vhero:not(.vhero--page) .hero-bowls { order: 5; max-width: 400px; margin-top: 28px; }
+}
+@media (max-width: 899.98px) {
+  .vhero-logo { width: 84px; margin-bottom: 14px; }
+  .vhero:not(.vhero--page) .hero-bowls { order: 2; max-width: none; margin-top: 16px; }
+  .vhero:not(.vhero--page) .hero-bowl img { aspect-ratio: 4 / 5; }
+  .vhero:not(.vhero--page) .actions { order: 3; width: 100%; margin-top: 16px; }
+  .vhero:not(.vhero--page) .vhero-sub { order: 4; }
+  .vhero .vhero-stage { padding-top: 16px; }
+}
