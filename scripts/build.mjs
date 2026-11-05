@@ -268,7 +268,7 @@ ${site.googleSiteVerification ? `<meta name="google-site-verification" content="
 <link rel="apple-touch-icon" href="${r("assets/img/apple-touch-icon.png")}">
 <link rel="manifest" href="${r("site.webmanifest")}">
 <link rel="preload" as="font" type="font/woff2" href="${r("assets/fonts/bricolage-grotesque-latin.woff2")}" crossorigin>
-${preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : ""}
+${typeof preload === "string" ? (preload ? `<link rel="preload" as="image" href="${r(preload)}" fetchpriority="high">` : "") : `<link rel="preload" as="image" href="${r(preload.src)}" imagesrcset="${preload.srcset.map(([p, w]) => `${r(p)} ${w}w`).join(", ")}" imagesizes="${preload.sizes}" fetchpriority="high">`}
 <link rel="stylesheet" href="${r("assets/css/site.css")}?v=${BUILD_ID}">
 <script>(function(d){d.className=d.className.replace("no-js","js");})(document.documentElement)</script>
 ${ld.length ? `<script type="application/ld+json">${json(ld.length === 1 ? ld[0] : ld)}</script>` : ""}
@@ -659,13 +659,21 @@ const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw,
 // no clip in the home hero (Design, 5 Nov 01:2x): its top peeked into the first screen and became the LCP image. The first
 // bowl is then the phone LCP, so the bowls use their own 4:5 copies, 360x450 (23-25 KB) and 720x900, made by
 // meon-work/rebuild/make_hero_bowls.py from the 2400 px shoot files: the shoot set's smallest copy is 800 px (46-56 KB).
-// Both load at once (above the fold); the first at high priority.
+// The first is preloaded from <head> at high priority and the second is lazy, so it doesn't share the first screen's
+// bandwidth with it (interleaved Lighthouse mobile, 6 runs each, 5 Nov: median LCP 3606 ms vs 3902 on production; 4240
+// with both bowls loading at once and no preload).
 const HERO_BOWLS = ["shin-black-top", "tomyum-egg-prawn"];
-const heroBowlImg = (r, name, first) => `<img src="${r(asset(`img/shoot/${name}-hero-720.webp`))}" srcset="${[360, 720].map((w) => `${r(asset(`img/shoot/${name}-hero-${w}.webp`))} ${w}w`).join(", ")}" sizes="(min-width: 900px) 200px, 46vw" width="720" height="900" alt="${esc(SHOOT[name].alt)}"${first ? ' fetchpriority="high"' : ""} decoding="async">`;
+const HERO_BOWL_SIZES = "(min-width: 900px) 200px, 46vw";
+const heroBowlSet = (name) => ({ src: asset(`img/shoot/${name}-hero-720.webp`), srcset: [360, 720].map((w) => [asset(`img/shoot/${name}-hero-${w}.webp`), w]), sizes: HERO_BOWL_SIZES });
+const heroBowlImg = (r, name, first) => {
+  const s = heroBowlSet(name);
+  return `<img src="${r(s.src)}" srcset="${s.srcset.map(([p, w]) => `${r(p)} ${w}w`).join(", ")}" sizes="${s.sizes}" width="720" height="900" alt="${esc(SHOOT[name].alt)}"${first ? ' fetchpriority="high"' : ' loading="lazy"'} decoding="async">`;
+};
 addPage("", layout({
   urlPath: "",
   active: "",
   overlay: true,
+  preload: heroBowlSet(HERO_BOWLS[0]),
   description: `MEON: cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}.`,
   body: (r) => `
 <section class="vhero" aria-labelledby="vhero-h" data-scene>
