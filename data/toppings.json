@@ -25,7 +25,14 @@
     "name": "Fishcake",
     "group": "Meat and seafood",
     "desc": "Bouncy fishcake adds savoury chew, cute shapes and instant joy.",
-    "icon": "bowl"
+    "img": "assets/img/toppings/fishcake.webp"
+  },
+  {
+    "id": "fish-balls",
+    "name": "Fish balls",
+    "group": "Meat and seafood",
+    "desc": "Bouncy fish balls that cook in the broth with your noodles.",
+    "img": "assets/img/toppings/fish-balls.webp"
   },
   {
     "id": "crab-sticks",
@@ -88,7 +95,14 @@
     "name": "Lettuce",
     "group": "Vegetables and more",
     "desc": "Crisp lettuce softens fast, adding freshness and light crunch.",
-    "icon": "leaf"
+    "img": "assets/img/toppings/lettuce.webp"
+  },
+  {
+    "id": "bean-sprouts",
+    "name": "Bean sprouts",
+    "group": "Vegetables and more",
+    "desc": "Fresh bean sprouts for a light, clean crunch.",
+    "img": "assets/img/toppings/bean-sprouts.webp"
   },
   {
     "id": "cabbage",
@@ -123,14 +137,21 @@
     "name": "Cheese",
     "group": "Egg and cheese",
     "desc": "Lay it on top of the noodles in the last 30 seconds and let it melt into the broth.",
-    "icon": "cheese"
+    "img": "assets/img/toppings/cheese.webp"
   },
   {
     "id": "chicken",
     "name": "Chicken wings",
     "group": "Sides",
     "desc": "Chicken wings on the side, ready to eat.",
-    "icon": "drumstick"
+    "img": "assets/img/toppings/chicken.webp"
+  },
+  {
+    "id": "gabo-nuggets",
+    "name": "Gabo nuggets",
+    "group": "Sides",
+    "desc": "Crispy fried nuggets on the side, ready to eat.",
+    "img": "assets/img/toppings/gabo-nuggets.webp"
   },
   {
     "id": "spam",
