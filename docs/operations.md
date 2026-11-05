@@ -24,7 +24,7 @@ The QR PNGs come from `scripts/make_qr_pngs.py`, which numbers noodles in the si
 - No QR codes are printed yet, so no public page links to them: not the announcement bar, home, About, Visit, FAQ, the footer or site search (Preston, 28 Oct: "no qr codes yet"). The staff pages `/qr/` and `/qr-generator/` stay ready, hidden from Google; open them by typing the address.
 - Every noodle has a code that opens `https://meon-noodles.vercel.app/noodles/<noodle>/?src=qr`.
 - `?src=qr` shows a "Scanned from the shelf" line and lets analytics count shelf scans separately.
-- **Before printing**, confirm the final web address. If you buy a domain (e.g. `meon.au`), change `siteUrl` in `data/site.json`, rebuild, then regenerate the codes:
+- **Before printing**, confirm the final web address. If MEON gets its own domain (`meon.au` is taken; see the final-domain item further down), change `siteUrl` in `data/site.json`, rebuild, then regenerate the codes:
   - website pages: `npm run build`, then the codes are at `/qr/`
   - Drive PNGs: `python3 scripts/make_qr_pngs.py`, then re-upload
 - Make your own codes for posters, Wi-Fi or Instagram at `/qr-generator/` (logo, colours, PNG/SVG download).

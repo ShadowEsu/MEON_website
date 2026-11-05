@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // MEON static site generator. Zero framework: reads data/*.json, writes ./site.
 // Usage: node scripts/build.mjs            (uses siteUrl from data/site.json)
-//        SITE_URL=https://meon.au node scripts/build.mjs
+//        SITE_URL=https://example.com node scripts/build.mjs   (another domain, e.g. once MEON has its own)
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
