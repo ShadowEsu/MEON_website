@@ -655,10 +655,13 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "shin-black-top"];
 // Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
-// 2 real bowls in the home hero (Design, 4 Nov 22:2x: a bowl and the primary button in a phone's first screen). Their
-// 800 px copies are 46 and 56 KB; the first loads eagerly at high priority. Phones show no clip in the home hero (Design,
-// 5 Nov 01:2x): its top peeked into the first screen and became the LCP image, so the hero has only the desktop clip.
+// 2 real bowls in the home hero (Design, 4 Nov 22:2x: a bowl and the primary button in a phone's first screen). Phones show
+// no clip in the home hero (Design, 5 Nov 01:2x): its top peeked into the first screen and became the LCP image. The first
+// bowl is then the phone LCP, so the bowls use their own 4:5 copies, 360x450 (23-25 KB) and 720x900, made by
+// meon-work/rebuild/make_hero_bowls.py from the 2400 px shoot files: the shoot set's smallest copy is 800 px (46-56 KB).
+// Both load at once (above the fold); the first at high priority.
 const HERO_BOWLS = ["shin-black-top", "tomyum-egg-prawn"];
+const heroBowlImg = (r, name, first) => `<img src="${r(asset(`img/shoot/${name}-hero-720.webp`))}" srcset="${[360, 720].map((w) => `${r(asset(`img/shoot/${name}-hero-${w}.webp`))} ${w}w`).join(", ")}" sizes="(min-width: 900px) 200px, 46vw" width="720" height="900" alt="${esc(SHOOT[name].alt)}"${first ? ' fetchpriority="high"' : ""} decoding="async">`;
 addPage("", layout({
   urlPath: "",
   active: "",
@@ -675,7 +678,7 @@ addPage("", layout({
       <h1 class="vhero-title" id="vhero-h">Your bowl, <span class="vhero-hl">your rules.</span></h1>
       <div class="hero-bowls">${HERO_BOWLS.map((name, i) => {
         const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="hero-bowl" href="${r(n.url)}">${shootImg(r, name, { sizes: "(min-width: 900px) 200px, 46vw", eager: i === 0 })}<span>${esc(`${n.brand} ${n.name}`)}</span></a>`;
+        return `<a class="hero-bowl" href="${r(n.url)}">${heroBowlImg(r, name, i === 0)}<span>${esc(`${n.brand} ${n.name}`)}</span></a>`;
       }).join("")}</div>
       <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
       <div class="actions">
