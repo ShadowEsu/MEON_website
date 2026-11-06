@@ -428,7 +428,9 @@
   // The final value is in the HTML, so a number on screen when the page opens just stays. One further down shows 0 and
   // counts up when it scrolls into view: 700 ms under 100, 1000 ms under 10,000, 1200 ms above. Screen readers get the
   // final value throughout (the counting digits are aria-hidden).
-  if (!reduceMotion && "IntersectionObserver" in window) $$("[data-count]").forEach(function (el) {
+  // "On screen" is decided after the load event and a frame, once images and fonts have settled the layout: when this
+  // script runs, the country facts at 390x844 sit at 651 px and later land at 876 px, below the fold.
+  var armCountUps = function () { $$("[data-count]").forEach(function (el) {
     var target = parseInt(el.getAttribute("data-count"), 10);
     if (!target) return;
     var b = el.getBoundingClientRect();
@@ -452,7 +454,11 @@
       })(t0);
     });
     cio.observe(el);
-  });
+  }); };
+  if (!reduceMotion && "IntersectionObserver" in window && $("[data-count]")) {
+    var armSoon = function () { requestAnimationFrame(function () { requestAnimationFrame(armCountUps); }); };
+    if (document.readyState === "complete") armSoon(); else window.addEventListener("load", armSoon, { once: true });
+  }
 
   /* ---------- Mascots: eyes follow the cursor, gentle drift, tap to hop & talk ---------- */
   if (finePointer && !reduceMotion) {
@@ -610,16 +616,19 @@
     document.body.classList.add("is-locked");
     inertOutside(overlay, true);
     // First open: the index is still on its way. Past 200 ms a skeleton of 4 results holds the panel (spec §2), and the
-    // results fade in when it lands. Later opens have it in memory, so nothing animates.
+    // results fade in when it lands. Later opens have it in memory, so nothing animates. "Loading search" goes to the
+    // status line (role=status), not the results listbox, so screen readers hear it; it's visually hidden there.
     var skelT = index ? 0 : setTimeout(function () {
       if (index || indexFailed) return;
+      if (sStatus) { sStatus.classList.add("visually-hidden"); sStatus.hidden = false; sStatus.textContent = "Loading search"; }
       sResults.setAttribute("aria-busy", "true");
-      sResults.innerHTML = '<span class="visually-hidden">Loading search</span>' + new Array(5).join('<div class="m-skel-row" aria-hidden="true"><span class="m-skel-b m-skel-thumb"></span><span><span class="m-skel-b m-skel-w60"></span><span class="m-skel-b m-skel-w40"></span></span></div>');
+      sResults.innerHTML = new Array(5).join('<div class="m-skel-row" aria-hidden="true"><span class="m-skel-b m-skel-thumb"></span><span><span class="m-skel-b m-skel-w60"></span><span class="m-skel-b m-skel-w40"></span></span></div>');
     }, 200);
     loadIndex().then(function () {
       clearTimeout(skelT);
       var was = sResults.getAttribute("aria-busy") === "true";
       sResults.removeAttribute("aria-busy");
+      if (sStatus) sStatus.classList.remove("visually-hidden");
       renderResults(sInput.value);
       if (was) { sResults.classList.remove("m-fade-in"); void sResults.offsetWidth; sResults.classList.add("m-fade-in"); }
     });
