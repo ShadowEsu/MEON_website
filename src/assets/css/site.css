@@ -670,7 +670,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .filters { position: sticky; top: var(--header-h); z-index: 20; background: #fff; border-bottom: 1px solid var(--line); padding: 16px 0 12px; transition: top .5s var(--ease); }
 .filters-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .filters-row .select { flex: 0 1 auto; }
-.filter-pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 2px; scrollbar-width: none; }
+/* 6 px of padding inside each edge holds the 2 px focus ring and its 3 px offset, which the scroller would clip; the
+   negative margin puts the pills exactly where they were */
+.filter-pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 6px 6px; margin: 0 -6px -4px; scrollbar-width: none; }
 .filter-pills::-webkit-scrollbar { display: none; }
 .filter-pills .flag { width: 16px; }
 /* The count never splits over two lines; on a phone, if it doesn't fit beside the tools, the tools move to their own row */
@@ -1355,7 +1357,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 
 /* Pairings and sides: the group tabs stick under the header */
 .subtabs { position: sticky; top: var(--header-h); z-index: 60; background: #fff; border-block: 1px solid var(--line); }
-.subtabs-row { display: flex; gap: 8px; padding-block: 10px; overflow-x: auto; scrollbar-width: none; }
+/* As .filter-pills: 6 px inside each edge for the focus ring; the row is 12 px wider so the tabs stay put */
+.subtabs-row { display: flex; gap: 8px; width: min(100% - var(--gutter) * 2 + 12px, var(--wrap) + 12px); padding: 10px 6px; overflow-x: auto; scrollbar-width: none; }
 .subtab { display: inline-flex; flex: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--line-2); border-radius: 999px; background: #fff; color: var(--ink); font-weight: 600; text-decoration: none; white-space: nowrap; }
 .subtab:hover { border-color: var(--ink); }
 .subtab small { font-size: .78rem; font-weight: 700; color: var(--ink-2); background: var(--soft); border-radius: 999px; padding: 2px 8px; }
