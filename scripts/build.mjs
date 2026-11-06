@@ -49,12 +49,42 @@ const write = (rel, content) => {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, content);
 };
+// The shipped CSS and JS lose their comments; the source keeps them. That is 19% less render-blocking CSS (4.7 KB
+// brotli): the motion release's phone LCP gate, 5 Nov 2026. Nothing else changes, so a minifier isn't needed:
+// - CSS: every /* */ outside a quoted string or url(), and the blank lines left behind. A comment with no space on
+//   either side becomes /**/, so 2 tokens never join. `/*!` comments stay.
+// - JS: only lines that are wholly a // comment, and blank lines. That is safe while the file has no template literal
+//   and no string continued onto the next line; a file with either is copied as it is.
+const stripCss = (s) => {
+  let out = "";
+  for (let i = 0; i < s.length; ) {
+    const c = s[i], bare = c === "u" && /^url\(\s*[^\s"']/.test(s.slice(i, i + 6)); // an unquoted url() ends at ")"; a quoted one is a string
+    if (c === '"' || c === "'" || bare) {
+      const close = bare ? ")" : c;
+      let j = i + (bare ? 4 : 1);
+      while (j < s.length && s[j] !== close) j += s[j] === "\\" ? 2 : 1;
+      out += s.slice(i, j + 1); i = j + 1;
+    } else if (c === "/" && s[i + 1] === "*" && s[i + 2] !== "!") {
+      const j = s.indexOf("*/", i + 2);
+      if (j < 0) throw new Error("CSS: a comment never closes");
+      if (!/\s/.test(out.slice(-1) || " ") && !/\s/.test(s[j + 2] || " ")) out += "/**/";
+      i = j + 2;
+    } else { out += c; i++; }
+  }
+  return out.replace(/\n[ \t]*(?=\n)/g, "");
+};
+const stripJs = (s, name) => {
+  if (s.includes("`") || /\\\r?\n/.test(s)) { console.log(`Note: ${name} keeps its comments (a template literal or a continued string)`); return s; }
+  return s.split("\n").filter((l) => !/^\s*(\/\/.*)?$/.test(l)).join("\n") + "\n";
+};
 const copyDir = (from, to) => {
   if (!fs.existsSync(from)) return;
   fs.mkdirSync(to, { recursive: true });
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     const a = path.join(from, entry.name), b = path.join(to, entry.name);
     if (entry.isDirectory()) copyDir(a, b);
+    else if (entry.name.endsWith(".css")) fs.writeFileSync(b, stripCss(fs.readFileSync(a, "utf8")));
+    else if (entry.name.endsWith(".js")) fs.writeFileSync(b, stripJs(fs.readFileSync(a, "utf8"), entry.name));
     else fs.copyFileSync(a, b);
   }
 };
