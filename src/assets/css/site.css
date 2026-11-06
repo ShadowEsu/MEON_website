@@ -141,7 +141,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .announce span { opacity: .85; }
 .announce a { color: #fff; font-weight: 600; margin-left: 6px; }
 .site-header {
-  position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.97); border-bottom: 1px solid transparent;
+  position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid transparent;
   transition: border-color .3s;
 }
 .site-header.is-scrolled { border-color: var(--line); }
@@ -301,7 +301,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   :root { --tabbar-h: calc(50px + .75rem * 1.6); }
   .tabbar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
-    background: rgba(255,255,255,.97); border-top: 1px solid var(--line);
+    background: #fff; border-top: 1px solid var(--line);
   }
   .tabbar a, .tabbar button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; text-decoration: none; font-size: .75rem; font-weight: 500; color: var(--muted); cursor: pointer; }
   .tabbar svg.i { width: 22px; height: 22px; }
@@ -668,7 +668,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 @media (max-width: 760px) { .ph-grid { grid-template-columns: 1fr; } .ph-aside { justify-content: flex-start; } .peeker { width: 96px; margin: 0; } }
 
 /* ---------- Library ---------- */
-.filters { position: sticky; top: var(--header-h); z-index: 20; background: rgba(255,255,255,.97); border-bottom: 1px solid var(--line); padding: 16px 0 12px; transition: top .5s var(--ease); }
+.filters { position: sticky; top: var(--header-h); z-index: 20; background: #fff; border-bottom: 1px solid var(--line); padding: 16px 0 12px; transition: top .5s var(--ease); }
 .filters-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .filters-row .select { flex: 0 1 auto; }
 .filter-pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 2px; scrollbar-width: none; }
@@ -1353,7 +1353,7 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 }
 
 /* Pairings and sides: the group tabs stick under the header */
-.subtabs { position: sticky; top: var(--header-h); z-index: 60; background: rgba(255,255,255,.97); border-block: 1px solid var(--line); }
+.subtabs { position: sticky; top: var(--header-h); z-index: 60; background: #fff; border-block: 1px solid var(--line); }
 .subtabs-row { display: flex; gap: 8px; padding-block: 10px; overflow-x: auto; scrollbar-width: none; }
 .subtab { display: inline-flex; flex: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--line-2); border-radius: 999px; background: #fff; color: var(--ink); font-weight: 600; text-decoration: none; white-space: nowrap; }
 .subtab:hover { border-color: var(--ink); }
