@@ -1231,6 +1231,20 @@
     }
   }
 
+  /* ---------- Home gallery: Noodles / Drinks switch ----------
+     Without JS both grids show, one after the other. With it, the two pills show one grid at a time. */
+  var galSwitch = $(".gal-switch");
+  if (galSwitch) {
+    var galBtns = $$("[data-gal-show]", galSwitch);
+    var galShow = function (which) {
+      galBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-gal-show") === which)); });
+      $$("[data-gal-panel]").forEach(function (p) { p.hidden = p.getAttribute("data-gal-panel") !== which; });
+    };
+    galBtns.forEach(function (b) { b.addEventListener("click", function () { galShow(b.getAttribute("data-gal-show")); }); });
+    galShow("noodles");
+    galSwitch.hidden = false;
+  }
+
   /* ---------- Year ---------- */
   $$("[data-year]").forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
 })();

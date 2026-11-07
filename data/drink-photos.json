@@ -1,0 +1,12 @@
+{
+  "_readme": "The home gallery's Drinks tab (Preston, 6 Nov 2026: 'give drinks free images, and like Aiko matcha too'). Each photo is a free-library (CC0 or public-domain) picture of a drink TYPE, never of the product MEON sells: the caption names the type and the products in `drinks` are listed as text under it ('At MEON: ...'). No logos, cans, bottles or packaging in frame (Preston via BOSS, 4 Nov 2026: branded cans and bottles are other companies' packaging). Every name in `drinks` must match a drink in data/catalogue.json and every catalogue drink must sit in exactly one group; npm run build stops otherwise. Photo sources and licences: docs/credits.md, 'Drink photos from free libraries'. Alt text: data/photo-alts.json.",
+  "groups": [
+    { "type": "Iced matcha", "img": "assets/img/drinks/iced-matcha.webp", "drinks": ["Aiko Matcha"] },
+    { "type": "Iced coffee", "img": "assets/img/drinks/iced-coffee.webp", "drinks": ["Caffe Bene Americano", "Caffe Bene Black Iced Drink", "Caffe Bene Caramel Macchiato", "Caffe Bene Hazelnut", "Caffe Bene Vanilla Americano"] },
+    { "type": "Soft drinks", "img": "assets/img/drinks/soft-drink.webp", "drinks": ["Coca-Cola Classic", "Coca-Cola Zero Sugar", "100 Plus", "Milkis Peach"] },
+    { "type": "Iced tea", "img": "assets/img/drinks/iced-tea.webp", "drinks": ["Sosro Teh Botol"] },
+    { "type": "Chrysanthemum tea", "img": "assets/img/drinks/chrysanthemum-tea.webp", "drinks": ["Yeo's Chrysanthemum Tea"] },
+    { "type": "Water", "img": "assets/img/drinks/water.webp", "drinks": ["Aussie Natural Water", "Australian Natural Spring Water"] },
+    { "type": "Ice", "img": "assets/img/drinks/ice.webp", "drinks": ["Ice in a cup"] }
+  ]
+}
