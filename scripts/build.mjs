@@ -129,7 +129,7 @@ const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   if (g.photo !== "type" && g.photo !== "exact") throw new Error(`${where}: photo must be "type" or "exact"`);
   const shows = g.photo === "exact" && items.find((d) => d.name === g.shows);
   if (g.photo === "exact" && !shows) throw new Error(`${where}: an exact photo needs "shows" naming one of its own drinks`);
-  if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || ""))) throw new Error(`${where}: a credit needs author, licence and a creativecommons.org licence URL`);
+  if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || "") && /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(g.source?.page || ""))) throw new Error(`${where}: a credit needs author, licence, a creativecommons.org licence URL and the Commons file page in source.page`);
   if (!g.credit && /\bBY\b/.test(g.source?.licence || "")) throw new Error(`${where}: a CC BY/BY-SA photo needs a credit on the page`);
   return { ...g, items, shows, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
 });
@@ -739,12 +739,11 @@ const heroStrip = (r) => `<div class="hstrip">
 // Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
 const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
-// The caption line under a drink photo (Design, ledger 571): what the photo shows, then the credit when the licence asks for one.
-const drinkPhotoLine = (g) => {
-  const what = g.shows ? `Photo: ${esc(g.shows.name)}${g.shows.size ? ` ${esc(g.shows.size)}` : ""} can` : "Photo shows the drink type";
-  const c = g.credit;
-  return c ? `${what} · Photo: ${esc(c.author)}, <a href="${esc(c.licenceUrl)}" rel="license">${esc(c.licence)}</a>${c.cropped ? ", cropped" : ""}` : what;
-};
+// The lines around a drink photo (Design + Security, ledger 571): a caption right under it saying what it shows ("Photo shows
+// this drink" for the exact product, whose size stays in the At MEON line, or "Photo shows the drink type"), and, when the
+// licence asks for one, a credit line after the At MEON text linking the author's source page and the licence.
+const drinkPhotoLine = (g) => (g.photo === "exact" ? "Photo shows this drink" : "Photo shows the drink type");
+const drinkCredit = (g) => g.credit ? `<span class="gal-credit">Photo: <span class="gal-credit-links"><a href="${esc(g.source.page)}">${esc(g.credit.author)}</a>, <a href="${esc(g.credit.licenceUrl)}" rel="license">${esc(g.credit.licence)}</a></span>${g.credit.cropped ? ", cropped" : ""}</span>` : "";
 // "At MEON: ..." under a drink photo. Several drinks of one brand and size read as one line ("Caffe Bene Americano, Hazelnut
 // (190 ml each)"); anything else lists each drink with its size.
 const drinkLine = (items) => {
@@ -771,7 +770,7 @@ const homeGallery = (r) => `
     </div>
     <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
       <h3 class="visually-hidden">Drinks</h3>
-      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span></li>`).join("")}</ul>
+      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}</li>`).join("")}</ul>
       <p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell. The fridge changes day to day, so ask the crew what's in.</p>
       <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
     </div>
