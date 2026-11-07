@@ -701,6 +701,34 @@ const galleryNoodles = (() => {
     for (const list of byBrand.values()) if (list[round] && out.length < 24) out.push(list[round]);
   return out;
 })();
+// Noodle strip in the home hero's first screen (Preston via BOSS, 7 Nov 2026 00:3x: "more noodles on the front"): the 12 in
+// data/home-strip.json, shoot photos that are NOT among the gallery's 24 so the first screen and the gallery don't repeat.
+// Each card is a link to the noodle's page with its brand and name. Desktop: a slow loop along the bottom of the hero
+// (site.css .hstrip), which stops with the hero's pause button, on hover and on keyboard focus; reduced motion and phones
+// get a still row that swipes. The loop's second copy is aria-hidden and inert, so each noodle is one tab stop.
+const stripNoodles = (() => {
+  const inGallery = new Set(galleryNoodles.map((n) => n.slug));
+  return readJSON("home-strip.json").slugs.map((slug) => {
+    const n = withPhotos.find((x) => x.slug === slug);
+    if (!n || FREE_LIBRARY_NOODLE_PHOTOS.has(slug)) throw new Error(`data/home-strip.json: ${slug} has no MEON shoot photo`);
+    if (inGallery.has(slug)) throw new Error(`data/home-strip.json: ${slug} is already in the home gallery`);
+    return n;
+  });
+})();
+// Design's spec (requests/meon/20261107-0033-design-noodle-strip-and-polish.md §A): cards 120 x 96 on desktop, 96 x 72 on
+// phones, from one 240 x 192 copy per photo (scripts/make_thumbs.py; 94 KB for all 12). The first 4 load with the page at
+// low priority, the rest lazily. The label is "On the wall", not "tonight": the site doesn't track live stock.
+const stripCards = (r, copy) => stripNoodles.map((n, i) => {
+  const src = r(smallCopy(`assets/${images[n.slug]}`, 240));
+  return `<li><a class="hcard" href="${r(n.url)}"><img src="${src}" alt="" width="240" height="192"${!copy && i < 4 ? "" : ' loading="lazy"'} fetchpriority="low" decoding="async"><span class="hcard-brand">${esc(n.brand)}</span><span class="hcard-name">${esc(n.name)}</span></a></li>`;
+}).join("");
+const heroStrip = (r) => `<div class="hstrip">
+        <div class="hstrip-head"><p class="hstrip-label" id="hstrip-l">On the wall</p><a class="hstrip-all" href="${r("noodles/")}">See all ${COUNT} noodles</a></div>
+        <div class="hstrip-view"><div class="hstrip-track">
+          <ul class="hstrip-row" aria-labelledby="hstrip-l">${stripCards(r, false)}</ul>
+          <ul class="hstrip-row hstrip-row--copy" aria-hidden="true" inert>${stripCards(r, true)}</ul>
+        </div></div>
+      </div>`;
 // Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
 const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
@@ -776,6 +804,7 @@ addPage("", layout({
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
       </div>
+      ${heroStrip(r)}
     </div>
   </div>
 </section>

@@ -340,6 +340,14 @@
     bgVids.forEach(function (v) { if (v.paused) bgPlay(v); });
   };
   var vToggles = $$("[data-video-toggle]");
+  // On the home page the same button also stops the hero's noodle strip (WCAG 2.2.2), so there it says "motion", not
+  // "videos", to stay true: "Pause motion" while things move, "Play motion" once paused.
+  var vWord = $(".hstrip") ? "motion" : "videos";
+  if (vWord !== "videos") vToggles.forEach(function (t) {
+    t.setAttribute("aria-label", "Pause " + vWord);
+    var tx = $(".vpause-text", t);
+    if (tx) tx.textContent = "Play " + vWord;
+  });
   var heroToggle = $(".vhero [data-video-toggle]");
   var headerToggle = $("[data-video-toggle-header]");
   var heroToggleOn = !!heroToggle; // until its observer reports
@@ -375,7 +383,7 @@
   var showVideosPaused = function (on) {
     userPaused = on;
     document.documentElement.classList.toggle("videos-paused", on);
-    vToggles.forEach(function (t) { t.setAttribute("aria-pressed", String(on)); t.setAttribute("aria-label", on ? "Play videos" : "Pause videos"); });
+    vToggles.forEach(function (t) { t.setAttribute("aria-pressed", String(on)); t.setAttribute("aria-label", (on ? "Play " : "Pause ") + vWord); });
     bgVids.forEach(function (v) { if (on) v.pause(); else bgPlay(v); });
   };
   if (saveData) {
