@@ -1524,7 +1524,7 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 a.gal-card:hover .gal-name { color: var(--red); }
 .gal-at { font-size: .86rem; line-height: 1.4; color: var(--ink-2); }
 .gal-note { margin: 26px 0 0; max-width: 70ch; font-size: .9rem; color: var(--muted); }
-.gal-more { margin: clamp(24px, 3vw, 36px) 0 0; }
+.gal-more { margin: clamp(24px, 3vw, 36px) 0 0; text-align: center; } /* centred under the grid, size kept (Design §B 4) */
 @media (min-width: 600px) { .gal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 18px; } }
 @media (min-width: 900px) { .gal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .gal-grid:not(.gal-grid--drinks) { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
