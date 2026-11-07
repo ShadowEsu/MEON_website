@@ -1413,7 +1413,7 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 .vhero.is-moving .vhero-media { border-radius: 20px; }
 .vhero-title { margin-bottom: 0; }
 .vhero.vhero--full, .js .vhero.vhero--full { background: #1a1412; color: #fff; }
-.vhero.vhero--full .vhero-stage { display: flex; align-items: flex-end; overflow: hidden; isolation: isolate; padding: 0;
+.vhero.vhero--full .vhero-stage { display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; isolation: isolate; padding: 0;
   min-height: calc(100vh - var(--header-h) - var(--tabbar-h, 0px));
   min-height: calc(100svh - var(--header-h) - var(--tabbar-h, 0px) - env(safe-area-inset-bottom, 0px)); }
 .vhero.vhero--full .vhero-media, .vhero.vhero--full.is-moving .vhero-media { position: absolute; inset: 0; z-index: -2; display: block; height: auto; aspect-ratio: auto; border: 0; border-radius: 0; background: #1a1412; }
@@ -1425,20 +1425,30 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
    112 px above it, so it covers them at any stage height. A stage-height gradient had already faded where the title sits
    on short screens (iPhone Safari's small viewport, 360 x 640: red line 2.36:1, 6 Nov 2026). Desktop scrims the stage. */
 .vhero.vhero--full .vhero-stage::before { display: none; content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
-.vhero.vhero--full .vhero-inner { display: flex; flex-direction: column; align-items: flex-start; width: 100%; padding: 112px max(var(--gutter), (100% - var(--wrap)) / 2) 28px;
-  background: linear-gradient(0deg, rgba(12,9,8,.9) 0, rgba(12,9,8,.86) calc(100% - 112px), rgba(12,9,8,0) 100%); }
+.vhero.vhero--full .vhero-inner { --fade: 112px; display: flex; flex-direction: column; align-items: flex-start; width: 100%; padding: var(--fade) max(var(--gutter), (100% - var(--wrap)) / 2) 16px;
+  background: linear-gradient(0deg, rgba(12,9,8,.9) 0, rgba(12,9,8,.86) calc(100% - var(--fade)), rgba(12,9,8,0) 100%); }
 .vhero.vhero--full .vhero-title { color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.35); }
 .vhero.vhero--full .vhero-hl { color: #ff6b70; }
 .vhero.vhero--full .vhero-sub { margin: 14px 0 0; max-width: 40ch; color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
 .vhero.vhero--full .actions { margin-top: 20px; }
 .vhero.vhero--full .vpause { top: 14px; bottom: auto; }
+/* Short phones (360 x 640, iPhone Safari with its bars at 390 x 664): the words, both buttons and the first 2 noodle cards
+   with their names fit the first screen (ledger 571, Design's "Short phones"). The heading, lead and buttons get tighter;
+   the lead keeps all its words. */
+@media (max-width: 899.98px) and (max-height: 760px) {
+  .vhero.vhero--full .vhero-inner { --fade: 64px; }
+  .vhero.vhero--full .vhero-title { font-size: clamp(34px, 9.5vw, 44px); }
+  .vhero.vhero--full .vhero-sub { margin-top: 10px; font-size: .94rem; line-height: 1.4; }
+  .vhero.vhero--full .actions { margin-top: 14px; gap: 8px; }
+  .vhero.vhero--full .actions .btn--lg { min-height: 48px; }
+}
 @media (min-width: 900px) {
   .vhero.vhero--full .vcol:not(.vcol--main) { display: block; }
   .vhero.vhero--full .vhero-stage::before { display: block;
     background: linear-gradient(90deg, rgba(12,9,8,.88) 0%, rgba(12,9,8,.8) 36%, rgba(12,9,8,.34) 60%, rgba(12,9,8,0) 78%),
       linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 45%); }
   .vhero.vhero--full .vhero-title { font-size: clamp(3rem, 6.6vw, 6.2rem); }
-  .vhero.vhero--full .vhero-inner { padding-top: 48px; padding-bottom: clamp(48px, 9vh, 112px); background: none; }
+  .vhero.vhero--full .vhero-inner { padding-top: 48px; padding-bottom: clamp(20px, 3vh, 32px); background: none; }
   .vhero.vhero--full .vhero-sub { margin-top: 18px; }
   .vhero.vhero--full .actions { margin-top: 26px; }
 }
@@ -1479,40 +1489,49 @@ a.gal-card:hover .gal-name { color: var(--red); }
   a.gal-card:hover img { transform: translateY(-3px); }
 }
 
-/* Home hero noodle strip (Preston via BOSS, 7 Nov 2026: "more noodles on the front"). 12 noodle cards along the bottom of
-   the first screen, each a link to its page. Names are white on a solid dark card, never straight on the video.
-   Phones, no JS and reduced motion: a still row that swipes sideways, bleeding to the screen edges.
-   Desktop with JS and motion allowed: the two copies of the row loop slowly (-50% = one copy). The loop stops with the
+/* Home hero noodle strip (Preston via BOSS, 7 Nov 2026: "more noodles on the front"; ledger 571; Design's spec in
+   requests/meon/20261107-0033-design-noodle-strip-and-polish.md §A). 12 of MEON's own noodle photos along the bottom of
+   the first screen, each a link to its page, on a dark band that continues the words' scrim (names >= 4.5:1).
+   Phones, no JS and reduced motion: a still row that swipes sideways, the third card peeking.
+   Desktop with JS and motion allowed: the two copies of the row drift slowly (-50% = one copy). The drift stops with the
    hero's pause button (.videos-paused; the button then reads "Play motion"), on hover, and on keyboard focus, where it
-   becomes a still swipe row so the focused card is never carried off-screen (WCAG 2.2.2, as .insta-row). */
-.hstrip { width: 100vw; margin: 22px 0 0 calc(50% - 50vw); overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); }
-.hstrip::-webkit-scrollbar { display: none; }
+   becomes a still row so the focused card is never carried off-screen (WCAG 2.2.2, as .insta-row). */
+.hstrip { position: relative; background: rgba(12,9,8,.9); padding: 0 0 14px; }
+.hstrip-head { display: none; } /* phones: the hero's own "Browse the noodle wall" button leads to the full list */
+.hstrip-view { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding-block: 4px; }
+.hstrip-view::-webkit-scrollbar { display: none; }
 .hstrip-track { display: flex; width: max-content; padding-inline: var(--gutter); }
 .hstrip-row { display: flex; list-style: none; margin: 0; padding: 0; }
 .hstrip-row li { flex: none; padding-right: 10px; }
 .hstrip-row--copy { display: none; }
-.hcard { display: flex; align-items: center; gap: 12px; width: 232px; padding: 8px 14px 8px 8px; border: 1px solid rgba(255,255,255,.16); border-radius: 16px; background: #15110f; color: #fff; text-decoration: none; scroll-snap-align: start; transition: border-color .25s; }
-.hcard img { flex: none; display: block; width: 64px; height: 64px; border-radius: 10px; object-fit: cover; background: #2a2421; }
-.hcard-t { display: grid; gap: 2px; min-width: 0; }
-.hcard-brand { font-size: .76rem; font-weight: 500; line-height: 1.3; color: #d9d2cc; }
-.hcard-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .92rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; }
-.hcard:hover { border-color: rgba(255,255,255,.6); }
-.hcard:focus-visible { outline: 2px solid #fff; outline-offset: -5px; }
+.hcard { display: grid; gap: 6px; width: 112px; border-radius: 10px; color: #fff; text-decoration: none; scroll-snap-align: start; }
+.hcard img { display: block; width: 112px; height: 84px; border-radius: 10px; object-fit: cover; object-position: 50% 60%; background: #2a2421; }
+.hcard-brand { display: none; }
+.hcard-name { font-size: 12px; font-weight: 620; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hcard:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (hover: hover) { .hcard:hover .hcard-name { text-decoration: underline; text-underline-offset: 2px; } }
 @media (min-width: 900px) {
-  .vhero.vhero--full .vhero-inner:has(> .hstrip) { padding-bottom: 28px; }
-  .hstrip { margin-top: clamp(28px, 4.5vh, 48px); }
-  .hcard { width: 272px; }
-  .hcard img { width: 80px; height: 80px; border-radius: 12px; }
-  .hcard-name { font-size: 1rem; }
+  .hstrip { background: linear-gradient(180deg, rgba(12,9,8,0) 0, rgba(12,9,8,.92) 44px); padding: 48px 0 22px; }
+  .hstrip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; padding-inline: max(var(--gutter), (100% - var(--wrap)) / 2); }
+  .hstrip-label { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.8); }
+  .hstrip-all { font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-decoration-color: rgba(255,255,255,.5); text-underline-offset: 3px; }
+  .hstrip-all:hover { text-decoration-color: #fff; }
+  .hstrip-view { scroll-snap-type: none; padding-left: max(var(--gutter), (100% - var(--wrap)) / 2); scroll-padding-inline: max(var(--gutter), (100% - var(--wrap)) / 2);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 140px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 140px), transparent); }
+  .hstrip-track { padding-inline: 0; }
+  .hstrip-row li { padding-right: 16px; }
+  .hcard { width: 120px; gap: 0; }
+  .hcard img { width: 120px; height: 96px; }
+  .hcard-brand { display: block; margin-top: 8px; font-size: 11px; font-weight: 450; line-height: 1.3; color: rgba(255,255,255,.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hcard-name { margin-top: 2px; font-size: 13px; }
 }
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-  .js .hstrip { overflow: hidden; scroll-snap-type: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
-  .js .hstrip-track { padding-inline: 0; animation: hstrip-loop 80s linear infinite; }
+  .js .hstrip-view { overflow: hidden; }
+  .js .hstrip-track { animation: hstrip-loop 36s linear infinite; }
   .js .hstrip-row--copy { display: flex; }
-  .js .hstrip-row li { padding-right: 14px; }
-  .js .hstrip:hover .hstrip-track, .videos-paused .hstrip-track { animation-play-state: paused; }
-  .js .hstrip:focus-within { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
-  .js .hstrip:focus-within .hstrip-track { animation: none; padding-inline: var(--gutter); }
-  .js .hstrip:focus-within .hstrip-row--copy { display: none; }
+  .js .hstrip-view:hover .hstrip-track, .videos-paused .hstrip-track { animation-play-state: paused; }
+  .js .hstrip-view:focus-within { overflow-x: auto; }
+  .js .hstrip-view:focus-within .hstrip-track { animation: none; }
+  .js .hstrip-view:focus-within .hstrip-row--copy { display: none; }
 }
 @keyframes hstrip-loop { to { transform: translate3d(-50%, 0, 0); } }

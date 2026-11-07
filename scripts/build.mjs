@@ -804,8 +804,8 @@ addPage("", layout({
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
       </div>
-      ${heroStrip(r)}
     </div>
+    ${heroStrip(r)}
   </div>
 </section>
 ${homeGallery(r)}

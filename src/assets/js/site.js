@@ -1239,6 +1239,14 @@
     }
   }
 
+  /* ---------- Home hero noodle strip: a focused card scrolls fully into view ----------
+     The phone row (and the still desktop row once a card has focus) scrolls sideways; Chrome can leave a focused card half
+     past the scroller's edge after Tab, so on focus it's scrolled to the nearest edge inside the scroll-padding. */
+  var hstrip = $(".hstrip-view");
+  if (hstrip) hstrip.addEventListener("focusin", function (e) {
+    if (e.target.classList.contains("hcard")) e.target.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+
   /* ---------- Home gallery: Noodles / Drinks switch ----------
      Without JS both grids show, one after the other. With it, the two pills show one grid at a time. */
   var galSwitch = $(".gal-switch");
