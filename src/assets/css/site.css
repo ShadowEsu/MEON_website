@@ -1464,12 +1464,18 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 .gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
 .gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
-/* Drinks (ledger 571, Design): square photos like the noodles, then one caption line, 6 px below the photo, the same on every
-   tile ("Photo: <product> <size> can" or "Photo shows the drink type", plus any licence credit). The licence link's box is
-   24 px tall (WCAG 2.5.8) without changing the line height. */
+/* Drinks (ledger 571, Design + Security): square photos like the noodles. One caption line 6 px under every photo ("Photo
+   shows this drink" / "Photo shows the drink type"); CC BY / BY-SA photos add a credit line after the At MEON text, in the
+   same 12/500 ink-2. Its two links (author's page, licence) each get a 24 px tall box (WCAG 2.5.8) without changing the
+   line height, and stay together on one line, 10 px apart, so a phone-width wrap never stacks one box on the other. */
 .gal-card--drink img { margin-bottom: 3px; }
-.gal-photo { font-size: .75rem; font-weight: 500; line-height: 1.4; color: var(--ink-2); margin-bottom: 4px; }
-.gal-photo a { display: inline-block; padding: 4px 0; margin: -4px 0; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.gal-photo, .gal-credit { font-size: .75rem; font-weight: 500; line-height: 1.4; color: var(--ink-2); }
+.gal-photo { margin-bottom: 4px; }
+@media (max-width: 379px) { .gal-photo { min-height: 2.8em; } } /* "Photo shows the drink type" wraps at 360, so every caption takes 2 lines there and the titles stay level */
+.gal-credit { margin-top: 3px; }
+.gal-credit-links { white-space: nowrap; }
+.gal-credit a { display: inline-block; padding: 4px 0; margin: -4px 0; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.gal-credit a + a { margin-left: 4px; }
 .gal-brand { font-size: .8rem; font-weight: 500; color: var(--muted); }
 .gal-name, .gal-type { font-size: .98rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; transition: color .25s; }
 a.gal-card:hover .gal-name { color: var(--red); }
