@@ -1439,3 +1439,30 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
   .rv-google { row-gap: 14px; }
   .pill { min-height: 44px; }
 }
+
+/* Home gallery right under the hero (Preston, 6 Nov 2026): 24 shoot photos of noodles, and a Drinks grid of free-library
+   photos of each drink type with MEON's products as text. Without JS both grids show, one after the other; with it the two
+   pills switch between them (site.js). Column counts match GAL_*_SIZES in scripts/build.mjs. */
+.gal { padding: clamp(56px, 8vw, 110px) 0; background: var(--paper); }
+.gal-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin-bottom: clamp(24px, 3.5vw, 44px); }
+.gal-head h2 { margin: 0; max-width: 20ch; text-wrap: balance; }
+.gal-switch { display: flex; gap: 8px; }
+.gal-switch[hidden] { display: none; }
+.gal-panel + .gal-panel { margin-top: clamp(48px, 6vw, 80px); }
+.gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
+.gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
+.gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
+.gal-card--drink img { aspect-ratio: 4 / 5; }
+.gal-brand { font-size: .8rem; font-weight: 500; color: var(--muted); }
+.gal-name, .gal-type { font-size: .98rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; transition: color .25s; }
+a.gal-card:hover .gal-name { color: var(--red); }
+.gal-at { font-size: .86rem; line-height: 1.4; color: var(--ink-2); }
+.gal-note { margin: 26px 0 0; max-width: 70ch; font-size: .9rem; color: var(--muted); }
+.gal-more { margin: clamp(24px, 3vw, 36px) 0 0; }
+@media (min-width: 600px) { .gal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 18px; } }
+@media (min-width: 900px) { .gal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .gal-grid:not(.gal-grid--drinks) { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gal-card img { transition: transform .5s var(--ease); }
+  a.gal-card:hover img { transform: translateY(-3px); }
+}

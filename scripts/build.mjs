@@ -114,9 +114,22 @@ const withPhoto = (t) => {
 };
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
-// Drinks from MEON's Square catalogue, listed as text: no drink photos (Preston via BOSS, 4 Nov 2026: branded cans and
-// bottles are other companies' packaging).
+// Drinks from MEON's Square catalogue. The Pairings and sides page lists them as text. The home gallery's Drinks tab shows free-library
+// photos of each drink TYPE with MEON's products as text under them (Preston, 6 Nov 2026), never a can, bottle or logo
+// (Preston via BOSS, 4 Nov 2026: branded cans and bottles are other companies' packaging). See data/drink-photos.json.
 const drinks = catalogue.drinks;
+const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
+  const items = g.drinks.map((name) => {
+    const d = drinks.find((x) => x.name === name);
+    if (!d) throw new Error(`data/drink-photos.json: "${name}" isn't a drink in data/catalogue.json`);
+    return d;
+  });
+  return { ...g, items, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
+});
+for (const d of drinks) {
+  const n = drinkGroups.filter((g) => g.drinks.includes(d.name)).length;
+  if (n !== 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs exactly 1`);
+}
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -676,6 +689,53 @@ const addPage = (urlPath, html) => { pages.push(urlPath); write(urlPath + "index
 const countFor = (fn) => noodles.filter(fn).length;
 const half = Math.ceil(withPhotos.length / 2);
 const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-1" title="${esc(`${n.brand} ${n.name}`)}"><img src="${r(n.thumb)}" alt="" width="200" height="200" loading="lazy" decoding="async"></a>`).join("");
+// Home gallery right under the hero (Preston, 6 Nov 2026: lots of real noodle photos, plus drinks). Noodles: 24 shoot photos,
+// one brand at a time in library order so the first rows aren't all one maker. The packet photos from free libraries
+// (docs/credits.md, "Noodle photos from free libraries") stay out: this grid is MEON's own bowls.
+const FREE_LIBRARY_NOODLE_PHOTOS = new Set(["indomie-soto-mie"]);
+const galleryNoodles = (() => {
+  const byBrand = new Map();
+  for (const n of withPhotos) if (!FREE_LIBRARY_NOODLE_PHOTOS.has(n.slug)) byBrand.set(n.brand, [...(byBrand.get(n.brand) || []), n]);
+  const out = [];
+  for (let round = 0; out.length < 24 && [...byBrand.values()].some((l) => l.length > round); round++)
+    for (const list of byBrand.values()) if (list[round] && out.length < 24) out.push(list[round]);
+  return out;
+})();
+// Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
+const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
+const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
+// "At MEON: ..." under a drink photo. Several drinks of one brand and size read as one line ("Caffe Bene Americano, Hazelnut
+// (190 ml each)"); anything else lists each drink with its size.
+const drinkLine = (items) => {
+  const words = items.map((d) => d.name.split(" "));
+  let k = 0;
+  while (items.length > 1 && words.every((w) => w.length > k + 1 && w[k] === words[0][k])) k++;
+  if (k && items.every((d) => d.size === items[0].size)) return `${[esc(items[0].name), ...words.slice(1).map((w) => esc(w.slice(k).join(" ")))].join(", ")}${items[0].size ? ` (${esc(items[0].size)} each)` : ""}`;
+  return items.map((d) => `${esc(d.name)}${d.size ? ` (${esc(d.size)})` : ""}`).join(", ");
+};
+const homeGallery = (r) => `
+<section class="gal" id="gallery" aria-labelledby="gal-h">
+  <div class="wrap">
+    <div class="gal-head">
+      <h2 id="gal-h">Pick a noodle. Grab a drink.</h2>
+      <div class="gal-switch" role="group" aria-label="Show in the gallery" hidden>
+        <button class="pill" type="button" data-gal-show="noodles" aria-controls="gal-noodles" aria-pressed="true">Noodles</button>
+        <button class="pill" type="button" data-gal-show="drinks" aria-controls="gal-drinks" aria-pressed="false">Drinks</button>
+      </div>
+    </div>
+    <div class="gal-panel" id="gal-noodles" data-gal-panel="noodles">
+      <h3 class="visually-hidden">Noodles</h3>
+      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
+      <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all ${COUNT} noodles</a></p>
+    </div>
+    <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
+      <h3 class="visually-hidden">Drinks</h3>
+      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="800" loading="lazy" decoding="async"><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span></li>`).join("")}</ul>
+      <p class="gal-note">The photos show each type of drink, not the exact product we sell. The fridge changes day to day, so ask the crew what's in.</p>
+      <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
+    </div>
+  </div>
+</section>`;
 
 // ---------- Home ----------
 // Video-first (Preston, 29 Oct 2026): every clip he sent. A pinned full-screen hero (three drifting columns on desktop),
@@ -727,6 +787,7 @@ addPage("", layout({
     </div>
   </div>
 </section>
+${homeGallery(r)}
 
 <section class="insta" id="instagram" aria-labelledby="insta-h">
   <div class="wrap insta-head">
