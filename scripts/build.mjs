@@ -114,17 +114,24 @@ const withPhoto = (t) => {
 };
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
-// Drinks from MEON's Square catalogue. The Pairings and sides page lists them as text. The home gallery's Drinks tab shows free-library
-// photos of each drink TYPE with MEON's products as text under them (Preston, 6 Nov 2026), never a can, bottle or logo
-// (Preston via BOSS, 4 Nov 2026: branded cans and bottles are other companies' packaging). See data/drink-photos.json.
+// Drinks from MEON's Square catalogue. The Pairings and sides page lists them as text. The home gallery's Drinks tab shows one
+// free-library photo per group with MEON's products as text under it (Preston, 6 Nov 2026). A photo is either a drink TYPE
+// ("Photo shows the drink type") or the EXACT catalogue product, same variant and pack (ledger 571, 7 Nov 2026; Security's
+// pre-rules in requests/security/20261107-0038). See data/drink-photos.json.
 const drinks = catalogue.drinks;
 const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
+  const where = `data/drink-photos.json "${g.type}"`;
   const items = g.drinks.map((name) => {
     const d = drinks.find((x) => x.name === name);
     if (!d) throw new Error(`data/drink-photos.json: "${name}" isn't a drink in data/catalogue.json`);
     return d;
   });
-  return { ...g, items, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
+  if (g.photo !== "type" && g.photo !== "exact") throw new Error(`${where}: photo must be "type" or "exact"`);
+  const shows = g.photo === "exact" && items.find((d) => d.name === g.shows);
+  if (g.photo === "exact" && !shows) throw new Error(`${where}: an exact photo needs "shows" naming one of its own drinks`);
+  if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || ""))) throw new Error(`${where}: a credit needs author, licence and a creativecommons.org licence URL`);
+  if (!g.credit && /\bBY\b/.test(g.source?.licence || "")) throw new Error(`${where}: a CC BY/BY-SA photo needs a credit on the page`);
+  return { ...g, items, shows, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
 });
 for (const d of drinks) {
   const n = drinkGroups.filter((g) => g.drinks.includes(d.name)).length;
@@ -704,6 +711,12 @@ const galleryNoodles = (() => {
 // Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
 const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
+// The caption line under a drink photo (Design, ledger 571): what the photo shows, then the credit when the licence asks for one.
+const drinkPhotoLine = (g) => {
+  const what = g.shows ? `Photo: ${esc(g.shows.name)}${g.shows.size ? ` ${esc(g.shows.size)}` : ""} can` : "Photo shows the drink type";
+  const c = g.credit;
+  return c ? `${what} · Photo: ${esc(c.author)}, <a href="${esc(c.licenceUrl)}" rel="license">${esc(c.licence)}</a>${c.cropped ? ", cropped" : ""}` : what;
+};
 // "At MEON: ..." under a drink photo. Several drinks of one brand and size read as one line ("Caffe Bene Americano, Hazelnut
 // (190 ml each)"); anything else lists each drink with its size.
 const drinkLine = (items) => {
@@ -730,8 +743,8 @@ const homeGallery = (r) => `
     </div>
     <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
       <h3 class="visually-hidden">Drinks</h3>
-      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="800" loading="lazy" decoding="async"><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span></li>`).join("")}</ul>
-      <p class="gal-note">The photos show each type of drink, not the exact product we sell. The fridge changes day to day, so ask the crew what's in.</p>
+      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span></li>`).join("")}</ul>
+      <p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell. The fridge changes day to day, so ask the crew what's in.</p>
       <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
     </div>
   </div>
