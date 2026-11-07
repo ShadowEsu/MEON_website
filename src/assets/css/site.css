@@ -1455,11 +1455,14 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 /* Short desktop windows (1280 x 600 and the like): a smaller heading and tighter gaps keep the noodle strip on the first
    screen. */
 @media (min-width: 900px) and (max-height: 760px) {
-  .vhero.vhero--full .vhero-title { font-size: clamp(3rem, min(6.6vw, 9vh), 6.2rem); }
-  .vhero.vhero--full .vhero-inner { padding-top: 24px; }
+  .vhero.vhero--full .vhero-title { font-size: clamp(2.6rem, min(6.6vw, 8vh), 6.2rem); }
+  .vhero.vhero--full .vhero-inner { padding-top: 16px; }
   .vhero.vhero--full .vhero-sub { margin-top: 12px; }
   .vhero.vhero--full .actions { margin-top: 16px; }
-  .vhero--full .hstrip { padding-top: 32px; }
+  .vhero--full .hstrip { padding-top: 20px; }
+  .vhero--full .hstrip-head { margin-bottom: 8px; }
+  .vhero--full .hcard { width: 104px; }
+  .vhero--full .hcard img { width: 104px; height: 78px; }
 }
 /* Touch screens: 44 px tap targets for the text links with an arrow and the filter pills (Design SHOULD, 5 Nov 2026).
    The arrow links keep their look: an invisible strip above and below makes the 30 px link 44 px to a finger. Where two
@@ -1516,8 +1519,9 @@ a.gal-card:hover .gal-name { color: var(--red); }
    Desktop with JS and motion allowed: the two copies of the row drift slowly (-50% = one copy). The drift stops with the
    hero's pause button (.videos-paused; the button then reads "Play motion"), on hover, and on keyboard focus, where it
    becomes a still row so the focused card is never carried off-screen (WCAG 2.2.2, as .insta-row). */
-/* min-width: 0: as a flex item of the column stage, the strip would otherwise grow to its row's full width (1500 px) */
-.hstrip { position: relative; min-width: 0; background: rgba(12,9,8,.9); padding: 0 0 14px; }
+/* The stage centres its children, so without align-self + width the strip would shrink-wrap its row (1500 px) and sit
+   centred, 550 px off the left edge of a phone */
+.hstrip { position: relative; align-self: stretch; width: 100%; min-width: 0; background: rgba(12,9,8,.9); padding: 0 0 14px; }
 .hstrip-head { display: none; } /* phones: the hero's own "Browse the noodle wall" button leads to the full list */
 .hstrip-view { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding-block: 4px; }
 .hstrip-view::-webkit-scrollbar { display: none; }
