@@ -745,13 +745,14 @@ const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (mi
 const drinkPhotoLine = (g) => (g.photo === "exact" ? "Photo shows this drink" : "Photo shows the drink type");
 const drinkCredit = (g) => g.credit ? `<span class="gal-credit">Photo: <span class="gal-credit-links"><a href="${esc(g.source.page)}">${esc(g.credit.author)}</a>, <a href="${esc(g.credit.licenceUrl)}" rel="license">${esc(g.credit.licence)}</a></span>${g.credit.cropped ? ", cropped" : ""}</span>` : "";
 // "At MEON: ..." under a drink photo. Several drinks of one brand and size read as one line ("Caffe Bene Americano, Hazelnut
-// (190 ml each)"); anything else lists each drink with its size.
+// (190 ml each)"); anything else lists each drink with its size. The size never breaks between number and unit (Design, 571).
+const drinkSize = (s) => esc(s).replace(/ /g, "\u00A0");
 const drinkLine = (items) => {
   const words = items.map((d) => d.name.split(" "));
   let k = 0;
   while (items.length > 1 && words.every((w) => w.length > k + 1 && w[k] === words[0][k])) k++;
-  if (k && items.every((d) => d.size === items[0].size)) return `${[esc(items[0].name), ...words.slice(1).map((w) => esc(w.slice(k).join(" ")))].join(", ")}${items[0].size ? ` (${esc(items[0].size)} each)` : ""}`;
-  return items.map((d) => `${esc(d.name)}${d.size ? ` (${esc(d.size)})` : ""}`).join(", ");
+  if (k && items.every((d) => d.size === items[0].size)) return `${[esc(items[0].name), ...words.slice(1).map((w) => esc(w.slice(k).join(" ")))].join(", ")}${items[0].size ? ` (${drinkSize(items[0].size)} each)` : ""}`;
+  return items.map((d) => `${esc(d.name)}${d.size ? ` (${drinkSize(d.size)})` : ""}`).join(", ");
 };
 const homeGallery = (r) => `
 <section class="gal" id="gallery" aria-labelledby="gal-h">
