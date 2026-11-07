@@ -1249,7 +1249,7 @@
   /* The strip's photos follow the hero's poster, the page's LCP image (571 speed gate, 7 Nov 2026): once the poster has
      loaded and decoded, two frames on (so it has painted), the pictures get their files; the row (hidden until then, its
      space kept) shows whole once its first 4 photos have decoded, so no card ever shows an empty tile. A poster that fails
-     to load starts them at once. */
+     to load starts them at once. The gallery's photos come next (galFill, with the gallery below). */
   var hTrack = $(".hstrip-track"), hImgs = $$(".hstrip img[data-src]");
   if (hTrack && hImgs.length) {
     var hStart = function () {
@@ -1258,7 +1258,7 @@
       hImgs.forEach(function (im) { im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src"); im.removeAttribute("data-srcset"); im.removeAttribute("data-src"); });
       hImgs = null;
       var first = $$(".hstrip-row:not(.hstrip-row--copy) img", hTrack).slice(0, 4);
-      Promise.all(first.map(function (im) { return im.decode().catch(function () {}); })).then(function () { hTrack.classList.add("is-ready"); });
+      Promise.all(first.map(function (im) { return im.decode().catch(function () {}); })).then(function () { hTrack.classList.add("is-ready"); galFill(); });
     };
     var hPainted = function () { requestAnimationFrame(function () { requestAnimationFrame(hStart); }); };
     var hPoster = $(".vhero--full .vcol--main .vbg-poster");
@@ -1266,6 +1266,21 @@
     if (!hPoster) hPainted();
     else if (hPoster.complete) hDecoded();
     else { hPoster.addEventListener("load", hDecoded); hPoster.addEventListener("error", hPainted); }
+  }
+
+  /* ---------- Home gallery: when its photos load ----------
+     Without JS the grid shows from its <noscript> twins. With it, the photos wait for the hero strip (Sunday 1, BOSS +
+     Design): below the fold, they'd otherwise take the link from the first-screen bowls. The grid gets its files at the
+     earlier of the strip row's reveal and the gallery scrolled in (its top above the screen's bottom fifth: on phones it
+     sits at the fold, under the tab bar, from the start); from there the browser's own lazy loading takes over. */
+  var galFill = function () {
+    $$("#gallery img[data-src]").forEach(function (im) { im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src"); im.removeAttribute("data-srcset"); im.removeAttribute("data-src"); });
+  };
+  var galSec = $("#gallery");
+  if (galSec && !hTrack) galFill();
+  else if (galSec && "IntersectionObserver" in window) {
+    var galIO = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { galIO.disconnect(); galFill(); } }, { rootMargin: "0px 0px -20% 0px" });
+    galIO.observe(galSec);
   }
 
   /* ---------- Year ---------- */

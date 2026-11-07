@@ -762,6 +762,9 @@ const heroStrip = (r) => `<div class="hstrip">
 // Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
 const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
+// The gallery's photos wait for the hero strip (Sunday 1, BOSS + Design): below the fold, they'd otherwise take the link from
+// the first-screen bowls. site.js assigns data-src/data-srcset; a <noscript> twin holds the real files for no-JS.
+const galImg = (src, srcset, rest) => `<img data-src="${src}" data-srcset="${srcset}" ${rest}><noscript><img src="${src}" srcset="${srcset}" ${rest}></noscript>`;
 // A shared type photo still says what it shows. One product with its own pack shot is titled with that product and its size.
 const drinkPhotoLine = (g) => (g.photo === "exact" ? "Photo shows this drink" : "Photo shows the drink type");
 const drinkCredit = (g) => g.credit ? `<span class="gal-credit">Photo: <span class="gal-credit-links"><a href="${esc(g.source.page)}">${esc(g.credit.author)}</a><a href="${esc(g.credit.licenceUrl)}" rel="license">${esc(g.credit.licence)}</a></span>${g.credit.edits ? `(${esc(g.credit.edits)})` : ""}</span>` : "";
@@ -793,7 +796,7 @@ const homeGallery = (r) => `
       <h2 id="gal-h">Pick a noodle. Grab a drink.</h2>
       <a class="btn btn--line btn--sm" href="${r("drinks/")}">See the drinks</a>
     </div>
-    <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
+    <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}">${galImg(r(n.thumb), `${r(n.thumb)} 400w, ${r(n.img)} 900w`, `sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"`)}<span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
     <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all noodles</a></p>
   </div>
 </section>`;

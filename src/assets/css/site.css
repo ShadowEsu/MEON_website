@@ -1494,6 +1494,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
 .gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
+/* The photos wait for the hero strip (site.js, Sunday 1); without JS their <noscript> twins show instead */
+.no-js .gal-card img[data-src] { display: none; }
 /* Drinks: square product photos, names and sizes. Required photo credits use the same 12/500 ink-2.
    Source and licence links wrap independently with 24 px targets and a gap between rows. */
 .gal-card--drink img { margin-bottom: 3px; }
