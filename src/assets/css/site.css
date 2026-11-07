@@ -467,7 +467,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .js .img-reveal.is-in img { transform: none; }
 
 /* ---------- Noodle wall (scroll-linked rows) ---------- */
-.wall-sec { padding: clamp(64px, 9vw, 120px) 0; overflow: hidden; }
+.wall-sec { padding: clamp(64px, 11vw, 150px) 0; overflow: hidden; } /* 11vw/150 like .section: 150 at 1440 (Design §B 8), 390 unchanged */
 .wall { display: grid; gap: 14px; }
 .wall-row { display: flex; gap: 14px; width: max-content; will-change: transform; }
 .wall-row a { flex: none; width: clamp(120px, 13vw, 190px); aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--soft); }
@@ -480,7 +480,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .word-band span:nth-child(3n) { color: var(--ink); -webkit-text-stroke: 0; }
 
 /* ---------- Home: the five bowls from the booth shoot ---------- */
-.fresh { padding: clamp(72px, 10vw, 140px) 0 clamp(64px, 9vw, 120px); }
+.fresh { padding: clamp(72px, 10vw, 140px) 0 clamp(64px, 11vw, 150px); }
 .fresh-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 48px; margin-bottom: clamp(28px, 4vw, 52px); }
 .fresh-head h2, .story-head h2, .insta-head h2 { font-size: clamp(2.5rem, 6.4vw, 5.6rem); line-height: .92; letter-spacing: -.05em; max-width: 12ch; text-wrap: balance; }
 .fresh-head h2 { margin: 0; }
@@ -1134,7 +1134,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 
 /* ---------- Home: "Follow us." at the end (Preston, 29 Oct 2026: Instagram and TikTok logos at the end of the home page).
    The two logos keep their own colours so they read at a glance; everything else is the site's ink on white. */
-.follow { background: #fff; padding: clamp(72px, 10vw, 130px) 0; }
+.follow { background: #fff; padding: clamp(72px, 11vw, 150px) 0; }
 .follow-inner { display: grid; gap: clamp(28px, 4vw, 52px); align-items: center; }
 .follow h2 { font-size: clamp(3rem, 9vw, 7.4rem); line-height: .88; letter-spacing: -.055em; margin: 0 0 18px; }
 .follow .lead { max-width: 34ch; margin: 0; }
@@ -1370,7 +1370,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 
 /* Home: the 4 steps as white cards in a grid, photo on top, words below (no pinning, no darkening).
    The step posters stay loading="lazy", so a phone's first paint still prefers the hero. */
-.story { background: #fff; color: var(--ink); padding-bottom: clamp(64px, 9vw, 120px); }
+.story { background: #fff; color: var(--ink); padding-bottom: clamp(64px, 11vw, 150px); }
 .story-head .lead { color: var(--ink-2); }
 .stack { display: grid; gap: 20px; width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; }
 @media (min-width: 640px) { .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
