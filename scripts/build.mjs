@@ -750,6 +750,9 @@ const heroStrip = (r) => `<div class="hstrip">
 // Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
 const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
+// The gallery's photos wait for the hero strip (Sunday 1, BOSS + Design): below the fold, they'd otherwise take the link from
+// the first-screen bowls. site.js assigns data-src/data-srcset; a <noscript> twin holds the real files for no-JS.
+const galImg = (src, srcset, rest) => `<img data-src="${src}" data-srcset="${srcset}" ${rest}><noscript><img src="${src}" srcset="${srcset}" ${rest}></noscript>`;
 // The lines around a drink photo (Design + Security, ledger 571): a caption right under it saying what it shows ("Photo shows
 // this drink" for the exact product, whose size stays in the At MEON line, or "Photo shows the drink type"), and, when the
 // licence asks for one, a credit line after the At MEON text linking the author's source page and the licence.
@@ -777,12 +780,12 @@ const homeGallery = (r) => `
     </div>
     <div class="gal-panel" id="gal-noodles" data-gal-panel="noodles">
       <h3 class="visually-hidden">Noodles</h3>
-      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
+      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}">${galImg(r(n.thumb), `${r(n.thumb)} 400w, ${r(n.img)} 900w`, `sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"`)}<span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
       <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all ${COUNT} noodles</a></p>
     </div>
     <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
       <h3 class="visually-hidden">Drinks</h3>
-      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}</li>`).join("")}</ul>
+      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink">${galImg(r(g.small), `${r(g.small)} 320w, ${r(g.img)} 640w`, `sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"`)}<span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}</li>`).join("")}</ul>
       <p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell. The fridge changes day to day, so ask the crew what's in.</p>
       <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
     </div>

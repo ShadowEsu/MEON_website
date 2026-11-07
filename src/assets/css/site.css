@@ -1496,6 +1496,8 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 .gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
 .gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
+/* The photos wait for the hero strip (site.js, Sunday 1); without JS their <noscript> twins show instead */
+.no-js .gal-card img[data-src] { display: none; }
 /* Drinks (ledger 571, Design + Security): square photos like the noodles. One caption line 6 px under every photo ("Photo
    shows this drink" / "Photo shows the drink type"); CC BY / BY-SA photos add a credit line after the At MEON text, in the
    same 12/500 ink-2. Its two links (author's page, licence) each get a 24 px tall box (WCAG 2.5.8) without changing the

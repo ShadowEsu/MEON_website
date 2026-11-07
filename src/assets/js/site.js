@@ -1249,7 +1249,7 @@
   /* The strip's photos follow the hero's poster, the page's LCP image (571 speed gate, 7 Nov 2026): once the poster has
      loaded and decoded, two frames on (so it has painted), the pictures get their files; the row (hidden until then, its
      space kept) shows whole once its first 4 photos have decoded, so no card ever shows an empty tile. A poster that fails
-     to load starts them at once. */
+     to load starts them at once. The gallery's photos come next (galFill, with the gallery below). */
   var hTrack = $(".hstrip-track"), hImgs = $$(".hstrip img[data-src]");
   if (hTrack && hImgs.length) {
     var hStart = function () {
@@ -1258,7 +1258,7 @@
       hImgs.forEach(function (im) { im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src"); im.removeAttribute("data-srcset"); im.removeAttribute("data-src"); });
       hImgs = null;
       var first = $$(".hstrip-row:not(.hstrip-row--copy) img", hTrack).slice(0, 4);
-      Promise.all(first.map(function (im) { return im.decode().catch(function () {}); })).then(function () { hTrack.classList.add("is-ready"); });
+      Promise.all(first.map(function (im) { return im.decode().catch(function () {}); })).then(function () { hTrack.classList.add("is-ready"); galFill(); });
     };
     var hPainted = function () { requestAnimationFrame(function () { requestAnimationFrame(hStart); }); };
     var hPoster = $(".vhero--full .vcol--main .vbg-poster");
@@ -1269,8 +1269,15 @@
   }
 
 
-  /* ---------- Home gallery: Noodles / Drinks switch ----------
-     Without JS both grids show, one after the other. With it, the two pills show one grid at a time. */
+  /* ---------- Home gallery: Noodles / Drinks switch, and when its photos load ----------
+     Without JS both grids show, one after the other, from their <noscript> twins. With it, the two pills show one grid at
+     a time, and the photos wait for the hero strip (Sunday 1, BOSS + Design): below the fold, they'd otherwise take the
+     link from the first-screen bowls. The shown grid gets its files at the earliest of the strip row's reveal, the gallery
+     scrolled in (its top above the screen's bottom fifth: on phones it sits at the fold, under the tab bar, from the
+     start) and a pill press; from there the browser's own lazy loading takes over. */
+  var galFill = function () {
+    $$("[data-gal-panel]:not([hidden]) img[data-src]").forEach(function (im) { im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src"); im.removeAttribute("data-srcset"); im.removeAttribute("data-src"); });
+  };
   var galSwitch = $(".gal-switch");
   if (galSwitch) {
     var galBtns = $$("[data-gal-show]", galSwitch);
@@ -1278,9 +1285,15 @@
       galBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-gal-show") === which)); });
       $$("[data-gal-panel]").forEach(function (p) { p.hidden = p.getAttribute("data-gal-panel") !== which; });
     };
-    galBtns.forEach(function (b) { b.addEventListener("click", function () { galShow(b.getAttribute("data-gal-show")); }); });
+    galBtns.forEach(function (b) { b.addEventListener("click", function () { galShow(b.getAttribute("data-gal-show")); galFill(); }); });
     galShow("noodles");
     galSwitch.hidden = false;
+  }
+  var galSec = $("#gallery");
+  if (galSec && !hTrack) galFill();
+  else if (galSec && "IntersectionObserver" in window) {
+    var galIO = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { galIO.disconnect(); galFill(); } }, { rootMargin: "0px 0px -20% 0px" });
+    galIO.observe(galSec);
   }
 
   /* ---------- Year ---------- */
