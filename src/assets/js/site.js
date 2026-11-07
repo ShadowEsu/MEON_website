@@ -1246,6 +1246,28 @@
   if (hstrip) hstrip.addEventListener("focusin", function (e) {
     if (e.target.classList.contains("hcard")) e.target.scrollIntoView({ block: "nearest", inline: "nearest" });
   });
+  /* The strip's photos follow the hero's poster, the page's LCP image (571 speed gate, 7 Nov 2026): once the poster has
+     loaded and decoded, two frames on (so it has painted), the pictures get their files; the row (hidden until then, its
+     space kept) shows whole once its first 4 photos have decoded, so no card ever shows an empty tile. A poster that fails
+     to load starts them at once. */
+  var hTrack = $(".hstrip-track"), hImgs = $$(".hstrip img[data-src]");
+  if (hTrack && hImgs.length) {
+    var hStart = function () {
+      if (!hImgs) return;
+      $$(".hstrip source[data-srcset]").forEach(function (s) { s.srcset = s.getAttribute("data-srcset"); s.removeAttribute("data-srcset"); });
+      hImgs.forEach(function (im) { im.srcset = im.getAttribute("data-srcset"); im.src = im.getAttribute("data-src"); im.removeAttribute("data-srcset"); im.removeAttribute("data-src"); });
+      hImgs = null;
+      var first = $$(".hstrip-row:not(.hstrip-row--copy) img", hTrack).slice(0, 4);
+      Promise.all(first.map(function (im) { return im.decode().catch(function () {}); })).then(function () { hTrack.classList.add("is-ready"); });
+    };
+    var hPainted = function () { requestAnimationFrame(function () { requestAnimationFrame(hStart); }); };
+    var hPoster = $(".vhero--full .vcol--main .vbg-poster");
+    var hDecoded = function () { hPoster.decode().then(hPainted, hPainted); };
+    if (!hPoster) hPainted();
+    else if (hPoster.complete) hDecoded();
+    else { hPoster.addEventListener("load", hDecoded); hPoster.addEventListener("error", hPainted); }
+  }
+
 
   /* ---------- Home gallery: Noodles / Drinks switch ----------
      Without JS both grids show, one after the other. With it, the two pills show one grid at a time. */

@@ -725,8 +725,10 @@ const stripNoodles = (() => {
 // Design's spec (requests/meon/20261107-0033-design-noodle-strip-and-polish.md §A): cards 120 x 96 on desktop (104 x 78 on
 // short desktop windows), 112 x 84 on phones. Each photo comes at 2x those sizes (scripts/make_thumbs.py): 224 x 168 and
 // 240 x 192, as AVIF at quality 50 with WebP for browsers without AVIF. The 571 speed gate (7 Nov 2026) caught the first 4
-// WebP copies (34 KB) adding 227 ms to the simulated phone LCP; as AVIF they are 15 KB. The first 4 load with the page
-// at low priority, the rest lazily. The label is "On the wall", not "tonight": the site doesn't track live stock.
+// WebP copies (34 KB) adding 227 ms to the simulated phone LCP. So the photos also wait for the hero's poster, the page's
+// LCP image: their files sit in data-srcset/data-src, and site.js fills them in once the poster has loaded, decoded and
+// painted, then shows the row whole once its first 4 photos have decoded (no empty tiles). Without JS a <noscript> copy of
+// each picture loads with the page. The label is "On the wall", not "tonight": the site doesn't track live stock.
 const STRIP_SIZES = "(min-width: 900px) and (max-height: 800px) 104px, (min-width: 900px) 120px, 112px";
 const stripFile = (r, n, px, ext) => {
   const p = `assets/${images[n.slug]}`.replace(/\.webp$/, `-t${px}.${ext}`);
@@ -735,7 +737,8 @@ const stripFile = (r, n, px, ext) => {
 };
 const stripCards = (r, copy) => stripNoodles.map((n, i) => {
   const set = (ext) => `${stripFile(r, n, 224, ext)} 224w, ${stripFile(r, n, 240, ext)} 240w`;
-  return `<li><a class="hcard" href="${r(n.url)}"><picture><source type="image/avif" srcset="${set("avif")}" sizes="${STRIP_SIZES}"><img src="${stripFile(r, n, 240, "webp")}" srcset="${set("webp")}" sizes="${STRIP_SIZES}" alt="" width="240" height="192"${!copy && i < 4 ? "" : ' loading="lazy"'} fetchpriority="low" decoding="async"></picture><span class="hcard-brand">${esc(n.brand)}</span><span class="hcard-name">${esc(n.name)}</span></a></li>`;
+  const pic = (a) => `<picture><source type="image/avif" ${a}srcset="${set("avif")}" sizes="${STRIP_SIZES}"><img ${a}src="${stripFile(r, n, 240, "webp")}" ${a}srcset="${set("webp")}" sizes="${STRIP_SIZES}" alt="" width="240" height="192"${!copy && i < 4 ? "" : ' loading="lazy"'} fetchpriority="low" decoding="async"></picture>`;
+  return `<li><a class="hcard" href="${r(n.url)}">${pic("data-")}${copy ? "" : `<noscript>${pic("")}</noscript>`}<span class="hcard-brand">${esc(n.brand)}</span><span class="hcard-name">${esc(n.name)}</span></a></li>`;
 }).join("");
 const heroStrip = (r) => `<div class="hstrip">
         <div class="hstrip-head"><p class="hstrip-label" id="hstrip-l">On the wall</p><a class="hstrip-all" href="${r("noodles/")}">See all ${COUNT} noodles</a></div>

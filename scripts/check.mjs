@@ -28,7 +28,7 @@ for (const file of htmlFiles) {
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
   const dup = ids.filter((v, i) => ids.indexOf(v) !== i);
   if (dup.length) problems.push(`${rel}: duplicate ids ${[...new Set(dup)].join(", ")}`);
-  for (const m of html.matchAll(/\s(?:href|src|poster|data-bg-(?:src|av1|hevc))="([^"]+)"/g)) {
+  for (const m of html.matchAll(/\s(?:href|src|data-src|poster|data-bg-(?:src|av1|hevc))="([^"]+)"/g)) {
     let u = m[1];
     if (/^(https?:|mailto:|tel:|data:|#)/.test(u)) continue;
     u = u.split("#")[0].split("?")[0];
