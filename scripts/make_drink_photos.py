@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "src" / "assets" / "img" / "drinks"
 CROPS = {
     "iced-matcha": (0.1333, 0.2639, 0.9667, 0.9583),
-    "iced-coffee": (0.2135, 0.0, 0.7469, 1.0),
+    "iced-coffee": (0.172, 0.0, 0.705, 1.0),
     "soft-drink": (0.1901, 0.0, 0.8099, 1.0),
     "iced-tea": (0.15, 0.1, 0.75, 0.6625),
     "chrysanthemum-tea": (0.3, 0.25, 0.7, 0.75),
