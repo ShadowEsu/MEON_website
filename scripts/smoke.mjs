@@ -30,15 +30,16 @@ ok(/\/noodles\/samyang-buldak/.test(page.url()), `Enter opens first result (${pa
 
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(2500);
-ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 1 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the one desktop hero clip loads and plays");
+// Full-bleed hero (Preston, 6 Nov 2026): on desktop the gate clip plays between 2 side clips; the copies test is the gate's.
+ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 3 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the 3 desktop hero clips load and play");
 // Smaller AV1/HEVC copies (REG-54): the hero plays one of its own files, and if the copy this device picked fails, the H.264 file.
-const heroFiles = () => page.$eval(".vhero .vcol video", (v) => ({ src: v.getAttribute("src") || "", files: ["data-bg-src", "data-bg-av1", "data-bg-hevc"].map((a) => v.getAttribute(a)).filter(Boolean), h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
+const heroFiles = () => page.$eval(".vhero .vcol--main video", (v) => ({ src: v.getAttribute("src") || "", files: ["data-bg-src", "data-bg-av1", "data-bg-hevc"].map((a) => v.getAttribute(a)).filter(Boolean), h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
 const picked = await heroFiles();
 ok(picked.files.length >= 2 && picked.files.includes(picked.src) && picked.playing, `the desktop hero has its H.264 file plus a smaller copy, and plays one of them (${picked.src.split("/").pop()})`);
 const copyFiles = new Set();
 await page.route(/\.(av1|hevc)\.mp4/, (route) => { copyFiles.add(new URL(route.request().url()).pathname); return route.fulfill({ status: 200, contentType: "video/mp4", body: "not a video" }); }); // a copy the device can't decode
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
-await page.waitForFunction(() => { const v = document.querySelector(".vhero .vcol video"); return v && !v.paused && v.currentTime > 0; }, null, { timeout: 10000 }).catch(() => {});
+await page.waitForFunction(() => { const v = document.querySelector(".vhero .vcol--main video"); return v && !v.paused && v.currentTime > 0; }, null, { timeout: 10000 }).catch(() => {});
 const fallback = await heroFiles();
 ok(fallback.src === fallback.h264 && fallback.playing, `when the AV1/HEVC copy can't be decoded, the hero falls back to the H.264 file and plays (${fallback.src.split("/").pop()})`);
 // After one copy fails, later clips on that visit go straight to their H.264 file instead of fetching a copy first.
@@ -146,7 +147,10 @@ const phoneVideos = [];
 phone.on("request", (r) => { if (/\.mp4(\?|$)/.test(r.url())) phoneVideos.push(r.url().split("/").pop().replace(/\?.*/, "")); });
 await phone.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await phone.waitForTimeout(2000);
-ok(phoneVideos.length === 0, `at 390 px the home page loads no video before scrolling (no hero clip on phones, Design 5 Nov 2026)${phoneVideos.length ? `: ${phoneVideos.join(", ")}` : ""}`);
+// Phones play only the gate clip behind the words (Preston, 6 Nov 2026, replacing Design's 5 Nov no-hero-clip rule; Design PASS
+// on the full-bleed hero): no side clip and no clip further down the page before scrolling.
+const phoneClips = [...new Set(phoneVideos)]; // playback can make several range requests for one file
+ok(phoneClips.length === 1 && /^hero-col-a\./.test(phoneClips[0]), `at 390 px the home page loads only the gate hero clip before scrolling (${phoneClips.join(", ") || "none"})`);
 await phone.focus(".nav-toggle");
 await phone.keyboard.press("Enter");
 await phone.waitForTimeout(400);
