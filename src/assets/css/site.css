@@ -1416,6 +1416,9 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 .vhero.vhero--full .vhero-stage { display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; isolation: isolate; padding: 0;
   min-height: calc(100vh - var(--header-h) - var(--tabbar-h, 0px));
   min-height: calc(100svh - var(--header-h) - var(--tabbar-h, 0px) - env(safe-area-inset-bottom, 0px)); }
+/* Below 900 px the words box's scrim (.9 at its foot) meets the noodle strip's .9 band directly: the light layout's stage
+   gap (.vhero .vhero-stage, 24 px on a phone) left a bright, hard-edged line of raw video between them (Design, 571). */
+@media (max-width: 899.98px) { .vhero.vhero--full .vhero-stage { gap: 0; } }
 .vhero.vhero--full .vhero-media, .vhero.vhero--full.is-moving .vhero-media { position: absolute; inset: 0; z-index: -2; display: block; height: auto; aspect-ratio: auto; border: 0; border-radius: 0; background: #1a1412; }
 .vhero.vhero--full .vhero-cols { position: absolute; inset: 0; display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: #1a1412; }
 .vhero.vhero--full .vcol { position: relative; overflow: hidden; }
@@ -1441,6 +1444,12 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
   .vhero.vhero--full .vhero-sub { margin-top: 10px; font-size: .94rem; line-height: 1.4; }
   .vhero.vhero--full .actions { margin-top: 14px; gap: 8px; }
   .vhero.vhero--full .actions .btn--lg { min-height: 48px; }
+}
+/* Landscape phones (under 450 px high): the two buttons side by side, so both stay whole on the first screen; the strip
+   may sit below the fold there (Design §A, 571). */
+@media (max-width: 899.98px) and (max-height: 450px) {
+  .vhero.vhero--full .actions { flex-wrap: nowrap; }
+  .vhero.vhero--full .actions .btn { flex: 1 1 auto; }
 }
 @media (min-width: 900px) {
   .vhero.vhero--full .vcol:not(.vcol--main) { display: block; }
