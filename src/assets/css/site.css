@@ -1406,29 +1406,38 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
   .visit-band-inner { min-height: 0; padding-block: 28px clamp(56px, 9vh, 110px); }
 }
 
-/* Home hero: 2 real bowls. Phones: headline, the bowls side by side, the 2 buttons, then the paragraph, so a bowl and the
-   primary button sit in the first screen above the tab bar (Design, 4 Nov 22:2x); the clip card follows. Desktop: the
-   bowls under the buttons, beside the clip. */
+/* Home hero, full-bleed (Preston, 6 Nov 2026 19:3x: "make the text overlay it ... make sure the video is covering
+   everything and adjustable by screen size"). The clips cover the first screen under the header (and above the phone tab
+   bar) at every width, and the words sit on a dark scrim over them: white text on at least ~.8 black where the paragraph
+   sits, for 4.5:1 over any frame. Phones play the gate clip alone; desktop puts the 3 portrait clips side by side. */
 .vhero.is-moving .vhero-media { border-radius: 20px; }
-.vhero:not(.vhero--page) .vhero-inner { display: flex; flex-direction: column; align-items: flex-start; }
 .vhero-title { margin-bottom: 0; }
-.hero-bowls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 420px; margin-top: 22px; }
-.hero-bowl { display: flex; flex-direction: column; gap: 8px; color: var(--ink); text-decoration: none; }
-.hero-bowl img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 16px; border: 1px solid var(--line); background: var(--soft); transition: transform .45s var(--ease); }
-.hero-bowl:hover img { transform: translateY(-3px); }
-.hero-bowl span { font-size: .9rem; font-weight: 600; line-height: 1.25; }
-.vhero:not(.vhero--page) .vhero-sub { margin: 18px 0 0; }
-.vhero:not(.vhero--page) .actions { margin-top: 22px; }
+.vhero.vhero--full, .js .vhero.vhero--full { background: #1a1412; color: #fff; }
+.vhero.vhero--full .vhero-stage { display: flex; align-items: flex-end; overflow: hidden; isolation: isolate; padding: 0;
+  min-height: calc(100vh - var(--header-h) - var(--tabbar-h, 0px));
+  min-height: calc(100svh - var(--header-h) - var(--tabbar-h, 0px) - env(safe-area-inset-bottom, 0px)); }
+.vhero.vhero--full .vhero-media, .vhero.vhero--full.is-moving .vhero-media { position: absolute; inset: 0; z-index: -2; display: block; height: auto; aspect-ratio: auto; border: 0; border-radius: 0; background: #1a1412; }
+.vhero.vhero--full .vhero-cols { position: absolute; inset: 0; display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: #1a1412; }
+.vhero.vhero--full .vcol { position: relative; overflow: hidden; }
+.vhero.vhero--full .vcol:not(.vcol--main) { display: none; }
+.vhero.vhero--full .vbg { background: #1a1412; }
+.vhero.vhero--full .vhero-stage::before { display: block; content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(0deg, rgba(12,9,8,.9) 0%, rgba(12,9,8,.86) 42%, rgba(12,9,8,.6) 62%, rgba(12,9,8,0) 86%); }
+.vhero.vhero--full .vhero-inner { display: flex; flex-direction: column; align-items: flex-start; width: 100%; padding: 48px max(var(--gutter), (100% - var(--wrap)) / 2) 28px; }
+.vhero.vhero--full .vhero-title { color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.35); }
+.vhero.vhero--full .vhero-hl { color: #ff6b70; }
+.vhero.vhero--full .vhero-sub { margin: 14px 0 0; max-width: 40ch; color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
+.vhero.vhero--full .actions { margin-top: 20px; }
+.vhero.vhero--full .vpause { top: 14px; bottom: auto; }
 @media (min-width: 900px) {
-  .vhero:not(.vhero--page) .vhero-title { font-size: clamp(3rem, 6.6vw, 6.2rem); }
-  .vhero:not(.vhero--page) .hero-bowls { order: 5; max-width: 400px; margin-top: 28px; }
-}
-@media (max-width: 899.98px) {
-  .vhero:not(.vhero--page) .hero-bowls { order: 2; max-width: none; margin-top: 16px; }
-  .vhero:not(.vhero--page) .hero-bowl img { aspect-ratio: 4 / 5; }
-  .vhero:not(.vhero--page) .actions { order: 3; width: 100%; margin-top: 16px; }
-  .vhero:not(.vhero--page) .vhero-sub { order: 4; }
-  .vhero .vhero-stage { padding-top: 16px; }
+  .vhero.vhero--full .vcol:not(.vcol--main) { display: block; }
+  .vhero.vhero--full .vhero-stage::before {
+    background: linear-gradient(90deg, rgba(12,9,8,.88) 0%, rgba(12,9,8,.8) 36%, rgba(12,9,8,.34) 60%, rgba(12,9,8,0) 78%),
+      linear-gradient(0deg, rgba(12,9,8,.55) 0%, rgba(12,9,8,0) 45%); }
+  .vhero.vhero--full .vhero-title { font-size: clamp(3rem, 6.6vw, 6.2rem); }
+  .vhero.vhero--full .vhero-inner { padding-bottom: clamp(48px, 9vh, 112px); }
+  .vhero.vhero--full .vhero-sub { margin-top: 18px; }
+  .vhero.vhero--full .actions { margin-top: 26px; }
 }
 /* Touch screens: 44 px tap targets for the text links with an arrow and the filter pills (Design SHOULD, 5 Nov 2026).
    The arrow links keep their look: an invisible strip above and below makes the 30 px link 44 px to a finger. Where two

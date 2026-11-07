@@ -686,39 +686,31 @@ const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-
 const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", "white-curry-top", "shin-black-top"];
 // Rendered width of each tile (desktop: 1.15/1/1/1.15 columns, tile 2 spans two; phones: tiles 1, 2 and 5 full width).
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
-// 2 real bowls in the home hero (Design, 4 Nov 22:2x: a bowl and the primary button in a phone's first screen). Phones show
-// no clip in the home hero (Design, 5 Nov 01:2x): its top peeked into the first screen and became the LCP image. The first
-// bowl is then the phone LCP, so the bowls use their own 4:5 copies, 360x450 (23-25 KB) and 720x900, made by
-// meon-work/rebuild/make_hero_bowls.py from the 2400 px shoot files: the shoot set's smallest copy is 800 px (46-56 KB).
-// The first is preloaded from <head> at high priority and the second is lazy, so it doesn't share the first screen's
-// bandwidth with it (interleaved Lighthouse mobile, 6 runs each, 5 Nov: median LCP 3606 ms vs 3902 on production; 4240
-// with both bowls loading at once and no preload).
-const HERO_BOWLS = ["shin-black-top", "tomyum-egg-prawn"];
-const HERO_BOWL_SIZES = "(min-width: 900px) 200px, 46vw";
-const heroBowlSet = (name) => ({ src: asset(`img/shoot/${name}-hero-720.webp`), srcset: [360, 720].map((w) => [asset(`img/shoot/${name}-hero-${w}.webp`), w]), sizes: HERO_BOWL_SIZES });
-const heroBowlImg = (r, name, first) => {
-  const s = heroBowlSet(name);
-  return `<img src="${r(s.src)}" srcset="${s.srcset.map(([p, w]) => `${r(p)} ${w}w`).join(", ")}" sizes="${s.sizes}" width="720" height="900" alt="${esc(SHOOT[name].alt)}"${first ? ' fetchpriority="high"' : ' loading="lazy"'} decoding="async">`;
-};
+// Home hero, full-bleed (Preston, 6 Nov 2026 19:3x: "make the text overlay it ... make sure the video is covering
+// everything and adjustable by screen size"). The clips fill the first screen under the header at every width, with the
+// words over them. The main clip (MEON's gate) is the only one on phones: its poster is preloaded at high priority, as it's
+// the LCP image, and its video plays at every width. On desktop the others stand beside it (inside the shop, then the
+// noodle wall: clips with no captions burned in, since the words sit over them), so 3 portrait clips fill the landscape
+// screen at their own sharpness; their posters are lazy, so phones never fetch them.
+const HOME_HERO_CLIPS = ["wall-07", "hero-col-a", "wall-10"];
+const HOME_HERO_MAIN = "hero-col-a";
 addPage("", layout({
   urlPath: "",
   active: "",
   overlay: true,
-  preload: heroBowlSet(HERO_BOWLS[0]),
+  preload: asset(`video/${HOME_HERO_MAIN}.webp`),
   description: `MEON: cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}.`,
   body: (r) => `
-<section class="vhero" aria-labelledby="vhero-h" data-scene>
+<section class="vhero vhero--full" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
     <div class="vhero-media">
-      <div class="vhero-cols"><div class="vcol vcol--a">${bgVideo(r, "hero-col-a", { media: "(min-width: 900px)", eager: true })}</div></div>
+      <div class="vhero-cols">${HOME_HERO_CLIPS.map((c) => c === HOME_HERO_MAIN
+        ? `<div class="vcol vcol--main">${bgVideo(r, c, { eager: true })}</div>`
+        : `<div class="vcol">${bgVideo(r, c, { media: "(min-width: 900px)" })}</div>`).join("")}</div>
       ${heroVideoToggle}
     </div>
     <div class="wrap vhero-inner">
       <h1 class="vhero-title" id="vhero-h">Your bowl, <span class="vhero-hl">your rules.</span></h1>
-      <div class="hero-bowls">${HERO_BOWLS.map((name, i) => {
-        const n = noodles.find((x) => x.slug === SHOOT[name].slug);
-        return `<a class="hero-bowl" href="${r(n.url)}">${heroBowlImg(r, name, i === 0)}<span>${esc(`${n.brand} ${n.name}`)}</span></a>`;
-      }).join("")}</div>
       <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall</a>
