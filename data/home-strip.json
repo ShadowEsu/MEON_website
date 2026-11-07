@@ -1,0 +1,17 @@
+{
+  "_readme": "The noodle strip along the bottom of the home hero's first screen (Preston via BOSS, 7 Nov 2026: \"more noodles on the front\"), in order. Noodles with a shoot photo that are NOT in the home gallery's 24, so the first screen and the gallery don't repeat. Picked one brand per round, as the gallery is (meon-2, 7 Nov 2026). npm run build stops if a slug has no photo or is also in the gallery. scripts/make_thumbs.py makes their 160 px copies (<slug>-t160.webp).",
+  "slugs": [
+    "nongshim-neoguri-seafood-and-spicy",
+    "ottogi-kimchi-ramen",
+    "samyang-buldak-spicy-chicken-stew-type",
+    "nissin-ramen-hokkaido-miso",
+    "indomie-vegetable-with-lime",
+    "mama-pork-flavour",
+    "master-kong-kangsifu-mushroom-chicken-noodle-soup",
+    "lucky-me-instant-pancit-canton-original",
+    "nongshim-chapagetti-original",
+    "samyang-buldak-carbonara-hot-chicken-ramen",
+    "nissin-demae-iccho-japan-series-black-garlic-oil-tonkotsu",
+    "master-kong-kangsifu-seafood-flavour"
+  ]
+}
