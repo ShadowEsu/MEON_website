@@ -722,12 +722,20 @@ const stripNoodles = (() => {
     return n;
   });
 })();
-// Design's spec (requests/meon/20261107-0033-design-noodle-strip-and-polish.md §A): cards 120 x 96 on desktop, 96 x 72 on
-// phones, from one 240 x 192 copy per photo (scripts/make_thumbs.py; 94 KB for all 12). The first 4 load with the page at
-// low priority, the rest lazily. The label is "On the wall", not "tonight": the site doesn't track live stock.
+// Design's spec (requests/meon/20261107-0033-design-noodle-strip-and-polish.md §A): cards 120 x 96 on desktop (104 x 78 on
+// short desktop windows), 112 x 84 on phones. Each photo comes at 2x those sizes (scripts/make_thumbs.py): 224 x 168 and
+// 240 x 192, as AVIF at quality 50 with WebP for browsers without AVIF. The 571 speed gate (7 Nov 2026) caught the first 4
+// WebP copies (34 KB) adding 227 ms to the simulated phone LCP; as AVIF they are 15 KB. The first 4 load with the page
+// at low priority, the rest lazily. The label is "On the wall", not "tonight": the site doesn't track live stock.
+const STRIP_SIZES = "(min-width: 900px) and (max-height: 800px) 104px, (min-width: 900px) 120px, 112px";
+const stripFile = (r, n, px, ext) => {
+  const p = `assets/${images[n.slug]}`.replace(/\.webp$/, `-t${px}.${ext}`);
+  if (!fs.existsSync(path.join(SRC, p))) throw new Error(`${p} is missing: run scripts/make_thumbs.py`);
+  return r(fingerprint(p));
+};
 const stripCards = (r, copy) => stripNoodles.map((n, i) => {
-  const src = r(smallCopy(`assets/${images[n.slug]}`, 240));
-  return `<li><a class="hcard" href="${r(n.url)}"><img src="${src}" alt="" width="240" height="192"${!copy && i < 4 ? "" : ' loading="lazy"'} fetchpriority="low" decoding="async"><span class="hcard-brand">${esc(n.brand)}</span><span class="hcard-name">${esc(n.name)}</span></a></li>`;
+  const set = (ext) => `${stripFile(r, n, 224, ext)} 224w, ${stripFile(r, n, 240, ext)} 240w`;
+  return `<li><a class="hcard" href="${r(n.url)}"><picture><source type="image/avif" srcset="${set("avif")}" sizes="${STRIP_SIZES}"><img src="${stripFile(r, n, 240, "webp")}" srcset="${set("webp")}" sizes="${STRIP_SIZES}" alt="" width="240" height="192"${!copy && i < 4 ? "" : ' loading="lazy"'} fetchpriority="low" decoding="async"></picture><span class="hcard-brand">${esc(n.brand)}</span><span class="hcard-name">${esc(n.name)}</span></a></li>`;
 }).join("");
 const heroStrip = (r) => `<div class="hstrip">
         <div class="hstrip-head"><p class="hstrip-label" id="hstrip-l">On the wall</p><a class="hstrip-all" href="${r("noodles/")}">See all ${COUNT} noodles</a></div>
