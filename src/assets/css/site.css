@@ -221,6 +221,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .has-mega:hover .mega, .has-mega:focus-within .mega, .has-mega.is-open .mega { opacity: 1; visibility: visible; transform: none; }
   .has-mega:hover .chev, .has-mega.is-open .chev { transform: rotate(180deg); }
 }
+/* Visit matches Search and Sound at 44 px (Design §B 10: it was the small button's 40) */
+.header-visit { min-height: 44px; }
 @media (max-width: 1180px) { .search-btn .label, .search-btn kbd, .sound-label { display: none; } }
 @media (max-width: 1024px) {
   .nav-toggle { display: inline-flex; }
