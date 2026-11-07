@@ -6,7 +6,7 @@
   <name>-t480.webp  posters of the card-sized clips (src/assets/video/ig-*.webp and step-*.webp), 480 px wide, offered in
                     a srcset next to the original so 1-2x screens skip the 720 px poster
   <name>-t240.webp  the noodle photos in the home hero's strip (data/home-strip.json): 240 x 192 (5:4, a little below
-                    centre, where the bowl sits) for the 120 x 96 desktop and 96 x 72 phone cards at 2x
+                    centre, where the bowl sits) for the 120 x 96 desktop and 112 x 84 phone cards at 2x
 
 scripts/build.mjs uses a copy when it exists and falls back to the original, so a missing copy only costs bytes.
 Run after adding or replacing those photos or clips:  uv run -q --with pillow python scripts/make_thumbs.py
