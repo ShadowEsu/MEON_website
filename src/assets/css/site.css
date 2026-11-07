@@ -1459,7 +1459,8 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
   .vhero.vhero--full .vhero-inner { padding-top: 16px; }
   .vhero.vhero--full .vhero-sub { margin-top: 12px; }
   .vhero.vhero--full .actions { margin-top: 16px; }
-  .vhero--full .hstrip { padding-top: 20px; }
+  /* the label row starts 20 px in, so the band is at full strength by then (a 44 px fade left "See all" over the clip) */
+  .vhero--full .hstrip { padding-top: 20px; background: linear-gradient(180deg, rgba(12,9,8,.3) 0, rgba(12,9,8,.92) 18px); }
   .vhero--full .hstrip-head { margin-bottom: 8px; }
   .vhero--full .hcard { width: 104px; }
   .vhero--full .hcard img { width: 104px; height: 78px; }
