@@ -1507,6 +1507,10 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
 /* The photos wait for the hero strip (site.js, Sunday 1); without JS their <noscript> twins show instead */
 .no-js .gal-card img[data-src] { display: none; }
+/* Noodle cards: the photo sits in a box with its radius that clips, so the hover zoom stays inside the rounded corners
+   (Design §B 3); isolation keeps Safari clipping the scaled photo to them during the transition */
+.gal-ph { display: block; overflow: hidden; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; isolation: isolate; }
+.gal-ph img { margin-bottom: 0; }
 /* Drinks (ledger 571, Design + Security): square photos like the noodles. One caption line 6 px under every photo ("Photo
    shows this drink" / "Photo shows the drink type"); CC BY / BY-SA photos add a credit line after the At MEON text, in the
    same 12/500 ink-2. Its two links (author's page, licence) each get a 24 px tall box (WCAG 2.5.8) without changing the
@@ -1521,7 +1525,7 @@ main > .section ~ .section, main > .section ~ .reviews, .site-footer { content-v
 .gal-credit a + a { margin-left: 4px; }
 .gal-brand { font-size: .8rem; font-weight: 500; color: var(--muted); }
 .gal-name, .gal-type { font-size: .98rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; transition: color .25s; }
-a.gal-card:hover .gal-name { color: var(--red); }
+a.gal-card:hover .gal-name { color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
 .gal-at { font-size: .86rem; line-height: 1.4; color: var(--ink-2); }
 .gal-note { margin: 26px 0 0; max-width: 70ch; font-size: .9rem; color: var(--muted); }
 .gal-more { margin: clamp(24px, 3vw, 36px) 0 0; text-align: center; } /* centred under the grid, size kept (Design §B 4) */
@@ -1529,8 +1533,8 @@ a.gal-card:hover .gal-name { color: var(--red); }
 @media (min-width: 900px) { .gal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .gal-grid:not(.gal-grid--drinks) { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .gal-card img { transition: transform .5s var(--ease); }
-  a.gal-card:hover img { transform: translateY(-3px); }
+  .gal-ph img { transition: transform .3s var(--ease); }
+  a.gal-card:hover .gal-ph img { transform: scale(1.03); } /* one motion: the zoom replaced the 3 px lift (Design §B 3) */
 }
 
 /* Home hero noodle strip (Preston via BOSS, 7 Nov 2026: "more noodles on the front"; ledger 571; Design's spec in
