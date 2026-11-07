@@ -788,7 +788,7 @@ const homeGallery = (r) => `
     </div>
     <div class="gal-panel" id="gal-noodles" data-gal-panel="noodles">
       <h3 class="visually-hidden">Noodles</h3>
-      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}">${galImg(r(n.thumb), `${r(n.thumb)} 400w, ${r(n.img)} 900w`, `sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"`)}<span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
+      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><span class="gal-ph">${galImg(r(n.thumb), `${r(n.thumb)} 400w, ${r(n.img)} 900w`, `sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"`)}</span><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
       <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all ${COUNT} noodles</a></p>
     </div>
     <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
