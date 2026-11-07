@@ -1248,6 +1248,15 @@
     }
   }
 
+  /* ---------- Pill scrollers: a focused pill or tab is scrolled fully into view ----------
+     The country pills (/noodles/) and the group tabs (/pairings-and-sides/) scroll sideways on a phone. Chrome leaves a
+     focused one half past the scroller's edge after Tab (meon-2's keyboard probe at 390 px: 6 of 17 stops cut by
+     3-124 px), so on focus it's scrolled to the nearest edge, inside the scroll-padding that leaves room for its ring. */
+  document.addEventListener("focusin", function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest(".filter-pills, .subtabs-row")) t.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+
   /* ---------- Home hero noodle strip: a focused card scrolls fully into view ----------
      The phone row (and the still desktop row once a card has focus) scrolls sideways; Chrome can leave a focused card half
      past the scroller's edge after Tab, so on focus it's scrolled to the nearest edge inside the scroll-padding. */
