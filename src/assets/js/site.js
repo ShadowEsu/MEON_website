@@ -279,8 +279,8 @@
   }
 
   /* ---------- Background videos ----------
-     Muted loops that start on their own on every phone (Preston, 29 Oct 2026: "autoplays on mobile phones ... so nobody
-     has to press play"). Reduced motion (BOSS, 30 Oct 2026): they start paused and the hero button shows "Play videos";
+     Muted loops start automatically on phones. With reduced motion they start paused and the hero button shows
+     "Play videos";
      one tap plays them all. A file loads only when its video nears the screen and plays only while it's on screen.
      Save-Data: never load the videos; the posters stay. Hero videos carry data-media so a phone only fetches the portrait
      cut and a desktop only the column clips. When the browser refuses to start a video by itself (an iPhone in Low Power

@@ -1,5 +1,5 @@
 {
-  "_readme": "The noodle strip along the bottom of the home hero's first screen (Preston via BOSS, 7 Nov 2026: \"more noodles on the front\"), in order. Noodles with a shoot photo that are NOT in the home gallery's 24, so the first screen and the gallery don't repeat. Picked one brand per round, as the gallery is (meon-2, 7 Nov 2026). npm run build stops if a slug has no photo or is also in the gallery. scripts/make_thumbs.py makes their 160 px copies (<slug>-t160.webp).",
+  "_readme": "The noodle strip along the bottom of the home hero's first screen, in order. Uses shoot photos not already in the home gallery's 24 so the first screen and gallery do not repeat. Picked one brand per round. The build stops if a slug has no photo or is also in the gallery; scripts/make_thumbs.py generates the responsive copies.",
   "slugs": [
     "nongshim-neoguri-seafood-and-spicy",
     "ottogi-kimchi-ramen",

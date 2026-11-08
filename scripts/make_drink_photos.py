@@ -16,7 +16,6 @@ from PIL import Image, ImageOps
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "src" / "assets" / "img" / "drinks"
 CROPS = {
-    "iced-matcha": (0.0, 0.2778, 1.0, 0.9444),
     "iced-coffee": (0.1052, 0.0, 0.7719, 1.0),
     "soft-drink": (0.1128, 0.0, 0.8872, 1.0),
     "iced-tea": (0.075, 0.1, 0.825, 0.6625),
