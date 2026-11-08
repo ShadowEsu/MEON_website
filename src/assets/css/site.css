@@ -1497,18 +1497,15 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
 .gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
-/* Drinks: square photos like the noodles. A single product tile is the name, then the size. A shared type photo still
-   uses the "Photo shows" line, and a CC BY / BY-SA photo adds a credit line after the At MEON text, in the same 12/500 ink-2.
-   Its two links (author's page, licence) each get a 24 px tall box (WCAG 2.5.8) without changing the line height, and stay
-   together on one line, 10 px apart, so a phone-width wrap never stacks one box on the other. */
+/* Drinks: square product photos, names and sizes. Required photo credits use the same 12/500 ink-2.
+   Source and licence links wrap independently with 24 px targets and a gap between rows. */
 .gal-card--drink img { margin-bottom: 3px; }
 .gal-photo, .gal-credit { font-size: .75rem; font-weight: 500; line-height: 1.4; color: var(--ink-2); }
 .gal-photo { margin-bottom: 4px; }
 @media (max-width: 379px) { .gal-photo { min-height: 2.8em; } } /* "Photo shows the drink type" wraps at 360, so every caption takes 2 lines there and the titles stay level */
 .gal-credit { margin-top: 3px; }
-.gal-credit-links { white-space: nowrap; }
-.gal-credit a { display: inline-block; padding: 4px 0; margin: -4px 0; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-.gal-credit a + a { margin-left: 4px; }
+.gal-credit-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 10px; margin: 4px 0; }
+.gal-credit a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .gal-brand { font-size: .8rem; font-weight: 500; color: var(--muted); }
 .gal-name, .gal-type { font-size: .98rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; transition: color .25s; }
 a.gal-card:hover .gal-name { color: var(--red); }

@@ -48,12 +48,14 @@ Flickr owners can change a licence later, so each row records the date it was ch
 
 The home gallery's Drinks tab and the Pairings and sides drinks menu use the same photos. On 7 Nov 2026 the owner sent pack shots and asked for them in place of the library photos (glasses of coffee, cola, tea, water and ice, plus a Commons crop of a Coca-Cola Zero can and a brewed chrysanthemum bowl). Those library files were deleted from the repo the same day. Git history still has them, with the licence notes that used to be in this section.
 
-Each current file is the product it is filed under. Files are 640 × 640 in `src/assets/img/drinks/`, with a 320 × 320 `-t320` copy, fitted onto a white square with the whole pack in frame and no EXIF. `data/drink-photos.json` records the SHA-256 of every shipped file.
+Each current file depicts the product it is filed under. Files are 640 × 640 in `src/assets/img/drinks/`, with a 320 × 320 `-t320` copy and no EXIF. The three additions below preserve the full source frame, fitted onto white without further cropping or upscaling. Their original SHA-256, native dimensions and source details are in `data/drink-photos.json`; the earlier pack shots retain their shipped-file hashes. These web sizes are not a claim that every original is native 4K.
 
 | File | Product |
 |---|---|
 | `100-plus.webp` | 100 Plus, slim can |
-| `aussie-natural-water.webp` | Aussie Natural Water. The photo is a 20 × 600 ml pack labelled Aussie Natural Spring Water. Australian Natural Spring Water is a different product and has no photo. |
+| `aiko-matcha.webp` | AIKO ready-to-drink cans on ice, from the official events page; not matcha powder |
+| `aussie-natural-water.webp` | Aussie Natural Water. The photo is a 20 × 600 ml pack labelled Aussie Natural Spring Water, distinct from the Coles water below. |
+| `australian-natural-spring-water.webp` | Coles Australian Natural Spring Water, 600 ml; matched to the till product, with the source and licence credited on each card |
 | `caffe-bene-americano.webp` | Caffe Bene Americano, 190 mL pouch |
 | `caffe-bene-black.webp` | Caffe Bene Black Iced Drink. The pouch is labelled Black, 190 mL. The owner sent this photo twice; one copy is used. |
 | `caffe-bene-caramel-macchiato.webp` | Caffe Bene Caramel Macchiato, 190 mL pouch |
@@ -62,9 +64,16 @@ Each current file is the product it is filed under. Files are 640 × 640 in `src
 | `coca-cola-classic.webp` | Coca-Cola Classic, 375 mL can |
 | `coke-zero-sugar.webp` | Coca-Cola Zero Sugar, 375 mL can |
 | `milkis-peach.webp` | Milkis Peach, 250 mL can |
+| `pepsi.webp` | The blue Pepsi can supplied by the shop; no serving size inferred |
 | `sosro-teh-botol.webp` | Sosro Teh Botol Original, 250 ml carton. The owner also sent a three quarter view of the same carton; the front is the one on the page. |
 | `yeos-chrysanthemum-tea.webp` | Yeo's Chrysanthemum Tea, 300 mL can |
 | `ice.webp` | Ice in a cup: ice cubes in a clear plastic cup |
+
+- **AIKO:** [official canned-drink photo](https://www.aikomatcha.com.au/pages/events). The shop confirmed permission from the brand owner. Original: 1086 × 1448; used only for the AIKO product, not as an open-licensed image.
+- **Coles water:** [Open Food Facts product page](https://world.openfoodfacts.org/product/9310645269436/coles-spring-water), photo by Open Food Facts contributors, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), under its [image reuse terms](https://world.openfoodfacts.org/terms-of-use). The original `1.jpg` is 1616 × 3822; the source already cuts off the cap. The web derivatives are resized and padded, remain CC BY-SA 3.0, and carry the source, licence and changed-image notice on both the home and menu cards. The photograph licence does not grant ownership of product marks or imply brand endorsement.
+- **Pepsi:** shop-supplied menu image, 1140 × 1520. Supplied for use on this menu, not represented as CC0 or an owner-taken photograph.
+
+To reproduce these three additions from their recorded originals: apply EXIF orientation, keep the full source frame, shrink to at most 608 × 608 without upscaling, centre on a white 640 × 640 RGB canvas, and save WebP quality 84/method 6. Resize that canvas to 320 × 320 for the thumbnail. Do not run the retired glass/type-photo crop script over these product images.
 
 ## Code libraries that ship artwork
 
