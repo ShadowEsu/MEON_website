@@ -427,7 +427,6 @@
  ],
  "drinks": [
   { "name": "100 Plus", "size": "325 ml" },
-  { "name": "Aiko Matcha", "size": "can" },
   { "name": "Aussie Natural Water", "size": "600 ml" },
   { "name": "Australian Natural Spring Water", "size": "600 ml" },
   { "name": "Caffe Bene Americano", "size": "190 ml" },

@@ -14,13 +14,6 @@
     "img": "assets/img/toppings/pork.webp"
   },
   {
-    "id": "meatballs",
-    "name": "Meatballs",
-    "group": "Meat and seafood",
-    "desc": "Springy meatballs that soak up the broth as they cook.",
-    "icon": "pork"
-  },
-  {
     "id": "chicken-sausage",
     "name": "Chicken sausage",
     "group": "Meat and seafood",
@@ -271,13 +264,6 @@
     "group": "Sides",
     "desc": "Crispy shrimp katsu crunches loud, with a sweet seafood snap inside.",
     "img": "assets/img/toppings/shrimp-katsu.webp"
-  },
-  {
-    "id": "tempura-prawn",
-    "name": "Tempura prawn",
-    "group": "Sides",
-    "desc": "A crunchy battered prawn to eat on the side or lay on top at the end.",
-    "img": "assets/img/toppings/tempura-prawn.webp"
   },
   {
     "id": "soft-boiled-egg",

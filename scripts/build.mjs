@@ -114,8 +114,8 @@ const withPhoto = (t) => {
 };
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
-// Drinks from MEON's Square catalogue. The Pairings and sides page lists them as text. The home gallery's Drinks tab shows one
-// free-library photo per group with MEON's products as text under it (Preston, 6 Nov 2026). A photo is either a drink TYPE
+// Drinks from MEON's current catalogue. The menu and home gallery show the same
+// licensed drink groups, with the product names and honest type/exact captions.
 // ("Photo shows the drink type") or the EXACT catalogue product, same variant and pack (ledger 571, 7 Nov 2026; Security's
 // pre-rules in requests/security/20261107-0038). See data/drink-photos.json.
 const drinks = catalogue.drinks;
@@ -1358,6 +1358,8 @@ ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}">
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2>Drinks</h2>
+  <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}</li>`).join("")}</ul>
+  <p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>
   <ul class="drink-list">${drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
