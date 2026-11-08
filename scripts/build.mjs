@@ -32,12 +32,13 @@ const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON(
 // Extra photos per noodle (top-down and close-ups from the MEON shoot), shown under the main photo.
 const gallery = fs.existsSync(path.join(ROOT, "data", "gallery.json")) ? readJSON("gallery.json") : {};
 // Photos of noodles and sides from free libraries (ledger 582; docs/credits.md). `photos` holds each photo once: its file,
-// source page, licence, the sha256 of the file as downloaded, and the credit when the licence asks for one; several
-// noodles may share a dish-type photo. `noodles` and `toppings` say which photo an item shows and what it shows: "exact" =
-// this product, same brand and flavour; "cooked" = this product cooked plain, the cooked shot of a raw-and-cooked series
-// of it (Security 582: nothing in the bowl beyond its own sachets); "type" = the dish type. They show only where their
-// caption and credit show: noodle cards and pages, and the Pairings and sides page. The home page, search thumbnails,
-// share images, structured data and the image sitemap keep MEON's own photos (`own` below).
+// source page, licence, the sha256 of the file as downloaded, and its credit (required unless CC0 or public domain, given
+// for every photo so far); several noodles may share a dish-type photo. `noodles` and `toppings` say which photo an item
+// shows and what it shows: "exact" = this product, same brand and flavour; "cooked" = this product cooked plain, the
+// cooked shot of a raw-and-cooked series of it (Security 582: nothing in the bowl beyond its own sachets); "type" = the
+// dish type. They show only where their caption and credit show: noodle cards and pages, and the Pairings and sides
+// page. The home page, search thumbnails, share images, structured data and the image sitemap keep MEON's own photos
+// (`own` below).
 const freePhotos = readJSON("free-photos.json");
 const FREE_KIND = { exact: "Photo shows this product", cooked: "Photo shows this product, cooked plain", type: "Photo shows the dish type" };
 for (const [id, p] of Object.entries(freePhotos.photos)) {
