@@ -115,8 +115,8 @@ const withPhoto = (t) => {
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
 // Drinks from MEON's current catalogue. The menu and home gallery show the same
-// photos. Each row in data/drink-photos.json is one product (owner pack shots, 7 Nov 2026).
-// A catalogue drink with no row is listed by name only.
+// photos. Each row in data/drink-photos.json is one product, with required source credits.
+// Every stocked drink must have exactly one photo.
 const drinks = catalogue.drinks;
 const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   const where = `data/drink-photos.json "${g.type}"`;
@@ -128,15 +128,14 @@ const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   if (g.photo !== "type" && g.photo !== "exact") throw new Error(`${where}: photo must be "type" or "exact"`);
   const shows = g.photo === "exact" && items.find((d) => d.name === g.shows);
   if (g.photo === "exact" && !shows) throw new Error(`${where}: an exact photo needs "shows" naming one of its own drinks`);
-  if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || "") && /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(g.source?.page || ""))) throw new Error(`${where}: a credit needs author, licence, a creativecommons.org licence URL and the Commons file page in source.page`);
+  if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || "") && /^(https:\/\/commons\.wikimedia\.org\/wiki\/File:|https:\/\/world\.openfoodfacts\.org\/product\/)/.test(g.source?.page || ""))) throw new Error(`${where}: a credit needs author, licence, a creativecommons.org licence URL and a Commons file or Open Food Facts product page in source.page`);
   if (!g.credit && /\bBY\b/.test(g.source?.licence || "")) throw new Error(`${where}: a CC BY/BY-SA photo needs a credit on the page`);
   return { ...g, items, shows, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
 });
 for (const d of drinks) {
   const n = drinkGroups.filter((g) => g.drinks.includes(d.name)).length;
-  if (n > 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs at most 1`);
+  if (n !== 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs exactly 1`);
 }
-const drinksWithoutPhoto = drinks.filter((d) => !drinkGroups.some((g) => g.drinks.includes(d.name)));
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -752,7 +751,7 @@ const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (m
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 // A shared type photo still says what it shows. One product with its own pack shot is titled with that product and its size.
 const drinkPhotoLine = (g) => (g.photo === "exact" ? "Photo shows this drink" : "Photo shows the drink type");
-const drinkCredit = (g) => g.credit ? `<span class="gal-credit">Photo: <span class="gal-credit-links"><a href="${esc(g.source.page)}">${esc(g.credit.author)}</a>, <a href="${esc(g.credit.licenceUrl)}" rel="license">${esc(g.credit.licence)}</a></span>${g.credit.cropped ? ", cropped" : ""}</span>` : "";
+const drinkCredit = (g) => g.credit ? `<span class="gal-credit">Photo: <span class="gal-credit-links"><a href="${esc(g.source.page)}">${esc(g.credit.author)}</a><a href="${esc(g.credit.licenceUrl)}" rel="license">${esc(g.credit.licence)}</a></span>${g.credit.edits ? `(${esc(g.credit.edits)})` : ""}</span>` : "";
 // "At MEON: ..." under a drink photo. Several drinks of one brand and size read as one line ("Caffe Bene Americano, Hazelnut
 // (190 ml each)"); anything else lists each drink with its size. The size never breaks between number and unit (Design, 571).
 const drinkSize = (s) => esc(s).replace(/ /g, "\u00A0");
@@ -767,12 +766,11 @@ const drinkCard = (r, g) => {
   const one = g.photo === "exact" && g.items.length === 1;
   const lines = one
     ? `<span class="gal-type">${esc(g.items[0].name)}</span>${g.items[0].size ? `<span class="gal-at">${drinkSize(g.items[0].size)}</span>` : ""}`
-    : `<span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}`;
-  return `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}</li>`;
+    : `<span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>`;
+  return `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}${drinkCredit(g)}</li>`;
 };
 const drinkGrid = (r) => `<ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => drinkCard(r, g)).join("")}</ul>`;
 const drinkTypeNote = drinkGroups.some((g) => g.photo === "type") ? `<p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>` : "";
-const drinkNameList = (items) => items.length ? `<ul class="drink-list">${items.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>` : "";
 const homeGallery = (r) => `
 <section class="gal" id="gallery" aria-labelledby="gal-h">
   <div class="wrap">
@@ -1370,7 +1368,6 @@ ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}">
   <h2>Drinks</h2>
   ${drinkGrid(r)}
   ${drinkTypeNote}
-  ${drinkNameList(drinksWithoutPhoto)}
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
 ${ctaBand(r)}

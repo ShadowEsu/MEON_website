@@ -427,6 +427,7 @@
  ],
  "drinks": [
   { "name": "100 Plus", "size": "325 ml" },
+  { "name": "Aiko Matcha", "size": "can" },
   { "name": "Aussie Natural Water", "size": "600 ml" },
   { "name": "Australian Natural Spring Water", "size": "600 ml" },
   { "name": "Caffe Bene Americano", "size": "190 ml" },
@@ -437,6 +438,7 @@
   { "name": "Coca-Cola Classic", "size": "375 ml" },
   { "name": "Coca-Cola Zero Sugar", "size": "375 ml" },
   { "name": "Milkis Peach", "size": "250 ml" },
+  { "name": "Pepsi" },
   { "name": "Sosro Teh Botol", "size": "250 ml" },
   { "name": "Yeo's Chrysanthemum Tea", "size": "300 ml" },
   { "name": "Ice in a cup" }
