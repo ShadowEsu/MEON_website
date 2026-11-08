@@ -573,6 +573,12 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .nc-name { font-size: 1.08rem; font-weight: 600; letter-spacing: -.015em; line-height: 1.25; margin: 0 0 8px; transition: color .25s; }
 .noodle-card:hover .nc-name { color: var(--red); }
 .nc-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; margin-top: auto; font-size: .86rem; color: var(--ink-2); }
+/* A free-library photo's caption and credit (ledger 582): the drinks' type (12/500 ink-2), the credit on its own line.
+   Credit links get a 24 px box (WCAG 2.5.8) without changing the line height, as .gal-credit. */
+.photo-cap, .photo-credit { display: block; font-size: .75rem; font-weight: 500; line-height: 1.4; color: var(--ink-2); }
+.photo-credit { overflow-wrap: anywhere; }
+.photo-credit a { display: inline-block; padding: 4px 0; margin: -4px 0; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.nc-photo { display: block; margin: -8px 0 8px; }
 .nc-spice { display: inline-flex; align-items: center; gap: 6px; }
 .nc-spice-word { font-size: .8rem; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
 .nc-spice-soon { font-size: .78rem; color: var(--muted); }
@@ -700,6 +706,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .noodle-media { position: sticky; top: calc(var(--header-h) + 24px); }
 .noodle-photo { position: relative; margin: 0; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: var(--soft); }
 .noodle-photo > img { width: 100%; height: 100%; object-fit: cover; }
+.noodle-photo-note { margin: 10px 0 0; }
 .steam-overlay { position: absolute; left: 20%; right: 20%; top: 0; height: 32%; pointer-events: none; fill: none; stroke: rgba(255,255,255,.75); stroke-width: 5; stroke-linecap: round; }
 .steam-overlay path { stroke-dasharray: 40 160; animation: steam 3.4s ease-in-out infinite; }
 .steam-overlay path:nth-child(2) { animation-delay: 1.1s; }
@@ -803,6 +810,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .topping strong { font-size: 1.02rem; }
 .topping span { font-size: .9rem; color: var(--ink-2); }
 .topping:target strong { color: var(--red); }
+.topping .topping-photo { display: block; margin: -6px 0 2px; }
+.topping .photo-cap, .topping .photo-credit { font-size: .75rem; color: var(--ink-2); }
 @media (max-width: 1024px) { .topping-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .topping-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 

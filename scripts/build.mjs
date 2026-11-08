@@ -31,8 +31,41 @@ const countries = readJSON("countries.json");
 const images = fs.existsSync(path.join(ROOT, "data", "images.json")) ? readJSON("images.json") : {};
 // Extra photos per noodle (top-down and close-ups from the MEON shoot), shown under the main photo.
 const gallery = fs.existsSync(path.join(ROOT, "data", "gallery.json")) ? readJSON("gallery.json") : {};
-// What each photo shows (alt text), keyed like images.json and gallery.json. A photo the site shows without one stops the build.
-const photoAlts = readJSON("photo-alts.json");
+// Photos of noodles and sides from free libraries (ledger 582; docs/credits.md). `photos` holds each photo once: its file,
+// source page, licence, the sha256 of the file as downloaded, and the credit when the licence asks for one; several
+// noodles may share a dish-type photo. `noodles` and `toppings` say which photo an item shows and what it shows: "exact" =
+// this product, same brand and flavour; "cooked" = this product cooked plain, the cooked shot of a raw-and-cooked series
+// of it (Security 582: nothing in the bowl beyond its own sachets); "type" = the dish type. They show only where their
+// caption and credit show: noodle cards and pages, and the Pairings and sides page. The home page, search thumbnails,
+// share images, structured data and the image sitemap keep MEON's own photos (`own` below).
+const freePhotos = readJSON("free-photos.json");
+const FREE_KIND = { exact: "Photo shows this product", cooked: "Photo shows this product, cooked plain", type: "Photo shows the dish type" };
+for (const [id, p] of Object.entries(freePhotos.photos)) {
+  const where = `data/free-photos.json photos.${id}`;
+  if (!/^[a-z0-9-]+$/.test(id) || !new RegExp(`^img/(noodles|toppings)/free/${id}\\.webp$`).test(p.file || "")) throw new Error(`${where}: file must be img/noodles/free/${id}.webp or img/toppings/free/${id}.webp (ids: a-z, 0-9, -)`);
+  if (!p.alt) throw new Error(`${where}: alt (what the photo shows) is missing`);
+  if (!/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.flickr\.com\/photos\/|www\.pexels\.com\/photo\/)/.test(p.source?.page || "")) throw new Error(`${where}: source.page must be the Commons file page, or the Flickr or Pexels photo page`);
+  if (!/^[0-9a-f]{64}$/.test(p.source.sha256 || "")) throw new Error(`${where}: source.sha256 (the file as downloaded) is missing`);
+  const lic = p.source.licence || "";
+  const pd = /^(CC0|Public domain|Public Domain Mark)/.test(lic);
+  if (!pd && !/^CC BY(-SA)? [0-9.]+$/.test(lic) && lic !== "Pexels License") throw new Error(`${where}: licence "${lic}" isn't CC0, public domain, CC BY, CC BY-SA or the Pexels licence`);
+  // CC BY/BY-SA need the credit; Pexels photos are credited anyway (Security F4)
+  if (!pd && !(p.credit?.author && p.credit.licence && /^https:\/\/(creativecommons\.org\/|www\.pexels\.com\/license\/)/.test(p.credit.licenceUrl || ""))) throw new Error(`${where}: a ${lic} photo needs a credit (author, licence, licence URL)`);
+}
+// An item's free photo. An item with its own photo never has one: owner photos win (brief 582).
+const freeFor = (where, e) => {
+  if (!FREE_KIND[e.kind]) throw new Error(`${where}: kind must be one of ${Object.keys(FREE_KIND).join(", ")}`);
+  const p = freePhotos.photos[e.photo];
+  if (!p) throw new Error(`${where}: no photo "${e.photo}" under photos`);
+  return { kind: e.kind, ...p };
+};
+for (const [slug, e] of Object.entries(freePhotos.noodles)) {
+  if (images[slug]) throw new Error(`data/free-photos.json noodles.${slug}: it has its own photo in data/images.json, and owner photos win`);
+  freeFor(`data/free-photos.json noodles.${slug}`, e);
+}
+// What each photo shows (alt text), keyed like images.json and gallery.json; free-library photos carry theirs in
+// data/free-photos.json. A photo the site shows without one stops the build.
+const photoAlts = { ...readJSON("photo-alts.json"), ...Object.fromEntries(Object.values(freePhotos.photos).map((p) => [p.file, p.alt])) };
 const altFor = (p) => {
   if (!photoAlts[p]) throw new Error(`No alt text for ${p}: add what the photo shows to data/photo-alts.json`);
   return photoAlts[p];
@@ -105,12 +138,16 @@ const webpWidth = (file) => {
 // Small copies of photos the site shows small (made by scripts/make_thumbs.py): "<name>-t<px>.webp" next to the original.
 // Falls back to the original when the copy hasn't been made yet.
 const smallCopy = (p, px) => { const t = p.replace(/\.webp$/, `-t${px}.webp`); return fingerprint(fs.existsSync(path.join(SRC, t)) ? t : p); };
-// A photo named in data/*.json (`img`) with what the grids need: `small` is the 64 px icon (2x); `mid` (384 px) and `w` (the original's
-// width) give the grid a srcset when the 384 px copy exists.
+// A photo named in data/*.json (`img`), or a side's free-library photo (data/free-photos.json), with what the grids need:
+// `small` is the 64 px icon (2x); `mid` (384 px) and `w` (the original's width) give the grid a srcset when the 384 px copy exists.
 const withPhoto = (t) => {
-  if (!t.img) return t;
-  const mid = t.img.replace(/\.webp$/, "-t384.webp");
-  return { ...t, img: fingerprint(t.img), alt: altFor(t.img.replace(/^assets\//, "")), small: smallCopy(t.img, 128), ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, t.img)) } : {}) };
+  const fe = t.id && freePhotos.toppings[t.id];
+  if (fe && t.img) throw new Error(`data/free-photos.json toppings.${t.id}: it has its own photo in data/toppings.json, and owner photos win`);
+  const free = fe ? freeFor(`data/free-photos.json toppings.${t.id}`, fe) : null;
+  const img = t.img || (free && `assets/${free.file}`);
+  if (!img) return t;
+  const mid = img.replace(/\.webp$/, "-t384.webp");
+  return { ...t, img: fingerprint(img), alt: altFor(img.replace(/^assets\//, "")), small: smallCopy(img, 128), free, ...(fs.existsSync(path.join(SRC, mid)) ? { mid: fingerprint(mid), w: webpWidth(path.join(SRC, img)) } : {}) };
 };
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
@@ -141,12 +178,18 @@ const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
   if (!c) throw new Error(`Unknown country ${n.country} for ${n.slug}`);
-  const img = images[n.slug] && fs.existsSync(path.join(SRC, "assets", images[n.slug])) ? fingerprint(`assets/${images[n.slug]}`) : null;
-  const thumb = img && fs.existsSync(path.join(SRC, "assets", "img", "noodles", "sm", `${n.slug}.webp`)) ? fingerprint(`assets/img/noodles/sm/${n.slug}.webp`) : img;
+  const fe = freePhotos.noodles[n.slug];
+  const file = images[n.slug] || (fe && freePhotos.photos[fe.photo].file);
+  const img = file && fs.existsSync(path.join(SRC, "assets", file)) ? fingerprint(`assets/${file}`) : null;
+  // the 400 px copy sits in sm/ next to the photo: img/noodles/sm/<slug>.webp, or img/noodles/free/sm/<id>.webp for a
+  // free-library photo that several noodles share (data/free-photos.json)
+  const small = file && file.replace(/[^/]+$/, "sm/$&");
+  const thumb = img && fs.existsSync(path.join(SRC, "assets", small)) ? fingerprint(`assets/${small}`) : img;
   const galleryFiles = img ? (gallery[n.slug] || []).filter((p) => fs.existsSync(path.join(SRC, "assets", p))) : [];
   const more = galleryFiles.map((p) => fingerprint(`assets/${p}`));
   const moreSmall = galleryFiles.map((p) => smallCopy(`assets/${p}`, 192)); // the 96 px gallery thumbnails (2x)
-  const imgAlt = img ? altFor(images[n.slug]) : null;
+  const imgAlt = img ? altFor(file) : null;
+  const free = img && fe ? freeFor(`data/free-photos.json noodles.${n.slug}`, fe) : null;
   const moreAlts = galleryFiles.map(altFor);
   // Diet label (Preston, 29 Oct 2026): "Vegetarian", never "vegetarian-friendly" or "vegan". "Meat flavour (…)" (owner's
   // ruling, 2 Nov 2026): noodles flavoured with chicken, beef or pork flavour, artificial or not, are never vegetarian;
@@ -159,9 +202,10 @@ const noodles = noodlesRaw.map((n) => {
   if (m) dietTokens.push(m[1].toLowerCase());
   if (/Seafood/.test(diet)) dietTokens.push("seafood");
   const unrated = n.spice == null;
-  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, imgAlt, thumb, more, moreAlts, moreSmall, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
+  return { ...n, diet, dietNote: n.dietNote || diet === "Vegetarian", note: badge(n.funNote), c, img, imgAlt, thumb, more, moreAlts, moreSmall, free, own: !!img && !free, dietTokens, unrated, spiceKey: unrated ? -1 : n.spice, url: `noodles/${n.slug}/`, qrUrl: `${SITE_URL}/noodles/${n.slug}/?src=qr` };
 });
-const withPhotos = noodles.filter((n) => n.img);
+// MEON's own photos (the shoot): the home page, share images, structured data and the image sitemap use only these
+const withPhotos = noodles.filter((n) => n.own);
 // Vegetarian label only with the maker's word for it (BOSS + Security, 2 Nov 2026): a noodle says Vegetarian only once its
 // data has dietSource {url, checked}, the maker's ingredient list (check.mjs enforces it). Until one does, the site offers
 // no Vegetarian filter, links or "some are vegetarian" answer, because they would lead nowhere or say something untrue.
@@ -171,7 +215,7 @@ const HAS_VEG = noodles.some((n) => n.dietTokens.includes("veg"));
 // photo. Not sales or till data, so the heading never claims what customers pick most (REG-82; check.mjs guards it). A true
 // best-sellers list needs the till's numbers from the owner.
 const FEATURE_RE = /top|popular|viral|no\.1|award|premium|seller|hyped|featured|michelin|rated/i;
-const featured = [...noodles.filter((n) => n.img && n.funNote && FEATURE_RE.test(n.funNote)), ...noodles.filter((n) => n.img && !(n.funNote && FEATURE_RE.test(n.funNote)))].slice(0, 8);
+const featured = [...noodles.filter((n) => n.own && n.funNote && FEATURE_RE.test(n.funNote)), ...noodles.filter((n) => n.own && !(n.funNote && FEATURE_RE.test(n.funNote)))].slice(0, 8);
 
 // Shin Ramyun is the yardstick (Preston, 28 Oct 2026): every noodle is rated against it.
 const SPICE_LADDER = [
@@ -455,6 +499,10 @@ function packetArt(n, r) {
 </span>`;
 }
 
+// A free-library photo's caption and credit (ledger 582, Design S-1): "Photo shows this product" (or "…, cooked plain") or
+// "Photo shows the dish type", then the credit on its own line. Cards are links, so their credit is text; the noodle page
+// and the Pairings and sides page link the source page and the licence.
+const photoNote = (f, links) => `<span class="photo-cap">${FREE_KIND[f.kind]}</span>${f.credit ? `<span class="photo-credit">Photo: ${links ? `<a href="${esc(f.source.page)}">${esc(f.credit.author)}</a>, ${f.credit.licenceUrl ? `<a href="${esc(f.credit.licenceUrl)}" rel="license">${esc(f.credit.licence)}</a>` : esc(f.credit.licence)}` : `${esc(f.credit.author)}, ${esc(f.credit.licence)}`}${f.credit.cropped ? ", cropped" : ""}</span>` : ""}`;
 // A noodle's photo, or its packet art when there's no photo. `alt` is "" on cards, whose link text already names the noodle.
 function noodleMedia(n, r, { size = 400, eager = false, large = false, alt = n.imgAlt } = {}) {
   if (n.img) return `<img src="${r(large ? n.img : n.thumb)}" alt="${esc(alt)}" width="${size}" height="${size}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
@@ -467,8 +515,10 @@ const spiceLine = (n, r) => n.unrated ? `<span class="nc-spice-soon">Spice ratin
 
 function noodleCard(n, r) {
   const search = [n.name, n.brand, n.country, n.flavour, n.type, n.diet, n.note].filter(Boolean).join(" ");
-  return `<a class="noodle-card" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.img ? 1 : 0}">
+  // "Photos first" (site.js): MEON's own bowls, then free-library photos, then packet art
+  return `<a class="noodle-card" href="${r(n.url)}" data-search="${esc(search)}" data-name="${esc(n.name)}" data-country="${n.countryCode}" data-type="${esc(n.type || "")}" data-spice="${n.spiceKey}" data-diet="${n.dietTokens.join(" ")}" data-photo="${n.own ? 2 : n.img ? 1 : 0}">
   <span class="nc-media">${noodleMedia(n, r, { alt: "" })}${n.note ? `<span class="nc-note">${esc(n.note)}</span>` : ""}</span>
+  ${n.free ? `<span class="nc-photo">${photoNote(n.free, false)}</span>` : ""}
   <span class="nc-meta">${flag(n.countryCode, r, { w: 16 })}<span>${esc(n.country)}${n.type ? ` · ${esc(n.type)}` : ""}</span></span>
   <h3 class="nc-name">${esc(n.name)}</h3>
   <span class="nc-foot"><span class="nc-brand">${esc(n.brand)}</span>${spiceLine(n, r)}</span>
@@ -697,12 +747,11 @@ const countFor = (fn) => noodles.filter(fn).length;
 const half = Math.ceil(withPhotos.length / 2);
 const wallImgs = (list, r) => list.map((n) => `<a href="${r(n.url)}" tabindex="-1" title="${esc(`${n.brand} ${n.name}`)}"><img src="${r(n.thumb)}" alt="" width="200" height="200" loading="lazy" decoding="async"></a>`).join("");
 // Home gallery right under the hero (Preston, 6 Nov 2026: lots of real noodle photos, plus drinks). Noodles: 24 shoot photos,
-// one brand at a time in library order so the first rows aren't all one maker. The packet photos from free libraries
-// (docs/credits.md, "Noodle photos from free libraries") stay out: this grid is MEON's own bowls.
-const FREE_LIBRARY_NOODLE_PHOTOS = new Set(["indomie-soto-mie"]);
+// one brand at a time in library order so the first rows aren't all one maker. Only MEON's own bowls (withPhotos): the
+// free-library photos (data/free-photos.json) stay out.
 const galleryNoodles = (() => {
   const byBrand = new Map();
-  for (const n of withPhotos) if (!FREE_LIBRARY_NOODLE_PHOTOS.has(n.slug)) byBrand.set(n.brand, [...(byBrand.get(n.brand) || []), n]);
+  for (const n of withPhotos) byBrand.set(n.brand, [...(byBrand.get(n.brand) || []), n]);
   const out = [];
   for (let round = 0; out.length < 24 && [...byBrand.values()].some((l) => l.length > round); round++)
     for (const list of byBrand.values()) if (list[round] && out.length < 24) out.push(list[round]);
@@ -717,7 +766,7 @@ const stripNoodles = (() => {
   const inGallery = new Set(galleryNoodles.map((n) => n.slug));
   return readJSON("home-strip.json").slugs.map((slug) => {
     const n = withPhotos.find((x) => x.slug === slug);
-    if (!n || FREE_LIBRARY_NOODLE_PHOTOS.has(slug)) throw new Error(`data/home-strip.json: ${slug} has no MEON shoot photo`);
+    if (!n) throw new Error(`data/home-strip.json: ${slug} has no MEON shoot photo`);
     if (inGallery.has(slug)) throw new Error(`data/home-strip.json: ${slug} is already in the home gallery`);
     return n;
   });
@@ -952,7 +1001,7 @@ ${homeGallery(r)}
       </div>
     </div>
   </div>
-  <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, country: n.country, spice: n.spiceKey, type: n.type, img: n.thumb })))}</script>
+  <script type="application/json" id="noodle-data">${json(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, cc: n.countryCode, country: n.country, spice: n.spiceKey, type: n.type, img: n.own ? n.thumb : undefined })))}</script>
 </section>
 
 <section class="section section--soft">
@@ -1056,7 +1105,7 @@ addPage("noodles/", layout({
       "@type": "MenuSection",
       name: `${c.name} instant noodles`,
       url: `${SITE_URL}/countries/${c.slug}/`,
-      hasMenuItem: noodles.filter((n) => n.country === c.name).map((n) => ({ "@type": "MenuItem", name: `${n.brand} ${n.name}`, url: `${SITE_URL}/${n.url}`, image: n.img ? `${SITE_URL}/${n.img}` : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined })),
+      hasMenuItem: noodles.filter((n) => n.country === c.name).map((n) => ({ "@type": "MenuItem", name: `${n.brand} ${n.name}`, url: `${SITE_URL}/${n.url}`, image: n.own ? `${SITE_URL}/${n.img}` : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined })),
     })),
   }],
   description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
@@ -1115,11 +1164,11 @@ noodles.forEach((n, idx) => {
     title: `${n.name} – ${n.brand}`,
     seoTitle: [`${n.brand} ${n.name} (${n.country}) · Instant Noodles at MEON Perth`, `${n.brand} ${n.name} (${n.country}) · MEON Perth`, `${n.brand} ${n.name} · MEON Perth`, `${n.brand} ${n.name} · MEON`, `${n.name} · MEON Perth`, `${n.name} · MEON`].find((t) => t.length <= 60) || `${n.name} · MEON`,
     active: "noodles/",
-    image: n.img || "assets/img/shoot/og-meon.jpg",
+    image: n.own ? n.img : "assets/img/shoot/og-meon.jpg",
     preload: n.img || "",
     description: fitDesc(`${n.brand} ${n.name} (${n.country}) at MEON ${site.suburb}.`, shortBlurb(n), [n.unrated ? [] : `Spice ${n.spice}/5.`, n.type ? `${n.type} noodle.` : []]),
     jsonld: [
-      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}${n.weightG ? `, ${n.weightG} g packet` : ""}.`, image: n.img ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined },
+      { "@context": "https://schema.org", "@type": "MenuItem", name: `${n.brand} ${n.name}`, description: `${shortBlurb(n)}${n.type ? ` ${n.type} noodle` : ""} from ${n.country}${n.weightG ? `, ${n.weightG} g packet` : ""}.`, image: n.own ? [n.img, ...n.more].map((p) => `${SITE_URL}/${p}`) : undefined, url: `${SITE_URL}/${n.url}`, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
         { "@type": "ListItem", position: 2, name: "Noodles", item: `${SITE_URL}/noodles/` },
@@ -1133,7 +1182,8 @@ noodles.forEach((n, idx) => {
     ${crumbsNav(r, [["Noodles", "noodles/"], [esc(n.country), `countries/${n.c.slug}/`], [esc(n.name)]])}
     <div class="noodle-grid">
       <div class="noodle-media">
-        <figure class="noodle-photo" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.img ? steamOverlay : ""}</figure>
+        <figure class="noodle-photo" data-gallery-main>${noodleMedia(n, r, { size: 800, eager: true, large: true })}${n.own ? steamOverlay : ""}</figure>
+        ${n.free ? `<p class="noodle-photo-note">${photoNote(n.free, true)}</p>` : ""}
         ${n.more.length ? `<div class="noodle-thumbs" role="group" aria-label="More photos of ${esc(n.name)}">${[n.img, ...n.more].map((p, i) => `<button type="button" class="noodle-thumb" data-gallery-src="${r(p)}" data-gallery-alt="${esc(i === 0 ? n.imgAlt : n.moreAlts[i - 1])}" aria-label="Photo ${i + 1} of ${n.more.length + 1}" aria-pressed="${i === 0}"><img src="${r(i === 0 ? n.thumb : n.moreSmall[i - 1])}" alt="" width="96" height="96" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
         ${n.note ? `<p class="noodle-note">${esc(n.note)}</p>` : ""}
       </div>
@@ -1181,7 +1231,7 @@ noodles.forEach((n, idx) => {
 
         ${tops.length ? `<section class="noodle-sec" aria-labelledby="top-h">
           <h2 id="top-h">Pairs well with</h2>
-          <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img ? `<img src="${r(t.small)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
+          <ul class="pairings">${tops.map((t) => `<li><a href="${r("pairings-and-sides/")}#${t.id}">${t.img && !t.free ? `<img src="${r(t.small)}" alt="" width="64" height="64" loading="lazy">` : `<span class="pair-ic">${svgIcon(t.icon || "bowl")}</span>`}<span>${esc(t.name)}</span></a></li>`).join("")}</ul>
         </section>` : ""}
 
         <p class="note">${n.dietNote ? "* Vegetarian means the maker's ingredient list has no meat, fish, seafood or meat flavouring. Recipes vary: check the packet, and ask the crew if unsure." : /^Meat flavour/.test(n.diet) ? "* Meat flavour: the seasoning tastes of chicken, beef or pork. The flavour may be artificial, but MEON never counts these noodles as vegetarian. Check the packet for allergens and full ingredients." : "Check the packet for allergens and full ingredients, and ask the crew if unsure."}</p>
@@ -1237,7 +1287,7 @@ for (const c of countries) {
     title: `${c.name} instant noodles`,
     seoTitle: `${COUNTRY_ADJ[c.name] || c.name} Instant Noodles in Perth (${list.length}) · MEON Noodles`,
     active: "countries/",
-    image: list.find((n) => n.img)?.img,
+    image: list.find((n) => n.own)?.img,
     jsonld: [
       { "@context": "https://schema.org", "@type": "ItemList", name: `${c.name} instant noodles at MEON`, numberOfItems: list.length, itemListElement: list.map((n, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE_URL}/${n.url}`, name: `${n.brand} ${n.name}` })) },
       { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Countries", item: `${SITE_URL}/countries/` }, { "@type": "ListItem", position: 3, name: c.name, item: `${SITE_URL}/countries/${c.slug}/` }] },
@@ -1285,7 +1335,7 @@ addPage("spiciest-noodles/", layout({
   title: "The spiciest noodles at MEON",
   seoTitle: `The ${hot.length} Spiciest Instant Noodles at MEON Perth`,
   active: "noodles/",
-  image: hot.find((n) => n.img)?.img,
+  image: hot.find((n) => n.own)?.img,
   jsonld: [listLd("The spiciest instant noodles at MEON", hot), crumbLd("Spiciest noodles", "spiciest-noodles/")],
   description: fitDesc(`${hot.length} instant noodles rated 3 to 5 on MEON's spice scale, where Shin Ramyun is a 3.`, "Hottest first.", [["Every packet has its own page with cooking steps and a cook timer.", "Every packet has its own page."]]),
   body: (r) => `
@@ -1310,7 +1360,7 @@ addPage("buldak/", layout({
   title: "Buldak at MEON",
   seoTitle: `Buldak in Perth: ${buldak.length} Flavours to Cook at MEON`,
   active: "noodles/",
-  image: buldak.find((n) => n.img)?.img,
+  image: buldak.find((n) => n.own)?.img,
   jsonld: [listLd("Buldak noodles at MEON", buldak), crumbLd("Buldak", "buldak/")],
   description: fitDesc(`${buldak.length} Samyang Buldak noodles at MEON in ${site.suburb}, Perth.`, "From hottest to mildest on our 0 to 5 spice scale, where Shin Ramyun is a 3.", [["Every packet has its own page."]]),
   body: (r) => `
@@ -1341,7 +1391,7 @@ const groups = [...new Set(pairings.map((t) => t.group))];
 for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
 const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 // One card in the pairings grids: the square photo, or a line icon when there's none; the name; one line under it.
-const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}</div>`;
+const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span>${t.free ? `<span class="topping-photo">${photoNote(t.free, true)}</span>` : ""}<strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}</div>`;
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
@@ -1645,9 +1695,10 @@ write("assets/img/icons.svg", iconSprite());
 
 // Search index used by the site-wide search overlay.
 const searchIndex = [
-  ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.thumb, f: n.countryCode, k: [n.flavour, n.diet, n.note, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
+  ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.own ? n.thumb : undefined, f: n.countryCode, k: [n.flavour, n.diet, n.note, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
   ...countries.map((c) => ({ g: "Countries", t: c.name, s: `${countFor((n) => n.country === c.name)} noodles · ${c.headline}`, u: `countries/${c.slug}/`, f: c.code, k: "country" })),
-  ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.small || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
+  // a free-library side photo shows only on the Pairings and sides page, with its caption and credit (ledger 582)
+  ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: (!t.free && t.small) || undefined, ic: t.img && !t.free ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
     ...(HAS_VEG ? [["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"]] : []),
@@ -1664,10 +1715,10 @@ write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 // IndexNow (Bing, Yandex, Seznam, Naver; SEO 2 Nov 2026): the key file proves the pings in scripts/indexnow.mjs come from us.
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
-const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
+const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.own).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
 write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
-write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
+write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.own ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
-console.log(`Built ${pages.length + 1} pages → ${path.relative(ROOT, OUT)}/  (${noodles.length} noodles, ${withPhotos.length} with photos, QR base ${SITE_URL})`);
+console.log(`Built ${pages.length + 1} pages → ${path.relative(ROOT, OUT)}/  (${noodles.length} noodles, ${withPhotos.length} with MEON photos, ${noodles.filter((n) => n.free).length} with free-library photos, QR base ${SITE_URL})`);
