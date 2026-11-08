@@ -277,7 +277,8 @@
     "name": "Seasoned seaweed",
     "group": "Sides",
     "desc": "Crispy seasoned seaweed sheets, plain or green tea, to crumble over or snack on.",
-    "icon": "leaf"
+    "img": "assets/img/toppings/seasoned-seaweed.webp",
+    "credit": { "author": "Alice Wiegand (Lyzzy)", "page": "https://commons.wikimedia.org/wiki/File:Nori.jpg", "licence": "CC BY-SA 3.0", "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0/" }
   },
   {
     "id": "kimchi",

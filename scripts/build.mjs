@@ -115,9 +115,8 @@ const withPhoto = (t) => {
 // Pairings (cooked in the bowl) and sides (ready to eat), from data/toppings.json.
 const pairings = readJSON("toppings.json").map(withPhoto);
 // Drinks from MEON's current catalogue. The menu and home gallery show the same
-// licensed drink groups, with the product names and honest type/exact captions.
-// ("Photo shows the drink type") or the EXACT catalogue product, same variant and pack (ledger 571, 7 Nov 2026; Security's
-// pre-rules in requests/security/20261107-0038). See data/drink-photos.json.
+// photos. Each row in data/drink-photos.json is one product (owner pack shots, 7 Nov 2026).
+// A catalogue drink with no row is listed by name only.
 const drinks = catalogue.drinks;
 const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   const where = `data/drink-photos.json "${g.type}"`;
@@ -135,8 +134,9 @@ const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
 });
 for (const d of drinks) {
   const n = drinkGroups.filter((g) => g.drinks.includes(d.name)).length;
-  if (n !== 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs exactly 1`);
+  if (n > 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs at most 1`);
 }
+const drinksWithoutPhoto = drinks.filter((d) => !drinkGroups.some((g) => g.drinks.includes(d.name)));
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -750,9 +750,7 @@ const heroStrip = (r) => `<div class="hstrip">
 // Rendered tile widths for the grids in site.css (.gal-grid): noodles 2/3/4/6 columns, drinks 2/3/4, inside --wrap (1240 px).
 const GAL_NOODLE_SIZES = "(min-width: 1200px) 200px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
 const GAL_DRINK_SIZES = "(min-width: 1200px) 300px, (min-width: 900px) 23vw, (min-width: 600px) 31vw, 46vw";
-// The lines around a drink photo (Design + Security, ledger 571): a caption right under it saying what it shows ("Photo shows
-// this drink" for the exact product, whose size stays in the At MEON line, or "Photo shows the drink type"), and, when the
-// licence asks for one, a credit line after the At MEON text linking the author's source page and the licence.
+// A shared type photo still says what it shows. One product with its own pack shot is titled with that product and its size.
 const drinkPhotoLine = (g) => (g.photo === "exact" ? "Photo shows this drink" : "Photo shows the drink type");
 const drinkCredit = (g) => g.credit ? `<span class="gal-credit">Photo: <span class="gal-credit-links"><a href="${esc(g.source.page)}">${esc(g.credit.author)}</a>, <a href="${esc(g.credit.licenceUrl)}" rel="license">${esc(g.credit.licence)}</a></span>${g.credit.cropped ? ", cropped" : ""}</span>` : "";
 // "At MEON: ..." under a drink photo. Several drinks of one brand and size read as one line ("Caffe Bene Americano, Hazelnut
@@ -765,6 +763,16 @@ const drinkLine = (items) => {
   if (k && items.every((d) => d.size === items[0].size)) return `${[esc(items[0].name), ...words.slice(1).map((w) => esc(w.slice(k).join(" ")))].join(", ")}${items[0].size ? ` (${drinkSize(items[0].size)} each)` : ""}`;
   return items.map((d) => `${esc(d.name)}${d.size ? ` (${drinkSize(d.size)})` : ""}`).join(", ");
 };
+const drinkCard = (r, g) => {
+  const one = g.photo === "exact" && g.items.length === 1;
+  const lines = one
+    ? `<span class="gal-type">${esc(g.items[0].name)}</span>${g.items[0].size ? `<span class="gal-at">${drinkSize(g.items[0].size)}</span>` : ""}`
+    : `<span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}`;
+  return `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}</li>`;
+};
+const drinkGrid = (r) => `<ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => drinkCard(r, g)).join("")}</ul>`;
+const drinkTypeNote = drinkGroups.some((g) => g.photo === "type") ? `<p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>` : "";
+const drinkNameList = (items) => items.length ? `<ul class="drink-list">${items.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>` : "";
 const homeGallery = (r) => `
 <section class="gal" id="gallery" aria-labelledby="gal-h">
   <div class="wrap">
@@ -782,8 +790,9 @@ const homeGallery = (r) => `
     </div>
     <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
       <h3 class="visually-hidden">Drinks</h3>
-      <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}</li>`).join("")}</ul>
-      <p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell. The fridge changes day to day, so ask the crew what's in.</p>
+      ${drinkGrid(r)}
+      ${drinkTypeNote}
+      <p class="gal-note">The fridge changes day to day, so ask the crew what's in.</p>
       <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
     </div>
   </div>
@@ -800,12 +809,12 @@ const FRESH = ["udon-tempura-close", "tomyum-egg-prawn", "tonkotsu-nori-close", 
 const FRESH_SIZES = ["(min-width: 900px) 24vw, 100vw", "(min-width: 900px) 42vw, 100vw", "(min-width: 900px) 24vw, 50vw", "(min-width: 900px) 21vw, 50vw", "(min-width: 900px) 21vw, 100vw"];
 // Home hero, full-bleed (Preston, 6 Nov 2026 19:3x: "make the text overlay it ... make sure the video is covering
 // everything and adjustable by screen size"). The clips fill the first screen under the header at every width, with the
-// words over them. The main clip (MEON's gate) is the only one on phones: its poster is preloaded at high priority, as it's
-// the LCP image, and its video plays at every width. On desktop the others stand beside it (inside the shop, then the
-// noodle wall: clips with no captions burned in, since the words sit over them), so 3 portrait clips fill the landscape
-// screen at their own sharpness; their posters are lazy, so phones never fetch them.
+// words over them. Phones play the shop interior (the noodle wall in frame). Its poster is preloaded at high priority, as it's
+// the LCP image, and its video plays at every width. On desktop the gate and a packet close-up stand beside it. Those posters
+// are lazy, so phones never fetch them.
 const HOME_HERO_CLIPS = ["wall-07", "hero-col-a", "wall-10"];
-const HOME_HERO_MAIN = "hero-col-a";
+// Phones play this clip alone. The gate clip crops to a lattice and a cut sign, so the first screen is the walk into the shop, with the noodle wall in frame.
+const HOME_HERO_MAIN = "wall-07";
 addPage("", layout({
   urlPath: "",
   active: "",
@@ -1338,7 +1347,8 @@ const groups = [...new Set(pairings.map((t) => t.group))];
 for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
 const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
 // One card in the pairings grids: the square photo, or a line icon when there's none; the name; one line under it.
-const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}</div>`;
+const toppingCredit = (t) => t.credit ? `<span class="topping-credit">Photo: <a href="${esc(t.credit.page)}">${esc(t.credit.author)}</a>, <a href="${esc(t.credit.licenceUrl)}" rel="license">${esc(t.credit.licence)}</a></span>` : "";
+const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}${toppingCredit(t)}</div>`;
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
@@ -1358,9 +1368,9 @@ ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}">
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2>Drinks</h2>
-  <ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async"><span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>${drinkCredit(g)}</li>`).join("")}</ul>
-  <p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>
-  <ul class="drink-list">${drinks.map((x) => `<li>${esc(x.name)}${x.size ? ` <small>${esc(x.size)}</small>` : ""}</li>`).join("")}</ul>
+  ${drinkGrid(r)}
+  ${drinkTypeNote}
+  ${drinkNameList(drinksWithoutPhoto)}
 </div></section>
 <section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
 ${ctaBand(r)}

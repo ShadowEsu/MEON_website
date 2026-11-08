@@ -1,5 +1,7 @@
-"""Drink photos for the home gallery, from the free-library photos listed in docs/credits.md ("Drink photos from free
-libraries"). Each is cropped square (1:1, centred on the glass or can) and saved as src/assets/img/drinks/<name>.webp
+"""Retired. The drink photos now on the site are the pack shots the owner sent on 7 Nov 2026
+(see docs/credits.md, "Drink photos"). Do not run this over src/assets/img/drinks.
+
+It used to crop the free-library photos. Each was cropped square (1:1, centred on the glass or can) and saved as src/assets/img/drinks/<name>.webp
 (640 x 640) plus <name>-t320.webp (320 x 320) for the srcset. Pillow writes no EXIF or GPS into the WebP files.
 
 The sources aren't kept in the repo. To rebuild, save each photo's Commons rendering 1920 px wide (what the shipped files

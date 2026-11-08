@@ -88,7 +88,7 @@ Loading and winning moments follow the fleet's shared motion spec (Design, 4 Nov
 
 Speed rules (tested with the CPU slowed 4x, like an average phone):
 - Nothing animates forever except cheap things (blinks, floats, the home hero logo's glyph hop). Waves, squishes and the other logo hops only play on hover or tap.
-- Sections below the first one use `content-visibility: auto`, so the browser skips drawing them until you scroll near.
+- Off-screen photos use `loading="lazy"`. Sections do not use `content-visibility: auto`: Safari shows the broken-image icon for lazy photos inside a skipped section and never loads them.
 - `play.js` does nothing until someone touches Build your bowl, Heat check or a mascot.
 
 Removed on purpose:
