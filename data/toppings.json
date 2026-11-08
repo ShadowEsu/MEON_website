@@ -259,13 +259,6 @@
     "img": "assets/img/toppings/spam.webp"
   },
   {
-    "id": "shrimp-katsu",
-    "name": "Shrimp katsu",
-    "group": "Sides",
-    "desc": "Crispy shrimp katsu crunches loud, with a sweet seafood snap inside.",
-    "img": "assets/img/toppings/shrimp-katsu.webp"
-  },
-  {
     "id": "soft-boiled-egg",
     "name": "Soft-boiled egg",
     "group": "Sides",

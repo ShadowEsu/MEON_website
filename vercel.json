@@ -6,6 +6,7 @@
     "deploymentEnabled": {
       "**": false,
       "main": true,
+      "site": true,
       "preview/**": true
     }
   },
