@@ -1485,7 +1485,7 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .pill { min-height: 44px; }
 }
 
-/* Home gallery right under the hero (Preston, 6 Nov 2026): 24 shoot photos of noodles, with a link to the Drinks page in
+/* Home gallery right under the hero (the owner, 6 Nov 2026): 24 shoot photos of noodles, with a link to the Drinks page in
    its head. The Drinks page (589) uses the same grid and cards: each drink tile is the pack shot the owner sent on 7 Nov
    2026. Column counts match GAL_*_SIZES in scripts/build.mjs. */
 .gal { padding: clamp(56px, 8vw, 110px) 0; background: var(--paper); }

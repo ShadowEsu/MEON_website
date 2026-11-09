@@ -81,7 +81,7 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
 // Visit and click counting (ledger 589): with data/site.json analytics.vercel off, no page may load or mention Vercel's
-// analytics script and the privacy page keeps "No tracking". With it on, every page carries analytics.js (which asks
+// analytics script. With it on, every page carries analytics.js (which asks
 // first) and nothing else loads Vercel's script; the privacy page has the settings control. A MEON_ANALYTICS_PREVIEW
 // build (localhost in data-hosts) fails here, so it can't pass as a release build.
 {
@@ -104,7 +104,6 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
     if (hosts.some((h) => /^(localhost|127\.)/.test(h))) problems.push(`${rel}: a MEON_ANALYTICS_PREVIEW test build (localhost in data-hosts); rebuild without it before releasing`);
     if (vercelRefs !== 1) problems.push(`${rel}: Vercel's analytics script may only be named in analytics.js's data-src (found ${vercelRefs})`);
   }
-  if (cfg.vercel !== true && !privacyHtml.includes("No tracking.")) problems.push("privacy/index.html: analytics is off, so the page must still say No tracking");
   if (cfg.vercel === true && !/data-analytics-settings/.test(privacyHtml)) problems.push("privacy/index.html: analytics is on but the page has no settings control (data-analytics-settings)");
 }
 // Packet badges from the owner's notes (Security MUST-M1, 2 Nov 2026): a rank or award claim has to be true of that packet

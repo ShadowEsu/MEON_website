@@ -119,6 +119,32 @@ let allowed;
   await s.ctx.close();
 }
 
+// 4b. Withdraw in another tab (BOSS's repro, 8 Nov): a tab that already said Allow sends nothing once counting is turned
+//     off on the privacy page in a second tab, and a privacy page open in a third tab shows the new answer.
+{
+  const s = await session();
+  const a = s.page;
+  await a.goto(`${BASE}/visit/`, { waitUntil: "networkidle" });
+  await bar(a).getByRole("button", { name: "Allow" }).click();
+  await settle(a);
+  await s.holdLinks();
+  let n = s.events().length;
+  await a.click(".site-header [data-search-open]"); await settle(a); await a.keyboard.press("Escape");
+  ok(s.events().length === n + 1, `cross-tab: tab A counts a click after Allow (${s.events().length - n})`);
+  const b = await s.ctx.newPage(), c = await s.ctx.newPage();
+  for (const p of [b, c]) p.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
+  await c.goto(`${BASE}/privacy/#analytics`, { waitUntil: "networkidle" }); await settle(c);
+  ok(/Counting is on/.test(await c.locator("[data-analytics-settings]").innerText()), "cross-tab: tab C's privacy settings say counting is on");
+  await b.goto(`${BASE}/privacy/#analytics`, { waitUntil: "networkidle" }); await settle(b);
+  await b.getByRole("button", { name: "Turn counting off" }).click(); await settle(b);
+  ok((await s.stored())?.c === "no", "cross-tab: tab B stored no");
+  n = s.sent.length;
+  await a.click(".site-header [data-search-open]"); await settle(a); await a.keyboard.press("Escape");
+  ok(s.sent.length === n, `cross-tab: tab A sends nothing after tab B turned counting off (${s.sent.length - n} sent)`);
+  ok(/Counting is off/.test(await c.locator("[data-analytics-settings]").innerText()), "cross-tab: tab C's open privacy page now says counting is off");
+  await s.ctx.close();
+}
+
 // 5. Global Privacy Control: no question, nothing loaded or sent, and the stored choice is never even read.
 {
   const s = await session({ gpc: true });

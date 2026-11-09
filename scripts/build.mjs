@@ -784,7 +784,7 @@ const drinkCard = (r, g) => {
 };
 const drinkGrid = (r) => `<ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => drinkCard(r, g)).join("")}</ul>`;
 const drinkTypeNote = drinkGroups.some((g) => g.photo === "type") ? `<p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>` : "";
-// Home gallery: the booth-shoot noodles. Drinks have their own page (589, Preston: a separate Drinks section, not a tab in
+// Home gallery: the booth-shoot noodles. Drinks have their own page (589, the owner: a separate Drinks section, not a tab in
 // the food gallery), linked from the gallery's head so phones see it before the 24 noodles.
 const homeGallery = (r) => `
 <section class="gal" id="gallery" aria-labelledby="gal-h">
@@ -1377,7 +1377,7 @@ ${ctaBand(r)}
 }));
 
 // ---------- Drinks ----------
-// Its own page (589, Preston: a separate Drinks section with his photos). The same cards as before, unchanged: each drink's
+// Its own page (589, the owner: a separate Drinks section with the owner's photos). The same cards as before, unchanged: each drink's
 // own photo, name, size and credit from data/drink-photos.json. Each card has an anchor (#drink-…) for search.
 addPage("drinks/", layout({
   urlPath: "drinks/",

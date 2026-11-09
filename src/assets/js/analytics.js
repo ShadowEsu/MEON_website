@@ -18,22 +18,25 @@
   var HOSTS = (me.getAttribute("data-hosts") || "").split(/\s+/).filter(Boolean);
   var ROOT = (document.body && document.body.getAttribute("data-root")) || "/";
   var gpc = navigator.globalPrivacyControl === true;
-  var memory = null; // this page's choice when the browser won't let us store it
+  var memory = null; // this page's choice, only while the browser won't store it (unsaved) or won't let us read storage
   var unsaved = false;
   var loaded = false;
 
+  // The stored choice is the authority every open tab shares, so turning counting off in one tab stops the others at
+  // their next send. memory stands in only when storage can't be read, or when this page's own choice couldn't be
+  // stored; even then a "no" stored by another tab wins.
   function read() {
     if (gpc) return "no";
-    if (memory) return memory;
+    var stored;
     try {
       var v = JSON.parse(localStorage.getItem(KEY) || "null");
-      return v && v.v === VERSION && (v.c === "yes" || v.c === "no") ? v.c : null;
-    } catch (e) { return null; }
+      stored = v && v.v === VERSION && (v.c === "yes" || v.c === "no") ? v.c : null;
+    } catch (e) { return memory; }
+    return unsaved && stored !== "no" ? memory : stored;
   }
   function save(c) {
-    memory = c;
-    try { localStorage.setItem(KEY, JSON.stringify({ v: VERSION, c: c, t: new Date().toISOString().slice(0, 10) })); unsaved = false; }
-    catch (e) { unsaved = true; }
+    try { localStorage.setItem(KEY, JSON.stringify({ v: VERSION, c: c, t: new Date().toISOString().slice(0, 10) })); memory = null; unsaved = false; }
+    catch (e) { memory = c; unsaved = true; }
   }
 
   var localTest = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
@@ -211,6 +214,17 @@
     row.hidden = !row.childNodes.length;
     if (focus) status.focus();
   }
+  // Another tab answered or changed the choice: this page's question and settings show the same answer. (Counting
+  // itself already follows the stored choice, because every send calls read().)
+  window.addEventListener("storage", function (e) {
+    if (e.key !== KEY && e.key !== null) return;
+    var bar = document.querySelector(".consent-bar");
+    if (bar && read() !== null) {
+      if (bar.contains(document.activeElement)) document.activeElement.blur();
+      bar.remove();
+    }
+    renderSettings();
+  });
 
   window.meonAnalytics = { version: VERSION };
   load();
