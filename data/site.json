@@ -29,7 +29,9 @@
   "hoursNote": "Hours change now and then; the latest are on our Instagram, @meonnoodles.",
   "orderingNote": "Walk in, choose a packet and cook it your way. Dine in or take it away.",
   "analytics": {
-    "vercel": false
+    "_readme": "Visit and click counting (ledger 589): Vercel Web Analytics, asked first with Allow / No thanks. Keep vercel false until the owner approves the cost and Web Analytics is enabled on the Vercel project. hosts are every hostname that serves the site's pages: counting stays off on any other. www.meon.au only redirects to meon.au, so it never needs listing.",
+    "vercel": false,
+    "hosts": ["meon-noodles.vercel.app", "meon.au"]
   },
   "googleSiteVerification": "yAWLKCAh0cClV1B2YihYCaivUctHfrPJhs9aEJvf0-I",
   "bingSiteVerification": "",

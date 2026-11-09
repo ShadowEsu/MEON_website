@@ -80,6 +80,32 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
+// Visit and click counting (ledger 589): with data/site.json analytics.vercel off, no page may load or mention Vercel's
+// analytics script. With it on, every page carries analytics.js (which asks
+// first) and nothing else loads Vercel's script; the privacy page has the settings control. A MEON_ANALYTICS_PREVIEW
+// build (localhost in data-hosts) fails here, so it can't pass as a release build.
+{
+  const cfg = JSON.parse(fs.readFileSync(path.join(OUT, "..", "data", "site.json"), "utf8")).analytics || {};
+  const privacyHtml = fs.readFileSync(path.join(OUT, "privacy", "index.html"), "utf8");
+  for (const file of htmlFiles) {
+    const rel = path.relative(OUT, file);
+    const html = fs.readFileSync(file, "utf8");
+    const tags = html.match(/<script src="[^"]*assets\/js\/analytics\.js[^"]*"[^>]*>/g) || [];
+    const vercelRefs = (html.match(/_vercel\/insights/g) || []).length;
+    if (cfg.vercel !== true) {
+      if (tags.length || vercelRefs) problems.push(`${rel}: loads visit counting while data/site.json analytics.vercel is off`);
+      continue;
+    }
+    if (tags.length !== 1) { problems.push(`${rel}: needs analytics.js exactly once (has ${tags.length})`); continue; }
+    const t = tags[0];
+    if (!/\sdefer\b/.test(t) || !/data-version="analytics-\d{4}-\d{2}-\d{2}"/.test(t) || !/data-src="\/_vercel\/insights\/script\.js"/.test(t)) problems.push(`${rel}: analytics.js tag lacks defer, data-version or data-src`);
+    const hosts = (t.match(/data-hosts="([^"]*)"/) || [, ""])[1].split(/\s+/).filter(Boolean);
+    if (!hosts.length) problems.push(`${rel}: analytics.js has no data-hosts`);
+    if (hosts.some((h) => /^(localhost|127\.)/.test(h))) problems.push(`${rel}: a MEON_ANALYTICS_PREVIEW test build (localhost in data-hosts); rebuild without it before releasing`);
+    if (vercelRefs !== 1) problems.push(`${rel}: Vercel's analytics script may only be named in analytics.js's data-src (found ${vercelRefs})`);
+  }
+  if (cfg.vercel === true && !/data-analytics-settings/.test(privacyHtml)) problems.push("privacy/index.html: analytics is on but the page has no settings control (data-analytics-settings)");
+}
 // Packet badges from the owner's notes (Security MUST-M1, 2 Nov 2026): a rank or award claim has to be true of that packet
 // and sourced. These were not: "India's favourite" (brand-level, on 4 Maggi packets), "Crowd favourite" (2nd/3rd most
 // popular), "A lighter pick" (unsourced health claim), an unattributed "No.1 ramen in the world" or "Top 10 noodle 2021",
@@ -231,6 +257,24 @@ for (const f of fs.readdirSync(VID).filter((f) => /\.(av1|hevc)\.mp4$/.test(f)))
   const h264 = path.join(VID, `${clip}.mp4`);
   if (!fs.existsSync(h264)) problems.push(`src/assets/video/${f}: no ${clip}.mp4 to fall back to`);
   else if (!entry || entry.h264_sha256 !== crypto.createHash("sha256").update(fs.readFileSync(h264)).digest("hex")) problems.push(`src/assets/video/${f}: made from an older ${clip}.mp4; remake its copies (meon-work/clips) or delete them`);
+}
+// Search results and the Drinks page (589): every search result opens a built page, and a result with an #anchor
+// (drinks/#drink-pepsi, pairings-and-sides/#egg) lands on it. Every drink photo in data/drink-photos.json shows on drinks/.
+const pageIds = new Map();
+for (const x of searchIndex) {
+  const [p, frag] = x.u.split("?")[0].split("#");
+  const file = path.join(OUT, p, "index.html");
+  if (!fs.existsSync(file)) { problems.push(`search-index.json: "${x.t}" opens ${x.u}, which isn't a page`); continue; }
+  if (!frag) continue;
+  if (!pageIds.has(file)) pageIds.set(file, new Set([...fs.readFileSync(file, "utf8").matchAll(/\sid="([^"]+)"/g)].map((m) => m[1])));
+  if (!pageIds.get(file).has(frag)) problems.push(`search-index.json: "${x.t}" opens ${x.u}, but that page has no #${frag}`);
+}
+const drinksPage = path.join(OUT, "drinks", "index.html");
+if (!fs.existsSync(drinksPage)) problems.push("drinks/: the Drinks page is missing");
+else {
+  const drinksHtml = fs.readFileSync(drinksPage, "utf8");
+  for (const g of JSON.parse(fs.readFileSync(path.join(DATA, "drink-photos.json"), "utf8")).groups)
+    if (!drinksHtml.includes(`/${g.img}?v=`)) problems.push(`drinks/index.html: doesn't show the photo ${g.img} (${g.drinks.join(", ")})`);
 }
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }

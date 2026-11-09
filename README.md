@@ -6,7 +6,7 @@ MEON is a cook-it-yourself instant-noodle bar at Shop 8, 45 Francis Street, Nort
 - Noodle library with search, country / style / spice / diet filters and sorting (filters are shareable URLs, e.g. `/noodles/?country=jp&type=Soup`)
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download. Both are staff pages hidden from Google; no codes are printed yet, so the public pages don't mention QR codes
-- Country pages, Pairings and sides (`/pairings-and-sides/`: pairings, egg and cheese, ready-to-eat sides, then the drinks; the old `/toppings/` address redirects there), About, Visit
+- Country pages, Pairings and sides (`/pairings-and-sides/`: pairings, egg and cheese, then ready-to-eat sides; the old `/toppings/` address redirects there), Drinks (`/drinks/`: every drink with its photo), About, Visit
 - Two list pages built only from our own spice ratings: `/spiciest-noodles/` (every noodle rated 3 to 5, grouped by rating, hottest first) and `/buldak/` (every Samyang Buldak we stock, hottest to mildest). Counts, names and the mildest Buldak are computed at build time, so they follow `data/noodles.json` and `data/catalogue.json`; the build stops if Shin Noodle Soup Original (the 3 the scale is set against) goes missing or changes rating
 - No prices anywhere: prices change, so they stay off the site
 - Professional, calm design: one typeface (Bricolage Grotesque), ink and white with MEON red as the only colour, hairlines instead of boxes, no emojis (custom line icons and real flag artwork)
@@ -47,7 +47,7 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 | Noodle photos | `src/assets/img/noodles/<slug>.webp` (800×800) + `src/assets/img/noodles/sm/<slug>.webp` (400×400), mapped in `data/images.json` |
 | Countries (intro copy, flag, colour) | `data/countries.json` |
 | Pairings and sides (groups: Meat and seafood, Vegetables and more, Egg and cheese, Sides) | `data/toppings.json` |
-| Drink photos on the home gallery and drinks menu | `data/drink-photos.json`; remove withdrawn drinks from both its groups and `data/catalogue.json` |
+| Drink photos on the Drinks page | `data/drink-photos.json`; remove withdrawn drinks from both its groups and `data/catalogue.json` |
 | Cook time (230 s, shown as 3:50) | `COOK_SECONDS` and `COOK_TIME` in `scripts/lib/copy.mjs` |
 | Spice ladder copy (0 to 5, against Shin Ramyun = 3) | `SPICE_LADDER` in `scripts/build.mjs` |
 | Logo | traced from the official artwork by `python3 scripts/trace_logo.py` into `scripts/lib/logo-mixed.json`; drawn by `logoBadge()` (header), `logoMark()` (square) and `logoLockup()` (footer) in `scripts/lib/art.mjs` |
@@ -59,14 +59,14 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 - `data/source/Meon_Website_format2.md` — export of the Drive doc *Meon_Website_format2.docx* (names, countries, diet, fun notes, and spice for noodles new to the site). Source of truth.
 - `data/source/meon_wix_cms_fixed_final.csv` — Wix CMS export (fills missing soup/dry and weights).
 - Spice: every noodle is rated 0 to 5 against Shin Ramyun = 3 (Indomie Mi Goreng = 1, Mama Creamy Tom Yum = 2), recalibrated on 28 Oct 2026. Re-running `scripts/parse_library.py` keeps the spice already in `data/noodles.json` and takes the doc's spice only for noodles new to the site.
-- `data/catalogue.json` — items from MEON's Square catalogue export (16 Oct 2026), with no prices. It adds the till's packet weight to 14 noodles where it differs, 27 noodles that are in the till but not yet in the Drive doc (`extraNoodles`), and the drinks on the Pairings and sides page (plus Milkis Peach, which isn't in the export: the owner's photo of 30 Oct 2026 shows MEON sells it). The till's sides live in `data/toppings.json`. SKUs, stock counts and barcodes are never copied in.
+- `data/catalogue.json` — items from MEON's Square catalogue export (16 Oct 2026), with no prices. It adds the till's packet weight to 14 noodles where it differs, 27 noodles that are in the till but not yet in the Drive doc (`extraNoodles`), and the drinks on the Drinks page (plus Milkis Peach, which isn't in the export: the owner's photo of 30 Oct 2026 shows MEON sells it). The till's sides live in `data/toppings.json`. SKUs, stock counts and barcodes are never copied in.
 - Photos: noodle and bowl photos come from MEON's own photo shoot (see `docs/operations.md`). Pairing and side photos are MEON's own or free-licence library photos. `docs/credits.md` lists the source and licence of every image MEON didn't make itself. Noodles without a shoot photo show an illustrated packet. Every photo on the site needs its alt text in `data/photo-alts.json` (what the photo shows); delete photo files the site stops using, because `npm run check` fails on them.
-- Current availability confirmed by the owner overrides older catalogue exports. Remove withdrawn pairings/sides from `data/toppings.json` and their now-unused photo assets; remove withdrawn drinks from both catalogue data and photo groups. The drinks menu reuses the same licensed, captioned photo groups as the home gallery. Representative photos are labelled as drink types, not exact branded products; optimized 320/640 px web copies are not a claim that every source is native 4K.
+- Current availability confirmed by the owner overrides older catalogue exports. Remove withdrawn pairings/sides from `data/toppings.json` and their now-unused photo assets; remove withdrawn drinks from both catalogue data and photo groups. The Drinks page shows every drink with its photo from `data/drink-photos.json`. Representative photos are labelled as drink types, not exact branded products; optimized 320/640 px web copies are not a claim that every source is native 4K.
 
 ## Dev helpers
 
 ```bash
-PW_CHANNEL=chrome PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # search, filters, roulette, timer, QR generator, keyboard focus (1280 and 390 px)
+PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # search, filters, roulette, timer, QR generator, keyboard focus, hero video playback (1280 and 390 px)
 PLAYWRIGHT_PATH=... node scripts/sweep.mjs                              # every page × phone/desktop: console errors + overflow
 PLAYWRIGHT_PATH=... node scripts/screenshot.mjs <outDir> / /noodles/    # full-page screenshots
 python3 scripts/make_qr_pngs.py [outDir]                                # compact 1-bit QR PNGs for Drive (+ manifest.csv with md5s)

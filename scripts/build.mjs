@@ -118,6 +118,8 @@ const pairings = readJSON("toppings.json").map(withPhoto);
 // photos. Each row in data/drink-photos.json is one product, with required source credits.
 // Every stocked drink must have exactly one photo.
 const drinks = catalogue.drinks;
+// Each drink card's anchor on the Drinks page (drinks/#drink-pepsi), for search results and links from other pages.
+const drinkId = (name) => "drink-" + name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   const where = `data/drink-photos.json "${g.type}"`;
   const items = g.drinks.map((name) => {
@@ -130,12 +132,13 @@ const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   if (g.photo === "exact" && !shows) throw new Error(`${where}: an exact photo needs "shows" naming one of its own drinks`);
   if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || "") && /^(https:\/\/commons\.wikimedia\.org\/wiki\/File:|https:\/\/world\.openfoodfacts\.org\/product\/)/.test(g.source?.page || ""))) throw new Error(`${where}: a credit needs author, licence, a creativecommons.org licence URL and a Commons file or Open Food Facts product page in source.page`);
   if (!g.credit && /\bBY\b/.test(g.source?.licence || "")) throw new Error(`${where}: a CC BY/BY-SA photo needs a credit on the page`);
-  return { ...g, items, shows, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
+  return { ...g, items, shows, id: drinkId(items.length === 1 ? items[0].name : g.type), img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
 });
 for (const d of drinks) {
   const n = drinkGroups.filter((g) => g.drinks.includes(d.name)).length;
   if (n !== 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs exactly 1`);
 }
+for (const [i, g] of drinkGroups.entries()) if (drinkGroups.findIndex((x) => x.id === g.id) !== i) throw new Error(`data/drink-photos.json: two drink cards would share the anchor #${g.id}`);
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -188,6 +191,7 @@ const NAV = [
   ["noodles/", "Noodles"],
   ["countries/", "Countries"],
   ["pairings-and-sides/", "Pairings and sides"],
+  ["drinks/", "Drinks"],
   ["about/", "About"],
 ];
 // Public wording (owner via BOSS, 8 Nov 2026): no noodle count anywhere in public copy, titles, meta or JSON-LD. The site
@@ -233,6 +237,17 @@ const fitDesc = (head, body, extras = [], max = 160) => {
   return d;
 };
 
+// Visit and click counting (ledger 589): assets/js/analytics.js asks first (Allow / No thanks), honours Global Privacy
+// Control, and loads Vercel Web Analytics only after Allow, on data/site.json analytics.hosts. Off unless
+// analytics.vercel is true (its cost needs the owner's yes). MEON_ANALYTICS_PREVIEW=1 turns it on for a local test build,
+// with localhost as the only host, so scripts/analytics-smoke.mjs can run it against a mock; never set it on Vercel.
+const ANALYTICS_PREVIEW = process.env.MEON_ANALYTICS_PREVIEW === "1";
+const ANALYTICS_ON = site.analytics?.vercel === true || ANALYTICS_PREVIEW;
+const ANALYTICS_CONSENT = "analytics-2026-11-08";
+const ANALYTICS_HOSTS = ANALYTICS_PREVIEW ? ["localhost"] : site.analytics?.hosts || [];
+if (ANALYTICS_ON && !ANALYTICS_HOSTS.length) throw new Error("data/site.json analytics.hosts: list the live hostnames before turning analytics on");
+if (ANALYTICS_PREVIEW) console.log("Note: MEON_ANALYTICS_PREVIEW=1, so visit counting is on for localhost in this build. Don't deploy it.");
+
 // `overlay`: the page opens on a video hero: no announcement line above it, and the header gets the video pause button
 // that takes over once the hero's own button scrolls under the header.
 function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/shoot/og-meon.jpg", preload = "", noindex = false, overlay = false, jsonld = [], scripts = [] }) {
@@ -245,8 +260,9 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
   const navLinks = NAV.map(([href, label]) => href === "noodles/"
     ? `<div class="nav-item has-mega"><a href="${r(href)}"${cur(href)}>${label}</a><button class="mega-toggle" type="button" aria-expanded="false" aria-controls="mega-noodles" aria-label="Show the noodle menu">${icon.chevron}</button>${megaNoodles(r)}</div>`
     : `<a href="${r(href)}"${cur(href)}>${label}</a>`).join("");
-  const analytics = site.analytics?.vercel
-    ? `<script>(function(){var h=location.hostname;if(location.protocol.indexOf("http")!==0||/^(localhost|127\\.|0\\.0\\.0\\.0|\\[::1\\])/.test(h))return;window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};var s=document.createElement("script");s.defer=true;s.src="/_vercel/insights/script.js";document.head.appendChild(s);})();</script>`
+  const analytics = ANALYTICS_ON
+    ? `<link rel="stylesheet" href="${r("assets/css/analytics.css")}?v=${BUILD_ID}">
+<script src="${r("assets/js/analytics.js")}?v=${BUILD_ID}" defer data-version="${ANALYTICS_CONSENT}" data-src="/_vercel/insights/script.js" data-hosts="${esc(ANALYTICS_HOSTS.join(" "))}"></script>`
     : "";
   const restaurant = {
     "@context": "https://schema.org",
@@ -369,6 +385,7 @@ ${body(r)}
         <ul>
           <li><a href="${r("countries/")}">Countries</a></li>
           <li><a href="${r("pairings-and-sides/")}">Pairings and sides</a></li>
+          <li><a href="${r("drinks/")}">Drinks</a></li>
           <li><a href="${r("about/")}">About</a></li>
           <li><a href="${r("visit/")}">Visit</a></li>
           <li><a href="${r("privacy/")}">Privacy</a></li>
@@ -763,32 +780,21 @@ const drinkCard = (r, g) => {
   const lines = one
     ? `<span class="gal-type">${esc(g.items[0].name)}</span>${g.items[0].size ? `<span class="gal-at">${drinkSize(g.items[0].size)}</span>` : ""}`
     : `<span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>`;
-  return `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}${drinkCredit(g)}</li>`;
+  return `<li class="gal-card gal-card--drink" id="${g.id}"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}${drinkCredit(g)}</li>`;
 };
 const drinkGrid = (r) => `<ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => drinkCard(r, g)).join("")}</ul>`;
 const drinkTypeNote = drinkGroups.some((g) => g.photo === "type") ? `<p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>` : "";
+// Home gallery: the booth-shoot noodles. Drinks have their own page (589, the owner: a separate Drinks section, not a tab in
+// the food gallery), linked from the gallery's head so phones see it before the 24 noodles.
 const homeGallery = (r) => `
 <section class="gal" id="gallery" aria-labelledby="gal-h">
   <div class="wrap">
     <div class="gal-head">
       <h2 id="gal-h">Pick a noodle. Grab a drink.</h2>
-      <div class="gal-switch" role="group" aria-label="Show in the gallery" hidden>
-        <button class="pill" type="button" data-gal-show="noodles" aria-controls="gal-noodles" aria-pressed="true">Noodles</button>
-        <button class="pill" type="button" data-gal-show="drinks" aria-controls="gal-drinks" aria-pressed="false">Drinks</button>
-      </div>
+      <a class="btn btn--line btn--sm" href="${r("drinks/")}">See the drinks</a>
     </div>
-    <div class="gal-panel" id="gal-noodles" data-gal-panel="noodles">
-      <h3 class="visually-hidden">Noodles</h3>
-      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
-      <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all noodles</a></p>
-    </div>
-    <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
-      <h3 class="visually-hidden">Drinks</h3>
-      ${drinkGrid(r)}
-      ${drinkTypeNote}
-      <p class="gal-note">The fridge changes day to day, so ask the crew what's in.</p>
-      <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
-    </div>
+    <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
+    <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all noodles</a></p>
   </div>
 </section>`;
 
@@ -1346,11 +1352,11 @@ const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="$
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
-  seoTitle: "Noodle Pairings, Sides and Drinks · MEON Perth",
+  seoTitle: "Noodle Pairings and Sides · MEON Perth",
   active: "pairings-and-sides/",
   overlay: true,
   jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
-  description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
+  description: "Pairings and sides at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: `${Math.floor(pairings.length / 10) * 10}+ pairings and sides`, title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.",
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
@@ -1362,10 +1368,35 @@ ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}">
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2>Drinks</h2>
+  <p class="lead pairing-note">The drinks in the fridge have their own page.</p>
+  <p class="gal-more"><a class="btn btn--line" href="${r("drinks/")}">See the drinks</a></p>
+</div></section>
+<section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
+${ctaBand(r)}
+`,
+}));
+
+// ---------- Drinks ----------
+// Its own page (589, the owner: a separate Drinks section with the owner's photos). The same cards as before, unchanged: each drink's
+// own photo, name, size and credit from data/drink-photos.json. Each card has an anchor (#drink-…) for search.
+addPage("drinks/", layout({
+  urlPath: "drinks/",
+  title: "Drinks",
+  seoTitle: "Drinks at MEON Noodles Perth",
+  active: "drinks/",
+  jsonld: [crumbLd("Drinks", "drinks/")],
+  description: fitDesc("The drinks in MEON's fridge, to go with your noodles:", `${drinks.map((d) => d.name).join(", ")}.`),
+  body: (r) => `
+${pageHero(r, { crumbs: [["Drinks"]], title: "Drinks.", split: false, lead: "Something cold to go with your noodles. These are the drinks we stock; the fridge changes day to day, so ask the crew what's in.", seed: 3 })}
+<section class="section section--tight" id="drinks-list" aria-labelledby="drinks-h" data-analytics-place="drinks"><div class="wrap">
+  <h2 id="drinks-h" class="visually-hidden">The drinks</h2>
   ${drinkGrid(r)}
   ${drinkTypeNote}
 </div></section>
-<section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
+<section class="section section--soft section--tight"><div class="wrap">
+  <h2>With your noodles</h2>
+  ${linkRow(r, [["pairings-and-sides/", "Pairings and sides"], ["noodles/", "All noodles"], ["spiciest-noodles/", "The spiciest noodles"]])}
+</div></section>
 ${ctaBand(r)}
 `,
 }));
@@ -1413,7 +1444,7 @@ addPage("privacy/", layout({
   jsonld: [crumbLd("Privacy", "privacy/")],
   description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
+${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: ANALYTICS_ON ? "This site has no accounts and no ads, and it only counts visits if you say yes. Here is everything it does with your information." : "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
 <section class="section section--tight"><div class="wrap split split--top">
   <div>
     <h2>Reviews.</h2>
@@ -1427,7 +1458,8 @@ ${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has n
     <ul>
       <li>which pages you've already reviewed, so the form doesn't ask twice;</li>
       <li>whether you turned the background music on;</li>
-      <li>whether you paused or played the videos, until you close the tab.</li>
+      <li>whether you paused or played the videos, until you close the tab${ANALYTICS_ON ? ";" : "."}</li>${ANALYTICS_ON ? `
+      <li>your answer to “Can we count visits?”, the version of that question and the date, so we don't ask on every page.</li>` : ""}
     </ul>
     <p>Clearing your browser's site data removes them.</p>
   </div>
@@ -1435,12 +1467,18 @@ ${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has n
 <section class="section section--tight"><div class="wrap split split--top">
   <div>
     <h2>Services we use.</h2>
-    <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
+    <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font${ANALYTICS_ON ? " and the visit counter" : ""}, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
   </div>
-  <div>
+  <div${ANALYTICS_ON ? ' id="analytics"' : ""}>${ANALYTICS_ON ? `
+    <h2>Counting visits.</h2>
+    <p>Only if you tap Allow, the site loads Vercel Web Analytics and sends Vercel a note for each page you open and each link or button you tap. A tap note says only what kind of link or button it was and which part of the page it sits in (for example “directions” in the “footer”), never what you typed, searched for or wrote. The page address goes without anything after a ? or #, except a mark that you arrived by scanning a shelf QR code.</p>
+    <p>Vercel uses no cookies for this. It tells visits apart with a code made from your connection that changes every day, so it can't follow you from one day to the next or onto other websites. With each note it records your approximate location (country, region and city), browser, operating system, device type and the site that sent you here. We see totals, not people.</p>
+    <p>If you tap No thanks, don't answer, or your browser sends a Global Privacy Control signal, nothing is loaded or sent. You can change your answer here at any time.</p>
+    <div class="consent-settings" data-analytics-settings><p class="consent-status">Counting needs JavaScript, so with JavaScript off nothing is counted.</p></div>
+    <p class="note">Visit-counting question version ${ANALYTICS_CONSENT}. Review agreement version ${REVIEW_CONSENT}. Last updated 8 November 2026.</p>` : `
     <h2>No tracking.</h2>
     <p>We don't use analytics, advertising or tracking cookies. If that changes, we'll update this page first, and anything that needs your agreement will ask for it.</p>
-    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>
+    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>`}
   </div>
 </div></section>
 ${ctaBand(r)}
@@ -1650,8 +1688,10 @@ const searchIndex = [
   ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.thumb, f: n.countryCode, k: [n.flavour, n.diet, n.note, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
   ...countries.map((c) => ({ g: "Countries", t: c.name, s: `${countFor((n) => n.country === c.name)} noodles · ${c.headline}`, u: `countries/${c.slug}/`, f: c.code, k: "country" })),
   ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.small || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
+  ...drinkGroups.flatMap((g) => g.items.map((d) => ({ g: "Drinks", t: d.name, s: d.size ? `Drink · ${d.size}` : "Drink", u: `drinks/#${g.id}`, i: g.small, k: `drink ${g.type}` }))),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
+    ["Drinks", "Cold drinks from the fridge", "drinks/", "drop"],
     ...(HAS_VEG ? [["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"]] : []),
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
     ["Spiciest noodles", `${hot.length} rated 3 to 5, hottest first`, "spiciest-noodles/", "flame"],
@@ -1666,9 +1706,9 @@ write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 // IndexNow (Bing, Yandex, Seznam, Naver; SEO 2 Nov 2026): the key file proves the pings in scripts/indexnow.mjs come from us.
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
-const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
+const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ["drinks/", drinkGroups.map((g) => g.img)], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia, with a wall of instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
+write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia, with a wall of instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles and ready-to-eat sides\n- [Drinks](${SITE_URL}/drinks/): the drinks we stock, with photos\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
