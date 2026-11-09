@@ -7,14 +7,14 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 - **Structured data (schema.org)** that Google reads directly:
   - `Restaurant` on the home page: name, logo, photos, cuisine, menu link, the Google listing as the map link, the street address (Shop 8, 45 Francis Street, Northbridge WA 6003), map coordinates and opening hours. The hours are the same sourced rows the Visit page shows (`hours` in `data/site.json`), and `npm run check` fails if the two ever differ. Once `hoursSource.checked` is more than 90 days old, the build leaves the hours out of the schema until someone re-checks them and updates `checked`, so search engines never keep stale hours for long. No price range, ratings or reviews: those need the owner's facts first. It still needs a phone number, if MEON gets one.
   - `WebSite`
-  - a full `Menu` of all 199 noodles, grouped by country
+  - a full `Menu` of every noodle, grouped by country
   - a `MenuItem` for every noodle (description with country and packet size, and diet; no price, because prices stay off the site)
   - `BreadcrumbList` on every noodle and country page, and on Countries, Pairings and sides, About, Visit and Privacy
   - an `ItemList` on each country page
   - `FAQPage` on the Visit page
   - All of it passes validator.schema.org with no errors or warnings. Google doesn't show special "rich results" for menus, FAQs or the sitelinks search box any more, so the markup helps Google understand the pages but won't change how they look in results.
 - **Titles and descriptions**: every page has its own title and description, for example "Indomie Soto Mie (Indonesia) · Instant Noodles at MEON Perth", "Korean Instant Noodles in Perth (50)" and "Visit MEON Noodles · Instant Noodle Bar in Northbridge, Perth". Very long noodle names use a shorter "· MEON Perth" ending so the title fits in search results.
-- **199 unique noodle pages**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
+- **A unique page for every noodle**, each with real content, which gives Google something to match for searches like "Buldak carbonara Perth" or "where to buy Chapagetti Perth".
 - **An FAQ on the Visit page**: questions people actually ask (location, online orders and delivery, how many noodles, vegetarian options, how spicy, how long the noodles take).
 - **Sitemaps**: `sitemap.xml` includes image entries, so photos can appear in Google Images.
 - **Robots**: `robots.txt` points to the sitemap, and the staff QR pages are hidden from Google.
@@ -77,7 +77,7 @@ Mismatched details confuse Google and lower your ranking.
   - Perth Now food
   - So Perth
   - WA Today
-- Invite Perth food TikTokers and Instagrammers. "199 noodles from 12 countries" and the Buldak challenge are easy stories.
+- Invite Perth food TikTokers and Instagrammers. The wall of noodles from across Asia and Australia and the Buldak challenge are easy stories.
 - University food clubs (Curtin and UWA are close by) and local community pages.
 - Every article that links to the website helps it rank.
 
