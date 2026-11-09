@@ -237,6 +237,17 @@ const fitDesc = (head, body, extras = [], max = 160) => {
   return d;
 };
 
+// Visit and click counting (ledger 589): assets/js/analytics.js asks first (Allow / No thanks), honours Global Privacy
+// Control, and loads Vercel Web Analytics only after Allow, on data/site.json analytics.hosts. Off unless
+// analytics.vercel is true (its cost needs the owner's yes). MEON_ANALYTICS_PREVIEW=1 turns it on for a local test build,
+// with localhost as the only host, so scripts/analytics-smoke.mjs can run it against a mock; never set it on Vercel.
+const ANALYTICS_PREVIEW = process.env.MEON_ANALYTICS_PREVIEW === "1";
+const ANALYTICS_ON = site.analytics?.vercel === true || ANALYTICS_PREVIEW;
+const ANALYTICS_CONSENT = "analytics-2026-11-08";
+const ANALYTICS_HOSTS = ANALYTICS_PREVIEW ? ["localhost"] : site.analytics?.hosts || [];
+if (ANALYTICS_ON && !ANALYTICS_HOSTS.length) throw new Error("data/site.json analytics.hosts: list the live hostnames before turning analytics on");
+if (ANALYTICS_PREVIEW) console.log("Note: MEON_ANALYTICS_PREVIEW=1, so visit counting is on for localhost in this build. Don't deploy it.");
+
 // `overlay`: the page opens on a video hero: no announcement line above it, and the header gets the video pause button
 // that takes over once the hero's own button scrolls under the header.
 function layout({ urlPath, title, seoTitle = "", description, body, active = "", image = "assets/img/shoot/og-meon.jpg", preload = "", noindex = false, overlay = false, jsonld = [], scripts = [] }) {
@@ -249,8 +260,9 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
   const navLinks = NAV.map(([href, label]) => href === "noodles/"
     ? `<div class="nav-item has-mega"><a href="${r(href)}"${cur(href)}>${label}</a><button class="mega-toggle" type="button" aria-expanded="false" aria-controls="mega-noodles" aria-label="Show the noodle menu">${icon.chevron}</button>${megaNoodles(r)}</div>`
     : `<a href="${r(href)}"${cur(href)}>${label}</a>`).join("");
-  const analytics = site.analytics?.vercel
-    ? `<script>(function(){var h=location.hostname;if(location.protocol.indexOf("http")!==0||/^(localhost|127\\.|0\\.0\\.0\\.0|\\[::1\\])/.test(h))return;window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};var s=document.createElement("script");s.defer=true;s.src="/_vercel/insights/script.js";document.head.appendChild(s);})();</script>`
+  const analytics = ANALYTICS_ON
+    ? `<link rel="stylesheet" href="${r("assets/css/analytics.css")}?v=${BUILD_ID}">
+<script src="${r("assets/js/analytics.js")}?v=${BUILD_ID}" defer data-version="${ANALYTICS_CONSENT}" data-src="/_vercel/insights/script.js" data-hosts="${esc(ANALYTICS_HOSTS.join(" "))}"></script>`
     : "";
   const restaurant = {
     "@context": "https://schema.org",
@@ -1432,7 +1444,7 @@ addPage("privacy/", layout({
   jsonld: [crumbLd("Privacy", "privacy/")],
   description: "What the MEON Noodles website does with your information: guest reviews, the small notes it keeps in your browser, and the services it loads.",
   body: (r) => `
-${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
+${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: ANALYTICS_ON ? "This site has no accounts and no ads, and it only counts visits if you say yes. Here is everything it does with your information." : "This site has no accounts, no ads and no tracking. Here is everything it does with your information.", seed: 5 })}
 <section class="section section--tight"><div class="wrap split split--top">
   <div>
     <h2>Reviews.</h2>
@@ -1446,7 +1458,8 @@ ${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has n
     <ul>
       <li>which pages you've already reviewed, so the form doesn't ask twice;</li>
       <li>whether you turned the background music on;</li>
-      <li>whether you paused or played the videos, until you close the tab.</li>
+      <li>whether you paused or played the videos, until you close the tab${ANALYTICS_ON ? ";" : "."}</li>${ANALYTICS_ON ? `
+      <li>your answer to “Can we count visits?”, the version of that question and the date, so we don't ask on every page.</li>` : ""}
     </ul>
     <p>Clearing your browser's site data removes them.</p>
   </div>
@@ -1454,12 +1467,18 @@ ${pageHero(r, { crumbs: [["Privacy"]], title: "Privacy.", lead: "This site has n
 <section class="section section--tight"><div class="wrap split split--top">
   <div>
     <h2>Services we use.</h2>
-    <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
+    <p>Vercel hosts the site and keeps standard server logs, which include your IP address. Everything on our pages, including the font${ANALYTICS_ON ? " and the visit counter" : ""}, loads from this site. The one exception is the reviews section: when you scroll to it, your browser fetches the reviews from Supabase, which sees your IP address. Links to Google Maps and Instagram take you to those services, under their own privacy policies.</p>
   </div>
-  <div>
+  <div${ANALYTICS_ON ? ' id="analytics"' : ""}>${ANALYTICS_ON ? `
+    <h2>Counting visits.</h2>
+    <p>Only if you tap Allow, the site loads Vercel Web Analytics and sends Vercel a note for each page you open and each link or button you tap. A tap note says only what kind of link or button it was and which part of the page it sits in (for example “directions” in the “footer”), never what you typed, searched for or wrote. The page address goes without anything after a ? or #, except a mark that you arrived by scanning a shelf QR code.</p>
+    <p>Vercel uses no cookies for this. It tells visits apart with a code made from your connection that changes every day, so it can't follow you from one day to the next or onto other websites. With each note it records your approximate location (country, region and city), browser, operating system, device type and the site that sent you here. We see totals, not people.</p>
+    <p>If you tap No thanks, don't answer, or your browser sends a Global Privacy Control signal, nothing is loaded or sent. You can change your answer here at any time.</p>
+    <div class="consent-settings" data-analytics-settings><p class="consent-status">Counting needs JavaScript, so with JavaScript off nothing is counted.</p></div>
+    <p class="note">Visit-counting question version ${ANALYTICS_CONSENT}. Review agreement version ${REVIEW_CONSENT}. Last updated 8 November 2026.</p>` : `
     <h2>No tracking.</h2>
     <p>We don't use analytics, advertising or tracking cookies. If that changes, we'll update this page first, and anything that needs your agreement will ask for it.</p>
-    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>
+    <p class="note">Review agreement version ${REVIEW_CONSENT}. Last updated 30 October 2026.</p>`}
   </div>
 </div></section>
 ${ctaBand(r)}
