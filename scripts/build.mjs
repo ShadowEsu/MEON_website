@@ -1376,7 +1376,7 @@ addPage("drinks/", layout({
   description: fitDesc(`The ${drinks.length} drinks in MEON's fridge, to go with your noodles:`, `${drinks.map((d) => d.name).join(", ")}.`),
   body: (r) => `
 ${pageHero(r, { crumbs: [["Drinks"]], title: "Drinks.", split: false, lead: `Something cold to go with your noodles. These are the ${drinks.length} drinks we stock; the fridge changes day to day, so ask the crew what's in.`, seed: 3 })}
-<section class="section section--tight" id="drinks-list" aria-labelledby="drinks-h"><div class="wrap">
+<section class="section section--tight" id="drinks-list" aria-labelledby="drinks-h" data-analytics-place="drinks"><div class="wrap">
   <h2 id="drinks-h" class="visually-hidden">The drinks</h2>
   ${drinkGrid(r)}
   ${drinkTypeNote}
