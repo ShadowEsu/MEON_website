@@ -2,7 +2,7 @@
 
 MEON is a cook-it-yourself instant-noodle bar at Shop 8, 45 Francis Street, Northbridge, Perth, Western Australia. This repo builds the MEON website: a fast, static site with **a page for every noodle on the wall** (and shelf QR codes ready to print).
 
-- 199 noodles from 12 countries, each with its own page (story, spice level, diet, soup/dry, packet size, **"press 1, then 2"** on the cooking machine, a 3:50 cook timer, pairing ideas, similar noodles)
+- A wall of noodles from across Asia and Australia, each with its own page (story, spice level, diet, soup/dry, packet size, **"press 1, then 2"** on the cooking machine, a 3:50 cook timer, pairing ideas, similar noodles). Public copy never states the total count (owner, 8 Nov 2026)
 - Noodle library with search, country / style / spice / diet filters and sorting (filters are shareable URLs, e.g. `/noodles/?country=jp&type=Soup`)
 - Site-wide search on every page (header button, <kbd>Ctrl/⌘ K</kbd> or <kbd>/</kbd>)
 - Shelf QR codes (`/qr/`, printable) plus an in-browser QR generator (`/qr-generator/`) with the MEON logo, colours, PNG/SVG download. Both are staff pages hidden from Google; no codes are printed yet, so the public pages don't mention QR codes
@@ -15,7 +15,7 @@ MEON is a cook-it-yourself instant-noodle bar at Shop 8, 45 Francis Street, Nort
 - Guest reviews: star rating, name and comment on the home page and every noodle page, stored in Supabase (see `docs/operations.md`)
 - Optional background music: an original lo-fi loop generated in the browser (off by default)
 - Video-first home page (29 Oct 2026): a pinned full-screen video hero (one portrait clip on phones; on desktop one clip shown whole at 9:16 on the left with the words beside it), the booth-shoot bowls, the four "Do it yourself" steps as stacked full-screen video cards, a drifting video wall and Instagram-style @meonnoodles reel cards with MEON's logo. Background clips are muted, load only near the screen and stay still for "reduce motion" and Save-Data (see `docs/operations.md`, Videos)
-- SEO: Restaurant, WebSite, Menu (199 items), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
+- SEO: Restaurant, WebSite, Menu (every noodle), MenuItem, Breadcrumb, ItemList and FAQ structured data, keyword titles, image sitemap, `llms.txt`
 - Dine in or take it away: no online ordering
 
 Docs: [`docs/design-system.md`](docs/design-system.md) (rules, page anatomy, motion catalogue, sound, adding a page) · [`docs/operations.md`](docs/operations.md) (QR codes, Google Drive hub, reviews, views log, common edits) · [`docs/seo.md`](docs/seo.md) (what's done for Google and the owner's step-by-step guide).
