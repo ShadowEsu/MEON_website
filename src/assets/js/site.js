@@ -583,7 +583,7 @@
       if (!hits.length) {
         // No dead end: the popular searches stay, plus the whole library
         note = ["No noodles match “" + q.trim() + "”.", "Check the spelling, or try one of these."];
-        html = popularPills(" search-suggest--center") + '<div class="search-none"><a class="btn btn--red btn--sm" href="' + ROOT + 'noodles/">Browse all ' + index.filter(function (x) { return x.g === "Noodles"; }).length + " noodles</a></div>";
+        html = popularPills(" search-suggest--center") + '<div class="search-none"><a class="btn btn--red btn--sm" href="' + ROOT + 'noodles/">Browse all noodles</a></div>';
       }
       else if (close) note = ["No exact matches for “" + q.trim() + "”. Showing close spellings."];
       var groups = {};
@@ -754,7 +754,7 @@
         });
       }
       applied = true;
-      if (countEl) countEl.textContent = (shown === cards.length ? "All " + cards.length + " noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
+      if (countEl) countEl.textContent = (shown === cards.length ? "All noodles" : shown === 1 ? "1 noodle" : shown + " noodles") + (close && shown ? ", close spellings" : "");
       if (empty) {
         empty.classList.toggle("is-visible", shown === 0);
         var typed = search ? search.value.trim() : "";

@@ -190,19 +190,15 @@ const NAV = [
   ["pairings-and-sides/", "Pairings and sides"],
   ["about/", "About"],
 ];
-// Public wording: the noodle count is built from the data (Design, 31 Oct 2026: no vague "100+" next to a list of 199), so
-// it stays true as packets come and go.
-const COUNT = String(noodles.length);
-// Where the noodles come from, counted from the data. 3 packets are from Australia, so the wording isn't "from across Asia"
-// (Security, 4 Nov 2026). The build stops if a stocked country outside Asia isn't Australia, so the wording stays true.
+// Public wording (owner via BOSS, 8 Nov 2026): no noodle count anywhere in public copy, titles, meta or JSON-LD. The site
+// says "a wall of noodles" and where they come from (Design, 31 Oct 2026: never a vague "100+" either).
+// Where the noodles come from: 3 packets are from Australia, so the wording isn't "from across Asia" (Security, 4 Nov 2026).
+// The build stops if a stocked country outside Asia isn't Australia, so the wording stays true.
 const ASIAN_COUNTRIES = new Set(["China", "India", "Indonesia", "Japan", "Malaysia", "Philippines", "Singapore", "South Korea", "Taiwan", "Thailand", "Vietnam"]);
 const stockedCountries = [...new Set(noodles.map((n) => n.country))];
 const outsideAsia = stockedCountries.filter((c) => !ASIAN_COUNTRIES.has(c));
 if (outsideAsia.join() !== "Australia") throw new Error(`The site says "across Asia and Australia", but the stocked countries outside Asia are: ${outsideAsia.join(", ") || "none"}`);
-// \u00A0 keeps each number on the same line as its noun (Design, 4 Nov 2026: "12 / countries" broke on desktop). It's the
-// character, not &nbsp;, because REGION also goes into meta descriptions, JSON-LD and llms.txt.
-const REGION = `from ${stockedCountries.length}\u00A0countries across Asia and Australia`;
-const REGION_SHORT = `from ${stockedCountries.length}\u00A0countries`; // where space is tight: the library eyebrow
+const REGION = "from across Asia and Australia";
 // Opening hours: data/site.json `hours`, as MEON published them (hoursSource; check.mjs makes sure they're sourced and
 // shown). The note says changes go up on Instagram first; Design, 31 Oct 2026: no "please". With no hours in the file the
 // visit page links to Instagram instead.
@@ -258,7 +254,7 @@ function layout({ urlPath, title, seoTitle = "", description, body, active = "",
     "@id": `${SITE_URL}/#restaurant`,
     name: "MEON Noodles",
     alternateName: "MEON",
-    description: `Instant noodle bar in ${site.suburb}, ${site.city} with ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Dine in or take it away.`,
+    description: `Instant noodle bar in ${site.suburb}, ${site.city} with a wall of instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Dine in or take it away.`,
     url: SITE_URL + "/",
     logo: `${SITE_URL}/assets/img/logo-512.png`,
     image: [`${SITE_URL}/assets/img/shoot/og-meon.jpg`, `${SITE_URL}/assets/img/shoot/tomyum-egg-prawn-1600.webp`, `${SITE_URL}/assets/img/shoot/shin-black-top-1600.webp`, `${SITE_URL}/assets/img/logo-512.png`],
@@ -681,7 +677,7 @@ const sectionHead = (eyebrow, title, extra = "", lead = "") => `<div class="sect
 const FAQ = [
   ["Where is MEON?", `MEON Noodles is an instant noodle bar in ${site.suburb}, ${site.city}, Western Australia. Tap "Get directions" on this page for the map.`],
   ["Can I order online or get delivery?", "No. Walk in, choose a packet from the noodle wall, add pairings and sides, cook it at the machine, then dine in or take it away."],
-  ["How many instant noodles do you have?", `We stock ${COUNT}\u00A0instant noodles ${REGION}: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
+  ["Where do your noodles come from?", `Our wall of instant noodles comes ${REGION}: South Korea, Japan, Indonesia, Vietnam, China, Malaysia, Thailand, Singapore, India, the Philippines, Taiwan and Australia.`],
   ["Do you have vegetarian noodles?", HAS_VEG
     ? `Some are vegetarian: look for the Vegetarian label (or pick Vegetarian in the noodle library's diet filter), and ask the crew if unsure. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`
     : `None are labelled vegetarian yet: a noodle only gets the Vegetarian label once we've checked its maker's ingredient list. Ask the crew, and check the packet. Noodles with chicken, beef or pork flavour are never vegetarian, even when the flavour is artificial. Always check the packet if you have allergies.`],
@@ -740,7 +736,7 @@ const stripCards = (r, copy) => stripNoodles.map((n, i) => {
   return `<li><a class="hcard" href="${r(n.url)}">${pic("data-")}${copy ? "" : `<noscript>${pic("")}</noscript>`}<span class="hcard-brand">${esc(n.brand)}</span><span class="hcard-name">${esc(n.name)}</span></a></li>`;
 }).join("");
 const heroStrip = (r) => `<div class="hstrip">
-        <div class="hstrip-head"><p class="hstrip-label" id="hstrip-l">On the wall</p><a class="hstrip-all" href="${r("noodles/")}">See all ${COUNT} noodles</a></div>
+        <div class="hstrip-head"><p class="hstrip-label" id="hstrip-l">On the wall</p><a class="hstrip-all" href="${r("noodles/")}">See all noodles</a></div>
         <div class="hstrip-view"><div class="hstrip-track">
           <ul class="hstrip-row" aria-labelledby="hstrip-l">${stripCards(r, false)}</ul>
           <ul class="hstrip-row hstrip-row--copy" aria-hidden="true" inert>${stripCards(r, true)}</ul>
@@ -784,7 +780,7 @@ const homeGallery = (r) => `
     <div class="gal-panel" id="gal-noodles" data-gal-panel="noodles">
       <h3 class="visually-hidden">Noodles</h3>
       <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
-      <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all ${COUNT} noodles</a></p>
+      <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all noodles</a></p>
     </div>
     <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
       <h3 class="visually-hidden">Drinks</h3>
@@ -818,7 +814,7 @@ addPage("", layout({
   active: "",
   overlay: true,
   preload: asset(`video/${HOME_HERO_MAIN}.webp`),
-  description: `MEON: cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}. ${COUNT} noodles ${REGION}.`,
+  description: `MEON: cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, with a wall of noodles ${REGION}.`,
   body: (r) => `
 <section class="vhero vhero--full" aria-labelledby="vhero-h" data-scene>
   <div class="vhero-stage">
@@ -830,7 +826,7 @@ addPage("", layout({
     </div>
     <div class="wrap vhero-inner">
       <h1 class="vhero-title" id="vhero-h">Your bowl, <span class="vhero-hl">your rules.</span></h1>
-      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with ${COUNT}\u00A0noodles ${REGION}.</p>
+      <p class="vhero-sub">${esc(site.name)} is a cook-it-yourself instant noodle bar in ${esc(site.suburb)}, ${esc(site.city)}, with a wall of noodles ${REGION}.</p>
       <div class="actions">
         <a class="btn btn--red btn--lg" href="${r("noodles/")}" data-magnetic>Browse the noodle wall</a>
         <a class="btn btn--glass btn--lg" href="${esc(site.mapsUrl)}" target="_blank" rel="noopener">${icon.pin} Get directions</a>
@@ -874,7 +870,7 @@ ${homeGallery(r)}
   <ol class="stack">
     <li class="scard scard--red">
       <div class="scard-media">${bgVideo(r, "step-pick", { sizes: STEP_SIZES })}</div>
-      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse ${COUNT}\u00A0noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall</a></div>
+      <div class="scard-copy"><span class="scard-num">01</span><h3>Pick a packet</h3><p>Browse our wall of noodles ${REGION}. Every packet has its own page here, with its flavour and how hot it is.</p><a class="btn btn--white" href="${r("noodles/")}">Browse the noodle wall</a></div>
     </li>
     <li class="scard scard--ink">
       <div class="scard-media">${bgVideo(r, "step-pairings", { sizes: STEP_SIZES })}</div>
@@ -896,7 +892,7 @@ ${homeGallery(r)}
   <div class="vwall-copy">
     <p class="eyebrow">MEON time</p>
     <h2 id="vwall-h">Bring your crew.</h2>
-    <p class="lead">We've got a wall of ${COUNT} packets, cooking stations and tables for the whole crew.</p>
+    <p class="lead">We've got a wall of noodles, cooking stations and tables for the whole crew.</p>
     <a class="btn btn--white btn--lg" href="${r("visit/")}">Visit us</a>
   </div>
 </section>
@@ -1046,7 +1042,7 @@ ${reviewsBlock(r, { title: "What people are saying.", lead: "Been in? Leave a qu
 addPage("noodles/", layout({
   urlPath: "noodles/",
   title: "Noodle library",
-  seoTitle: `${COUNT} Instant Noodles from ${stockedCountries.length} Countries · MEON Noodles Perth`,
+  seoTitle: "Instant Noodles from Asia and Australia · MEON Noodles Perth",
   active: "noodles/",
   overlay: true,
   jsonld: [{
@@ -1063,9 +1059,9 @@ addPage("noodles/", layout({
       hasMenuItem: noodles.filter((n) => n.country === c.name).map((n) => ({ "@type": "MenuItem", name: `${n.brand} ${n.name}`, url: `${SITE_URL}/${n.url}`, image: n.img ? `${SITE_URL}/${n.img}` : undefined, suitableForDiet: n.dietTokens.includes("vegan") ? "https://schema.org/VeganDiet" : n.dietTokens.includes("veg") ? "https://schema.org/VegetarianDiet" : undefined })),
     })),
   }],
-  description: `Browse ${COUNT} instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
+  description: `Browse the wall of instant noodles at MEON. Filter by country, soup or dry, spice level and diet. Every packet has its own page.`,
   body: (r) => `
-${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT}\u00A0noodles ${REGION_SHORT}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
+${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `Noodles ${REGION}`, title: "The noodle wall.", lead: `Every instant noodle we stock. Search by flavour, filter by country or heat, then find it on the wall.`, clips: ["ig-DetKN4Bh0FW", "ig-DewSjLLBLqQ"], phone: "ig-DetKN4Bh0FW" })}
 <div data-library>
   <div class="filters">
     <div class="wrap">
@@ -1086,7 +1082,7 @@ ${videoHero(r, { crumbs: [["Noodles"]], eyebrow: `${COUNT}\u00A0noodles ${REGION
     </div>
   </div>
   <div class="wrap">
-    <div class="results-bar"><span data-result-count aria-live="polite">All ${COUNT} noodles</span>
+    <div class="results-bar"><span data-result-count aria-live="polite">All noodles</span>
       <span class="results-tools"><label class="visually-hidden" for="f-sort">Sort</label><select class="select" id="f-sort"><option value="featured">By country</option><option value="photo">Photos first</option><option value="az">A to Z</option><option value="hot">Hottest first</option><option value="mild">Mildest first</option></select>
       <button class="btn btn--line btn--sm" type="button" data-reset>Clear filters</button></span>
     </div>
@@ -1302,7 +1298,7 @@ ${[5, 4, 3].filter((l) => atLevel(l).length).map((l) => `<section class="section
 </div></section>`).join("")}
 <section class="section section--soft section--tight"><div class="wrap">
   <h2>How we rate spice</h2>
-  <p class="lead">Each packet gets one number from 0 to 5. Shin Ramyun is our 3, and every other noodle is rated against it. A 0 means no chilli heat: ${noHeat} of our ${COUNT} noodles are a 0.</p>
+  <p class="lead">Each packet gets one number from 0 to 5. Shin Ramyun is our 3, and every other noodle is rated against it. A 0 means no chilli heat: ${noHeat} of our noodles are a 0.</p>
   ${linkRow(r, [["buldak/", `Every Buldak we stock (${buldak.length})`], ["noodles/?spice=mild", `Noodles with no heat (${noHeat})`], ["countries/", "Noodles by country"]])}
 </div></section>
 ${ctaBand(r)}
@@ -1381,13 +1377,13 @@ addPage("about/", layout({
   active: "about/",
   overlay: true,
   jsonld: [crumbLd("About", "about/")],
-  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with ${COUNT} noodles ${REGION} and a pairings and sides bar.`,
+  description: `MEON is an instant noodle bar at ${site.suburb}, ${site.city}, with a wall of noodles ${REGION} and a pairings and sides bar.`,
   body: (r) => `
 ${videoHero(r, { crumbs: [["About"]], title: "Get to know MEON.", lead: "We opened MEON to share the instant noodles people grow up with across Asia and beyond, and to let everyone cook them their own way.", logo: true, clips: ["ig-store-tour", "ig-DedzCYDhezV"], phone: "ig-store-tour" })}
 <section class="section section--tight"><div class="wrap split">
   <div>
     <h2>What we do.</h2>
-    <p class="lead">${COUNT}\u00A0instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add pairings and sides, and cook it at the machine.</p>
+    <p class="lead">A wall of instant noodles ${REGION}, in one place. Sweet or spicy, soup or dry: pick a packet, add pairings and sides, and cook it at the machine.</p>
     <p>Every packet on our wall has a page on this site with what it tastes like, how hot it is, how to cook it and what pairs well with it.</p>
     <blockquote class="pull">“Meon is a versatile instant noodle celebrating cultural diversity, inviting creativity and fun with every bowl. Enjoy it as is or customise with pairings and sides to make each meal uniquely yours.”</blockquote>
   </div>
@@ -1672,7 +1668,7 @@ write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-gene
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
 const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia. ${COUNT} instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
+write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia, with a wall of instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 

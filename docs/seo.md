@@ -77,7 +77,7 @@ Mismatched details confuse Google and lower your ranking.
   - Perth Now food
   - So Perth
   - WA Today
-- Invite Perth food TikTokers and Instagrammers. "199 noodles from 12 countries" and the Buldak challenge are easy stories.
+- Invite Perth food TikTokers and Instagrammers. The wall of noodles from across Asia and Australia and the Buldak challenge are easy stories.
 - University food clubs (Curtin and UWA are close by) and local community pages.
 - Every article that links to the website helps it rank.
 
