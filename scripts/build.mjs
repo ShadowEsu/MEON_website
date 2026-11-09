@@ -1373,9 +1373,9 @@ addPage("drinks/", layout({
   seoTitle: "Drinks at MEON Noodles Perth",
   active: "drinks/",
   jsonld: [crumbLd("Drinks", "drinks/")],
-  description: fitDesc(`The ${drinks.length} drinks in MEON's fridge, to go with your noodles:`, `${drinks.map((d) => d.name).join(", ")}.`),
+  description: fitDesc("The drinks in MEON's fridge, to go with your noodles:", `${drinks.map((d) => d.name).join(", ")}.`),
   body: (r) => `
-${pageHero(r, { crumbs: [["Drinks"]], title: "Drinks.", split: false, lead: `Something cold to go with your noodles. These are the ${drinks.length} drinks we stock; the fridge changes day to day, so ask the crew what's in.`, seed: 3 })}
+${pageHero(r, { crumbs: [["Drinks"]], title: "Drinks.", split: false, lead: "Something cold to go with your noodles. These are the drinks we stock; the fridge changes day to day, so ask the crew what's in.", seed: 3 })}
 <section class="section section--tight" id="drinks-list" aria-labelledby="drinks-h" data-analytics-place="drinks"><div class="wrap">
   <h2 id="drinks-h" class="visually-hidden">The drinks</h2>
   ${drinkGrid(r)}
@@ -1672,7 +1672,7 @@ const searchIndex = [
   ...drinkGroups.flatMap((g) => g.items.map((d) => ({ g: "Drinks", t: d.name, s: d.size ? `Drink · ${d.size}` : "Drink", u: `drinks/#${g.id}`, i: g.small, k: `drink ${g.type}` }))),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
-    ["Drinks", `The ${drinks.length} drinks in the fridge`, "drinks/", "drop"],
+    ["Drinks", "Cold drinks from the fridge", "drinks/", "drop"],
     ...(HAS_VEG ? [["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"]] : []),
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
     ["Spiciest noodles", `${hot.length} rated 3 to 5, hottest first`, "spiciest-noodles/", "flame"],
