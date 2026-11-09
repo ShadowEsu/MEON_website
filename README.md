@@ -66,7 +66,7 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 ## Dev helpers
 
 ```bash
-PW_CHANNEL=chrome PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # search, filters, roulette, timer, QR generator, keyboard focus (1280 and 390 px)
+PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   # search, filters, roulette, timer, QR generator, keyboard focus, hero video playback (1280 and 390 px)
 PLAYWRIGHT_PATH=... node scripts/sweep.mjs                              # every page × phone/desktop: console errors + overflow
 PLAYWRIGHT_PATH=... node scripts/screenshot.mjs <outDir> / /noodles/    # full-page screenshots
 python3 scripts/make_qr_pngs.py [outDir]                                # compact 1-bit QR PNGs for Drive (+ manifest.csv with md5s)

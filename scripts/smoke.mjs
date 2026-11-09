@@ -1,6 +1,5 @@
 // Dev helper: clicks through the interactive features, runs the keyboard and focus checks, and fails on any console error.
-// PLAYWRIGHT_PATH=/path/to/playwright/index.mjs PW_CHANNEL=chrome node scripts/smoke.mjs
-// PW_CHANNEL=chrome: the background videos are H.264, which Playwright's bundled Chromium can't play.
+// PLAYWRIGHT_PATH=/path/to/playwright/index.mjs node scripts/smoke.mjs   (PW_CHANNEL=chrome runs it in installed Chrome)
 const { chromium } = await import(process.env.PLAYWRIGHT_PATH || "playwright");
 const BASE = process.env.BASE || "http://localhost:4173";
 const browser = await chromium.launch({ args: ["--no-sandbox"], ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}) });
@@ -30,12 +29,10 @@ ok(/\/noodles\/samyang-buldak/.test(page.url()), `Enter opens first result (${pa
 
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(2500);
-// Full-bleed hero (Preston, 6 Nov 2026): on desktop the gate clip plays between 2 side clips; the copies test is the gate's.
+// Full-bleed hero (the owner, 6 Nov 2026): on desktop the main clip plays between 2 side clips.
 ok(await page.$$eval(".vhero .vcol video", (vs) => vs.length === 3 && vs.every((v) => !!v.getAttribute("src") && !v.paused && v.currentTime > 0)), "the 3 desktop hero clips load and play");
-// Smaller AV1/HEVC copies (REG-54): the hero plays one of its own files, and if the copy this device picked fails, the H.264 file.
-const heroFiles = () => page.$eval(".vhero .vcol--main video", (v) => ({ src: v.getAttribute("src") || "", files: ["data-bg-src", "data-bg-av1", "data-bg-hevc"].map((a) => v.getAttribute(a)).filter(Boolean), h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
-const picked = await heroFiles();
-ok(picked.files.length >= 2 && picked.files.includes(picked.src) && picked.playing, `the desktop hero has its H.264 file plus a smaller copy, and plays one of them (${picked.src.split("/").pop()})`);
+// Smaller AV1/HEVC copies (REG-54): if the copy this device picked can't be decoded, the hero plays its H.264 file.
+const heroFiles = () => page.$eval(".vhero .vcol--main video", (v) => ({ src: v.getAttribute("src") || "", h264: v.getAttribute("data-bg-src"), playing: !v.paused && v.currentTime > 0 }));
 const copyFiles = new Set();
 await page.route(/\.(av1|hevc)\.mp4/, (route) => { copyFiles.add(new URL(route.request().url()).pathname); return route.fulfill({ status: 200, contentType: "video/mp4", body: "not a video" }); }); // a copy the device can't decode
 await page.goto(BASE + "/", { waitUntil: "domcontentloaded" });
@@ -147,10 +144,12 @@ const phoneVideos = [];
 phone.on("request", (r) => { if (/\.mp4(\?|$)/.test(r.url())) phoneVideos.push(r.url().split("/").pop().replace(/\?.*/, "")); });
 await phone.goto(BASE + "/", { waitUntil: "domcontentloaded" });
 await phone.waitForTimeout(2000);
-// Phones play only the gate clip behind the words (Preston, 6 Nov 2026, replacing Design's 5 Nov no-hero-clip rule; Design PASS
-// on the full-bleed hero): no side clip and no clip further down the page before scrolling.
+// Phones play only the main hero clip behind the words (the owner, 6 Nov 2026): no side clip and no clip further down the
+// page before scrolling, and that one clip really plays. Which clip it is, is the generator's choice (HOME_HERO_MAIN).
+await phone.waitForFunction(() => { const v = document.querySelector(".vhero .vcol--main video"); return v && !v.paused && v.currentTime > 0; }, null, { timeout: 10000 }).catch(() => {});
 const phoneClips = [...new Set(phoneVideos)]; // playback can make several range requests for one file
-ok(phoneClips.length === 1 && /^hero-col-a\./.test(phoneClips[0]), `at 390 px the home page loads only the gate hero clip before scrolling (${phoneClips.join(", ") || "none"})`);
+const phoneHero = await phone.$eval(".vhero .vcol--main video", (v) => ({ file: (v.currentSrc || v.getAttribute("src") || "").split("/").pop().replace(/\?.*/, ""), playing: !v.paused && v.currentTime > 0 })).catch(() => null);
+ok(phoneClips.length === 1 && !!phoneHero && phoneHero.playing && phoneHero.file === phoneClips[0], `at 390 px the home page fetches exactly one video before scrolling, and it is the hero's clip, playing (${phoneClips.join(", ") || "none"}; hero playing ${phoneHero ? phoneHero.playing : "no hero video"})`);
 await phone.focus(".nav-toggle");
 await phone.keyboard.press("Enter");
 await phone.waitForTimeout(400);
