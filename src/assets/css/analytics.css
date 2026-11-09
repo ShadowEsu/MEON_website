@@ -11,6 +11,7 @@
 .consent-bar p { flex: 1 1 260px; margin: 0; font-size: .92rem; line-height: 1.45; color: var(--ink-2); }
 .consent-bar a { color: var(--ink); text-underline-offset: 2px; }
 .consent-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.consent-actions[hidden] { display: none; }
 .consent-actions .btn { min-height: 44px; }
 .consent-status { margin: 0 0 12px; }
 @media (max-width: 760px) {
