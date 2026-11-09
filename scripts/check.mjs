@@ -80,6 +80,33 @@ for (const name of ["llms.txt", "noodles.json", "search-index.json"]) {
   const price = fs.readFileSync(path.join(OUT, name), "utf8").match(/\$\s?\d[\d.,]*|"price"\s*:/);
   if (price) problems.push(`${name}: has a price (${price[0]}); prices stay off the site`);
 }
+// Visit and click counting (ledger 589): with data/site.json analytics.vercel off, no page may load or mention Vercel's
+// analytics script and the privacy page keeps "No tracking". With it on, every page carries analytics.js (which asks
+// first) and nothing else loads Vercel's script; the privacy page has the settings control. A MEON_ANALYTICS_PREVIEW
+// build (localhost in data-hosts) fails here, so it can't pass as a release build.
+{
+  const cfg = JSON.parse(fs.readFileSync(path.join(OUT, "..", "data", "site.json"), "utf8")).analytics || {};
+  const privacyHtml = fs.readFileSync(path.join(OUT, "privacy", "index.html"), "utf8");
+  for (const file of htmlFiles) {
+    const rel = path.relative(OUT, file);
+    const html = fs.readFileSync(file, "utf8");
+    const tags = html.match(/<script src="[^"]*assets\/js\/analytics\.js[^"]*"[^>]*>/g) || [];
+    const vercelRefs = (html.match(/_vercel\/insights/g) || []).length;
+    if (cfg.vercel !== true) {
+      if (tags.length || vercelRefs) problems.push(`${rel}: loads visit counting while data/site.json analytics.vercel is off`);
+      continue;
+    }
+    if (tags.length !== 1) { problems.push(`${rel}: needs analytics.js exactly once (has ${tags.length})`); continue; }
+    const t = tags[0];
+    if (!/\sdefer\b/.test(t) || !/data-version="analytics-\d{4}-\d{2}-\d{2}"/.test(t) || !/data-src="\/_vercel\/insights\/script\.js"/.test(t)) problems.push(`${rel}: analytics.js tag lacks defer, data-version or data-src`);
+    const hosts = (t.match(/data-hosts="([^"]*)"/) || [, ""])[1].split(/\s+/).filter(Boolean);
+    if (!hosts.length) problems.push(`${rel}: analytics.js has no data-hosts`);
+    if (hosts.some((h) => /^(localhost|127\.)/.test(h))) problems.push(`${rel}: a MEON_ANALYTICS_PREVIEW test build (localhost in data-hosts); rebuild without it before releasing`);
+    if (vercelRefs !== 1) problems.push(`${rel}: Vercel's analytics script may only be named in analytics.js's data-src (found ${vercelRefs})`);
+  }
+  if (cfg.vercel !== true && !privacyHtml.includes("No tracking.")) problems.push("privacy/index.html: analytics is off, so the page must still say No tracking");
+  if (cfg.vercel === true && !/data-analytics-settings/.test(privacyHtml)) problems.push("privacy/index.html: analytics is on but the page has no settings control (data-analytics-settings)");
+}
 // Packet badges from the owner's notes (Security MUST-M1, 2 Nov 2026): a rank or award claim has to be true of that packet
 // and sourced. These were not: "India's favourite" (brand-level, on 4 Maggi packets), "Crowd favourite" (2nd/3rd most
 // popular), "A lighter pick" (unsourced health claim), an unattributed "No.1 ramen in the world" or "Top 10 noodle 2021",
