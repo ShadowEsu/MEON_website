@@ -232,6 +232,24 @@ for (const f of fs.readdirSync(VID).filter((f) => /\.(av1|hevc)\.mp4$/.test(f)))
   if (!fs.existsSync(h264)) problems.push(`src/assets/video/${f}: no ${clip}.mp4 to fall back to`);
   else if (!entry || entry.h264_sha256 !== crypto.createHash("sha256").update(fs.readFileSync(h264)).digest("hex")) problems.push(`src/assets/video/${f}: made from an older ${clip}.mp4; remake its copies (meon-work/clips) or delete them`);
 }
+// Search results and the Drinks page (589): every search result opens a built page, and a result with an #anchor
+// (drinks/#drink-pepsi, pairings-and-sides/#egg) lands on it. Every drink photo in data/drink-photos.json shows on drinks/.
+const pageIds = new Map();
+for (const x of searchIndex) {
+  const [p, frag] = x.u.split("?")[0].split("#");
+  const file = path.join(OUT, p, "index.html");
+  if (!fs.existsSync(file)) { problems.push(`search-index.json: "${x.t}" opens ${x.u}, which isn't a page`); continue; }
+  if (!frag) continue;
+  if (!pageIds.has(file)) pageIds.set(file, new Set([...fs.readFileSync(file, "utf8").matchAll(/\sid="([^"]+)"/g)].map((m) => m[1])));
+  if (!pageIds.get(file).has(frag)) problems.push(`search-index.json: "${x.t}" opens ${x.u}, but that page has no #${frag}`);
+}
+const drinksPage = path.join(OUT, "drinks", "index.html");
+if (!fs.existsSync(drinksPage)) problems.push("drinks/: the Drinks page is missing");
+else {
+  const drinksHtml = fs.readFileSync(drinksPage, "utf8");
+  for (const g of JSON.parse(fs.readFileSync(path.join(DATA, "drink-photos.json"), "utf8")).groups)
+    if (!drinksHtml.includes(`/${g.img}?v=`)) problems.push(`drinks/index.html: doesn't show the photo ${g.img} (${g.drinks.join(", ")})`);
+}
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }
 console.log("All good ✔");

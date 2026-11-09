@@ -1485,21 +1485,21 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .pill { min-height: 44px; }
 }
 
-/* Home gallery right under the hero (Preston, 6 Nov 2026): 24 shoot photos of noodles, and a Drinks grid.
-   Each drink tile is the pack shot the owner sent on 7 Nov 2026. Without JS both grids show, one after the other; with it the two
-   pills switch between them (site.js). Column counts match GAL_*_SIZES in scripts/build.mjs. */
+/* Home gallery right under the hero (Preston, 6 Nov 2026): 24 shoot photos of noodles, with a link to the Drinks page in
+   its head. The Drinks page (589) uses the same grid and cards: each drink tile is the pack shot the owner sent on 7 Nov
+   2026. Column counts match GAL_*_SIZES in scripts/build.mjs. */
 .gal { padding: clamp(56px, 8vw, 110px) 0; background: var(--paper); }
 .gal-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin-bottom: clamp(24px, 3.5vw, 44px); }
 .gal-head h2 { margin: 0; max-width: 20ch; text-wrap: balance; }
-.gal-switch { display: flex; gap: 8px; }
-.gal-switch[hidden] { display: none; }
-.gal-panel + .gal-panel { margin-top: clamp(48px, 6vw, 80px); }
 .gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
 .gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
 /* Drinks: square product photos, names and sizes. Required photo credits use the same 12/500 ink-2.
    Source and licence links wrap independently with 24 px targets and a gap between rows. */
 .gal-card--drink img { margin-bottom: 3px; }
+/* A search result opens drinks/#drink-…: the card lands below the fixed header, its name in red (like .topping:target) */
+.gal-card--drink { scroll-margin-top: calc(var(--header-h) + 24px); }
+.gal-card--drink:target .gal-type { color: var(--red); }
 .gal-photo, .gal-credit { font-size: .75rem; font-weight: 500; line-height: 1.4; color: var(--ink-2); }
 .gal-photo { margin-bottom: 4px; }
 @media (max-width: 379px) { .gal-photo { min-height: 2.8em; } } /* "Photo shows the drink type" wraps at 360, so every caption takes 2 lines there and the titles stay level */

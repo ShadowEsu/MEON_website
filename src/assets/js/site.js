@@ -588,7 +588,7 @@
       else if (close) note = ["No exact matches for “" + q.trim() + "”. Showing close spellings."];
       var groups = {};
       hits.slice(0, 40).forEach(function (x) { (groups[x.g] = groups[x.g] || []).push(x); });
-      ["Noodles", "Countries", "Pairings and sides", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
+      ["Noodles", "Countries", "Pairings and sides", "Drinks", "Pages"].forEach(function (g) { if (groups[g]) html += '<div class="search-group">' + g + " · " + groups[g].length + "</div>" + groups[g].map(item).join(""); });
     }
     if (sStatus) { sStatus.innerHTML = note.map(function (l) { return "<span>" + esc(l) + "</span>"; }).join(""); sStatus.hidden = !note.length; }
     sResults.innerHTML = html;
@@ -1266,21 +1266,6 @@
     if (!hPoster) hPainted();
     else if (hPoster.complete) hDecoded();
     else { hPoster.addEventListener("load", hDecoded); hPoster.addEventListener("error", hPainted); }
-  }
-
-
-  /* ---------- Home gallery: Noodles / Drinks switch ----------
-     Without JS both grids show, one after the other. With it, the two pills show one grid at a time. */
-  var galSwitch = $(".gal-switch");
-  if (galSwitch) {
-    var galBtns = $$("[data-gal-show]", galSwitch);
-    var galShow = function (which) {
-      galBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-gal-show") === which)); });
-      $$("[data-gal-panel]").forEach(function (p) { p.hidden = p.getAttribute("data-gal-panel") !== which; });
-    };
-    galBtns.forEach(function (b) { b.addEventListener("click", function () { galShow(b.getAttribute("data-gal-show")); }); });
-    galShow("noodles");
-    galSwitch.hidden = false;
   }
 
   /* ---------- Year ---------- */

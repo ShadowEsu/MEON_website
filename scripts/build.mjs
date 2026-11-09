@@ -118,6 +118,8 @@ const pairings = readJSON("toppings.json").map(withPhoto);
 // photos. Each row in data/drink-photos.json is one product, with required source credits.
 // Every stocked drink must have exactly one photo.
 const drinks = catalogue.drinks;
+// Each drink card's anchor on the Drinks page (drinks/#drink-pepsi), for search results and links from other pages.
+const drinkId = (name) => "drink-" + name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   const where = `data/drink-photos.json "${g.type}"`;
   const items = g.drinks.map((name) => {
@@ -130,12 +132,13 @@ const drinkGroups = readJSON("drink-photos.json").groups.map((g) => {
   if (g.photo === "exact" && !shows) throw new Error(`${where}: an exact photo needs "shows" naming one of its own drinks`);
   if (g.credit && !(g.credit.author && g.credit.licence && /^https:\/\/creativecommons\.org\//.test(g.credit.licenceUrl || "") && /^(https:\/\/commons\.wikimedia\.org\/wiki\/File:|https:\/\/world\.openfoodfacts\.org\/product\/)/.test(g.source?.page || ""))) throw new Error(`${where}: a credit needs author, licence, a creativecommons.org licence URL and a Commons file or Open Food Facts product page in source.page`);
   if (!g.credit && /\bBY\b/.test(g.source?.licence || "")) throw new Error(`${where}: a CC BY/BY-SA photo needs a credit on the page`);
-  return { ...g, items, shows, img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
+  return { ...g, items, shows, id: drinkId(items.length === 1 ? items[0].name : g.type), img: fingerprint(g.img), small: smallCopy(g.img, 320), alt: altFor(g.img.replace(/^assets\//, "")) };
 });
 for (const d of drinks) {
   const n = drinkGroups.filter((g) => g.drinks.includes(d.name)).length;
   if (n !== 1) throw new Error(`data/drink-photos.json: catalogue drink "${d.name}" is in ${n} groups, it needs exactly 1`);
 }
+for (const [i, g] of drinkGroups.entries()) if (drinkGroups.findIndex((x) => x.id === g.id) !== i) throw new Error(`data/drink-photos.json: two drink cards would share the anchor #${g.id}`);
 const countryByName = new Map(countries.map((c) => [c.name, c]));
 const noodles = noodlesRaw.map((n) => {
   const c = countryByName.get(n.country);
@@ -188,6 +191,7 @@ const NAV = [
   ["noodles/", "Noodles"],
   ["countries/", "Countries"],
   ["pairings-and-sides/", "Pairings and sides"],
+  ["drinks/", "Drinks"],
   ["about/", "About"],
 ];
 // Public wording (owner via BOSS, 8 Nov 2026): no noodle count anywhere in public copy, titles, meta or JSON-LD. The site
@@ -369,6 +373,7 @@ ${body(r)}
         <ul>
           <li><a href="${r("countries/")}">Countries</a></li>
           <li><a href="${r("pairings-and-sides/")}">Pairings and sides</a></li>
+          <li><a href="${r("drinks/")}">Drinks</a></li>
           <li><a href="${r("about/")}">About</a></li>
           <li><a href="${r("visit/")}">Visit</a></li>
           <li><a href="${r("privacy/")}">Privacy</a></li>
@@ -763,32 +768,21 @@ const drinkCard = (r, g) => {
   const lines = one
     ? `<span class="gal-type">${esc(g.items[0].name)}</span>${g.items[0].size ? `<span class="gal-at">${drinkSize(g.items[0].size)}</span>` : ""}`
     : `<span class="gal-photo">${drinkPhotoLine(g)}</span><span class="gal-type">${esc(g.type)}</span><span class="gal-at">At MEON: ${drinkLine(g.items)}</span>`;
-  return `<li class="gal-card gal-card--drink"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}${drinkCredit(g)}</li>`;
+  return `<li class="gal-card gal-card--drink" id="${g.id}"><img src="${r(g.small)}" srcset="${r(g.small)} 320w, ${r(g.img)} 640w" sizes="${GAL_DRINK_SIZES}" alt="${esc(g.alt)}" width="640" height="640" loading="lazy" decoding="async">${lines}${drinkCredit(g)}</li>`;
 };
 const drinkGrid = (r) => `<ul class="gal-grid gal-grid--drinks">${drinkGroups.map((g) => drinkCard(r, g)).join("")}</ul>`;
 const drinkTypeNote = drinkGroups.some((g) => g.photo === "type") ? `<p class="gal-note">Where a tile says “Photo shows the drink type”, the picture is the kind of drink, not the exact product we sell.</p>` : "";
+// Home gallery: the booth-shoot noodles. Drinks have their own page (589, Preston: a separate Drinks section, not a tab in
+// the food gallery), linked from the gallery's head so phones see it before the 24 noodles.
 const homeGallery = (r) => `
 <section class="gal" id="gallery" aria-labelledby="gal-h">
   <div class="wrap">
     <div class="gal-head">
       <h2 id="gal-h">Pick a noodle. Grab a drink.</h2>
-      <div class="gal-switch" role="group" aria-label="Show in the gallery" hidden>
-        <button class="pill" type="button" data-gal-show="noodles" aria-controls="gal-noodles" aria-pressed="true">Noodles</button>
-        <button class="pill" type="button" data-gal-show="drinks" aria-controls="gal-drinks" aria-pressed="false">Drinks</button>
-      </div>
+      <a class="btn btn--line btn--sm" href="${r("drinks/")}">See the drinks</a>
     </div>
-    <div class="gal-panel" id="gal-noodles" data-gal-panel="noodles">
-      <h3 class="visually-hidden">Noodles</h3>
-      <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
-      <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all noodles</a></p>
-    </div>
-    <div class="gal-panel" id="gal-drinks" data-gal-panel="drinks">
-      <h3 class="visually-hidden">Drinks</h3>
-      ${drinkGrid(r)}
-      ${drinkTypeNote}
-      <p class="gal-note">The fridge changes day to day, so ask the crew what's in.</p>
-      <p class="gal-more"><a class="btn btn--line" href="${r("pairings-and-sides/")}#drinks">See the drinks list</a></p>
-    </div>
+    <ul class="gal-grid">${galleryNoodles.map((n) => `<li><a class="gal-card" href="${r(n.url)}"><img src="${r(n.thumb)}" srcset="${r(n.thumb)} 400w, ${r(n.img)} 900w" sizes="${GAL_NOODLE_SIZES}" alt="" width="400" height="400" loading="lazy" decoding="async"><span class="gal-brand">${esc(n.brand)}</span><span class="gal-name">${esc(n.name)}</span></a></li>`).join("")}</ul>
+    <p class="gal-more"><a class="btn btn--line" href="${r("noodles/")}">See all noodles</a></p>
   </div>
 </section>`;
 
@@ -1346,11 +1340,11 @@ const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="$
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
   title: "Pairings and sides",
-  seoTitle: "Noodle Pairings, Sides and Drinks · MEON Perth",
+  seoTitle: "Noodle Pairings and Sides · MEON Perth",
   active: "pairings-and-sides/",
   overlay: true,
   jsonld: [crumbLd("Pairings and sides", "pairings-and-sides/")],
-  description: "Pairings, sides and drinks at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
+  description: "Pairings and sides at MEON: beef roll, fishcake, egg, cheese, mushrooms and more to cook with your noodles, plus chicken wings and fried Spam.",
   body: (r) => `
 ${videoHero(r, { crumbs: [["Pairings and sides"]], eyebrow: `${Math.floor(pairings.length / 10) * 10}+ pairings and sides`, title: "Pairings and sides.", lead: "Pairings cook in the bowl with your noodles. Sides are ready to eat. Add as many as you like until the bowl is just how you want it.",
   clips: ["step-pairings", "ig-DeOXYn5hSUT"], phone: "step-pairings" })}
@@ -1362,10 +1356,35 @@ ${groups.map((g) => `<section class="section section--tight" id="${groupId(g)}">
 </div></section>`).join("")}
 <section class="section section--tight" id="drinks"><div class="wrap">
   <h2>Drinks</h2>
+  <p class="lead pairing-note">The drinks in the fridge have their own page.</p>
+  <p class="gal-more"><a class="btn btn--line" href="${r("drinks/")}">See the drinks</a></p>
+</div></section>
+<section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
+${ctaBand(r)}
+`,
+}));
+
+// ---------- Drinks ----------
+// Its own page (589, Preston: a separate Drinks section with his photos). The same cards as before, unchanged: each drink's
+// own photo, name, size and credit from data/drink-photos.json. Each card has an anchor (#drink-…) for search.
+addPage("drinks/", layout({
+  urlPath: "drinks/",
+  title: "Drinks",
+  seoTitle: "Drinks at MEON Noodles Perth",
+  active: "drinks/",
+  jsonld: [crumbLd("Drinks", "drinks/")],
+  description: fitDesc(`The ${drinks.length} drinks in MEON's fridge, to go with your noodles:`, `${drinks.map((d) => d.name).join(", ")}.`),
+  body: (r) => `
+${pageHero(r, { crumbs: [["Drinks"]], title: "Drinks.", split: false, lead: `Something cold to go with your noodles. These are the ${drinks.length} drinks we stock; the fridge changes day to day, so ask the crew what's in.`, seed: 3 })}
+<section class="section section--tight" id="drinks-list" aria-labelledby="drinks-h"><div class="wrap">
+  <h2 id="drinks-h" class="visually-hidden">The drinks</h2>
   ${drinkGrid(r)}
   ${drinkTypeNote}
 </div></section>
-<section class="section section--tight"><div class="wrap"><p class="note">What's available changes day to day, so ask the crew what's fresh. Please tell us about any allergies.</p></div></section>
+<section class="section section--soft section--tight"><div class="wrap">
+  <h2>With your noodles</h2>
+  ${linkRow(r, [["pairings-and-sides/", "Pairings and sides"], ["noodles/", "All noodles"], ["spiciest-noodles/", "The spiciest noodles"]])}
+</div></section>
 ${ctaBand(r)}
 `,
 }));
@@ -1650,8 +1669,10 @@ const searchIndex = [
   ...noodles.map((n) => ({ g: "Noodles", t: n.name, s: `${n.brand} · ${n.country} · ${n.type || "?"} · ${n.unrated ? "spice soon" : "spice " + n.spice + "/5"}`, u: n.url, i: n.thumb, f: n.countryCode, k: [n.flavour, n.diet, n.note, n.dietTokens.join(" ")].filter(Boolean).join(" ") })),
   ...countries.map((c) => ({ g: "Countries", t: c.name, s: `${countFor((n) => n.country === c.name)} noodles · ${c.headline}`, u: `countries/${c.slug}/`, f: c.code, k: "country" })),
   ...pairings.map((t) => ({ g: "Pairings and sides", t: t.name, s: t.desc, u: `pairings-and-sides/#${t.id}`, i: t.small || undefined, ic: t.img ? undefined : t.icon, k: `pairing side topping ${t.group}` })),
+  ...drinkGroups.flatMap((g) => g.items.map((d) => ({ g: "Drinks", t: d.name, s: d.size ? `Drink · ${d.size}` : "Drink", u: `drinks/#${g.id}`, i: g.small, k: `drink ${g.type}` }))),
   ...[
     ["Noodle library", "Browse and filter all noodles", "noodles/", "bowl"],
+    ["Drinks", `The ${drinks.length} drinks in the fridge`, "drinks/", "drop"],
     ...(HAS_VEG ? [["Vegetarian noodles", "Filter: vegetarian", "noodles/?diet=veg", "leaf"]] : []),
     ["Spicy noodles (3+)", "Filter: hot", "noodles/?spice=hot", "flame"],
     ["Spiciest noodles", `${hot.length} rated 3 to 5, hottest first`, "spiciest-noodles/", "flame"],
@@ -1666,9 +1687,9 @@ write("search-index.json", JSON.stringify(searchIndex));
 write("robots.txt", `User-agent: *\nAllow: /\nDisallow: /qr/\nDisallow: /qr-generator/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 // IndexNow (Bing, Yandex, Seznam, Naver; SEO 2 Nov 2026): the key file proves the pings in scripts/indexnow.mjs come from us.
 if (site.indexNow) write(`${indexNowKey(SITE_URL)}.txt`, indexNowKey(SITE_URL));
-const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
+const pageImages = new Map([["", ["assets/img/shoot/og-meon.jpg", ...FRESH.map((f) => `assets/img/shoot/${f}-1600.webp`)]], ["drinks/", drinkGroups.map((g) => g.img)], ...noodles.filter((n) => n.img).map((n) => [n.url, [n.img, ...n.more]])]);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${pages.filter((p) => !p.startsWith("qr")).map((p) => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${BUILD_DATE}</lastmod>${(pageImages.get(p) || []).map((im) => `<image:image><image:loc>${SITE_URL}/${im}</image:loc></image:image>`).join("")}</url>`).join("\n")}\n</urlset>\n`);
-write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia, with a wall of instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles, ready-to-eat sides and drinks\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
+write("llms.txt", `# MEON Noodles\n\n> Cook-it-yourself instant noodle bar at ${site.streetAddress}, ${site.suburb}, ${site.city}, Western Australia, with a wall of instant noodles ${REGION}, a pairings and sides bar and self-cook machines. Order in person, then dine in or take it away. Every noodle cooks for ${COOK_TIME}: press 1, then 2 on the machine. Spice is rated 0-5 against Shin Ramyun, which is a 3.\n\n## Key pages\n- [Noodle library](${SITE_URL}/noodles/): every noodle with country, spice level (0-5) and diet\n- [Spiciest noodles](${SITE_URL}/spiciest-noodles/): the ${hot.length} noodles rated 3 to 5, hottest first\n- [Buldak](${SITE_URL}/buldak/): all ${buldak.length} Samyang Buldak flavours we stock, hottest to mildest\n- [Countries](${SITE_URL}/countries/)\n- [Pairings and sides](${SITE_URL}/pairings-and-sides/): pairings to cook with your noodles and ready-to-eat sides\n- [Drinks](${SITE_URL}/drinks/): the drinks we stock, with photos\n- [Visit](${SITE_URL}/visit/): location and FAQ\n\n## Noodles\n${noodles.map((n) => `- [${n.brand} ${n.name}](${SITE_URL}/${n.url}): ${n.country}, ${n.type || "noodle"}, spice ${n.unrated ? "unrated" : n.spice + "/5"}`).join("\n")}\n`);
 write("site.webmanifest", JSON.stringify({ name: "MEON Noodles", short_name: "MEON", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#ec1b25", icons: [{ src: "/assets/img/logo-192.png", sizes: "192x192", type: "image/png" }, { src: "/assets/img/logo-512.png", sizes: "512x512", type: "image/png" }] }, null, 2));
 write("noodles.json", JSON.stringify(noodles.map((n) => ({ slug: n.slug, name: n.name, brand: n.brand, country: n.country, flavour: n.flavour, type: n.type, spice: n.unrated ? null : n.spice, diet: n.diet, weightG: n.weightG, funNote: n.note, url: `${SITE_URL}/${n.url}`, qr: n.qrUrl, image: n.img ? `${SITE_URL}/${n.img}` : null })), null, 1));
 
