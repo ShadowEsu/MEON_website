@@ -276,6 +276,44 @@ else {
   for (const g of JSON.parse(fs.readFileSync(path.join(DATA, "drink-photos.json"), "utf8")).groups)
     if (!drinksHtml.includes(`/${g.img}?v=`)) problems.push(`drinks/index.html: doesn't show the photo ${g.img} (${g.drinks.join(", ")})`);
 }
+// Items MEON no longer sells must never come back onto the menu (BOSS 586, owner 544e26e and 711a280). Checked against
+// item NAMES only, wherever the menu lists them: the source data (toppings, catalogue), the Pairings and sides cards, the
+// Drinks cards and list, the menu-card ids, search-index.json titles, llms.txt list entries and every JSON-LD Menu,
+// MenuSection, MenuItem or offered item name. Photo alt text and noodle blurbs are left alone: owner photos show bowls
+// topped with these, and "meatball-soup style broth" describes a flavour. The pattern matches whole words, so
+// Nongshim Tempura Udon, Prawn wontons and Tom Yum Shrimp stay fine. Add a name here when the owner drops an item.
+{
+  const REMOVED = /\b(?:meat[ -]?balls?|tempura[ -]prawns?|shrimp[ -]katsu)\b/i;
+  const hit = (where, name) => { if (name && REMOVED.test(String(name).replace(/&#39;|&amp;/g, " "))) problems.push(`${where}: "${String(name).trim()}" is an item MEON no longer sells (see check.mjs REMOVED)`); };
+  const unslug = (s) => s.replace(/^drink-/, "").replace(/-/g, " ");
+  for (const t of JSON.parse(fs.readFileSync(path.join(DATA, "toppings.json"), "utf8"))) { hit("data/toppings.json", t.name); hit("data/toppings.json id", t.id && unslug(t.id)); }
+  for (const key of Object.keys(catalogueData)) {
+    const v = catalogueData[key];
+    for (const x of Array.isArray(v) ? v : []) if (x && typeof x === "object") hit(`data/catalogue.json ${key}`, [x.brand, x.name].filter(Boolean).join(" "));
+  }
+  for (const x of searchIndex) hit(`search-index.json (${x.g})`, x.t);
+  for (const m of fs.readFileSync(path.join(OUT, "llms.txt"), "utf8").matchAll(/^- \[([^\]]+)\]/gm)) hit("llms.txt", m[1]);
+  const ldNames = (node, where) => {
+    if (Array.isArray(node)) return node.forEach((n) => ldNames(n, where));
+    if (!node || typeof node !== "object") return;
+    if (/^(?:Menu|MenuSection|MenuItem|Product|Offer)$/.test([node["@type"]].flat()[0] || "")) hit(`${where} JSON-LD ${node["@type"]}`, node.name);
+    for (const v of Object.values(node)) if (v && typeof v === "object") ldNames(v, where);
+  };
+  for (const file of htmlFiles) {
+    const rel = path.relative(OUT, file);
+    const html = fs.readFileSync(file, "utf8");
+    for (const chunk of html.split('<div class="topping"').slice(1)) {
+      hit(`${rel} pairing card`, (chunk.match(/<strong>([^<]*)<\/strong>/) || [])[1]);
+      hit(`${rel} pairing card id`, unslug((chunk.match(/^[^>]*\sid="([^"]+)"/) || [, ""])[1]));
+    }
+    for (const m of html.matchAll(/<span class="gal-(?:type|name)">([^<]*)<\/span>/g)) hit(`${rel} card`, m[1]);
+    for (const m of html.matchAll(/<li class="gal-card gal-card--drink" id="([^"]+)"/g)) hit(`${rel} drink card id`, unslug(m[1]));
+    for (const m of html.matchAll(/<ul class="drink-list">([\s\S]*?)<\/ul>/g)) for (const li of m[1].matchAll(/<li>([^<]*)/g)) hit(`${rel} drinks list`, li[1]);
+    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      try { ldNames(JSON.parse(m[1]), rel); } catch { problems.push(`${rel}: JSON-LD doesn't parse`); }
+    }
+  }
+}
 console.log(`Checked ${htmlFiles.length} HTML files, ${files.length} files total.`);
 if (problems.length) { console.log([...new Set(problems)].slice(0, 200).join("\n")); console.log(`${problems.length} problem(s).`); process.exit(1); }
 console.log("All good ✔");
