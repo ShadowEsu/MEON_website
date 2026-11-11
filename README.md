@@ -35,7 +35,7 @@ Requires Node 18+. No framework — `scripts/build.mjs` renders HTML from the JS
 
 `vercel.json` is set up: build command `npm run build`, output directory `site`. A push to `site` publishes production. Vercel's Git builds stay off for every other branch except `main` and `preview/<name>` (`git.deploymentEnabled` in `vercel.json`), so those pushes don't use up the 100-deployments-a-day limit. `vercel deploy --prod` still publishes the current folder when the CLI is logged in. Vercel Web Analytics is off (`analytics.vercel: false` in `data/site.json`), because it isn't enabled on the Vercel project and the script returned 404. To use it, enable Web Analytics on the project in Vercel first, then set the flag to `true` and redeploy. QR scans arrive as page views with `?src=qr`.
 
-**QR codes encode `siteUrl` from `data/site.json`** (currently `https://meon-noodles.vercel.app`). If you use a different domain, change `siteUrl` and rebuild **before printing** shelf codes.
+**QR codes encode `siteUrl` from `data/site.json`** (`https://meon.au`, MEON's own domain; `meon-noodles.vercel.app` serves the same pages and points search engines at `meon.au`). If the domain ever changes, change `siteUrl` and rebuild **before printing** shelf codes.
 
 ## Editing content
 
@@ -75,5 +75,4 @@ python3 scripts/make_qr_pngs.py [outDir]                                # compac
 ## Things to confirm
 
 - Street address, phone, email and opening hours (placeholders on the old Wix site were template text, so they are hidden until set in `data/site.json`).
-- Final domain for QR codes (see above).
 - Diet for the noodles that still say "Ask the crew" (see "Still to confirm" in `docs/operations.md`). Packets with chicken, beef or pork flavour say "Meat flavour" and are never vegetarian, even when the flavour is artificial (owner's ruling, 2 Nov 2026).

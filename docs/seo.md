@@ -37,7 +37,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
    - primary: **Noodle shop**
    - secondary: **Ramen restaurant** and **Asian restaurant**
 3. Enter the exact street address, phone and opening hours. Use exactly the same details everywhere (see step 5).
-4. Website: `https://meon-noodles.vercel.app` (or your own domain later). Menu link: `/noodles/`. On 2 Nov 2026 the listing had **no website**, so Google can't connect the site to the shop yet. This is the single most useful step.
+4. Website: `https://meon.au`. Menu link: `/noodles/`. On 2 Nov 2026 the listing had **no website**, so Google can't connect the site to the shop yet. This is the single most useful step.
 5. Turn on the attributes "Dine-in", "Takeaway" and "No delivery".
 6. Upload at least 15 photos: shopfront, the noodle wall, bowls, the cooking stations and the crew. Add new ones every month.
 7. Post a Google update every week, for example "New this week: Buldak Mala".
@@ -45,7 +45,7 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 
 ### 2. Google Search Console (tells Google the site exists)
 1. Go to <https://search.google.com/search-console> and click **Add property**, then **URL prefix**.
-2. Enter `https://meon-noodles.vercel.app/`.
+2. Enter `https://meon.au/`. (`meon-noodles.vercel.app` serves the same pages with canonical links to `meon.au`, so Google indexes `meon.au`.)
 3. Choose **HTML tag**. Copy only the `content="…"` value into `googleSiteVerification` in `data/site.json`, then ask Claude to redeploy. Click **Verify**.
 4. Open **Sitemaps**, enter `sitemap.xml` and click **Submit**.
 5. Use **URL inspection** on the home page and `/noodles/`, and click **Request indexing**.
@@ -57,10 +57,10 @@ Nobody can guarantee a #1 spot, but for searches like "instant noodles Perth", "
 - Reply to every review, good or bad, within a few days.
 - Never buy or swap reviews. Google removes them and can penalise the profile.
 
-### 4. Your own domain (recommended before printing QR codes)
-- Buy `meon.com.au` (needs your ABN) or `meonnoodles.com`. Connect it in Vercel under **Project**, then **Domains**.
-- Then change `siteUrl` in `data/site.json` and rebuild. The QR codes and Drive PNGs must be regenerated with `scripts/make_qr_pngs.py`.
-- Add the new domain as a property in Search Console too.
+### 4. Own domain: done
+- The site lives at `https://meon.au` (pointed at the Vercel project on 8 Nov 2026; `www.meon.au` redirects to it). `siteUrl` in `data/site.json` is `meon.au`, so canonical links, the sitemap, structured data and QR codes all use it. `meon-noodles.vercel.app` still serves the same pages and its canonical links point at `meon.au`.
+- Add `https://meon.au/` as a property in Search Console (step 2) and submit its sitemap. The IndexNow key comes from the domain, so the build now publishes the `meon.au` key.
+- Regenerate the Drive QR PNGs with `scripts/make_qr_pngs.py` before printing (the ones from 30 Oct 2026 encode the vercel.app address).
 
 ### 5. Same details everywhere (NAP: name, address, phone)
 Use the identical name ("MEON Noodles"), address and phone on:
