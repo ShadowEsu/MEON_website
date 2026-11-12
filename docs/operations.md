@@ -22,11 +22,11 @@ The QR PNGs come from `scripts/make_qr_pngs.py`, which numbers noodles in the si
 ## QR codes
 
 - No QR codes are printed yet, so no public page links to them: not the announcement bar, home, About, Visit, FAQ, the footer or site search (Preston, 28 Oct: "no qr codes yet"). The staff pages `/qr/` and `/qr-generator/` stay ready, hidden from Google; open them by typing the address.
-- Every noodle has a code that opens `https://meon-noodles.vercel.app/noodles/<noodle>/?src=qr`.
+- Every noodle has a code that opens `https://meon.au/noodles/<noodle>/?src=qr`.
 - `?src=qr` shows a "Scanned from the shelf" line and lets analytics count shelf scans separately.
-- **Before printing**, confirm the final web address. If MEON gets its own domain (`meon.au` is taken; see the final-domain item further down), change `siteUrl` in `data/site.json`, rebuild, then regenerate the codes:
+- The address is MEON's own domain, `meon.au` (`siteUrl` in `data/site.json`, since 11 Nov 2026). It points at the Vercel project (8 Nov 2026); `www.meon.au` redirects to it, and `meon-noodles.vercel.app` still serves the same pages, whose canonical links point at `meon.au`. If the address ever changes, change `siteUrl`, rebuild, then regenerate the codes **before printing**:
   - website pages: `npm run build`, then the codes are at `/qr/`
-  - Drive PNGs: `python3 scripts/make_qr_pngs.py`, then re-upload
+  - Drive PNGs: `python3 scripts/make_qr_pngs.py`, then re-upload. The PNGs uploaded to Drive on 30 Oct 2026 encode `meon-noodles.vercel.app`: they still open the right pages, but regenerate and re-upload them before anything is printed.
 - Make your own codes for posters, Wi-Fi or Instagram at `/qr-generator/` (logo, colours, PNG/SVG download).
 - Print tips: at least 2.5 cm wide, black on white, and leave the white border.
 
@@ -200,7 +200,6 @@ After any change: `npm run build && npm run check`. A push to `site` is what Ver
 - Opening hours are on the site from MEON's Instagram post "NEW OPENING HOURS!" (19 Oct 2026, https://www.instagram.com/meonnoodles/p/DerDVb1hdx2/): Monday – Thursday 12pm – 9:30pm, Friday – Saturday 12pm – 2:30am, Sunday 12pm – 6pm. The Instagram bio and the Google listing agreed on 2 Nov 2026. When they change, edit `hours` and `hoursSource` in `data/site.json`; `npm run check` fails if hours have no source and notes when they were last checked over 6 months ago
 - The address: the site says Shop 8, 45 Francis Street (Preston, 29 Oct 2026). MEON's Instagram (bio and the 19 Oct 2026 post) and its Google listing also say Shop 8; only the designer's "We Are OPEN" posters (April and May 2026, shared MEON Drive folder) say "Shop 7 & 8". If it's both units, change `streetAddress` in `data/site.json`
 - MEON's Google listing exists: "Meon", Shop 8/45 Francis St (https://www.google.com/maps?cid=8133712238712901594, now in `googleBusinessUrl`, with its pin in `geo`). It has no phone number or website yet; the owner can add the site's link and a phone number in Google Business Profile. Its "From the owner" note shows a price, which stays off the site
-- The final domain (do this before printing QR codes). `meon.au` is registered to Seven Ninety Seven Pty Ltd and parked at GoDaddy, and MEON's printed packaging already shows "www.meon.au" (the designer's packaging file in the shared MEON Drive folder), so anyone typing it today lands on a parked page. If that's MEON's company, point it at the Vercel project rather than buying a new domain
 - Nongshim Shin Noodle Soup Original (and Shin Red, Shin Kimchi, Shin Ramyun Cheese) was marked vegetarian-friendly in the Drive doc, but many Shin Ramyun versions list beef. Like every noodle whose vegetarian label came only from the doc, it now says "Ask the crew" (2 Nov 2026)
 - The promo and website tour videos were taken down on 29 Oct 2026 (Preston: "get rid of it for now"); the home page now uses short background clips instead (see Videos)
 - 155 noodles still need a photo (they show an illustrated packet). A search of Wikimedia Commons and Openverse on 29 Oct 2026 found a public-domain or CC0 photo for only one (Indomie Soto Mie). Photos that need a visible credit (CC BY, CC BY-SA) are not used (Preston, 30 Oct 2026), so shooting the packets on the wall is the way to cover the rest
