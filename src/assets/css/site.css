@@ -797,7 +797,6 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .topping strong { font-size: 1.02rem; }
 .topping span { font-size: .9rem; color: var(--ink-2); }
 .topping-credit { font-size: .75rem; line-height: 1.35; }
-.topping-credit a { color: inherit; }
 .topping:target strong { color: var(--red); }
 @media (max-width: 1024px) { .topping-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .topping-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -1504,8 +1503,12 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .gal-photo { margin-bottom: 4px; }
 @media (max-width: 379px) { .gal-photo { min-height: 2.8em; } } /* "Photo shows the drink type" wraps at 360, so every caption takes 2 lines there and the titles stay level */
 .gal-credit { margin-top: 3px; }
-.gal-credit-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 10px; margin: 4px 0; }
-.gal-credit a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+/* The pairings photo credit (.topping-credit, the seaweed) shares this, so its two links never sit on each other (2.5.8) */
+.gal-credit-links, .topping-credit-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 10px; margin: 4px 0; }
+.gal-credit a, .topping-credit a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+/* The label and the author wrap together (Design SHOULD, PR #8): every line a 24 px row, 8 px apart like the rows outside */
+.credit-item { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 4px; }
+.credit-label { display: inline-flex; align-items: center; min-height: 24px; }
 .gal-brand { font-size: .8rem; font-weight: 500; color: var(--muted); }
 .gal-name, .gal-type { font-size: .98rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; transition: color .25s; }
 a.gal-card:hover .gal-name { color: var(--red); }

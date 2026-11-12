@@ -1346,8 +1346,12 @@ const PAIRING_GROUPS = {
 const groups = [...new Set(pairings.map((t) => t.group))];
 for (const g of groups) if (!PAIRING_GROUPS[g]) throw new Error(`data/toppings.json: unknown group "${g}"`);
 const groupId = (g) => g.toLowerCase().replace(/[^a-z]+/g, "-");
+// A photo credit's two links (source page, licence) sit in their own row like the drinks' (.gal-credit-links): each is a
+// 24 px target and a wrap puts 8 px between them (WCAG 2.5.8; meon-2's live sweep, 11 Nov: they touched at 390 and 1440).
+// "Photo:" travels with the author in one item that wraps inside itself (Design SHOULD on PR #8), so a wide card reads
+// "Photo: author" / licence and a narrow one gives each its own evenly spaced 24 px line.
+const toppingCredit = (t) => t.credit ? `<span class="topping-credit"><span class="topping-credit-links"><span class="credit-item"><span class="credit-label">Photo:</span><a href="${esc(t.credit.page)}">${esc(t.credit.author)}</a></span><a href="${esc(t.credit.licenceUrl)}" rel="license">${esc(t.credit.licence)}</a></span></span>` : "";
 // One card in the pairings grids: the square photo, or a line icon when there's none; the name; one line under it.
-const toppingCredit = (t) => t.credit ? `<span class="topping-credit">Photo: <a href="${esc(t.credit.page)}">${esc(t.credit.author)}</a>, <a href="${esc(t.credit.licenceUrl)}" rel="license">${esc(t.credit.licence)}</a></span>` : "";
 const itemCard = (r, t, line, iconName) => `<div class="topping"${t.id ? ` id="${t.id}"` : ""}><span class="topping-media">${t.img ? `<img src="${r(t.img)}"${t.mid ? ` srcset="${r(t.mid)} 384w, ${r(t.img)} ${t.w}w" sizes="(min-width: 1025px) 230px, (min-width: 561px) 30vw, 44vw"` : ""} alt="${esc(t.alt)}" width="300" height="300" loading="lazy">` : `<span class="topping-ic">${svgIcon(iconName)}</span>`}</span><strong>${esc(t.name)}</strong>${line ? `<span>${esc(line)}</span>` : ""}${toppingCredit(t)}</div>`;
 addPage("pairings-and-sides/", layout({
   urlPath: "pairings-and-sides/",
