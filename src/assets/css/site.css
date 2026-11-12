@@ -1506,6 +1506,9 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 /* The pairings photo credit (.topping-credit, the seaweed) shares this, so its two links never sit on each other (2.5.8) */
 .gal-credit-links, .topping-credit-links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 10px; margin: 4px 0; }
 .gal-credit a, .topping-credit a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+/* The label and the author wrap together (Design SHOULD, PR #8): every line a 24 px row, 8 px apart like the rows outside */
+.credit-item { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 4px; }
+.credit-label { display: inline-flex; align-items: center; min-height: 24px; }
 .gal-brand { font-size: .8rem; font-weight: 500; color: var(--muted); }
 .gal-name, .gal-type { font-size: .98rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; transition: color .25s; }
 a.gal-card:hover .gal-name { color: var(--red); }
