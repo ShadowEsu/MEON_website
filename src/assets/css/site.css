@@ -132,7 +132,7 @@ svg.i { width: 1.25em; height: 1.25em; flex: none; }
 .search { position: relative; display: block; flex: 1 1 260px; }
 .search svg.i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 18px; height: 18px; }
 .search input { width: 100%; padding-left: 42px; }
-kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px solid var(--line-2); border-radius: 5px; padding: 2px 6px; color: var(--muted); background: #fff; }
+kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px solid var(--line-2); border-radius: 5px; padding: 2px 6px; color: var(--muted); background: #fff; white-space: nowrap; }
 
 /* ---------- Announcement + header ---------- */
 .scroll-progress { position: fixed; inset: 0 0 auto; height: 2px; z-index: 120; pointer-events: none; }
@@ -670,7 +670,10 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .filters { position: sticky; top: var(--header-h); z-index: 20; background: #fff; border-bottom: 1px solid var(--line); padding: 16px 0 12px; transition: top .5s var(--ease); }
 .filters-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .filters-row .select { flex: 0 1 auto; }
-.filter-pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 2px; scrollbar-width: none; }
+/* 6 px of padding inside each edge holds the 2 px focus ring and its 3 px offset, which the scroller would clip; the
+   negative margin puts the pills exactly where they were. scroll-padding-inline keeps that room when a focused pill is
+   scrolled into view (site.js, "Pill scrollers") */
+.filter-pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 6px 6px; margin: 0 -6px -4px; scroll-padding-inline: 12px; scrollbar-width: none; }
 .filter-pills::-webkit-scrollbar { display: none; }
 .filter-pills .flag { width: 16px; }
 /* The count never splits over two lines; on a phone, if it doesn't fit beside the tools, the tools move to their own row */
@@ -1355,7 +1358,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 
 /* Pairings and sides: the group tabs stick under the header */
 .subtabs { position: sticky; top: var(--header-h); z-index: 60; background: #fff; border-block: 1px solid var(--line); }
-.subtabs-row { display: flex; gap: 8px; padding-block: 10px; overflow-x: auto; scrollbar-width: none; }
+/* As .filter-pills: 6 px inside each edge for the focus ring; the row is 12 px wider so the tabs stay put */
+.subtabs-row { display: flex; gap: 8px; width: min(100% - var(--gutter) * 2 + 12px, var(--wrap) + 12px); padding: 10px 6px; overflow-x: auto; scroll-padding-inline: 12px; scrollbar-width: none; }
 .subtab { display: inline-flex; flex: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--line-2); border-radius: 999px; background: #fff; color: var(--ink); font-weight: 600; text-decoration: none; white-space: nowrap; }
 .subtab:hover { border-color: var(--ink); }
 .subtab small { font-size: .78rem; font-weight: 700; color: var(--ink-2); background: var(--soft); border-radius: 999px; padding: 2px 8px; }
@@ -1469,8 +1473,11 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
   .vhero.vhero--full .vhero-inner { padding-top: 16px; }
   .vhero.vhero--full .vhero-sub { margin-top: 12px; }
   .vhero.vhero--full .actions { margin-top: 16px; }
-  /* the label row starts 20 px in, so the band is at full strength by then (a 44 px fade left "See all" over the clip) */
-  .vhero--full .hstrip { padding-top: 20px; background: linear-gradient(180deg, rgba(12,9,8,.3) 0, rgba(12,9,8,.92) 18px); }
+  /* the label row starts 20 px in, so the band is at full strength by then (a 44 px fade inside it left "See all" over the
+     clip). The fade starts 24 px above the band instead (::before, out of flow, so the cards don't move): one 44 px ramp
+     from clear to .92 that ends where the label row begins (Design SHOULD, 571 gate: at least 40 px, no visible top edge). */
+  .vhero--full .hstrip { padding-top: 20px; background: linear-gradient(180deg, transparent 20px, rgba(12,9,8,.92) 20px); }
+  .vhero--full .hstrip::before { content: ""; position: absolute; left: 0; right: 0; top: -24px; height: 44px; background: linear-gradient(180deg, rgba(12,9,8,0), rgba(12,9,8,.92)); pointer-events: none; }
   .vhero--full .hstrip-head { margin-bottom: 8px; }
   .vhero--full .hcard { width: 104px; }
   .vhero--full .hcard img { width: 104px; height: 78px; }
@@ -1494,6 +1501,8 @@ kbd { font-family: var(--font); font-size: .74rem; font-weight: 500; border: 1px
 .gal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
 .gal-card { display: flex; flex-direction: column; gap: 3px; color: var(--ink); text-decoration: none; }
 .gal-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--soft); margin-bottom: 9px; }
+/* The photos wait for the hero strip (site.js, Sunday 1); without JS their <noscript> twins show instead */
+.no-js .gal-card img[data-src] { display: none; }
 /* Drinks: square product photos, names and sizes. Required photo credits use the same 12/500 ink-2.
    Source and licence links wrap independently with 24 px targets and a gap between rows. */
 .gal-card--drink img { margin-bottom: 3px; }
@@ -1556,7 +1565,10 @@ a.gal-card:hover .gal-name { color: var(--red); }
   .hstrip-all { font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-decoration-color: rgba(255,255,255,.5); text-underline-offset: 3px; }
   .hstrip-all:hover { text-decoration-color: #fff; }
   .hstrip-view { scroll-snap-type: none; padding-left: max(var(--gutter), (100% - var(--wrap)) / 2); scroll-padding-inline: max(var(--gutter), (100% - var(--wrap)) / 2);
-    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 140px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 140px), transparent); }
+    /* both ends fade (Design SHOULD, 571 gate): 140 px on the right, 64 px on the left, capped 4 px short of the row's
+       left padding so card 1 at rest and its 2 px focus ring (offset 2 px) are never faded */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 min(64px, max(var(--gutter), (100% - var(--wrap)) / 2) - 4px), #000 calc(100% - 140px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 min(64px, max(var(--gutter), (100% - var(--wrap)) / 2) - 4px), #000 calc(100% - 140px), transparent); }
   .hstrip-track { padding-inline: 0; }
   .hstrip-row li { padding-right: 16px; }
   .hcard { width: 120px; gap: 0; }
